@@ -1,0 +1,273 @@
+{
+  "factoryFloor": [
+    {
+      "position": { "x": 0, "y": 0 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 1, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 1, "y": 0 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 2, "y": 0 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 3, "y": 0 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 4, "y": 0 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 0, "y": 1 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 1, "y": 1 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 2, "y": 1 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 3, "y": 1 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 4, "y": 1 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 0, "y": 2 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 1, "y": 2 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 2, "y": 2 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 3, "y": 2 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 4, "y": 2 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 0, "y": 3 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 1, "y": 3 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 2, "y": 3 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 3, "y": 3 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 4, "y": 3 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 0, "y": 4 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 1, "y": 4 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 2, "y": 4 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 3, "y": 4 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    },
+    {
+      "position": { "x": 4, "y": 4 },
+      "floortype": "OPEN_FLOOR",
+      "activeInPhase": [ false, false, false, false, false ],
+      "facingDirection": "NORTH", "water": false,
+      "lasers": [ 0, 0, 0, 0 ],
+      "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
+      "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+    }
+  ],
+  "objects": [],
+  "robots": [],
+  "checkpoints": [],
+  "objectsFallingIntoABYSS": [],
+  "robotsFallingIntoABYSS": [],
+  "range": {
+    "minX": 0,
+    "minY": 0,
+    "maxX": 5,
+    "maxY": 5
+  },
+  "properties": {
+    "lasers": false,
+    "pushers": false,
+    "gears": false,
+    "conveyorBelts": false,
+    "expressConveyorBelts": false,
+    "trapdoorABYSSs": false
+  }
+}

@@ -48,7 +48,7 @@ public interface PictureConstants {
     String GFX_SPIN_RIGHT_BEAM = FOLDER_BEAMS + "spin-right-beam";
     String GFX_TRACTOR_BEAM    = FOLDER_BEAMS + "tractor-beam";
 
-    String GFX_OPEN_FLOOR   = FOLDER_FLOOR + "open-floor-";
+    String GFX_OPEN_FLOOR   = FOLDER_FLOOR + "open-floor/open-floor-";
     String GFX_GEARS_SOCKET = FOLDER_FLOOR + "gears-socket";
     String GFX_GEARS_CCW    = FOLDER_FLOOR + "gears-ccw";
     String GFX_GEARS_CW     = FOLDER_FLOOR + "gears-cw";

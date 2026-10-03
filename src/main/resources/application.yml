@@ -39,19 +39,15 @@ circuit-chaos:
     default-zoom: 1
     default-modules:
       - "MAIN_LASER"
-      - "SPIN_LEFT_BEAM"
-      - "EXCHANGE_BEAM"
-      - "TRACTOR_BEAM"
-      - "PRESSURE_BEAM"
-      - "SPIN_RIGHT_BEAM"
     board-directories:
       - "classpath:boards"
       - "file:boards"
+      - "file:temp"
     themes:
-      default:
-        name: "default"
-        path: "classpath:themes/default"
-        open-floor-variants: 4
+      ki-lowres:
+        name: "ki-lowres"
+        path: "classpath:themes/ki-lowres"
+        open-floor-variants: 8
         water-variants: 8
         explosion-variants: 7
         glue-variants: 12
@@ -60,10 +56,10 @@ circuit-chaos:
         repulsor-animation-steps: 9
         zoom-factor: 1
         image-size: 40
-      circuit-chaos-hires:
-        name: "circuit-chaos-hires"
-        path: "classpath:themes/circuit-chaos-hires"
-        open-floor-variants: 4
+      ki-hires:
+        name: "ki-hires"
+        path: "classpath:themes/ki-hires"
+        open-floor-variants: 8
         water-variants: 8
         explosion-variants: 7
         glue-variants: 12
