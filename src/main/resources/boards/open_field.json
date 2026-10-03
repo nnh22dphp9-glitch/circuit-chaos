@@ -5,7 +5,7 @@
       "floortype": "OPEN_FLOOR",
       "activeInPhase": [ false, false, false, false, false ],
       "facingDirection": "NORTH", "water": false,
-      "lasers": [ 0, 1, 0, 0 ],
+      "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
       "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
