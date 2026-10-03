@@ -19,7 +19,6 @@ public class Robot extends BoardElement {
     private Position        archivePosition;
     private int             archiveLevel;
     private List<Programme> potentialProgramme     = new ArrayList<>();
-    private Programme[]     forcedProgram          = new Programme[]{null, null, null, null, null};
     private List<Module>    modules                = new ArrayList<>();
     private boolean[]       blocked                = new boolean[]{false, false, false, false, false};
     private boolean         giveUp                 = false;
@@ -63,8 +62,6 @@ public class Robot extends BoardElement {
         damage = networkRobot.getDamage();
         archivePosition = networkRobot.getArchivePosition();
         archiveLevel = networkRobot.getArchiveLevel();
-        System.arraycopy(networkRobot.getForcedProgram(), 0, forcedProgram, 0,
-                         Math.min(networkRobot.getForcedProgram().length, forcedProgram.length));
         System.arraycopy(networkRobot.getBlocked(), 0, blocked, 0,
                          Math.min(networkRobot.getBlocked().length, blocked.length));
 

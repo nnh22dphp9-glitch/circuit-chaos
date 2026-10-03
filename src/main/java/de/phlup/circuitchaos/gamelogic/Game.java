@@ -403,7 +403,7 @@ public class Game {
             if (gameAborted) {
                 break;
             }
-            Programme program = getRobotsProgram(robot, phase);
+            Programme program = robot.getProgram()[phase];
             Floor     f       = BoardHandler.getFloor(board, robot.getPosition());
             reactivateRammingArmor(phase, robot);
             Player player = getPlayerOf(robot);
@@ -1125,7 +1125,7 @@ public class Game {
         RevealProgrammeResponse revealProgrammeResponse = new RevealProgrammeResponse();
         revealProgrammeResponse.setPhase(phase);
         for (Robot r : robots) {
-            Programme program = getRobotsProgram(r, phase);
+            Programme program = r.getProgram()[phase];
             if (program != null && !r.isPoweredDown() && r.isOnBoard()) {
                 revealProgrammeResponse.getProgramme().add(new RevealProgrammeListItem(r.getName(), ImageSupplier.getRobotImagePathAndName(r), program));
             }
@@ -1151,7 +1151,7 @@ public class Game {
             }
             if (cco.getType() == ObjectType.RANDOMIZER) {
                 for (Robot r : BoardHandler.getRobots(board, cco.getPosition())) {
-                    r.getForcedProgram()[phase] = Programme.create(r.hasModule(ModuleType.OVERDRIVE), r.hasModule(ModuleType.REVERSE_DRIVE));
+                    r.getProgram()[phase] = Programme.create(r.hasModule(ModuleType.OVERDRIVE), r.hasModule(ModuleType.REVERSE_DRIVE));
                 }
             }
         }
@@ -1215,6 +1215,7 @@ public class Game {
         for (Player activePlayer : players) {
             Robot r = activePlayer.getRobot();
             if (!(r.isPoweredDown() || gameAborted)) {
+                r.getPotentialProgramme().clear();
                 for (int counter = 9 - r.getDamage(); counter > 0; counter--) {
                     r.getPotentialProgramme().add(Programme.create(r.hasModule(ModuleType.OVERDRIVE), r.hasModule(ModuleType.REVERSE_DRIVE)));
                 }
@@ -1588,14 +1589,6 @@ public class Game {
         notifyBoardMayHaveChanged(Step.SETUP, null, "%s gave up".formatted(r.getName()));
     }
 
-    public Programme getRobotsProgram(Robot robot, int phase) {
-        Programme program = robot.getForcedProgram()[phase];
-        if (program == null && robot.getProgram()[phase] != null) {
-            program = robot.getProgram()[phase];
-        }
-        return program;
-    }
-
     private void deGlue(CircuitChaosObject circuitChaosObject, int phase) {
         if (circuitChaosObject.getGlue() > 0) {
             circuitChaosObject.setGlue(circuitChaosObject.getGlue() - 1);
@@ -1613,13 +1606,7 @@ public class Game {
     }
 
     private int getPriority(Robot robot, int phase) {
-        if (robot.getForcedProgram()[phase] != null) {
-            return robot.getForcedProgram()[phase].getPriority();
-        } else if (robot.getProgram()[phase] != null) {
-            return robot.getProgram()[phase].getPriority();
-        } else {
-            return -1;
-        }
+        return robot.getProgram()[phase] == null ? -1 : robot.getProgram()[phase].getPriority();
     }
 
     public void explode(Step step, Integer phase, Position position, int initialDamage) {

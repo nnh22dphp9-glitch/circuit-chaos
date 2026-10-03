@@ -45,38 +45,39 @@ public class ComputerPlayer extends Player {
         this.setTurnFinished(false);
         initTurn();
         initMoveInfo();
+        Robot robot1 = getRobot();
         if (isMakesGoodMoves()) {
-            if (!getRobot().isPoweredDown()) {
+            if (!robot1.isPoweredDown()) {
                 Board       gameboard  = game.getBoard();
                 MoveInfo    chosenMove = null;
                 Programme[] program    = new Programme[5];
                 for (int pr1 = 0; pr1 < robot.getPotentialProgramme().size(); pr1++) {
-                    if (getRobot().getBlocked()[4]) {
-                        program[4] = game.getRobotsProgram(robot, 4);
+                    if (robot1.getBlocked()[4]) {
+                        program[4] = robot.getProgram()[4];
                     } else {
                         program[4] = robot.getPotentialProgramme().get(pr1);
                     }
                     for (int pr2 = 0; pr2 < robot.getPotentialProgramme().size(); pr2++) {
-                        if (getRobot().getBlocked()[3]) {
-                            program[3] = game.getRobotsProgram(robot, 3);
+                        if (robot1.getBlocked()[3]) {
+                            program[3] = robot.getProgram()[3];
                         } else {
                             program[3] = robot.getPotentialProgramme().get(pr2);
                         }
                         for (int pr3 = 0; pr3 < robot.getPotentialProgramme().size(); pr3++) {
-                            if (getRobot().getBlocked()[2]) {
-                                program[2] = game.getRobotsProgram(robot, 2);
+                            if (robot1.getBlocked()[2]) {
+                                program[2] = robot.getProgram()[2];
                             } else {
                                 program[2] = robot.getPotentialProgramme().get(pr3);
                             }
                             for (int pr4 = 0; pr4 < robot.getPotentialProgramme().size(); pr4++) {
-                                if (getRobot().getBlocked()[1]) {
-                                    program[1] = game.getRobotsProgram(robot, 1);
+                                if (robot1.getBlocked()[1]) {
+                                    program[1] = robot.getProgram()[1];
                                 } else {
                                     program[1] = robot.getPotentialProgramme().get(pr4);
                                 }
                                 for (int pr5 = 0; pr5 < robot.getPotentialProgramme().size(); pr5++) {
-                                    if (getRobot().getBlocked()[0]) {
-                                        program[0] = game.getRobotsProgram(robot, 0);
+                                    if (robot1.getBlocked()[0]) {
+                                        program[0] = robot.getProgram()[0];
                                     } else {
                                         program[0] = robot.getPotentialProgramme().get(pr5);
                                     }
@@ -297,19 +298,19 @@ public class ComputerPlayer extends Player {
                     robot.setProgram(chosenMove.getProgram());
                 } else {
                     Iterator<Programme> i2 = robot.getPotentialProgramme().iterator();
-                    if (i2.hasNext() && !getRobot().getBlocked()[0]) {
+                    if (i2.hasNext() && !robot1.getBlocked()[0]) {
                         robot.getProgram()[0] = i2.next();
                     }
-                    if (i2.hasNext() && !getRobot().getBlocked()[1]) {
+                    if (i2.hasNext() && !robot1.getBlocked()[1]) {
                         robot.getProgram()[1] = i2.next();
                     }
-                    if (i2.hasNext() && !getRobot().getBlocked()[2]) {
+                    if (i2.hasNext() && !robot1.getBlocked()[2]) {
                         robot.getProgram()[2] = i2.next();
                     }
-                    if (i2.hasNext() && !getRobot().getBlocked()[3]) {
+                    if (i2.hasNext() && !robot1.getBlocked()[3]) {
                         robot.getProgram()[3] = i2.next();
                     }
-                    if (i2.hasNext() && !getRobot().getBlocked()[4]) {
+                    if (i2.hasNext() && !robot1.getBlocked()[4]) {
                         robot.getProgram()[4] = i2.next();
                     }
                     robot.setPowerDownAnnounced(true);
@@ -317,13 +318,13 @@ public class ComputerPlayer extends Player {
             }
         } else {
             // program completely randomly
-            if (getRobot().isMayChooseDirection()) {
+            if (robot1.isMayChooseDirection()) {
                 robot.setDirection(Direction.values()[GlobalServerAttributes.RANDOM.nextInt(4)]);
                 robot.setPrevDirection(robot.getDirection());
             }
             Iterator<Programme> i = robot.getPotentialProgramme().iterator();
             for (int j = 0; j < 5; j++) {
-                if (!getRobot().getBlocked()[j]) {
+                if (!robot1.getBlocked()[j]) {
                     robot.getProgram()[j] = i.next();
                 }
             }
