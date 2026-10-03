@@ -12,7 +12,6 @@ import de.phlup.circuitchaos.model.NetworkRequest;
 import de.phlup.circuitchaos.model.Position;
 import de.phlup.circuitchaos.model.RevealProgrammeListItem;
 import de.phlup.circuitchaos.model.RevealProgrammeResponse;
-import de.phlup.circuitchaos.model.Robot;
 import de.phlup.circuitchaos.service.AudioSupplier;
 import de.phlup.circuitchaos.service.ImageSupplier;
 import de.phlup.circuitchaos.settings.ClientSettings;
@@ -47,7 +46,6 @@ import java.awt.image.BufferedImage;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import static de.phlup.circuitchaos.enums.ModuleType.HOVERCRAFT;
@@ -251,16 +249,10 @@ public class GameGui {
     }
 
     private boolean isHover(int phase) {
-        Optional<Robot> activeRobotOptional = board.getRobots().stream()
-                                                   .filter((r) -> r.getName().equals(activeRobotName))
-                                                   .filter(BoardElement::isOnBoard)
-                                                   .findFirst();
-        if (activeRobotOptional.isPresent()) {
-            Robot activeRobot = activeRobotOptional.get();
-            return activeRobot.hasModule(HOVERCRAFT) && activeRobot.getModule(HOVERCRAFT).getActiveInPhase()[phase];
-        } else {
-            return false;
-        }
+        return board.getRobots().stream()
+                    .filter(r -> r.getName().equals(activeRobotName))
+                    .filter(BoardElement::isOnBoard)
+                    .anyMatch(r -> r.hasModule(HOVERCRAFT) && r.getModule(HOVERCRAFT).getActiveInPhase()[phase]);
     }
 
     private void playSound(Step step, Board board, boolean hover) {
