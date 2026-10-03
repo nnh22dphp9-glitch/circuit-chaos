@@ -47,9 +47,7 @@ import static de.phlup.circuitchaos.enums.ModuleType.MAIN_LASER;
 import static de.phlup.circuitchaos.enums.ModuleType.PRESSURE_BEAM;
 import static de.phlup.circuitchaos.enums.ModuleType.TRACTOR_BEAM;
 import static de.phlup.circuitchaos.enums.Step.CONVEYOR_BELTS_MOVE;
-import static de.phlup.circuitchaos.enums.Step.CONVEYOR_BELTS_MOVE_NO_WAIT;
 import static de.phlup.circuitchaos.enums.Step.EXPRESS_CONVEYOR_BELTS_MOVE;
-import static de.phlup.circuitchaos.enums.Step.EXPRESS_CONVEYOR_BELTS_MOVE_NO_WAIT;
 import static de.phlup.circuitchaos.enums.Step.GEARS_ROTATE;
 import static de.phlup.circuitchaos.gamelogic.GlobalServerAttributes.RANDOM;
 import static de.phlup.circuitchaos.gamelogic.utils.PictureConstants.FOLDER_ROBOTS;
@@ -284,11 +282,8 @@ public class ImageSupplier {
     private void drawBeams(Floor floor, Step step, Integer subPhase, BufferedImage image, int animationSteps) {
         if (subPhase < animationSteps) {
             if (step == Step.ROBOT_MOUNTED_LASER_FIRE
-                    || step == Step.ROBOT_MOUNTED_LASER_FIRE_NO_WAIT
                     || step == Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE
-                    || step == Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE_NO_WAIT
                     || step == Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE
-                    || step == Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE_NO_WAIT
                     || step == Step.ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE
                     || step == Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE
                     || step == Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE) {
@@ -636,7 +631,7 @@ public class ImageSupplier {
         if (floor.isHasPusher()) {
             if (gameIsNotStartedYet) {
                 addToImage(GFX_PUSHER + (theme.getPusherAnimationSteps() / 2), floor.getPusherDirection(), gr);
-            } else if (phase == null || subPhase == null || !floor.getActiveInPhase()[phase] || (step != Step.PUSHERS_PUSH && step != Step.PUSHERS_PUSH_NO_WAIT)) {
+            } else if (phase == null || subPhase == null || !floor.getActiveInPhase()[phase] || step != Step.PUSHERS_PUSH) {
                 addToImage(GFX_PUSHER + 0, floor.getPusherDirection(), gr);
             } else {
                 double alpha       = calculateAlpha(subPhase, 0, animationSteps) / 2;
@@ -748,8 +743,6 @@ public class ImageSupplier {
     }
 
     private void addAnimationToImage(Floortype floortype, Graphics2D gr, Step step, Integer subPhase, Direction rotation, int animationSteps) {
-        boolean conveyorBeltSteps        = step == CONVEYOR_BELTS_MOVE || step == CONVEYOR_BELTS_MOVE_NO_WAIT;
-        boolean expressConveyorBeltSteps = conveyorBeltSteps || step == EXPRESS_CONVEYOR_BELTS_MOVE || step == EXPRESS_CONVEYOR_BELTS_MOVE_NO_WAIT;
         if (step == GEARS_ROTATE && floortype == Floortype.GEARS_CCW) {
             Image i = getImageIconPlain(GFX_GEARS_CCW).getImage();
             gr.translate(-imageSize / 2, -imageSize / 2);
@@ -761,17 +754,17 @@ public class ImageSupplier {
             gr.drawImage(i, AffineTransform.getRotateInstance(2.0f * subPhase * Math.PI / animationSteps, imageSize / 2.0, imageSize / 2.0), null);
             gr.translate(imageSize / 2, imageSize / 2);
         }
-        if (floortype.isSlowConveyorBelt() && conveyorBeltSteps) {
+        if (floortype.isSlowConveyorBelt() && step == CONVEYOR_BELTS_MOVE) {
             addMovingAnimation(getImageIconPlain(getMovingPicture(floortype)).getImage(), gr, rotation, NORTH, subPhase, true, true, animationSteps);
         }
-        if (floortype.isExpressConveyorBelt() && expressConveyorBeltSteps) {
+        if (floortype.isExpressConveyorBelt() && (step == CONVEYOR_BELTS_MOVE || step == EXPRESS_CONVEYOR_BELTS_MOVE)) {
             addMovingAnimation(getImageIconPlain(getMovingPicture(floortype)).getImage(), gr, rotation, NORTH, subPhase, true, true, animationSteps);
         }
         // Special: add not-moving pictures on gears and conveyor belts, if they don't move
-        if (floortype.isSlowConveyorBelt() && !conveyorBeltSteps) {
+        if (floortype.isSlowConveyorBelt() && step != CONVEYOR_BELTS_MOVE) {
             addToImage(getMovingPicture(floortype), rotation, gr);
         }
-        if (floortype.isExpressConveyorBelt() && !expressConveyorBeltSteps) {
+        if (floortype.isExpressConveyorBelt() && step != CONVEYOR_BELTS_MOVE && step != EXPRESS_CONVEYOR_BELTS_MOVE) {
             addToImage(getMovingPicture(floortype), rotation, gr);
         }
         if (floortype == Floortype.GEARS_CCW && step != GEARS_ROTATE) {

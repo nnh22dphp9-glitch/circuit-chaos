@@ -112,77 +112,67 @@ public class Game {
     public void notifyBoardMayHaveChanged(Step step, Integer phase, String detail) {
         String reason = (phase == null ? "" : (phase + 1) + ": ") + step.getName() + (StringUtils.hasText(detail) ? " - " + detail : "");
         log.debug("Board may have changed: {}: {}", step.name(), reason);
-        if (step != Step.CONVEYOR_BELTS_MOVE_NO_WAIT
-                && step != Step.EXPRESS_CONVEYOR_BELTS_MOVE_NO_WAIT
-                && step != Step.GEARS_ROTATE_NO_WAIT
-                && step != Step.PUSHERS_PUSH_NO_WAIT
-                && step != Step.BOARD_MOUNTED_PRESSURE_BEAMS_FIRE_NO_WAIT
-                && step != Step.BOARD_MOUNTED_TRACTOR_BEAMS_FIRE_NO_WAIT
-                && step != Step.ROBOT_MOUNTED_LASER_FIRE_NO_WAIT
-                && step != Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE_NO_WAIT
-                && step != Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE_NO_WAIT) {
-            List<BoardElementStub> stubList = BoardHandler.createBoardElementStubList(board);
-            boolean wait = (elementStubs != null && !elementStubs.equals(stubList))
-                    || (step == Step.OPEN_TRAPDOORS && board.getProperties().isTrapdoor())
-                    || (step == Step.ROBOT_MOUNTED_LASER_FIRE && phase != null
-                    && board.getRobots().stream().filter(BoardElement::isOnBoard).anyMatch(
-                    r -> (r.hasModule(MAIN_LASER) && r.getModule(MAIN_LASER).getActiveInPhase()[phase])
-                            || (r.hasModule(DOUBLE_BARREL_LASER) && r.getModule(DOUBLE_BARREL_LASER).getActiveInPhase()[phase])
-                            || (r.hasModule(HIGH_POWER_LASER) && r.getModule(HIGH_POWER_LASER).getActiveInPhase()[phase])
-                            || (r.hasModule(REAR_LASER) && r.getModule(REAR_LASER).getActiveInPhase()[phase])))
-                    || (step == Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE && phase != null
-                    && board.getRobots().stream().filter(BoardElement::isOnBoard).anyMatch(
-                    r -> r.hasModule(PRESSURE_BEAM) && r.getModule(PRESSURE_BEAM).getActiveInPhase()[phase]))
-                    || (step == Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE && phase != null
-                    && board.getRobots().stream().filter(BoardElement::isOnBoard).anyMatch(
-                    r -> r.hasModule(TRACTOR_BEAM) && r.getModule(TRACTOR_BEAM).getActiveInPhase()[phase]))
-                    || (step == Step.ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE && phase != null
-                    && board.getRobots().stream().filter(BoardElement::isOnBoard).anyMatch(
-                    r -> r.hasModule(SPIN_LEFT_BEAM) && r.getModule(SPIN_LEFT_BEAM).getActiveInPhase()[phase]))
-                    || (step == Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE && phase != null
-                    && board.getRobots().stream().filter(BoardElement::isOnBoard).anyMatch(
-                    r -> r.hasModule(SPIN_RIGHT_BEAM) && r.getModule(SPIN_RIGHT_BEAM).getActiveInPhase()[phase]))
-                    || (step == Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE && phase != null
-                    && board.getRobots().stream().filter(BoardElement::isOnBoard).anyMatch(
-                    r -> r.hasModule(EXCHANGE_BEAM) && r.getModule(EXCHANGE_BEAM).getActiveInPhase()[phase]))
-                    || (step == Step.BOARD_MOUNTED_LASER_FIRE && board.getProperties().isLasers())
-                    || (step == Step.BOARD_MOUNTED_PRESSURE_BEAMS_FIRE && board.getProperties().isPressureBeams())
-                    || (step == Step.BOARD_MOUNTED_TRACTOR_BEAMS_FIRE && board.getProperties().isTractorBeams())
-                    || (step == Step.CONVEYOR_BELTS_MOVE && board.getProperties().isConveyorBelts())
-                    || (step == Step.EXPRESS_CONVEYOR_BELTS_MOVE && board.getProperties().isExpressConveyorBelts())
-                    || (step == Step.GEARS_ROTATE && board.getProperties().isGears())
-                    || (step == Step.PUSHERS_PUSH && board.getProperties().isPushers());
-            if (elementStubs == null || wait) {
-                if (step == Step.SETUP || !wait) {
-                    for (Registration reg : watchers) {
-                        // Please note: "reason" will become part of the window title
-                        pollOrPushSwitchService.notifyOfBoardChange(reg, board, reason, step, phase, null, animationSteps);
-                    }
-                } else {
-                    randomlySetFloorOrientationForDisplay();
-                    for (int subPhase = 0; subPhase < animationSteps; subPhase++) {
-                        for (Registration reg : watchers) {
-                            pollOrPushSwitchService.notifyOfBoardChange(reg, board, reason, step, phase, subPhase, animationSteps);
-                        }
-                        Sleep.sleepForMillis(timeSettings.getTimeBetweenSteps() / animationSteps);
-                    }
-                    resetPreviousPositionsAndDirections();
+        List<BoardElementStub> stubList = BoardHandler.createBoardElementStubList(board);
+        boolean wait = (elementStubs != null && !elementStubs.equals(stubList))
+                || (step == Step.OPEN_TRAPDOORS && board.getProperties().isTrapdoor())
+                || (step == Step.ROBOT_MOUNTED_LASER_FIRE && phase != null
+                && board.getRobots().stream().filter(BoardElement::isOnBoard).anyMatch(
+                r -> (r.hasModule(MAIN_LASER) && r.getModule(MAIN_LASER).getActiveInPhase()[phase])
+                        || (r.hasModule(DOUBLE_BARREL_LASER) && r.getModule(DOUBLE_BARREL_LASER).getActiveInPhase()[phase])
+                        || (r.hasModule(HIGH_POWER_LASER) && r.getModule(HIGH_POWER_LASER).getActiveInPhase()[phase])
+                        || (r.hasModule(REAR_LASER) && r.getModule(REAR_LASER).getActiveInPhase()[phase])))
+                || (step == Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE && phase != null
+                && board.getRobots().stream().filter(BoardElement::isOnBoard).anyMatch(
+                r -> r.hasModule(PRESSURE_BEAM) && r.getModule(PRESSURE_BEAM).getActiveInPhase()[phase]))
+                || (step == Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE && phase != null
+                && board.getRobots().stream().filter(BoardElement::isOnBoard).anyMatch(
+                r -> r.hasModule(TRACTOR_BEAM) && r.getModule(TRACTOR_BEAM).getActiveInPhase()[phase]))
+                || (step == Step.ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE && phase != null
+                && board.getRobots().stream().filter(BoardElement::isOnBoard).anyMatch(
+                r -> r.hasModule(SPIN_LEFT_BEAM) && r.getModule(SPIN_LEFT_BEAM).getActiveInPhase()[phase]))
+                || (step == Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE && phase != null
+                && board.getRobots().stream().filter(BoardElement::isOnBoard).anyMatch(
+                r -> r.hasModule(SPIN_RIGHT_BEAM) && r.getModule(SPIN_RIGHT_BEAM).getActiveInPhase()[phase]))
+                || (step == Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE && phase != null
+                && board.getRobots().stream().filter(BoardElement::isOnBoard).anyMatch(
+                r -> r.hasModule(EXCHANGE_BEAM) && r.getModule(EXCHANGE_BEAM).getActiveInPhase()[phase]))
+                || (step == Step.BOARD_MOUNTED_LASER_FIRE && board.getProperties().isLasers())
+                || (step == Step.BOARD_MOUNTED_PRESSURE_BEAMS_FIRE && board.getProperties().isPressureBeams())
+                || (step == Step.BOARD_MOUNTED_TRACTOR_BEAMS_FIRE && board.getProperties().isTractorBeams())
+                || (step == Step.CONVEYOR_BELTS_MOVE && board.getProperties().isConveyorBelts())
+                || (step == Step.EXPRESS_CONVEYOR_BELTS_MOVE && board.getProperties().isExpressConveyorBelts())
+                || (step == Step.GEARS_ROTATE && board.getProperties().isGears())
+                || (step == Step.PUSHERS_PUSH && board.getProperties().isPushers());
+        if (elementStubs == null || wait) {
+            if (step == Step.SETUP || !wait) {
+                for (Registration reg : watchers) {
+                    // Please note: "reason" will become part of the window title
+                    pollOrPushSwitchService.notifyOfBoardChange(reg, board, reason, step, phase, null, animationSteps);
                 }
-            }
-            // 2nd Phase for falling down robots/objects
-            if (!board.getRobotsFallingIntoAbyss().isEmpty() || !board.getObjectsFallingIntoAbyss().isEmpty()) {
+            } else {
                 randomlySetFloorOrientationForDisplay();
-                for (int subPhase = animationSteps; subPhase < 2 * animationSteps; subPhase++) {
+                for (int subPhase = 0; subPhase < animationSteps; subPhase++) {
                     for (Registration reg : watchers) {
                         pollOrPushSwitchService.notifyOfBoardChange(reg, board, reason, step, phase, subPhase, animationSteps);
                     }
                     Sleep.sleepForMillis(timeSettings.getTimeBetweenSteps() / animationSteps);
                 }
-                board.getRobotsFallingIntoAbyss().clear();
-                board.getObjectsFallingIntoAbyss().clear();
+                resetPreviousPositionsAndDirections();
             }
-            elementStubs = stubList;
         }
+        // 2nd Phase for falling down robots/objects
+        if (!board.getRobotsFallingIntoAbyss().isEmpty() || !board.getObjectsFallingIntoAbyss().isEmpty()) {
+            randomlySetFloorOrientationForDisplay();
+            for (int subPhase = animationSteps; subPhase < 2 * animationSteps; subPhase++) {
+                for (Registration reg : watchers) {
+                    pollOrPushSwitchService.notifyOfBoardChange(reg, board, reason, step, phase, subPhase, animationSteps);
+                }
+                Sleep.sleepForMillis(timeSettings.getTimeBetweenSteps() / animationSteps);
+            }
+            board.getRobotsFallingIntoAbyss().clear();
+            board.getObjectsFallingIntoAbyss().clear();
+        }
+        elementStubs = stubList;
     }
 
     private void randomlySetFloorOrientationForDisplay() {
@@ -644,9 +634,9 @@ public class Game {
                                 playerOfRobot.takeDamage(phase, null, dir2, true);
                             }
                         } else if (step == Step.BOARD_MOUNTED_PRESSURE_BEAMS_FIRE) {
-                            moveInit(target, dir, 0, 1, Step.BOARD_MOUNTED_PRESSURE_BEAMS_FIRE_NO_WAIT, phase, true);
+                            moveInit(target, dir, 0, 1, Step.BOARD_MOUNTED_PRESSURE_BEAMS_FIRE, phase, true, false);
                         } else if (step == Step.BOARD_MOUNTED_TRACTOR_BEAMS_FIRE) {
-                            moveInit(target, dir.reverse(), 0, 1, Step.BOARD_MOUNTED_TRACTOR_BEAMS_FIRE_NO_WAIT, phase, false);
+                            moveInit(target, dir.reverse(), 0, 1, Step.BOARD_MOUNTED_TRACTOR_BEAMS_FIRE, phase, false, false);
                         }
                     }
                 }
@@ -685,9 +675,9 @@ public class Game {
                             }
                         }
                     } else if (step == Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE && weaponType == ModuleType.PRESSURE_BEAM) {
-                        moveInit(targetRobot, dir, 0, 1, Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE_NO_WAIT, phase, true);
+                        moveInit(targetRobot, dir, 0, 1, step, phase, true, false);
                     } else if (step == Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE && weaponType == ModuleType.TRACTOR_BEAM) {
-                        moveInit(targetRobot, dir.reverse(), 0, 1, Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE_NO_WAIT, phase, false);
+                        moveInit(targetRobot, dir.reverse(), 0, 1, step, phase, false, false);
                     } else if (step == Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE && weaponType == ModuleType.EXCHANGE_BEAM) {
                         // Dreiecks-Tausch
                         Position position = targetRobot.getPosition();
@@ -747,7 +737,7 @@ public class Game {
                             && be.getPosition().equals(f.getPosition())
                             && !be.isFlying()
                             && !(be instanceof Robot && getPlayerOf(be).uses(ModuleType.GYROSCOPIC_STABILIZER, phase))) {
-                        rotate(be, f.getFloortype() == Floortype.GEARS_CCW ? WEST : EAST, Step.GEARS_ROTATE_NO_WAIT, phase);
+                        rotate(be, f.getFloortype() == Floortype.GEARS_CCW ? WEST : EAST, Step.GEARS_ROTATE, phase, false);
                     }
                 }
             }
@@ -766,7 +756,7 @@ public class Game {
                 for (BoardElement be : BoardHandler.getObjectsAndRobots(board)) {
                     if (be.isOnBoard() && be.getPosition().equals(f.getPosition())) {
                         if (willBePushed(be)) {
-                            moveInit(be, f.getPusherDirection(), 1, 1, Step.PUSHERS_PUSH_NO_WAIT, phase, true);
+                            moveInit(be, f.getPusherDirection(), 1, 1, Step.PUSHERS_PUSH, phase, true, false);
                         }
                     }
                 }
@@ -830,8 +820,8 @@ public class Game {
                             obj.setConflictingMark(-1);
                         } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
                             obj.setConflictingMark(-1);
-                            rotateObjectsOnConveyorBelts(Step.CONVEYOR_BELTS_MOVE_NO_WAIT, phase, obj, targetFloor, f);
-                            setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.CONVEYOR_BELTS_MOVE_NO_WAIT, phase, f.getFacingDirection());
+                            rotateObjectsOnConveyorBelts(Step.CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
+                            setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
                         } else {
                             needToGoAgain = true;
                         }
@@ -847,8 +837,8 @@ public class Game {
                 if (obj.getConflictingMark() == 0) {
                     Floor f           = BoardHandler.getFloor(board, obj.getPosition());
                     Floor targetFloor = BoardHandler.getFloor(board, f.getPosition().neighbour(f.getFacingDirection()));
-                    rotateObjectsOnConveyorBelts(Step.CONVEYOR_BELTS_MOVE_NO_WAIT, phase, obj, targetFloor, f);
-                    setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.CONVEYOR_BELTS_MOVE_NO_WAIT, phase, f.getFacingDirection());
+                    rotateObjectsOnConveyorBelts(Step.CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
+                    setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
                 }
             }
         }
@@ -897,8 +887,8 @@ public class Game {
                             obj.setConflictingMark(-1);
                         } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
                             obj.setConflictingMark(-1);
-                            rotateObjectsOnConveyorBelts(Step.EXPRESS_CONVEYOR_BELTS_MOVE_NO_WAIT, phase, obj, targetFloor, f);
-                            setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.EXPRESS_CONVEYOR_BELTS_MOVE_NO_WAIT, phase, f.getFacingDirection());
+                            rotateObjectsOnConveyorBelts(Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
+                            setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
                         } else {
                             needToGoAgain = true;
                         }
@@ -914,8 +904,8 @@ public class Game {
                 if (obj.getConflictingMark() == 0) {
                     Floor f           = BoardHandler.getFloor(board, obj.getPosition());
                     Floor targetFloor = BoardHandler.getFloor(board, f.getPosition().neighbour(f.getFacingDirection()));
-                    rotateObjectsOnConveyorBelts(Step.EXPRESS_CONVEYOR_BELTS_MOVE_NO_WAIT, phase, obj, targetFloor, f);
-                    setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.EXPRESS_CONVEYOR_BELTS_MOVE_NO_WAIT, phase, f.getFacingDirection());
+                    rotateObjectsOnConveyorBelts(Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
+                    setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
                 }
             }
         }
@@ -927,23 +917,23 @@ public class Game {
     private void boardElementMoves(int phase, BoardElement be, Programme pc, int movement) {
         if (be instanceof Robot) {
             if (movement > 0) {
-                moveInit(be, be.getDirection(), movement, movement, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
+                moveInit(be, be.getDirection(), movement, movement, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true, true);
             } else if (movement < 0) {
-                moveInit(be, SOUTH.add(be.getDirection()), movement, -movement, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
+                moveInit(be, SOUTH.add(be.getDirection()), movement, -movement, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true, true);
             }
             if (pc.getType() == ProgramType.ROTATE_RIGHT) {
-                rotate(be, EAST, Step.ROBOTS_AND_OBJECTS_MOVE, phase);
+                rotate(be, EAST, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
             } else if (pc.getType() == ProgramType.ROTATE_LEFT) {
-                rotate(be, WEST, Step.ROBOTS_AND_OBJECTS_MOVE, phase);
+                rotate(be, WEST, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
             } else if (pc.getType() == ProgramType.U_TURN) {
-                rotate(be, SOUTH, Step.ROBOTS_AND_OBJECTS_MOVE, phase);
+                rotate(be, SOUTH, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
             }
             Player player = getPlayerOf(be);
             if (player.uses(ModuleType.HOVERCRAFT, phase)) {
                 land(player, Step.ROBOTS_AND_OBJECTS_MOVE, phase);
             }
         } else {
-            moveInit(be, (pc.getType() == ProgramType.ROTATE_LEFT ? WEST : EAST).add(be.getDirection()), 1, 1, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
+            moveInit(be, (pc.getType() == ProgramType.ROTATE_LEFT ? WEST : EAST).add(be.getDirection()), 1, 1, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true, true);
         }
     }
 
@@ -953,20 +943,20 @@ public class Game {
                     || targetFloor.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW)
                     && (targetFloor.getFacingDirection() == sourceFloor.getFacingDirection().add(WEST)
                     || (targetFloor.getFacingDirection() == WEST && sourceFloor.getFacingDirection() == NORTH))) {
-                rotate(obj, WEST, step, phase);
+                rotate(obj, WEST, step, phase, false);
             } else if ((targetFloor.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW
                     || targetFloor.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW)
                     && (targetFloor.getFacingDirection() == sourceFloor.getFacingDirection().add(EAST)
                     || (sourceFloor.getFacingDirection() == WEST && targetFloor.getFacingDirection() == NORTH))) {
-                rotate(obj, EAST, step, phase);
+                rotate(obj, EAST, step, phase, false);
             } else if (targetFloor.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
                     || targetFloor.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW) {
                 if (targetFloor.getFacingDirection() == sourceFloor.getFacingDirection().add(WEST)
                         || (targetFloor.getFacingDirection() == WEST && sourceFloor.getFacingDirection() == NORTH)) {
-                    rotate(obj, WEST, step, phase);
+                    rotate(obj, WEST, step, phase, false);
                 } else if ((targetFloor.getFacingDirection() == NORTH && sourceFloor.getFacingDirection() == WEST)
                         || targetFloor.getFacingDirection() == sourceFloor.getFacingDirection().add(EAST)) {
-                    rotate(obj, EAST, step, phase);
+                    rotate(obj, EAST, step, phase, false);
                 }
             }
         }
@@ -1238,11 +1228,11 @@ public class Game {
         }
     }
 
-    public void moveInit(BoardElement be, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot) {
-        move(be, direction, strength, amount, step, phase, notBlockedByMovableRobot);
+    public void moveInit(BoardElement be, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait) {
+        move(be, direction, strength, amount, step, phase, notBlockedByMovableRobot, wait);
     }
 
-    private boolean move(BoardElement be, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot) {
+    private boolean move(BoardElement be, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait) {
         Position oldPosition    = be.getPosition();
         Floor    floor1         = BoardHandler.getFloor(board, oldPosition);
         Position targetPosition = be.getPosition().neighbour(direction);
@@ -1290,7 +1280,7 @@ public class Game {
                             getPlayerOf(conflictingElement).takeDamage(phase, player, null, false);
                         }
                     }
-                    if (move(conflictingElement, direction, strength, 1, step, phase, true)) {
+                    if (move(conflictingElement, direction, strength, 1, step, phase, true, wait)) {
                         be.setPosition(targetPosition);
                         if (!be.isFlying()) {
                             be.setLevel(BoardHandler.getFloor(board, be.getPosition()).getLevel());
@@ -1310,8 +1300,8 @@ public class Game {
                         be.setLevel(BoardHandler.getFloor(board, be.getPosition()).getLevel());
                     }
                 } else if (notBlockedByMovableRobot) {
-                    if (move(conflictingElement, direction, strength, 1, step, phase, true)) {
-                        move(be, direction, strength, amount, step, phase, true);
+                    if (move(conflictingElement, direction, strength, 1, step, phase, true, wait)) {
+                        move(be, direction, strength, amount, step, phase, true, wait);
                     }
                 }
             } else if (floor1.wall(direction) == WallType.REPULSOR_FIELD
@@ -1319,10 +1309,10 @@ public class Game {
                     || floor1.wall(direction) == WallType.ONE_WAY_GREEN
                     || floor1.wall(direction) == WallType.RAMP_DOWN)
                     && floor2.wall(direction2) == WallType.REPULSOR_FIELD)) {
-                move(be, direction2, strength, strength, step, phase, true);
+                move(be, direction2, strength, strength, step, phase, true, wait);
             }
         }
-        if (amount > 0) {
+        if (amount > 0 && wait) {
             notifyBoardMayHaveChanged(step, phase, null);
         }
         Floor floor3 = BoardHandler.getFloor(board, be.getPosition());
@@ -1377,7 +1367,9 @@ public class Game {
                         floor3 = BoardHandler.getFloor(board, portal.getTargetPosition());
                         be.setPosition(portal.getTargetPosition());
                         be.setLevel(floor3.getLevel());
-                        notifyBoardMayHaveChanged(step, phase, null);
+                        if (wait) {
+                            notifyBoardMayHaveChanged(step, phase, null);
+                        }
                         if (!player.getRobot().isVirtual()) {
                             for (CircuitChaosObject cco : new ArrayList<>(BoardHandler.getObjects(board, floor3.getPosition()))) {
                                 if ((cco.getType() == ObjectType.MINE || cco.getType() == ObjectType.PROXIMITY_MINE)
@@ -1422,17 +1414,19 @@ public class Game {
             }
         }
         if (amount > 1) {
-            move(be, direction, strength, amount - 1, step, phase, true);
+            move(be, direction, strength, amount - 1, step, phase, true, wait);
         }
         if (!oldPosition.equals(be.getPosition())) {
             boolean notBlocked = true;
             if (!be.isFlying()) {
                 while (notBlocked && BoardHandler.getObjects(board, be.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
-                    notBlocked = move(be, direction, 0, 1, step, phase, false);
+                    notBlocked = move(be, direction, 0, 1, step, phase, false, wait);
                 }
             }
         }
-        notifyBoardMayHaveChanged(step, phase, null);
+        if (wait) {
+            notifyBoardMayHaveChanged(step, phase, null);
+        }
         return !oldPosition.equals(be.getPosition());
     }
 
@@ -1440,7 +1434,7 @@ public class Game {
         Robot robot = player.getRobot();
         Floor f     = BoardHandler.getFloor(board, robot.getPosition());
         while (isRobotConflict(robot) && !player.getRobot().isVirtual()) {
-            moveInit(robot, robot.getDirection(), 0, 1, step, phase, true);
+            moveInit(robot, robot.getDirection(), 0, 1, step, phase, true, true);
         }
         player.setFlying(false);
         if (f.getFloortype() == Floortype.ABYSS || (f.getFloortype() == Floortype.TRAPDOOR && f.getActiveInPhase()[phase])) {
@@ -1541,12 +1535,14 @@ public class Game {
         return target;
     }
 
-    public void rotate(BoardElement be, Direction direction, Step step, int phase) {
+    public void rotate(BoardElement be, Direction direction, Step step, int phase, boolean wait) {
         be.setDirection(be.getDirection().add(direction));
-        notifyBoardMayHaveChanged(step, phase, "%s was rotated".formatted(be.getName()));
+        if (wait) {
+            notifyBoardMayHaveChanged(step, phase, "%s was rotated".formatted(be.getName()));
+        }
     }
 
-    public void setPosition(BoardElement be, int x, int y, Step step, int phase, Direction direction) {
+    public void setPosition(BoardElement be, int x, int y, Step step, int phase, Direction direction, boolean wait) {
         be.setPrevPosition(be.getPosition());
         be.setPosition(new Position(x, y));
         Floor floor3 = BoardHandler.getFloor(board, be.getPosition());
@@ -1560,10 +1556,10 @@ public class Game {
         }
         if (direction != null) {
             if (BoardHandler.getObjects(board, floor3.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
-                moveInit(be, direction, 0, 1, step, phase, false);
+                moveInit(be, direction, 0, 1, step, phase, false, wait);
             }
         }
-        moveInit(be, NORTH, 0, 0, step, phase, false);
+        moveInit(be, NORTH, 0, 0, step, phase, false, wait);
     }
 
     public void die(BoardElement be, Step reason, Integer phase) {

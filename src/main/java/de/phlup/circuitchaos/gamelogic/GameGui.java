@@ -250,13 +250,16 @@ public class GameGui {
             return;
         }
         switch (step) {
-            case ROBOT_MOUNTED_LASER_FIRE, ROBOT_MOUNTED_LASER_FIRE_NO_WAIT, BOARD_MOUNTED_LASER_FIRE ->
-                    audioSupplier.playSound(AudioConstants.LASER_BEAM);
-            case EXPRESS_CONVEYOR_BELTS_MOVE, EXPRESS_CONVEYOR_BELTS_MOVE_NO_WAIT, CONVEYOR_BELTS_MOVE_NO_WAIT,
-                 CONVEYOR_BELTS_MOVE -> audioSupplier.playSound(AudioConstants.CONVEYOR_BELT);
-            case ROBOTS_AND_OBJECTS_MOVE -> audioSupplier.playSound(AudioConstants.ROBOTS_MOVE);
-            case PUSHERS_PUSH, PUSHERS_PUSH_NO_WAIT -> audioSupplier.playSound(AudioConstants.PUSHER);
-            case GEARS_ROTATE, GEARS_ROTATE_NO_WAIT -> audioSupplier.playSound(AudioConstants.GEARS);
+            case ROBOT_MOUNTED_LASER_FIRE, BOARD_MOUNTED_LASER_FIRE,
+                 ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE, BOARD_MOUNTED_PRESSURE_BEAMS_FIRE,
+                 ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE, BOARD_MOUNTED_TRACTOR_BEAMS_FIRE,
+                 ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE, ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE,
+                 ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE -> audioSupplier.playSound(AudioConstants.LASER_BEAM);
+            case EXPRESS_CONVEYOR_BELTS_MOVE, CONVEYOR_BELTS_MOVE ->
+                    audioSupplier.playSound(AudioConstants.CONVEYOR_BELT);
+            case ROBOTS_AND_OBJECTS_MOVE -> audioSupplier.playSound(AudioConstants.ROBOTS_MOVE); // TODO ROBOTS_HOVER
+            case PUSHERS_PUSH -> audioSupplier.playSound(AudioConstants.PUSHER);
+            case GEARS_ROTATE -> audioSupplier.playSound(AudioConstants.GEARS);
             case OPEN_TRAPDOORS -> {
                 if (board.getProperties().isTrapdoor()) {
                     audioSupplier.playSound(AudioConstants.TRAPDOOR);
