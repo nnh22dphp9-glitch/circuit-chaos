@@ -1,7 +1,6 @@
 package de.phlup.circuitchaos.gamelogic;
 
 import de.phlup.circuitchaos.client.ClientToServerConnection;
-import de.phlup.circuitchaos.enums.ModuleType;
 import de.phlup.circuitchaos.enums.Step;
 import de.phlup.circuitchaos.gamelogic.creation.ClientBoardArranger;
 import de.phlup.circuitchaos.gamelogic.player.network.ProgramRobotAnswerWindow;
@@ -253,9 +252,9 @@ public class GameGui {
 
     private boolean isHover(int phase) {
         Optional<Robot> activeRobotOptional = board.getRobots().stream()
-                                                  .filter((r) -> r.getName().equals(activeRobotName))
-                                                  .filter(BoardElement::isOnBoard)
-                                                  .findFirst();
+                                                   .filter((r) -> r.getName().equals(activeRobotName))
+                                                   .filter(BoardElement::isOnBoard)
+                                                   .findFirst();
         if (activeRobotOptional.isPresent()) {
             Robot activeRobot = activeRobotOptional.get();
             return activeRobot.hasModule(HOVERCRAFT) && activeRobot.getModule(HOVERCRAFT).getActiveInPhase()[phase];
@@ -269,9 +268,6 @@ public class GameGui {
             audioSupplier.stop();
             return;
         }
-        if (hover) {
-            audioSupplier.playSound(AudioConstants.ROBOTS_HOVER);
-        }
         switch (step) {
             case ROBOT_MOUNTED_LASER_FIRE, BOARD_MOUNTED_LASER_FIRE,
                  ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE, BOARD_MOUNTED_PRESSURE_BEAMS_FIRE,
@@ -280,12 +276,18 @@ public class GameGui {
                  ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE -> audioSupplier.playSound(AudioConstants.LASER_BEAM);
             case EXPRESS_CONVEYOR_BELTS_MOVE, CONVEYOR_BELTS_MOVE ->
                     audioSupplier.playSound(AudioConstants.CONVEYOR_BELT);
-            case ROBOTS_AND_OBJECTS_MOVE -> audioSupplier.playSound(AudioConstants.ROBOTS_MOVE);
             case PUSHERS_PUSH -> audioSupplier.playSound(AudioConstants.PUSHER);
             case GEARS_ROTATE -> audioSupplier.playSound(AudioConstants.GEARS);
             case OPEN_TRAPDOORS -> {
                 if (board.getProperties().isTrapdoor()) {
                     audioSupplier.playSound(AudioConstants.TRAPDOOR);
+                }
+            }
+            case ROBOTS_AND_OBJECTS_MOVE -> {
+                if (hover) {
+                    audioSupplier.playSound(AudioConstants.ROBOTS_HOVER);
+                } else {
+                    audioSupplier.playSound(AudioConstants.ROBOTS_MOVE);
                 }
             }
             default -> audioSupplier.stop();
