@@ -39,6 +39,7 @@ circuit-chaos:
     default-zoom: 1
     default-modules:
       - "MAIN_LASER"
+      - "HOVERCRAFT"
     board-directories:
       - "classpath:boards"
       - "file:boards"

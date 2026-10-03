@@ -1,16 +1,19 @@
 package de.phlup.circuitchaos.gamelogic;
 
 import de.phlup.circuitchaos.client.ClientToServerConnection;
+import de.phlup.circuitchaos.enums.ModuleType;
 import de.phlup.circuitchaos.enums.Step;
 import de.phlup.circuitchaos.gamelogic.creation.ClientBoardArranger;
 import de.phlup.circuitchaos.gamelogic.player.network.ProgramRobotAnswerWindow;
 import de.phlup.circuitchaos.gamelogic.utils.AudioConstants;
 import de.phlup.circuitchaos.model.Board;
+import de.phlup.circuitchaos.model.BoardElement;
 import de.phlup.circuitchaos.model.Floor;
 import de.phlup.circuitchaos.model.NetworkRequest;
 import de.phlup.circuitchaos.model.Position;
 import de.phlup.circuitchaos.model.RevealProgrammeListItem;
 import de.phlup.circuitchaos.model.RevealProgrammeResponse;
+import de.phlup.circuitchaos.model.Robot;
 import de.phlup.circuitchaos.service.AudioSupplier;
 import de.phlup.circuitchaos.service.ImageSupplier;
 import de.phlup.circuitchaos.settings.ClientSettings;
@@ -45,7 +48,10 @@ import java.awt.image.BufferedImage;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+
+import static de.phlup.circuitchaos.enums.ModuleType.HOVERCRAFT;
 
 @Slf4j
 @Getter
@@ -235,7 +241,8 @@ public class GameGui {
             if (subPhase == null || gameEnded) {
                 audioSupplier.stop();
             } else if (subPhase == 0) {
-                playSound(step, board);
+                boolean hover = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(phase);
+                playSound(step, board, hover);
             }
         }
         if (boardArranger != null) {
@@ -244,10 +251,26 @@ public class GameGui {
         }
     }
 
-    private void playSound(Step step, Board board) {
+    private boolean isHover(int phase) {
+        Optional<Robot> activeRobotOptional = board.getRobots().stream()
+                                                  .filter((r) -> r.getName().equals(activeRobotName))
+                                                  .filter(BoardElement::isOnBoard)
+                                                  .findFirst();
+        if (activeRobotOptional.isPresent()) {
+            Robot activeRobot = activeRobotOptional.get();
+            return activeRobot.hasModule(HOVERCRAFT) && activeRobot.getModule(HOVERCRAFT).getActiveInPhase()[phase];
+        } else {
+            return false;
+        }
+    }
+
+    private void playSound(Step step, Board board, boolean hover) {
         if (!soundMenuItem.isSelected()) {
             audioSupplier.stop();
             return;
+        }
+        if (hover) {
+            audioSupplier.playSound(AudioConstants.ROBOTS_HOVER);
         }
         switch (step) {
             case ROBOT_MOUNTED_LASER_FIRE, BOARD_MOUNTED_LASER_FIRE,
@@ -257,7 +280,7 @@ public class GameGui {
                  ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE -> audioSupplier.playSound(AudioConstants.LASER_BEAM);
             case EXPRESS_CONVEYOR_BELTS_MOVE, CONVEYOR_BELTS_MOVE ->
                     audioSupplier.playSound(AudioConstants.CONVEYOR_BELT);
-            case ROBOTS_AND_OBJECTS_MOVE -> audioSupplier.playSound(AudioConstants.ROBOTS_MOVE); // TODO ROBOTS_HOVER
+            case ROBOTS_AND_OBJECTS_MOVE -> audioSupplier.playSound(AudioConstants.ROBOTS_MOVE);
             case PUSHERS_PUSH -> audioSupplier.playSound(AudioConstants.PUSHER);
             case GEARS_ROTATE -> audioSupplier.playSound(AudioConstants.GEARS);
             case OPEN_TRAPDOORS -> {

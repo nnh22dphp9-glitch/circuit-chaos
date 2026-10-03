@@ -289,14 +289,6 @@ public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiH
             }
         }
 
-        if (robot.hasModule(ModuleType.HOVERCRAFT)) {
-            y++;
-            addComponentToPanel(new JLabel("Hovercraft: "), panel, layout, 1, y, 1, GridBagConstraints.EAST);
-            for (int phaseCounter = 0; phaseCounter < 5; phaseCounter++) {
-                addComponentToPanel(hovercraftPhase[phaseCounter], panel, layout, 3 + phaseCounter, y, 1, GridBagConstraints.CENTER);
-            }
-        }
-
         y++;
         addComponentToPanel(new JLabel(" "), panel, layout, 1, y, 1, GridBagConstraints.EAST);
 
