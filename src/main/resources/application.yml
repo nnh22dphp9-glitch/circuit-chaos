@@ -1,0 +1,77 @@
+spring:
+  threads.virtual.enabled: true
+
+server:
+  address: localhost
+  port: 8080
+  ssl:
+    enabled: false
+
+logging:
+  level:
+    de.phlup.circuitchaos: info
+
+circuit-chaos:
+  game:
+    options:
+      max-number-of-computer-players: 1
+    waiting-times-in-milliseconds:
+      time-between-steps: 1_000
+      time-to-show-explosions: 500
+      question-timeout: 3600_000
+      sleep-time-between-answer-polling: 100
+      animation-steps: 20
+  server:
+    clean-game-list-scheduler:
+      start-delay-seconds: 1800
+      fixed-rate-seconds: 300
+      evict-time-preparing-minutes: 30
+      evict-time-running-minutes: 60
+  client:
+    own-url: http://localhost:8080
+    server-url: http://localhost:8080
+    allow-others-to-start-a-game: false
+    sound: true
+    ssl-bundle: ""
+    default-board-size-x: 900
+    default-board-size-y: 880
+    default-theme: "default"
+    default-zoom: 1
+    default-modules:
+      - "MAIN_LASER"
+      - "SPIN_LEFT_BEAM"
+      - "EXCHANGE_BEAM"
+      - "TRACTOR_BEAM"
+      - "PRESSURE_BEAM"
+      - "SPIN_RIGHT_BEAM"
+    board-directories:
+      - "classpath:boards"
+      - "file:boards"
+    themes:
+      default:
+        name: "default"
+        path: "classpath:themes/default"
+        open-floor-variants: 4
+        water-variants: 8
+        explosion-variants: 7
+        glue-variants: 12
+        oil-variants: 12
+        pusher-animation-steps: 10
+        repulsor-animation-steps: 9
+        zoom-factor: 1
+        image-size: 40
+      circuit-chaos-hires:
+        name: "circuit-chaos-hires"
+        path: "classpath:themes/circuit-chaos-hires"
+        open-floor-variants: 4
+        water-variants: 8
+        explosion-variants: 7
+        glue-variants: 12
+        oil-variants: 12
+        pusher-animation-steps: 10
+        repulsor-animation-steps: 9
+        zoom-factor: 0.15
+        image-size: 400
+    poll-scheduler:
+      start-delay-milliseconds: 1000
+      fixed-rate-milliseconds: 100

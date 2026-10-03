@@ -1,0 +1,3 @@
+circuit-chaos:
+  client:
+    allow-others-to-start-a-game: true
