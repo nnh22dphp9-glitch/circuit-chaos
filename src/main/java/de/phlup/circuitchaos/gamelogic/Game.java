@@ -1248,6 +1248,7 @@ public class Game {
             amount = 0;
             die(be, step, phase);
         }
+        wait = wait && (movingRobotName == null || movingRobotName.equals(be.getName()));
         Player player = getPlayerOf(be);
         if (amount > 0) {
             if (((floor1.wall(direction) == WallType.NONE
