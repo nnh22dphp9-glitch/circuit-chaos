@@ -241,7 +241,6 @@ public class GameGui {
             }
         }
         if (boardArranger != null) {
-            boardArranger.getRemoveButton().setEnabled(!board.getFactoryFloor().isEmpty());
             boardArranger.getPlayButton().setEnabled(board.getCheckpoints().size() > 1);
         }
     }

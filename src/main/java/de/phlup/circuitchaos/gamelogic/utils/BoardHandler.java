@@ -4,9 +4,7 @@ import de.phlup.circuitchaos.enums.Direction;
 import de.phlup.circuitchaos.enums.Floortype;
 import de.phlup.circuitchaos.enums.ObjectType;
 import de.phlup.circuitchaos.enums.Step;
-import de.phlup.circuitchaos.enums.WallType;
 import de.phlup.circuitchaos.gamelogic.Game;
-import de.phlup.circuitchaos.gamelogic.creation.ServerBoardArranger;
 import de.phlup.circuitchaos.gamelogic.player.Player;
 import de.phlup.circuitchaos.model.Board;
 import de.phlup.circuitchaos.model.BoardElement;
@@ -44,12 +42,6 @@ public class BoardHandler {
         }
     }
 
-    public static void add(Board board, Floor floor) {
-        if (floor != null) {
-            board.getFactoryFloor().add(floor);
-        }
-    }
-
     public static void remove(Board board, BoardElement be) {
         if (be != null) {
             be.setOnBoard(false);
@@ -58,18 +50,6 @@ public class BoardHandler {
             } else if (be instanceof CircuitChaosObject) {
                 board.getObjects().remove(be);
             }
-        }
-    }
-
-    public static void remove(Board board, Checkpoint checkpoint) {
-        if (checkpoint != null) {
-            board.getCheckpoints().remove(checkpoint);
-        }
-    }
-
-    public static void remove(Board board, Floor floor) {
-        if (floor != null) {
-            board.getFactoryFloor().remove(floor);
         }
     }
 
@@ -187,40 +167,6 @@ public class BoardHandler {
         return null;
     }
 
-    public static void rotateFloor(Floor floor) {
-        WallType tmp = floor.getWallNorth();
-        floor.setWallNorth(floor.getWallWest());
-        floor.setWallWest(floor.getWallSouth());
-        floor.setWallSouth(floor.getWallEast());
-        floor.setWallEast(tmp);
-        int tmp2 = floor.getLasers()[0];
-        floor.getLasers()[0] = floor.getLasers()[3];
-        floor.getLasers()[3] = floor.getLasers()[2];
-        floor.getLasers()[2] = floor.getLasers()[1];
-        floor.getLasers()[1] = tmp2;
-        tmp2 = floor.getBoardMountedLaserBeamsWE();
-        floor.setBoardMountedLaserBeamsWE(floor.getBoardMountedLaserBeamsNS());
-        floor.setBoardMountedLaserBeamsNS(tmp2);
-        boolean tmp3 = floor.getPressureBeam()[0];
-        floor.getPressureBeam()[0] = floor.getPressureBeam()[3];
-        floor.getPressureBeam()[3] = floor.getPressureBeam()[2];
-        floor.getPressureBeam()[2] = floor.getPressureBeam()[1];
-        floor.getPressureBeam()[1] = tmp3;
-        tmp3 = floor.isBoardMountedPressureBeamsWE();
-        floor.setBoardMountedPressureBeamsWE(floor.isBoardMountedPressureBeamsNS());
-        floor.setBoardMountedPressureBeamsNS(tmp3);
-        tmp3 = floor.getTractorBeam()[0];
-        floor.getTractorBeam()[0] = floor.getTractorBeam()[3];
-        floor.getTractorBeam()[3] = floor.getTractorBeam()[2];
-        floor.getTractorBeam()[2] = floor.getTractorBeam()[1];
-        floor.getTractorBeam()[1] = tmp3;
-        tmp3 = floor.isBoardMountedTractorBeamsWE();
-        floor.setBoardMountedTractorBeamsWE(floor.isBoardMountedTractorBeamsNS());
-        floor.setBoardMountedTractorBeamsNS(tmp3);
-        floor.setFacingDirection(floor.getFacingDirection().add(Direction.EAST));
-        floor.setPusherDirection(floor.getPusherDirection().add(Direction.EAST));
-    }
-
     public static CircuitChaosObject getPortal(Board board, Position position) {
         for (CircuitChaosObject obj : getObjects(board, position)) {
             if (obj.getType().isPortal()) {
@@ -319,85 +265,16 @@ public class BoardHandler {
         board.setRange(new Range(minx, miny, maxx, maxy));
     }
 
-    public static void rotateBoard(Board board) {
-        int maxy = board.getFactoryFloor().stream().max(Comparator.comparingInt((a) -> a.getPosition().y())).orElseThrow().getPosition().y();
-        for (Floor floor : board.getFactoryFloor()) {
-            rotateFloor(floor);
-            Position oldPosition = floor.getPosition();
-            floor.setPosition(new Position(maxy - floor.getPosition().y(), oldPosition.x()));
-        }
-        for (BoardElement be : getObjectsAndRobots(board)) {
-            be.setDirection(be.getDirection().add(Direction.EAST));
-            be.setPrevDirection(be.getDirection());
-            Position oldPosition = be.getPosition();
-            be.setPosition(new Position(maxy - be.getPosition().y(), oldPosition.x()));
-            be.setPrevPosition(be.getPosition());
-        }
-        for (Checkpoint checkpoint : board.getCheckpoints()) {
-            Position oldPosition = checkpoint.getPosition();
-            checkpoint.setPosition(new Position(maxy - checkpoint.getPosition().y(), oldPosition.x()));
-        }
-    }
-
-    public static void removeBoardFromGameBoard(Board board, int posx, int posy, ServerBoardArranger boardArranger) {
-        if (!isBoardLaidOutOnPostion(board, posx, posy)) {
-            return;
-        }
-        for (Floor o : new ArrayList<>(board.getFactoryFloor())) {
-            if (o.getPosition().x() >= 12 * posx && o.getPosition().x() < 12 * (posx + 1) && o.getPosition().y() >= 12 * posy && o.getPosition().y() < 12 * (posy + 1)) {
-                remove(board, o);
-            }
-        }
-        for (BoardElement o : new ArrayList<>(getObjectsAndRobots(board))) {
-            if (o.getPosition().x() >= 12 * posx && o.getPosition().x() < 12 * (posx + 1) && o.getPosition().y() >= 12 * posy && o.getPosition().y() < 12 * (posy + 1)) {
-                remove(board, o);
-            }
-        }
-        for (Checkpoint o : new ArrayList<>(board.getCheckpoints())) {
-            if (o.getPosition().x() >= 12 * posx && o.getPosition().x() < 12 * (posx + 1) && o.getPosition().y() >= 12 * posy && o.getPosition().y() < 12 * (posy + 1)) {
-                remove(board, o);
-            }
-        }
-        boardArranger.adjustCheckpointNumbers(board.getCheckpoints());
-        readjustBoardMinMaxValues(board);
-    }
-
-    public static boolean isBoardLaidOutOnPostion(Board board, int posx, int posy) {
-        boolean erg = false;
-        if (posx * 12 <= board.getRange().maxX()
-                && posx * 12 >= board.getRange().minY()
-                && posy * 12 <= board.getRange().maxY()
-                && posy * 12 >= board.getRange().minY()) {
-            for (int x = 0; x < 12 && !erg; x++) {
-                for (int y = 0; y < 12 && !erg; y++) {
-                    if (getFloor(board, new Position(posx * 12 + x, posy * 12 + y)).getFloortype() != Floortype.ABYSS) {
-                        erg = true;
-                    }
-                }
-            }
-        }
-        return erg;
-    }
-
-    public static void addBoardToGameBoard(Board board, Board boardToAdd, int posx, int posy, Game game, ServerBoardArranger boardArranger) {
-        for (int x = boardToAdd.getRange().minX(); x <= boardToAdd.getRange().maxX(); x++) {
-            for (int y = boardToAdd.getRange().minY(); y <= boardToAdd.getRange().maxY(); y++) {
-                if (x % 12 == 0 && y % 12 == 0 && isBoardLaidOutOnPostion(board, x / 12, y / 12)) {
-                    removeBoardFromGameBoard(board, posx + x / 12, posy + y / 12, boardArranger);
-                }
-            }
-        }
-        for (Floor be : boardToAdd.getFactoryFloor()) {
-            be.setPosition(new Position(be.getPosition().x() + 12 * posx, be.getPosition().y() + 12 * posy));
-            add(board, be);
-        }
-        for (BoardElement be : getObjectsAndRobots(boardToAdd)) {
-            be.setPosition(new Position(be.getPosition().x() + 12 * posx, be.getPosition().y() + 12 * posy));
-            be.setPrevPosition(be.getPosition());
-            add(board, be);
-        }
-        readjustBoardMinMaxValues(board);
-        game.notifyBoardMayHaveChanged(Step.SETUP, null, "Board was added", null);
+    public static void replaceBoardOnGameBoard(Board board, Board gameBoard) {
+        gameBoard.getFactoryFloor().clear();
+        gameBoard.getObjects().forEach(be -> be.setOnBoard(false));
+        gameBoard.getObjects().clear();
+        gameBoard.getCheckpoints().clear();
+        gameBoard.getFactoryFloor().addAll(board.getFactoryFloor());
+        gameBoard.getCheckpoints().addAll(board.getCheckpoints());
+        gameBoard.getObjects().addAll(board.getObjects());
+        gameBoard.getObjects().forEach(be -> be.setOnBoard(true));
+        gameBoard.setRange(board.getRange());
     }
 
     public static List<BoardElementStub> createBoardElementStubList(Board board) {

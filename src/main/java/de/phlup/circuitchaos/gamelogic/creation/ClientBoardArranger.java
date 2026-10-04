@@ -4,12 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.phlup.circuitchaos.enums.ComputerType;
 import de.phlup.circuitchaos.gamelogic.GameGui;
 import de.phlup.circuitchaos.gamelogic.GameOptions;
-import de.phlup.circuitchaos.gamelogic.utils.BoardHandler;
 import de.phlup.circuitchaos.gamelogic.utils.GuiHelper;
 import de.phlup.circuitchaos.gamelogic.utils.PictureConstants;
 import de.phlup.circuitchaos.model.Board;
 import de.phlup.circuitchaos.model.BoardInfo;
-import de.phlup.circuitchaos.model.BoardPosition;
 import de.phlup.circuitchaos.service.ImageSupplier;
 import de.phlup.circuitchaos.settings.ClientSettings;
 import de.phlup.circuitchaos.settings.GameSettings;
@@ -24,20 +22,16 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.border.LineBorder;
-import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.Collection;
 import java.util.Objects;
@@ -52,18 +46,12 @@ public class ClientBoardArranger implements GuiHelper {
 
     private final JComboBox<BoardInfo> boardList = new JComboBox<>();
 
-    private final JButton   rotateCCW;
-    private final JButton   rotateCW;
-    private final JButton   addButton    = new JButton("add");
+    private final JButton chooseBoardButton = new JButton("Choose");
     @Getter
-    private final JButton   removeButton = new JButton("remove");
-    @Getter
-    private final JButton   playButton   = new JButton("Play");
-    private final JPanel    chooserPanel = new JPanel(new BorderLayout());
-    private final JTextArea posx         = new JTextArea(1, 3);
-    private final JTextArea posy         = new JTextArea(1, 3);
-    private final JLabel    regPlayers   = new JLabel(" 1 ");
-    private final JLabel    regWatchers  = new JLabel(" 0 ");
+    private final JButton playButton        = new JButton("Play");
+    private final JPanel  chooserPanel      = new JPanel(new BorderLayout());
+    private final JLabel  regPlayers        = new JLabel(" 1 ");
+    private final JLabel  regWatchers       = new JLabel(" 0 ");
 
     @SuppressWarnings("unchecked")
     private final JComboBox<String>[]   computerTypes = new JComboBox[7];
@@ -71,14 +59,11 @@ public class ClientBoardArranger implements GuiHelper {
     private final ObjectMapper          objectMapper;
     private final ClientSettings        clientSettings;
 
-    private int    rotation     = 0;
     private JLabel boardPreview = new JLabel();
 
 
     public ClientBoardArranger(GameGui game, GameSettings gameSettings, Collection<BoardInfo> boards, ObjectMapper objectMapper, ClientSettings clientSettings) {
         imageSupplier = game.getImageSupplier();
-        rotateCCW = new JButton(imageSupplier.getImageIconPlain(PictureConstants.GFX_ROTATE_LEFT_ARROW));
-        rotateCW = new JButton(imageSupplier.getImageIconPlain(PictureConstants.GFX_ROTATE_RIGHT_ARROW));
         boardInfos = boards;
         this.objectMapper = objectMapper;
         this.clientSettings = clientSettings;
@@ -152,46 +137,13 @@ public class ClientBoardArranger implements GuiHelper {
         boardList.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                rotation = 0;
-                rotateCW.setEnabled(boardList.getSelectedIndex() > 0);
-                rotateCCW.setEnabled(boardList.getSelectedIndex() > 0);
-                addButton.setEnabled(boardList.getSelectedIndex() > 0);
+                chooseBoardButton.setEnabled(boardList.getSelectedIndex() > 0);
                 redrawPreview();
             }
         });
-        rotation = 0;
         boardChooser.add(boardList, BorderLayout.CENTER);
 
-        rotateCCW.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                rotation--;
-                if (rotation == -1) {
-                    rotation = 3;
-                }
-                redrawPreview();
-            }
-        });
-        rotateCCW.setEnabled(false);
-
-        rotateCW.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                rotation++;
-                if (rotation == 4) {
-                    rotation = 0;
-                }
-                redrawPreview();
-            }
-        });
-        rotateCW.setEnabled(false);
-
-        posx.setText("0");
-        posx.setBorder(new SoftBevelBorder(1));
-        posy.setText("0");
-        posy.setBorder(new SoftBevelBorder(1));
-
-        addButton.addActionListener(new AbstractAction() {
+        chooseBoardButton.addActionListener(new AbstractAction() {
             @Override
             @SneakyThrows
             public void actionPerformed(ActionEvent e) {
@@ -199,26 +151,12 @@ public class ClientBoardArranger implements GuiHelper {
                     BoardInfo selectedItem = (BoardInfo) boardList.getSelectedItem();
                     if (selectedItem != null && selectedItem.getBoard() != null) {
                         Board board = copy(selectedItem.getBoard());
-                        while (rotation > 0) {
-                            BoardHandler.rotateBoard(board);
-                            rotation--;
-                        }
-                        BoardPosition position = new BoardPosition(board, Integer.parseInt(posx.getText()), Integer.parseInt(posy.getText()));
-                        game.getClientToServerConnection().addBoard(game.getGameAttributes().getGameUrl(), position);
-                        removeButton.setEnabled(true);
+                        game.getClientToServerConnection().setBoard(game.getGameAttributes().getGameUrl(), board);
                     }
                 }
             }
         });
-        addButton.setEnabled(true);
-
-        removeButton.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                game.getClientToServerConnection().removeBoard(game.getGameAttributes().getGameUrl(), Integer.parseInt(posx.getText()), Integer.parseInt(posy.getText()));
-            }
-        });
-        removeButton.setEnabled(false);
+        chooseBoardButton.setEnabled(true);
 
         playButton.addActionListener(new AbstractAction() {
             @Override
@@ -240,20 +178,8 @@ public class ClientBoardArranger implements GuiHelper {
         playButton.setEnabled(false);
 
         JPanel buttonPanel = new JPanel(new BorderLayout());
-        JPanel flowPanel1  = new JPanel(new FlowLayout());
-        flowPanel1.add(rotateCCW);
-        flowPanel1.add(rotateCW);
-        JPanel flowPanel2 = new JPanel(new FlowLayout());
-        flowPanel2.add(addButton);
-        flowPanel2.add(removeButton);
-        JPanel flowPanel3 = new JPanel(new FlowLayout());
-        flowPanel3.add(new JLabel("Position:  x: "));
-        flowPanel3.add(posx);
-        flowPanel3.add(new JLabel("   y: "));
-        flowPanel3.add(posy);
-        boardChooser.add(flowPanel1, BorderLayout.NORTH);
-        buttonPanel.add(flowPanel3, BorderLayout.NORTH);
-        buttonPanel.add(flowPanel2, BorderLayout.CENTER);
+        buttonPanel.add(chooseBoardButton, BorderLayout.NORTH);
+        buttonPanel.add(new JLabel(" "), BorderLayout.CENTER);
         buttonPanel.add(playButton, BorderLayout.SOUTH);
         boardChooser.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -274,12 +200,11 @@ public class ClientBoardArranger implements GuiHelper {
         BufferedImage bi = new BufferedImage(150, 231, BufferedImage.TYPE_INT_ARGB);
         Graphics2D    gr = bi.createGraphics();
         if (boardList.getSelectedIndex() > 0) {
-            BoardInfo       boardInfo = (BoardInfo) boardList.getSelectedItem();
-            String          bild      = PictureConstants.GFX_LOGO_SMALL;
-            AffineTransform af        = AffineTransform.getRotateInstance(rotation * Math.PI / 2, 75, 75);
+            BoardInfo boardInfo = (BoardInfo) boardList.getSelectedItem();
+            String    bild      = PictureConstants.GFX_LOGO_SMALL;
             gr.drawImage(imageSupplier.getImageIconPlain(bild).getImage(), 0, 0, null);
             gr.translate(0, 81);
-            gr.drawImage(Objects.requireNonNull(boardInfo).getImage(), af, null);
+            gr.drawImage(Objects.requireNonNull(boardInfo).getImage(), 0, 0, null);
         } else {
             gr.drawImage(imageSupplier.getImageIconPlain(PictureConstants.GFX_LOGO_SMALL).getImage(), 0, 0, null);
             gr.translate(0, 81);

@@ -8,7 +8,6 @@ import de.phlup.circuitchaos.gamelogic.creation.ServerBoardArranger;
 import de.phlup.circuitchaos.gamelogic.player.Player;
 import de.phlup.circuitchaos.gamelogic.player.network.NetworkPlayer;
 import de.phlup.circuitchaos.model.Board;
-import de.phlup.circuitchaos.model.BoardPosition;
 import de.phlup.circuitchaos.model.GameItem;
 import de.phlup.circuitchaos.model.GameItemsWrapper;
 import de.phlup.circuitchaos.model.NetworkResponse;
@@ -153,10 +152,10 @@ public class ServerController {
     }
 
     /**
-     * @see de.phlup.circuitchaos.client.ClientToServerConnection addBoard(String gameUrl, BoardPosition boardPosition)
+     * @see de.phlup.circuitchaos.client.ClientToServerConnection replaceBoard(String gameUrl, Board board)
      */
     @PostMapping("/{gameId}/board")
-    public void addBoard(@PathVariable("gameId") String gameId, @RequestBody BoardPosition boardPosition) {
+    public void replaceBoard(@PathVariable("gameId") String gameId, @RequestBody Board board) {
         log.debug("Received addBoard request");
         Game                game          = GlobalServerAttributes.getGame(gameId, false, true);
         ServerBoardArranger boardArranger = game.getBoardArranger();
@@ -164,26 +163,7 @@ public class ServerController {
             throw new CircuitChaosException("Game has already startet.");
         }
         try {
-            boardArranger.putOnBoard(game, boardPosition);
-        } catch (Exception e) {
-            log.info("Exception!", e);
-            throw new CircuitChaosException("Exception! - " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * @see de.phlup.circuitchaos.client.ClientToServerConnection removeBoard(String gameUrl, int x, int y)
-     */
-    @DeleteMapping("/{gameId}/board")
-    public void removeBoard(@PathVariable("gameId") String gameId, @RequestParam("x") int x, @RequestParam("y") int y) {
-        log.debug("Received removeBoard request");
-        Game                game          = GlobalServerAttributes.getGame(gameId, false, true);
-        ServerBoardArranger boardArranger = game.getBoardArranger();
-        if (boardArranger == null || !game.isNotStartedYet()) {
-            throw new CircuitChaosException("Game has already startet.");
-        }
-        try {
-            boardArranger.removeFromBoard(game, x, y);
+            boardArranger.setBoard(game, board);
         } catch (Exception e) {
             log.info("Exception!", e);
             throw new CircuitChaosException("Exception! - " + e.getMessage(), e);

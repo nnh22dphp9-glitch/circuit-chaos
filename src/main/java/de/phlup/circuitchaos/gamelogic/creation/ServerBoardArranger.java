@@ -4,7 +4,7 @@ import de.phlup.circuitchaos.enums.Step;
 import de.phlup.circuitchaos.exception.CircuitChaosException;
 import de.phlup.circuitchaos.gamelogic.Game;
 import de.phlup.circuitchaos.gamelogic.utils.BoardHandler;
-import de.phlup.circuitchaos.model.BoardPosition;
+import de.phlup.circuitchaos.model.Board;
 import de.phlup.circuitchaos.model.Checkpoint;
 import de.phlup.circuitchaos.model.Position;
 
@@ -13,14 +13,9 @@ import java.util.List;
 
 public class ServerBoardArranger {
 
-    public void putOnBoard(Game game, BoardPosition boardPosition) {
-        BoardHandler.addBoardToGameBoard(game.getBoard(), boardPosition.board(), boardPosition.posX(), boardPosition.posY(), game, this);
-        game.notifyBoardMayHaveChanged(Step.SETUP, null, "added board", null);
-    }
-
-    public void removeFromBoard(Game game, int posx, int posy) {
-        BoardHandler.removeBoardFromGameBoard(game.getBoard(), posx, posy, this);
-        game.notifyBoardMayHaveChanged(Step.SETUP, null, "removed board", null);
+    public void setBoard(Game game, Board board) {
+        BoardHandler.replaceBoardOnGameBoard(board, game.getBoard());
+        game.notifyBoardMayHaveChanged(Step.SETUP, null, "set board", null);
     }
 
     public void addCheckpoint(Game game, Position position) {

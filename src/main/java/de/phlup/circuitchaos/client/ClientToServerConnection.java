@@ -3,7 +3,6 @@ package de.phlup.circuitchaos.client;
 import de.phlup.circuitchaos.exception.CircuitChaosException;
 import de.phlup.circuitchaos.gamelogic.GameOptions;
 import de.phlup.circuitchaos.model.Board;
-import de.phlup.circuitchaos.model.BoardPosition;
 import de.phlup.circuitchaos.model.GameItem;
 import de.phlup.circuitchaos.model.GameItemsWrapper;
 import de.phlup.circuitchaos.model.NetworkResponse;
@@ -101,25 +100,16 @@ public class ClientToServerConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ServerController addBoard(String gameId, BoardPosition boardPosition)
+     * @see de.phlup.circuitchaos.controller.ServerController setBoard(String gameId, Board board)
      */
-    public void addBoard(String gameUrl, BoardPosition boardPosition) {
-        log.debug("Send addBoard request");
+    public void setBoard(String gameUrl, Board board) {
+        log.debug("Send setBoard request");
         showErrorMessage(() -> restClient.post()
                                          .uri(URI.create(gameUrl + "/board"))
                                          .contentType(MediaType.APPLICATION_JSON)
-                                         .body(boardPosition)
+                                         .body(board)
                                          .retrieve()
                                          .toBodilessEntity());
-    }
-
-    /**
-     * @see de.phlup.circuitchaos.controller.ServerController removeBoard(String gameId, int x, int y)
-     */
-    public void removeBoard(String gameUrl, int x, int y) {
-        log.debug("Send removeBoard request");
-        String uri = gameUrl + "/board?x=" + x + "&y=" + y;
-        showErrorMessage(() -> restClient.delete().uri(URI.create(uri)).retrieve().toBodilessEntity());
     }
 
     /**
