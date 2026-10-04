@@ -15,7 +15,7 @@ public enum ModuleType {
     MECHANICAL_ARM("Mechanical Arm", "mechanical-arm", true, false),
     MINE_LAYER("Mine Layer", "mine-layer", false, false, 2),
     MOBILE_TELEPORTER("Mobile Teleporter", "mobile-teleporter", false, false, 1),
-    MOBILE_RANDOMIZER("Mobile Randomizer", "mobile-randomizer", false, false, 1), // TODO
+    MOBILE_RANDOMIZER("Mobile Randomizer", "mobile-randomizer", false, false, 1),
     OIL_DISPENSER("Oil Dispenser", "oil-dispenser", false, false, 2),
     PROXIMITY_MINE_LAYER("Proximity Mine Layer", "proximity-mine-layer", false, false, 3),
 
@@ -24,10 +24,10 @@ public enum ModuleType {
     HIGH_POWER_LASER("High Power Laser", "high-power-laser", false, true),
     RAMMING_ARMOR("Ramming Armor", "ramming-armor", false, true),
     REAR_LASER("Rear Laser", "rear-laser", false, true),
-    EXCHANGE_BEAM("Exchange Beam", "exchange-beam", false, true), // TODO
+    EXCHANGE_BEAM("Exchange Beam", "exchange-beam", false, true),
     PRESSURE_BEAM("Pressure Beam", "pressure-beam", false, true),
-    SPIN_LEFT_BEAM("Spin Left Beam", "spin-left-beam", false, true), // TODO
-    SPIN_RIGHT_BEAM("Spin Right Beam", "spin-right-beam", false, true), // TODO
+    SPIN_LEFT_BEAM("Spin Left Beam", "spin-left-beam", false, true),
+    SPIN_RIGHT_BEAM("Spin Right Beam", "spin-right-beam", false, true),
     TRACTOR_BEAM("Tractor Beam", "tractor-beam", false, true),
 
     EXTRA_PROGRAM("Extra Program", "extra-program", true, false, 1),
