@@ -33,7 +33,7 @@ public class NetworkPlayer extends Player {
         Game           game           = GlobalServerAttributes.getGame(gameId);
         NetworkRequest networkRequest = new NetworkRequest();
         networkRequest.setBoard(game.getBoard());
-        networkRequest.setActiveRobot(robot);
+        networkRequest.setMyRobot(robot);
         networkRequest.setPhase(phase);
         return createProgramRobotRequest(networkRequest);
     }

@@ -48,8 +48,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static de.phlup.circuitchaos.enums.ModuleType.HOVERCRAFT;
-
 @Slf4j
 @Getter
 public class GameGui {
@@ -60,7 +58,7 @@ public class GameGui {
     private final GameAttributes           gameAttributes;
     private final ClientSettings           clientSettings;
 
-    private String activeRobotName = null;
+    private String myRobotsName = null;
 
     private final AudioSupplier     audioSupplier;
     private final ImageSupplier     imageSupplier;
@@ -197,7 +195,7 @@ public class GameGui {
             gr.clearRect(0, 0, boardJPanel.getWidth(), boardJPanel.getHeight());
             gr.dispose();
             zoomFactor = newFactor;
-            refreshBoard(board, "zoom changed", Step.SETUP, null, null, 1);
+            refreshBoard(board, "zoom changed", Step.SETUP, null, null, 1, null);
         }
     }
 
@@ -222,7 +220,7 @@ public class GameGui {
         }
     }
 
-    public void refreshBoard(Board board, String reasonForBoardChange, Step step, Integer phase, Integer subPhase, int animationSteps) {
+    public void refreshBoard(Board board, String reasonForBoardChange, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
         this.board = board;
         if (getBoard().getFactoryFloor().isEmpty()) {
             Graphics2D gr = (Graphics2D) boardJPanel.getGraphics();
@@ -231,14 +229,14 @@ public class GameGui {
             gr.dispose();
         }
         mainFrame.setTitle("Circuit Chaos Board - %s - %s - %s".formatted(gameAttributes.getRegistration().getGameName(),
-                                                                          StringUtils.hasText(activeRobotName) ? activeRobotName : "Game has not been started yet",
+                                                                          StringUtils.hasText(myRobotsName) ? myRobotsName : "Game has not been started yet",
                                                                           StringUtils.hasText(reasonForBoardChange) ? reasonForBoardChange : ""));
         synchronized (boardJPanel) {
             boardJPanel.arrangeElements(this, step, phase, subPhase, animationSteps);
             if (subPhase == null || gameEnded) {
                 audioSupplier.stop();
             } else if (subPhase == 0) {
-                boolean hover = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(phase);
+                boolean hover = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(movingRobotName);
                 playSound(step, board, hover);
             }
         }
@@ -248,11 +246,11 @@ public class GameGui {
         }
     }
 
-    private boolean isHover(int phase) {
+    private boolean isHover(String movingRobotName) {
         return board.getRobots().stream()
-                    .filter(r -> r.getName().equals(activeRobotName))
+                    .filter(r -> r.getName().equals(movingRobotName))
                     .filter(BoardElement::isOnBoard)
-                    .anyMatch(r -> r.hasModule(HOVERCRAFT) && r.getModule(HOVERCRAFT).getActiveInPhase()[phase]);
+                    .anyMatch(BoardElement::isFlying);
     }
 
     private void playSound(Step step, Board board, boolean hover) {
@@ -290,9 +288,9 @@ public class GameGui {
         if (gameEnded) {
             return;
         }
-        activeRobotName = request.getActiveRobot().getName(); // only on first call relevant ;)
+        myRobotsName = request.getMyRobot().getName();
         mainFrame.setTitle("Circuit Chaos Board - %s - %s - Waiting for all to program their robots"
-                                   .formatted(gameAttributes.getRegistration().getGameName(), activeRobotName));
+                                   .formatted(gameAttributes.getRegistration().getGameName(), myRobotsName));
         if (lastRevealFrame != null) {
             lastRevealFrame.setVisible(false);
         }
@@ -320,7 +318,7 @@ public class GameGui {
                 revealPanel.add(p);
             }
             if (lastRevealFrame == null) {
-                lastRevealFrame = new JFrame("Circuit Chaos - %s - %s".formatted(gameAttributes.getRegistration().getGameName(), activeRobotName));
+                lastRevealFrame = new JFrame("Circuit Chaos - %s - %s".formatted(gameAttributes.getRegistration().getGameName(), myRobotsName));
                 lastRevealFrame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
                 lastRevealFrame.setLocationRelativeTo(mainFrame);
                 lastRevealFrame.setLocation(lastRevealFrame.getLocation().x - mainFrame.getWidth() / 2 + 50,

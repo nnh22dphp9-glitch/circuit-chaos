@@ -16,11 +16,11 @@ public class PollOrPushSwitchService {
     private final ServerToClientConnection serverToClientConnection;
     private final PollingService           pollingService;
 
-    public void notifyOfBoardChange(Registration registration, Board board, String reason, Step step, Integer phase, Integer subPhase, int animationSteps) {
+    public void notifyOfBoardChange(Registration registration, Board board, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
         if (registration.isPull()) {
-            pollingService.notifyOfBoardChange(registration, board, reason, step, phase, subPhase, animationSteps);
+            pollingService.notifyOfBoardChange(registration, board, reason, step, phase, subPhase, animationSteps, movingRobotName);
         } else {
-            serverToClientConnection.notifyOfBoardChange(registration, board, reason, step, phase, subPhase, animationSteps);
+            serverToClientConnection.notifyOfBoardChange(registration, board, reason, step, phase, subPhase, animationSteps, movingRobotName);
         }
     }
 

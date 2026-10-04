@@ -52,7 +52,7 @@ public class Teleporter {
                 }
                 if (willTeleport) {
                     game.setPosition(be, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.ROBOTS_AND_OBJECTS_MOVE, phase, null, false);
-                    game.notifyBoardMayHaveChanged(Step.ROBOTS_AND_OBJECTS_MOVE, phase, "%s was teleported".formatted(be.getName()));
+                    game.notifyBoardMayHaveChanged(Step.ROBOTS_AND_OBJECTS_MOVE, phase, "%s was teleported".formatted(be.getName()), null);
                     hasBeenTeleported = true;
                 }
             }

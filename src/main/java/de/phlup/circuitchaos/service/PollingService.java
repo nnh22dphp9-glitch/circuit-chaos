@@ -34,7 +34,7 @@ public class PollingService {
         }
     }
 
-    public void notifyOfBoardChange(Registration registration, Board board, String reason, Step step, Integer phase, Integer subPhase, int animationSteps) {
+    public void notifyOfBoardChange(Registration registration, Board board, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
         NetworkRequest programRequest = new NetworkRequest();
         programRequest.setBoard(board);
         programRequest.setReasonForBoardChange(reason);
@@ -42,6 +42,7 @@ public class PollingService {
         programRequest.setPhase(phase);
         programRequest.setSubPhase(subPhase);
         programRequest.setAnimationSteps(animationSteps);
+        programRequest.setMovingRobotName(movingRobotName);
         PullingData pullingData = new PullingData();
         pullingData.setType(PullType.BOARD_CHANGE);
         pullingData.setRequest(programRequest);

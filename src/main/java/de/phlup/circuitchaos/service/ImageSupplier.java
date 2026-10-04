@@ -193,7 +193,7 @@ public class ImageSupplier {
         Robot activeRobot = null;
         if (game instanceof GameGui cg) {
             Optional<Robot> activeRobotOptional = game.getBoard().getRobots().stream()
-                                                      .filter((r) -> r.getName().equals(cg.getActiveRobotName()))
+                                                      .filter((r) -> r.getName().equals(cg.getMyRobotsName()))
                                                       .filter(BoardElement::isOnBoard)
                                                       .filter((r) -> r.getPosition().equals(floor.getPosition()))
                                                       .findFirst();

@@ -26,7 +26,6 @@ public class Robot extends BoardElement {
     private boolean         poweredDown            = false;
     private boolean         powerDownAnnounced     = false;
     private boolean         mayChooseDirection     = true;
-    private boolean         takesDamageOnLanding   = false;
     private int             nextCheckpoint         = 1;
     private boolean         reactivateRammingArmor = false;
 
@@ -81,7 +80,6 @@ public class Robot extends BoardElement {
         poweredDown = networkRobot.isPoweredDown();
         powerDownAnnounced = networkRobot.isPowerDownAnnounced();
         mayChooseDirection = networkRobot.isMayChooseDirection();
-        takesDamageOnLanding = networkRobot.isTakesDamageOnLanding();
         nextCheckpoint = networkRobot.getNextCheckpoint();
         reactivateRammingArmor = networkRobot.isReactivateRammingArmor();
     }

@@ -26,7 +26,7 @@ public class ServerToClientConnection {
      * @see de.phlup.circuitchaos.controller.ClientController refreshBoard(String  NetworkRequest)
      */
     // Nicht Async - Animationen könnten kaputtgehen
-    public void notifyOfBoardChange(Registration registration, Board board, String reason, Step step, Integer phase, Integer subPhase, int animationSteps) {
+    public void notifyOfBoardChange(Registration registration, Board board, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
         log.debug("Send notifyOfBoardChange request");
         try {
             NetworkRequest programRequest = new NetworkRequest();
@@ -36,6 +36,7 @@ public class ServerToClientConnection {
             programRequest.setPhase(phase);
             programRequest.setSubPhase(subPhase);
             programRequest.setAnimationSteps(animationSteps);
+            programRequest.setMovingRobotName(movingRobotName);
             restClient.post()
                       .uri(URI.create(registration.getUrl() + "/board"))
                       .contentType(MediaType.APPLICATION_JSON)

@@ -34,11 +34,6 @@ public abstract class Player {
         return !hasLost() && robot.getNextCheckpoint() > GlobalServerAttributes.getGame(gameId).getBoard().getCheckpoints().size() - 1;
     }
 
-    public void setFlying(boolean value) {
-        robot.setFlying(value);
-        robot.setTakesDamageOnLanding(false);
-    }
-
     protected void initTurn() {
         for (Module module : robot.getModules()) {
             module.setPowerDownShield(new boolean[][]{{true, true, true, true}, {true, true, true, true}, {true, true, true, true}, {true, true, true, true}, {true, true, true, true}});

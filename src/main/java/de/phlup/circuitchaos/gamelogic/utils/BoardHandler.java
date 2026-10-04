@@ -397,7 +397,7 @@ public class BoardHandler {
             add(board, be);
         }
         readjustBoardMinMaxValues(board);
-        game.notifyBoardMayHaveChanged(Step.SETUP, null, "Board was added");
+        game.notifyBoardMayHaveChanged(Step.SETUP, null, "Board was added", null);
     }
 
     public static List<BoardElementStub> createBoardElementStubList(Board board) {

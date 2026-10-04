@@ -69,7 +69,7 @@ public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiH
 
     public ProgramRobotAnswerWindow(GameAttributes gameAttributes, String answerUrl, NetworkRequest request) {
         super(gameAttributes, answerUrl, request, "Program");
-        robot = getRequest().getActiveRobot();
+        robot = getRequest().getMyRobot();
         imageSupplier = getGameAttributes().getGameGui().getImageSupplier();
         robot.setPotentialProgramme(new ArrayList<>(robot.getPotentialProgramme()
                                                          .stream()
@@ -484,7 +484,7 @@ public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiH
         }
 
         public void action() {
-            for (int cnt = 0; cnt < getRequest().getActiveRobot().getPotentialProgramme().size(); cnt++) {
+            for (int cnt = 0; cnt < getRequest().getMyRobot().getPotentialProgramme().size(); cnt++) {
                 used[cnt] = false;
             }
             okButton.setEnabled(checkProgram());
@@ -494,7 +494,7 @@ public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiH
             boolean erg = true;
             for (int cnt = 0; cnt < 5; cnt++) {
                 if (!StringUtils.hasText(programIds[cnt].getText())) {
-                    erg = getRequest().getActiveRobot().getBlocked()[cnt];
+                    erg = getRequest().getMyRobot().getBlocked()[cnt];
                 } else {
                     try {
                         int c = Integer.parseInt(programIds[cnt].getText());
@@ -511,7 +511,7 @@ public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiH
                             }
                         }
                     } catch (ArrayIndexOutOfBoundsException | NumberFormatException nfe) {
-                        erg = getRequest().getActiveRobot().getBlocked()[cnt];
+                        erg = getRequest().getMyRobot().getBlocked()[cnt];
                     }
                 }
             }

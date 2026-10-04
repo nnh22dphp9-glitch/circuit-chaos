@@ -15,12 +15,12 @@ public class ServerBoardArranger {
 
     public void putOnBoard(Game game, BoardPosition boardPosition) {
         BoardHandler.addBoardToGameBoard(game.getBoard(), boardPosition.board(), boardPosition.posX(), boardPosition.posY(), game, this);
-        game.notifyBoardMayHaveChanged(Step.SETUP, null, "added board");
+        game.notifyBoardMayHaveChanged(Step.SETUP, null, "added board", null);
     }
 
     public void removeFromBoard(Game game, int posx, int posy) {
         BoardHandler.removeBoardFromGameBoard(game.getBoard(), posx, posy, this);
-        game.notifyBoardMayHaveChanged(Step.SETUP, null, "removed board");
+        game.notifyBoardMayHaveChanged(Step.SETUP, null, "removed board", null);
     }
 
     public void addCheckpoint(Game game, Position position) {
@@ -38,7 +38,7 @@ public class ServerBoardArranger {
         checkpoint.setNumber(numberOfNewCheckpoint);
         checkpoint.setPosition(position);
         checkpoints.add(checkpoint);
-        game.notifyBoardMayHaveChanged(Step.SETUP, null, "checkpoint added");
+        game.notifyBoardMayHaveChanged(Step.SETUP, null, "checkpoint added", null);
     }
 
     public void removeCheckpoint(Game game, Position position) {
@@ -49,7 +49,7 @@ public class ServerBoardArranger {
         List<Checkpoint> checkpoints = game.getBoard().getCheckpoints();
         checkpoints.remove(checkpoint);
         adjustCheckpointNumbers(checkpoints);
-        game.notifyBoardMayHaveChanged(Step.SETUP, null, "checkpoint removed");
+        game.notifyBoardMayHaveChanged(Step.SETUP, null, "checkpoint removed", null);
     }
 
     public void adjustCheckpointNumbers(List<Checkpoint> checkpoints) {

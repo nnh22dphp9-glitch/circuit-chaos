@@ -24,7 +24,8 @@ public class AsyncService {
         if (request.getSubPhase() == null || request.getSubPhase() == 0) {
             log.info("{}: {} ({})", gameGui.getGameAttributes().getGameId(), request.getReasonForBoardChange(), request.getStep());
         }
-        gameGui.refreshBoard(request.getBoard(), request.getReasonForBoardChange(), request.getStep(), request.getPhase(), request.getSubPhase(), request.getAnimationSteps());
+        gameGui.refreshBoard(request.getBoard(), request.getReasonForBoardChange(), request.getStep(), request.getPhase(),
+                             request.getSubPhase(), request.getAnimationSteps(), request.getMovingRobotName());
     }
 
     @Async

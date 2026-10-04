@@ -26,7 +26,7 @@ public abstract class ClientAnswerWindow {
         this.request = request;
         this.gameAttributes = gameAttributes;
         response.setFilled(true);
-        mainFrame = new JFrame("Circuit Chaos - %s - %s - %s".formatted(gameAttributes.getRegistration().getGameName(), request.getActiveRobot().getName(), title));
+        mainFrame = new JFrame("Circuit Chaos - %s - %s - %s".formatted(gameAttributes.getRegistration().getGameName(), request.getMyRobot().getName(), title));
         mainFrame.setVisible(false);
         JFrame boardFrame = gameAttributes.getGameGui().getMainFrame();
         mainFrame.setLocationRelativeTo(boardFrame);

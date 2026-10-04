@@ -109,7 +109,7 @@ public class Game {
 
     private int animationSteps;
 
-    public void notifyBoardMayHaveChanged(Step step, Integer phase, String detail) {
+    public void notifyBoardMayHaveChanged(Step step, Integer phase, String detail, String movingRobotName) {
         String reason = (phase == null ? "" : (phase + 1) + ": ") + step.getName() + (StringUtils.hasText(detail) ? " - " + detail : "");
         log.debug("Board may have changed: {}: {}", step.name(), reason);
         List<BoardElementStub> stubList = BoardHandler.createBoardElementStubList(board);
@@ -147,13 +147,13 @@ public class Game {
             if (step == Step.SETUP || !wait) {
                 for (Registration reg : watchers) {
                     // Please note: "reason" will become part of the window title
-                    pollOrPushSwitchService.notifyOfBoardChange(reg, board, reason, step, phase, null, animationSteps);
+                    pollOrPushSwitchService.notifyOfBoardChange(reg, board, reason, step, phase, null, animationSteps, movingRobotName);
                 }
             } else {
                 randomlySetFloorOrientationForDisplay();
                 for (int subPhase = 0; subPhase < animationSteps; subPhase++) {
                     for (Registration reg : watchers) {
-                        pollOrPushSwitchService.notifyOfBoardChange(reg, board, reason, step, phase, subPhase, animationSteps);
+                        pollOrPushSwitchService.notifyOfBoardChange(reg, board, reason, step, phase, subPhase, animationSteps, movingRobotName);
                     }
                     Sleep.sleepForMillis(timeSettings.getTimeBetweenSteps() / animationSteps);
                 }
@@ -165,7 +165,7 @@ public class Game {
             randomlySetFloorOrientationForDisplay();
             for (int subPhase = animationSteps; subPhase < 2 * animationSteps; subPhase++) {
                 for (Registration reg : watchers) {
-                    pollOrPushSwitchService.notifyOfBoardChange(reg, board, reason, step, phase, subPhase, animationSteps);
+                    pollOrPushSwitchService.notifyOfBoardChange(reg, board, reason, step, phase, subPhase, animationSteps, movingRobotName);
                 }
                 Sleep.sleepForMillis(timeSettings.getTimeBetweenSteps() / animationSteps);
             }
@@ -347,7 +347,7 @@ public class Game {
             try {
                 Player winner = null;
                 while (winner == null && !players.isEmpty() && !isGameAborted()) {
-                    notifyBoardMayHaveChanged(Step.SETUP, null, "start of new turn");
+                    notifyBoardMayHaveChanged(Step.SETUP, null, "start of new turn", null);
 
                     deal();
                     interactWithAllPlayers(players);
@@ -365,7 +365,7 @@ public class Game {
                     winner = loopThroughPhases();
                     winner = endOfTurnBoardEffects(winner);
                 }
-                notifyBoardMayHaveChanged(Step.SETUP, null, "end of turn");
+                notifyBoardMayHaveChanged(Step.SETUP, null, "end of turn", null);
                 if (!isGameAborted()) {
                     end(winner);
                 }
@@ -379,7 +379,7 @@ public class Game {
     private Player loopThroughPhases() {
         Player winner = null;
         for (int phase = 0; phase < 5 && winner == null && !players.isEmpty() && !gameAborted; phase++) {
-            notifyBoardMayHaveChanged(Step.START_OF_TURN_BOARD_EFFECTS, phase, "begin of phase %s".formatted(phase + 1));
+            notifyBoardMayHaveChanged(Step.START_OF_TURN_BOARD_EFFECTS, phase, "begin of phase %s".formatted(phase + 1), null);
 
             List<Robot> objectsWithPriority = stepRevealProgrammes(phase);
             stepRobotsMove(phase, objectsWithPriority);
@@ -398,8 +398,8 @@ public class Game {
         deactivateRammingArmor(phase, false);
     }
 
-    private void robotsMove(int phase, List<Robot> objectsWithPriority) {
-        for (Robot robot : objectsWithPriority) {
+    private void robotsMove(int phase, List<Robot> robots) {
+        for (Robot robot : robots) {
             if (gameAborted) {
                 break;
             }
@@ -411,7 +411,9 @@ public class Game {
                 releaseDevices(phase, player);
                 while (!gameAborted && program != null) {
                     int movement = determineMovementAmount(phase, robot, program);
-                    useHovercraft(phase, player, movement);
+                    if (player.uses(ModuleType.HOVERCRAFT, phase)) {
+                        robot.setFlying(movement != 0);
+                    }
 
                     Teleporter teleportResult = Teleporter.teleport(robot, movement, this, phase);
                     if (teleportResult.isHasBeenTeleported()) {
@@ -421,10 +423,28 @@ public class Game {
                     }
 
                     movement = applyWaterAndOilSlick(robot, f, movement);
-                    boardElementMoves(phase, robot, program, movement);
+                    singleRobotMoves(phase, robot, program, movement);
+                    if (robot.isFlying()) {
+                        land(getPlayerOf(robot), Step.ROBOTS_AND_OBJECTS_MOVE, phase);
+                    }
                     program = null;
                 }
             }
+        }
+    }
+
+    private void singleRobotMoves(int phase, Robot robot, Programme pc, int movement) {
+        if (movement > 0) {
+            moveInit(robot, robot.getDirection(), movement, movement, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true, true, robot.getName());
+        } else if (movement < 0) {
+            moveInit(robot, SOUTH.add(robot.getDirection()), movement, -movement, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true, true, robot.getName());
+        }
+        if (pc.getType() == ProgramType.ROTATE_RIGHT) {
+            rotate(robot, EAST, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
+        } else if (pc.getType() == ProgramType.ROTATE_LEFT) {
+            rotate(robot, WEST, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
+        } else if (pc.getType() == ProgramType.U_TURN) {
+            rotate(robot, SOUTH, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
         }
     }
 
@@ -450,7 +470,7 @@ public class Game {
                             break;
                         }
                     }
-                    notifyBoardMayHaveChanged(Step.END_OF_TURN_BOARD_EFFECTS, null, "discard virtual state");
+                    notifyBoardMayHaveChanged(Step.END_OF_TURN_BOARD_EFFECTS, null, "discard virtual state", null);
                 }
             }
         }
@@ -494,7 +514,7 @@ public class Game {
                 robot.setLevel(robot.getArchiveLevel());
                 robot.setMayChooseDirection(true);
                 robot.setVirtual(true);
-                notifyBoardMayHaveChanged(Step.END_OF_TURN_BOARD_EFFECTS, null, "%s was destroyed".formatted(robot.getName()));
+                notifyBoardMayHaveChanged(Step.END_OF_TURN_BOARD_EFFECTS, null, "%s was destroyed".formatted(robot.getName()), null);
                 BoardHandler.add(board, robot);
                 for (int phase = 0; phase < 5; phase++) {
                     if (robot.getBlocked()[phase]) {
@@ -634,16 +654,16 @@ public class Game {
                                 playerOfRobot.takeDamage(phase, null, dir2, true);
                             }
                         } else if (step == Step.BOARD_MOUNTED_PRESSURE_BEAMS_FIRE) {
-                            moveInit(target, dir, 0, 1, Step.BOARD_MOUNTED_PRESSURE_BEAMS_FIRE, phase, true, false);
+                            moveInit(target, dir, 0, 1, Step.BOARD_MOUNTED_PRESSURE_BEAMS_FIRE, phase, true, false, null);
                         } else if (step == Step.BOARD_MOUNTED_TRACTOR_BEAMS_FIRE) {
-                            moveInit(target, dir.reverse(), 0, 1, Step.BOARD_MOUNTED_TRACTOR_BEAMS_FIRE, phase, false, false);
+                            moveInit(target, dir.reverse(), 0, 1, Step.BOARD_MOUNTED_TRACTOR_BEAMS_FIRE, phase, false, false, null);
                         }
                     }
                 }
             }
         }
         if (!gameAborted) {
-            notifyBoardMayHaveChanged(step, phase, null);
+            notifyBoardMayHaveChanged(step, phase, null, null);
         }
         BoardHandler.clearBeams(board);
     }
@@ -675,9 +695,9 @@ public class Game {
                             }
                         }
                     } else if (step == Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE && weaponType == ModuleType.PRESSURE_BEAM) {
-                        moveInit(targetRobot, dir, 0, 1, step, phase, true, false);
+                        moveInit(targetRobot, dir, 0, 1, step, phase, true, false, null);
                     } else if (step == Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE && weaponType == ModuleType.TRACTOR_BEAM) {
-                        moveInit(targetRobot, dir.reverse(), 0, 1, step, phase, false, false);
+                        moveInit(targetRobot, dir.reverse(), 0, 1, step, phase, false, false, null);
                     } else if (step == Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE && weaponType == ModuleType.EXCHANGE_BEAM) {
                         // Dreiecks-Tausch
                         Position position = targetRobot.getPosition();
@@ -701,7 +721,7 @@ public class Game {
             }
         }
         if (!gameAborted) {
-            notifyBoardMayHaveChanged(step, phase, null);
+            notifyBoardMayHaveChanged(step, phase, null, null);
         }
         BoardHandler.clearBeams(board);
     }
@@ -743,7 +763,7 @@ public class Game {
             }
         }
         if (!gameAborted) {
-            notifyBoardMayHaveChanged(Step.GEARS_ROTATE, phase, null);
+            notifyBoardMayHaveChanged(Step.GEARS_ROTATE, phase, null, null);
         }
     }
 
@@ -756,14 +776,14 @@ public class Game {
                 for (BoardElement be : BoardHandler.getObjectsAndRobots(board)) {
                     if (be.isOnBoard() && be.getPosition().equals(f.getPosition())) {
                         if (willBePushed(be)) {
-                            moveInit(be, f.getPusherDirection(), 1, 1, Step.PUSHERS_PUSH, phase, true, false);
+                            moveInit(be, f.getPusherDirection(), 1, 1, Step.PUSHERS_PUSH, phase, true, false, null);
                         }
                     }
                 }
             }
         }
         if (!gameAborted) {
-            notifyBoardMayHaveChanged(Step.PUSHERS_PUSH, phase, null);
+            notifyBoardMayHaveChanged(Step.PUSHERS_PUSH, phase, null, null);
         }
     }
 
@@ -843,7 +863,7 @@ public class Game {
             }
         }
         if (!gameAborted) {
-            notifyBoardMayHaveChanged(Step.CONVEYOR_BELTS_MOVE, phase, null);
+            notifyBoardMayHaveChanged(Step.CONVEYOR_BELTS_MOVE, phase, null, null);
         }
     }
 
@@ -910,30 +930,7 @@ public class Game {
             }
         }
         if (!gameAborted) {
-            notifyBoardMayHaveChanged(Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, null);
-        }
-    }
-
-    private void boardElementMoves(int phase, BoardElement be, Programme pc, int movement) {
-        if (be instanceof Robot) {
-            if (movement > 0) {
-                moveInit(be, be.getDirection(), movement, movement, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true, true);
-            } else if (movement < 0) {
-                moveInit(be, SOUTH.add(be.getDirection()), movement, -movement, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true, true);
-            }
-            if (pc.getType() == ProgramType.ROTATE_RIGHT) {
-                rotate(be, EAST, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
-            } else if (pc.getType() == ProgramType.ROTATE_LEFT) {
-                rotate(be, WEST, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
-            } else if (pc.getType() == ProgramType.U_TURN) {
-                rotate(be, SOUTH, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
-            }
-            Player player = getPlayerOf(be);
-            if (player.uses(ModuleType.HOVERCRAFT, phase)) {
-                land(player, Step.ROBOTS_AND_OBJECTS_MOVE, phase);
-            }
-        } else {
-            moveInit(be, (pc.getType() == ProgramType.ROTATE_LEFT ? WEST : EAST).add(be.getDirection()), 1, 1, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true, true);
+            notifyBoardMayHaveChanged(Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, null, null);
         }
     }
 
@@ -963,7 +960,8 @@ public class Game {
     }
 
     private int applyWaterAndOilSlick(BoardElement be, Floor f, int movement) {
-        if ((f.isWater() || BoardHandler.getObjects(board, f.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) && !be.isFlying()) {
+        if (!be.isFlying() && (f.isWater()
+                || BoardHandler.getObjects(board, f.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL))) {
             if (movement > 0) {
                 movement--;
             }
@@ -972,12 +970,6 @@ public class Game {
             }
         }
         return movement;
-    }
-
-    private void useHovercraft(int phase, Player r, int movement) {
-        if (r.uses(ModuleType.HOVERCRAFT, phase)) {
-            r.setFlying(movement != 0);
-        }
     }
 
     private int determineMovementAmount(int phase, BoardElement be, Programme pc) {
@@ -1073,7 +1065,7 @@ public class Game {
             }
         }
         if (!gameAborted) {
-            notifyBoardMayHaveChanged(Step.RELEASE_DEVICES, phase, null);
+            notifyBoardMayHaveChanged(Step.RELEASE_DEVICES, phase, null, null);
         }
     }
 
@@ -1110,7 +1102,7 @@ public class Game {
             }
         }
         if (!gameAborted) {
-            notifyBoardMayHaveChanged(Step.OPEN_TRAPDOORS, phase, null);
+            notifyBoardMayHaveChanged(Step.OPEN_TRAPDOORS, phase, null, null);
         }
     }
 
@@ -1229,11 +1221,11 @@ public class Game {
         }
     }
 
-    public void moveInit(BoardElement be, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait) {
-        move(be, direction, strength, amount, step, phase, notBlockedByMovableRobot, wait);
+    public void moveInit(BoardElement be, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, String movingRobotName) {
+        move(be, direction, strength, amount, step, phase, notBlockedByMovableRobot, wait, movingRobotName);
     }
 
-    private boolean move(BoardElement be, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait) {
+    private boolean move(BoardElement be, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, String movingRobotName) {
         Position oldPosition    = be.getPosition();
         Floor    floor1         = BoardHandler.getFloor(board, oldPosition);
         Position targetPosition = be.getPosition().neighbour(direction);
@@ -1281,7 +1273,7 @@ public class Game {
                             getPlayerOf(conflictingElement).takeDamage(phase, player, null, false);
                         }
                     }
-                    if (move(conflictingElement, direction, strength, 1, step, phase, true, wait)) {
+                    if (move(conflictingElement, direction, strength, 1, step, phase, true, wait, movingRobotName)) {
                         be.setPosition(targetPosition);
                         if (!be.isFlying()) {
                             be.setLevel(BoardHandler.getFloor(board, be.getPosition()).getLevel());
@@ -1301,8 +1293,8 @@ public class Game {
                         be.setLevel(BoardHandler.getFloor(board, be.getPosition()).getLevel());
                     }
                 } else if (notBlockedByMovableRobot) {
-                    if (move(conflictingElement, direction, strength, 1, step, phase, true, wait)) {
-                        move(be, direction, strength, amount, step, phase, true, wait);
+                    if (move(conflictingElement, direction, strength, 1, step, phase, true, wait, movingRobotName)) {
+                        move(be, direction, strength, amount, step, phase, true, wait, movingRobotName);
                     }
                 }
             } else if (floor1.wall(direction) == WallType.REPULSOR_FIELD
@@ -1310,11 +1302,11 @@ public class Game {
                     || floor1.wall(direction) == WallType.ONE_WAY_GREEN
                     || floor1.wall(direction) == WallType.RAMP_DOWN)
                     && floor2.wall(direction2) == WallType.REPULSOR_FIELD)) {
-                move(be, direction2, strength, strength, step, phase, true, wait);
+                move(be, direction2, strength, strength, step, phase, true, wait, movingRobotName);
             }
         }
         if (amount > 0 && wait) {
-            notifyBoardMayHaveChanged(step, phase, null);
+            notifyBoardMayHaveChanged(step, phase, null, movingRobotName);
         }
         Floor floor3 = BoardHandler.getFloor(board, be.getPosition());
         if (player != null && !be.isFlying()) {
@@ -1369,7 +1361,7 @@ public class Game {
                         be.setPosition(portal.getTargetPosition());
                         be.setLevel(floor3.getLevel());
                         if (wait) {
-                            notifyBoardMayHaveChanged(step, phase, null);
+                            notifyBoardMayHaveChanged(step, phase, null, movingRobotName);
                         }
                         if (!player.getRobot().isVirtual()) {
                             for (CircuitChaosObject cco : new ArrayList<>(BoardHandler.getObjects(board, floor3.getPosition()))) {
@@ -1415,18 +1407,18 @@ public class Game {
             }
         }
         if (amount > 1) {
-            move(be, direction, strength, amount - 1, step, phase, true, wait);
+            move(be, direction, strength, amount - 1, step, phase, true, wait, movingRobotName);
         }
         if (!oldPosition.equals(be.getPosition())) {
             boolean notBlocked = true;
             if (!be.isFlying()) {
                 while (notBlocked && BoardHandler.getObjects(board, be.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
-                    notBlocked = move(be, direction, 0, 1, step, phase, false, wait);
+                    notBlocked = move(be, direction, 0, 1, step, phase, false, wait, movingRobotName);
                 }
             }
         }
         if (wait) {
-            notifyBoardMayHaveChanged(step, phase, null);
+            notifyBoardMayHaveChanged(step, phase, null, movingRobotName);
         }
         return !oldPosition.equals(be.getPosition());
     }
@@ -1435,19 +1427,15 @@ public class Game {
         Robot robot = player.getRobot();
         Floor f     = BoardHandler.getFloor(board, robot.getPosition());
         while (isRobotConflict(robot) && !player.getRobot().isVirtual()) {
-            moveInit(robot, robot.getDirection(), 0, 1, step, phase, true, true);
+            moveInit(robot, robot.getDirection(), 0, 1, step, phase, true, true, null);
         }
-        player.setFlying(false);
+        robot.setFlying(false);
         if (f.getFloortype() == Floortype.ABYSS || (f.getFloortype() == Floortype.TRAPDOOR && f.getActiveInPhase()[phase])) {
             die(robot, step, phase);
             board.getRobotsFallingIntoAbyss().add(robot);
         } else {
             while (f.getLevel() < player.getRobot().getLevel()) {
                 player.getRobot().setLevel(player.getRobot().getLevel() - 1);
-                player.takeDamage(phase, null, null, false);
-                player.takeDamage(phase, null, null, false);
-            }
-            if (player.getRobot().isTakesDamageOnLanding()) {
                 player.takeDamage(phase, null, null, false);
                 player.takeDamage(phase, null, null, false);
             }
@@ -1539,7 +1527,7 @@ public class Game {
     public void rotate(BoardElement be, Direction direction, Step step, int phase, boolean wait) {
         be.setDirection(be.getDirection().add(direction));
         if (wait) {
-            notifyBoardMayHaveChanged(step, phase, "%s was rotated".formatted(be.getName()));
+            notifyBoardMayHaveChanged(step, phase, "%s was rotated".formatted(be.getName()), null);
         }
     }
 
@@ -1557,10 +1545,10 @@ public class Game {
         }
         if (direction != null) {
             if (BoardHandler.getObjects(board, floor3.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
-                moveInit(be, direction, 0, 1, step, phase, false, wait);
+                moveInit(be, direction, 0, 1, step, phase, false, wait, null);
             }
         }
-        moveInit(be, NORTH, 0, 0, step, phase, false, wait);
+        moveInit(be, NORTH, 0, 0, step, phase, false, wait, null);
     }
 
     public void die(BoardElement be, Step reason, Integer phase) {
@@ -1570,7 +1558,7 @@ public class Game {
             player.takeNormalDamage(board);
         } else {
             BoardHandler.remove(board, be);
-            notifyBoardMayHaveChanged(reason, phase, "%s died".formatted(be.getName()));
+            notifyBoardMayHaveChanged(reason, phase, "%s died".formatted(be.getName()), null);
         }
     }
 
@@ -1586,7 +1574,7 @@ public class Game {
                 }
             }
         }
-        notifyBoardMayHaveChanged(Step.SETUP, null, "%s gave up".formatted(r.getName()));
+        notifyBoardMayHaveChanged(Step.SETUP, null, "%s gave up".formatted(r.getName()), null);
     }
 
     private void deGlue(CircuitChaosObject circuitChaosObject, int phase) {
@@ -1630,7 +1618,7 @@ public class Game {
                     this.getPlayerOf(obj).takeNormalDamage(board);
                 }
             }
-            notifyBoardMayHaveChanged(step, phase, "explosion");
+            notifyBoardMayHaveChanged(step, phase, "explosion", null);
             Sleep.sleepForMillis(timeSettings.getTimeToShowExplosions());
             for (Floor marker : markers) {
                 marker.setExplosiveDamage(0);
