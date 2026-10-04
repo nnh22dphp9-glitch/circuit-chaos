@@ -156,7 +156,7 @@ public class ClientBoardArranger implements GuiHelper {
                 }
             }
         });
-        chooseBoardButton.setEnabled(true);
+        chooseBoardButton.setEnabled(false);
 
         playButton.addActionListener(new AbstractAction() {
             @Override
