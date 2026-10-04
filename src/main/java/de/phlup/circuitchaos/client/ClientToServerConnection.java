@@ -1,14 +1,15 @@
 package de.phlup.circuitchaos.client;
 
-import de.phlup.circuitchaos.exception.CircuitChaosException;
-import de.phlup.circuitchaos.gamelogic.GameOptions;
-import de.phlup.circuitchaos.model.Board;
-import de.phlup.circuitchaos.model.GameItem;
-import de.phlup.circuitchaos.model.GameItemsWrapper;
-import de.phlup.circuitchaos.model.NetworkResponse;
-import de.phlup.circuitchaos.model.Position;
-import de.phlup.circuitchaos.model.PullingData;
-import de.phlup.circuitchaos.model.Registration;
+import de.phlup.circuitchaos.common.CircuitChaosException;
+import de.phlup.circuitchaos.common.model.Board;
+import de.phlup.circuitchaos.common.model.GameItem;
+import de.phlup.circuitchaos.common.model.GameItemsWrapper;
+import de.phlup.circuitchaos.common.model.NetworkResponse;
+import de.phlup.circuitchaos.common.model.Position;
+import de.phlup.circuitchaos.common.model.PullingData;
+import de.phlup.circuitchaos.common.model.Registration;
+import de.phlup.circuitchaos.server.ServerController;
+import de.phlup.circuitchaos.server.game.GameOptions;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -34,7 +35,7 @@ public class ClientToServerConnection {
     private final RestClient restClient;
 
     /**
-     * @see de.phlup.circuitchaos.controller.ServerController getGameIds()
+     * @see ServerController getGameIds()
      */
     public Set<GameItem> getAllPreparingGames(String server) {
         // an error message is shown in the drop-down list
@@ -46,7 +47,7 @@ public class ClientToServerConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ServerController register(String gameId, Registration registration)
+     * @see ServerController register(String gameId, Registration registration)
      */
     public void registerAsWatcher(String gameUrl, Registration clientRegistration) {
         log.debug("Send registerAsWatcher request");
@@ -59,7 +60,7 @@ public class ClientToServerConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ServerController createGame(Registration registration)
+     * @see ServerController createGame(Registration registration)
      */
     public String createGame(String gameUrl, Registration clientRegistration) {
         log.debug("Send createGame request");
@@ -72,7 +73,7 @@ public class ClientToServerConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ServerController deregister(String gameId, String registrationId)
+     * @see ServerController deregister(String gameId, String registrationId)
      */
     @Async
     public void deregister(String gameUrl, String clientRegistration) {
@@ -87,7 +88,7 @@ public class ClientToServerConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ServerController play(String gameId, GameOptions options)
+     * @see ServerController play(String gameId, GameOptions options)
      */
     public void play(String gameUrl, GameOptions gameOptions) {
         log.debug("Send play request");
@@ -100,7 +101,7 @@ public class ClientToServerConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ServerController setBoard(String gameId, Board board)
+     * @see ServerController setBoard(String gameId, Board board)
      */
     public void setBoard(String gameUrl, Board board) {
         log.debug("Send setBoard request");
@@ -113,7 +114,7 @@ public class ClientToServerConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ServerController addCheckpoint(String gameId, int x, int y)
+     * @see ServerController addCheckpoint(String gameId, int x, int y)
      */
     public void addCheckpoint(String gameUrl, Position position) {
         log.debug("Send addCheckpoint request");
@@ -126,7 +127,7 @@ public class ClientToServerConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ServerController removeCheckpoint(String gameId, int x, int y)
+     * @see ServerController removeCheckpoint(String gameId, int x, int y)
      */
     public void removeCheckpoint(String gameUrl, Position position) {
         log.debug("Send removeCheckpoint request");
@@ -135,7 +136,7 @@ public class ClientToServerConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ServerController getBoard(String gameId)
+     * @see ServerController getBoard(String gameId)
      */
     public Board getBoard(String gameUrl) {
         log.debug("Send getBoard request");
@@ -147,7 +148,7 @@ public class ClientToServerConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ServerController receiveAnswer(String gameId, String purposeId, String requestId, NetworkResponse response)
+     * @see ServerController receiveAnswer(String gameId, String purposeId, String requestId, NetworkResponse response)
      */
     public void postAnswer(String answerUrl, NetworkResponse response) {
         log.debug("Send postAnswer request");

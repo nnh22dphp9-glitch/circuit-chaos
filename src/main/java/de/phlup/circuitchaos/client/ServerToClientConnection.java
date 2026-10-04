@@ -1,10 +1,10 @@
 package de.phlup.circuitchaos.client;
 
-import de.phlup.circuitchaos.enums.Step;
-import de.phlup.circuitchaos.model.Board;
-import de.phlup.circuitchaos.model.NetworkRequest;
-import de.phlup.circuitchaos.model.Registration;
-import de.phlup.circuitchaos.model.RevealProgrammeResponse;
+import de.phlup.circuitchaos.common.enums.Step;
+import de.phlup.circuitchaos.common.model.Board;
+import de.phlup.circuitchaos.common.model.NetworkRequest;
+import de.phlup.circuitchaos.common.model.Registration;
+import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -23,7 +23,7 @@ public class ServerToClientConnection {
     private final RestClient restClient;
 
     /**
-     * @see de.phlup.circuitchaos.controller.ClientController refreshBoard(String  NetworkRequest)
+     * @see ClientController refreshBoard(String  NetworkRequest)
      */
     // Nicht Async - Animationen könnten kaputtgehen
     public void notifyOfBoardChange(Registration registration, Board board, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
@@ -51,7 +51,7 @@ public class ServerToClientConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ClientController showMessage(String, String)
+     * @see ClientController showMessage(String, String)
      */
     @Async
     public void showMessage(Registration registration, String message) {
@@ -71,7 +71,7 @@ public class ServerToClientConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ClientController revealProgramme(String, RevealProgrammesResponse)
+     * @see ClientController revealProgramme(String, RevealProgrammesResponse)
      */
     @Async
     public void revealProgramme(Registration registration, RevealProgrammeResponse revealProgrammeResponse) {
@@ -91,7 +91,7 @@ public class ServerToClientConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ClientController programQuestion(String, String, String, NetworkRequest)
+     * @see ClientController programQuestion(String, String, String, NetworkRequest)
      */
     @Async
     public void programQuestion(Registration registration, String purposeId, String requestId, NetworkRequest request) {
@@ -111,7 +111,7 @@ public class ServerToClientConnection {
     }
 
     /**
-     * @see de.phlup.circuitchaos.controller.ClientController numberOfPlayersChanged(String, int, int)
+     * @see ClientController numberOfPlayersChanged(String, int, int)
      */
     @Async
     public void notifyOfNumberOfPlayersChange(Registration registration, int numberOfPlayers, int numberOfWatchers) {
