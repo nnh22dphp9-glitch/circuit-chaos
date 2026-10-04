@@ -459,7 +459,7 @@ public class ImageSupplier {
             if (nextCP != -1 && nextCP != cp.getNumber()) {
                 checkpointGraphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
             }
-            checkpointGraphics.drawImage(i, 0, 0, null); // TODO
+            checkpointGraphics.drawImage(i, 0, 0, null);
         } finally {
             checkpointGraphics.dispose();
         }
