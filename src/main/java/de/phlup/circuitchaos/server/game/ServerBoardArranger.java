@@ -1,4 +1,4 @@
-package de.phlup.circuitchaos.server;
+package de.phlup.circuitchaos.server.game;
 
 import de.phlup.circuitchaos.board.BoardHandler;
 import de.phlup.circuitchaos.common.CircuitChaosException;
@@ -6,7 +6,6 @@ import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.model.Board;
 import de.phlup.circuitchaos.common.model.Checkpoint;
 import de.phlup.circuitchaos.common.model.Position;
-import de.phlup.circuitchaos.server.game.Game;
 
 import java.util.Comparator;
 import java.util.List;

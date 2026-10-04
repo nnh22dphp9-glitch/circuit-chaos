@@ -31,7 +31,6 @@ import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
 import de.phlup.circuitchaos.common.model.Robot;
 import de.phlup.circuitchaos.common.settings.TimeSettings;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
-import de.phlup.circuitchaos.server.ServerBoardArranger;
 import de.phlup.circuitchaos.server.player.Player;
 import de.phlup.circuitchaos.server.player.computer.ComputerPlayer;
 import de.phlup.circuitchaos.server.player.network.NetworkPlayer;

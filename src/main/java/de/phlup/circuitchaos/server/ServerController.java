@@ -13,6 +13,7 @@ import de.phlup.circuitchaos.common.settings.ClientSettings;
 import de.phlup.circuitchaos.common.settings.TimeSettings;
 import de.phlup.circuitchaos.server.game.Game;
 import de.phlup.circuitchaos.server.game.GameOptions;
+import de.phlup.circuitchaos.server.game.ServerBoardArranger;
 import de.phlup.circuitchaos.server.player.Player;
 import de.phlup.circuitchaos.server.player.network.NetworkPlayer;
 import de.phlup.circuitchaos.server.service.PollOrPushSwitchService;
