@@ -20,12 +20,12 @@ import static de.phlup.circuitchaos.server.game.Game.THIS_GAME_IS_A_TIE;
 public class AsyncService {
 
     // Nicht Async - Animationen könnten kaputtgehen
-    public void refreshBoard(GameGui gameGui, NetworkRequest request) {
+    public void refreshCourse(GameGui gameGui, NetworkRequest request) {
         if (request.getSubPhase() == null || request.getSubPhase() == 0) {
-            log.info("{}: {} ({})", gameGui.getGameAttributes().getGameId(), request.getReasonForBoardChange(), request.getStep());
+            log.info("{}: {} ({})", gameGui.getGameAttributes().getGameId(), request.getReasonForCourseChange(), request.getStep());
         }
-        gameGui.refreshBoard(request.getBoard(), request.getReasonForBoardChange(), request.getStep(), request.getPhase(),
-                             request.getSubPhase(), request.getAnimationSteps(), request.getMovingRobotName());
+        gameGui.refreshCourse(request.getCourse(), request.getReasonForCourseChange(), request.getStep(), request.getPhase(),
+                              request.getSubPhase(), request.getAnimationSteps(), request.getMovingRobotName());
     }
 
     @Async

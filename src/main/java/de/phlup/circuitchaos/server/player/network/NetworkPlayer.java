@@ -32,7 +32,7 @@ public class NetworkPlayer extends Player {
     public NetworkRequest createRequest(Integer phase) {
         Game           game           = GlobalServerAttributes.getGame(gameId);
         NetworkRequest networkRequest = new NetworkRequest();
-        networkRequest.setBoard(game.getBoard());
+        networkRequest.setCourse(game.getCourse());
         networkRequest.setMyRobot(robot);
         networkRequest.setPhase(phase);
         return createProgramRobotRequest(networkRequest);

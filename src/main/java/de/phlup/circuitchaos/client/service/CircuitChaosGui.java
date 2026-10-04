@@ -2,12 +2,12 @@ package de.phlup.circuitchaos.client.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.phlup.circuitchaos.client.ClientToServerConnection;
-import de.phlup.circuitchaos.client.gui.ClientBoardArranger;
+import de.phlup.circuitchaos.client.gui.ClientCourseArranger;
 import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.client.gui.GuiHelper;
 import de.phlup.circuitchaos.client.gui.PictureConstants;
 import de.phlup.circuitchaos.common.CircuitChaosException;
-import de.phlup.circuitchaos.common.model.BoardInfo;
+import de.phlup.circuitchaos.common.model.CourseInfo;
 import de.phlup.circuitchaos.common.model.GameItem;
 import de.phlup.circuitchaos.common.model.Registration;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
@@ -59,23 +59,23 @@ public class CircuitChaosGui implements GuiHelper {
     private final ClientToServerConnection clientToServerConnection;
     private final GameSettings             gameSettings;
     private final AudioSupplier            audioSupplier;
-    private final BoardLoader              boardLoader;
+    private final CourseLoader             courseLoader;
     private final ObjectMapper             objectMapper;
 
 
-    private ImageSupplier         imageSupplier;
-    private JTextArea             serverAddressInput;
-    private JComboBox<GameItem>   gameChooser;
-    private JButton               watchButton;
-    private JButton               playButton;
-    private Collection<BoardInfo> boards;
+    private ImageSupplier          imageSupplier;
+    private JTextArea              serverAddressInput;
+    private JComboBox<GameItem>    gameChooser;
+    private JButton                watchButton;
+    private JButton                playButton;
+    private Collection<CourseInfo> courses;
 
     @EventListener(ApplicationReadyEvent.class)
     @SuppressWarnings("unused")
     public void initClientGUI() {
         ClientSettings.Theme theme = determineTheme();
         this.imageSupplier = new ImageSupplier(theme, resourceLoader);
-        boards = boardLoader.loadBoards(imageSupplier.getImageIconPlain(PictureConstants.GFX_PICTURE).getImage());
+        courses = courseLoader.loadCourses(imageSupplier.getImageIconPlain(PictureConstants.GFX_PICTURE).getImage());
         JFrame frame = new JFrame("Circuit Chaos - " + clientSettings.getOwnUrl());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(getStartPanel());
@@ -206,7 +206,7 @@ public class CircuitChaosGui implements GuiHelper {
 
             GameGui gui = new GameGui(resourceLoader, audioSupplier, clientToServerConnection, gameAttributes, clientSettings);
             gameAttributes.setGameGui(gui);
-            gui.setBoardArranger(new ClientBoardArranger(gui, gameSettings, boards, objectMapper, clientSettings));
+            gui.setCourseArranger(new ClientCourseArranger(gui, gameSettings, courses, objectMapper, clientSettings));
         } catch (Exception exc) {
             log.error("Exception occurred - shutting game down", exc);
             if (gameAttributes != null) {

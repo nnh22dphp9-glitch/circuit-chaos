@@ -8,7 +8,7 @@ public class PullingData {
 
     private PullType type;
 
-    // refresh board / action
+    // refresh course / action
     private NetworkRequest request;
 
     // show message

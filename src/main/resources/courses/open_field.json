@@ -1,5 +1,5 @@
 {
-  "factoryFloor": [
+  "floor": [
     {
       "position": { "x": 0, "y": 0 },
       "floortype": "OPEN_FLOOR",
@@ -8,7 +8,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 1, "y": 0 },
@@ -18,7 +18,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 2, "y": 0 },
@@ -28,7 +28,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 3, "y": 0 },
@@ -38,7 +38,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 4, "y": 0 },
@@ -48,7 +48,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 0, "y": 1 },
@@ -58,7 +58,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 1, "y": 1 },
@@ -68,7 +68,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 2, "y": 1 },
@@ -78,7 +78,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 3, "y": 1 },
@@ -88,7 +88,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 4, "y": 1 },
@@ -98,7 +98,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 0, "y": 2 },
@@ -108,7 +108,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 1, "y": 2 },
@@ -118,7 +118,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 2, "y": 2 },
@@ -128,7 +128,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 3, "y": 2 },
@@ -138,7 +138,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 4, "y": 2 },
@@ -148,7 +148,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 0, "y": 3 },
@@ -158,7 +158,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 1, "y": 3 },
@@ -168,7 +168,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 2, "y": 3 },
@@ -178,7 +178,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 3, "y": 3 },
@@ -188,7 +188,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 4, "y": 3 },
@@ -198,7 +198,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 0, "y": 4 },
@@ -208,7 +208,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 1, "y": 4 },
@@ -218,7 +218,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 2, "y": 4 },
@@ -228,7 +228,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 3, "y": 4 },
@@ -238,7 +238,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     },
     {
       "position": { "x": 4, "y": 4 },
@@ -248,7 +248,7 @@
       "lasers": [ 0, 0, 0, 0 ],
       "hasPusher": false, "pusherDirection": "NORTH", "level": 0, "distanceCounter": 0,
       "wallNorth": "NONE", "wallEast": "NONE", "wallSouth": "NONE", "wallWest": "NONE",
-      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "boardMountedLaserBeamsNS": 0, "boardMountedLaserBeamsWE": 0
+      "explosiveDamage": 0, "laserBeamsNS": false, "laserBeamsWE": false, "courseMountedLaserBeamsNS": 0, "courseMountedLaserBeamsWE": 0
     }
   ],
   "objects": [],
@@ -259,8 +259,8 @@
   "range": {
     "minX": 0,
     "minY": 0,
-    "maxX": 5,
-    "maxY": 5
+    "maxX": 4,
+    "maxY": 4
   },
   "properties": {
     "lasers": false,

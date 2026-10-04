@@ -8,7 +8,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class CircuitChaosObject extends BoardElement {
+public class CourseObject extends CourseElement {
 
     private ObjectType type;
     private Position   targetPosition;

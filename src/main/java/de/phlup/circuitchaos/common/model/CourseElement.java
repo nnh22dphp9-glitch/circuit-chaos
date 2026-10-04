@@ -5,7 +5,7 @@ import de.phlup.circuitchaos.common.enums.Direction;
 import lombok.Data;
 
 @Data
-public abstract class BoardElement {
+public abstract class CourseElement {
 
     private String      name;
     private Position    position      = new Position(0, 0);
@@ -15,7 +15,7 @@ public abstract class BoardElement {
     private Direction   direction     = Direction.NORTH;
     private Direction   prevDirection = Direction.NORTH;
     private Programme[] program       = new Programme[5];
-    private boolean     onBoard       = false;
+    private boolean     onCourse      = false;
 
     @JsonIgnore
     private int conflictingMark = 0;

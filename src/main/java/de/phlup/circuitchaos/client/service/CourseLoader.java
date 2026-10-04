@@ -1,8 +1,8 @@
 package de.phlup.circuitchaos.client.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.phlup.circuitchaos.common.model.Board;
-import de.phlup.circuitchaos.common.model.BoardInfo;
+import de.phlup.circuitchaos.common.model.Course;
+import de.phlup.circuitchaos.common.model.CourseInfo;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +28,9 @@ import java.util.stream.Stream;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BoardLoader {
+public class CourseLoader {
 
-    private final ClientSettings boardProperties;
+    private final ClientSettings courseProperties;
     private final ObjectMapper   objectMapper;
 
     private final ResourcePatternResolver resourceResolver =
@@ -38,43 +38,43 @@ public class BoardLoader {
 
     private Image defaultImage;
 
-    public List<BoardInfo> loadBoards(Image defaultImage) {
+    public List<CourseInfo> loadCourses(Image defaultImage) {
         this.defaultImage = defaultImage;
-        return boardProperties.getBoardDirectories().stream()
-                              .flatMap(this::findBoards)
-                              .toList();
+        return courseProperties.getCourseDirectories().stream()
+                               .flatMap(this::findCourses)
+                               .toList();
     }
 
-    private Stream<BoardInfo> findBoards(String directory) {
+    private Stream<CourseInfo> findCourses(String directory) {
         try {
             String pattern = directory + "/**/*.json";
             return Arrays.stream(resourceResolver.getResources(pattern))
-                         .map(this::loadBoard)
+                         .map(this::loadCourse)
                          .filter(Objects::nonNull);
         } catch (IOException e) {
-            log.warn("Could not search for boards in {}", directory, e);
+            log.warn("Could not search for courses in {}", directory, e);
             return Stream.empty();
         }
     }
 
-    private BoardInfo loadBoard(Resource jsonResource) {
+    private CourseInfo loadCourse(Resource jsonResource) {
         String filename = jsonResource.getFilename();
         if (filename == null || !filename.endsWith(".json")) {
             return null;
         }
         String name = filename.substring(0, filename.length() - ".json".length());
         try {
-            Board board;
+            Course course;
             try (InputStream inputStream = jsonResource.getInputStream()) {
-                board = objectMapper.readValue(inputStream, Board.class);
+                course = objectMapper.readValue(inputStream, Course.class);
             }
             Image image = findPreview(jsonResource);
             if (image == null) {
                 image = defaultImage;
             }
-            return new BoardInfo(name, image, board);
+            return new CourseInfo(name, image, course);
         } catch (IOException e) {
-            log.warn("Could not load board {}", jsonResource, e);
+            log.warn("Could not load course {}", jsonResource, e);
             return null;
         }
     }

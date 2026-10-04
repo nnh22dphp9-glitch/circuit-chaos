@@ -33,15 +33,15 @@ circuit-chaos:
     allow-others-to-start-a-game: false
     sound: true
     ssl-bundle: ""
-    default-board-size-x: 900
-    default-board-size-y: 880
+    default-course-size-x: 900
+    default-course-size-y: 880
     default-theme: "default"
     default-zoom: 1
     default-modules:
       - "MAIN_LASER"
-    board-directories:
-      - "classpath:boards"
-      - "file:boards"
+    course-directories:
+      - "classpath:courses"
+      - "file:courses"
       - "file:temp"
     themes:
       ki-lowres:

@@ -2,7 +2,7 @@ package de.phlup.circuitchaos.server.service;
 
 import de.phlup.circuitchaos.common.enums.PullType;
 import de.phlup.circuitchaos.common.enums.Step;
-import de.phlup.circuitchaos.common.model.Board;
+import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.PullingData;
 import de.phlup.circuitchaos.common.model.Registration;
@@ -34,17 +34,17 @@ public class PollingService {
         }
     }
 
-    public void notifyOfBoardChange(Registration registration, Board board, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
+    public void notifyOfCourseChange(Registration registration, Course course, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
         NetworkRequest programRequest = new NetworkRequest();
-        programRequest.setBoard(board);
-        programRequest.setReasonForBoardChange(reason);
+        programRequest.setCourse(course);
+        programRequest.setReasonForCourseChange(reason);
         programRequest.setStep(step);
         programRequest.setPhase(phase);
         programRequest.setSubPhase(subPhase);
         programRequest.setAnimationSteps(animationSteps);
         programRequest.setMovingRobotName(movingRobotName);
         PullingData pullingData = new PullingData();
-        pullingData.setType(PullType.BOARD_CHANGE);
+        pullingData.setType(PullType.COURSE_CHANGE);
         pullingData.setRequest(programRequest);
         synchronized (data) {
             data.computeIfAbsent(registration.getId(), k -> new ArrayList<>()).add(pullingData);

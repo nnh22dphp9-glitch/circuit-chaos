@@ -19,14 +19,14 @@ public class ClientSettings {
     private boolean sound;
     private String  sslBundle;
 
-    private int    defaultBoardSizeX;
-    private int    defaultBoardSizeY;
+    private int    defaultCourseSizeX;
+    private int    defaultCourseSizeY;
     private String defaultTheme;
     private float  defaultZoom;
 
     private List<String> defaultModules;
 
-    private List<String> boardDirectories;
+    private List<String> courseDirectories;
 
     private HashMap<String, Theme> themes;
 

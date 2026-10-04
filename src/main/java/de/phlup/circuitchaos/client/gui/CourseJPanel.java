@@ -13,11 +13,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 @Validated
-public class BoardJPanel extends JPanel {
+public class CourseJPanel extends JPanel {
 
     private final ImageSupplier imageSupplier;
 
-    public BoardJPanel(ImageSupplier imageSupplier) {
+    public CourseJPanel(ImageSupplier imageSupplier) {
         super(true);
         setBackground(Color.black);
         this.imageSupplier = imageSupplier;
@@ -36,13 +36,13 @@ public class BoardJPanel extends JPanel {
     }
 
     private void redrawAllElements(GameGui game, GridBagLayout layout, JPanel contentPane, Step step, Integer phase, Integer subPhase, int animationSteps) {
-        for (Floor floor : game.getBoard().getFactoryFloor()) {
-            createBoardElementLabel(game, layout, floor, contentPane);
+        for (Floor floor : game.getCourse().getFloor()) {
+            createCourseElementLabel(game, layout, floor, contentPane);
             imageSupplier.redrawFloor(floor, game, step, phase, subPhase, animationSteps);
         }
     }
 
-    private void createBoardElementLabel(GameGui game, GridBagLayout layout, Floor floor, JPanel contentPane) {
+    private void createCourseElementLabel(GameGui game, GridBagLayout layout, Floor floor, JPanel contentPane) {
         if (floor != null) {
             JLabel             label = createJLabel(game, floor);
             GridBagConstraints gbc   = createGridBagConstraints(game, floor);
@@ -54,7 +54,7 @@ public class BoardJPanel extends JPanel {
 
     private JLabel createJLabel(GameGui game, Floor floor) {
         JLabel label = new JLabel(imageSupplier.getImageIcon(game, floor));
-        label.setToolTipText(ToolTipTexts.getToolTipText(game.getBoard(), floor));
+        label.setToolTipText(ToolTipTexts.getToolTipText(game.getCourse(), floor));
         label.setOpaque(false);
         label.getInsets().set(0, 0, 0, 0);
         if (game.isNotStartedYet()) {
@@ -64,8 +64,8 @@ public class BoardJPanel extends JPanel {
     }
 
     private GridBagConstraints createGridBagConstraints(GameGui game, Floor floor) {
-        return new GridBagConstraints(floor.getPosition().x() - game.getBoard().getRange().minX(),
-                                      floor.getPosition().y() - game.getBoard().getRange().minY(),
+        return new GridBagConstraints(floor.getPosition().x() - game.getCourse().getRange().minX(),
+                                      floor.getPosition().y() - game.getCourse().getRange().minY(),
                                       1, 1, 0, 0,
                                       GridBagConstraints.CENTER, GridBagConstraints.NONE,
                                       new Insets(0, 0, 0, 0), 0, 0);

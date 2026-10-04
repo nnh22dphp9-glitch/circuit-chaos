@@ -1,11 +1,11 @@
 package de.phlup.circuitchaos.server.player;
 
-import de.phlup.circuitchaos.board.BoardHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.ModuleType;
-import de.phlup.circuitchaos.common.model.Board;
+import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.Module;
 import de.phlup.circuitchaos.common.model.Robot;
+import de.phlup.circuitchaos.course.CourseHandler;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.Game;
 import jakarta.validation.constraints.NotNull;
@@ -31,7 +31,7 @@ public abstract class Player {
     }
 
     public boolean hasWon() {
-        return !hasLost() && robot.getNextCheckpoint() > GlobalServerAttributes.getGame(gameId).getBoard().getCheckpoints().size() - 1;
+        return !hasLost() && robot.getNextCheckpoint() > GlobalServerAttributes.getGame(gameId).getCourse().getCheckpoints().size() - 1;
     }
 
     protected void initTurn() {
@@ -50,7 +50,7 @@ public abstract class Player {
 
     public void takeDamage(Integer phase, Player source, Direction direction, boolean considerShields) {
         Game game = GlobalServerAttributes.getGame(gameId);
-        if (robot.isOnBoard() && (source == null || !robot.isVirtual())) {
+        if (robot.isOnCourse() && (source == null || !robot.isVirtual())) {
             boolean takesDamage = true;
             if (considerShields) {
                 if (uses(POWER_DOWN_SHIELD, phase)) {
@@ -83,20 +83,20 @@ public abstract class Player {
                 }
             }
             if (takesDamage) {
-                takeNormalDamage(game.getBoard());
+                takeNormalDamage(game.getCourse());
             }
         }
     }
 
-    public void takeNormalDamage(Board board) {
-        if (robot.isOnBoard()) {
+    public void takeNormalDamage(Course course) {
+        if (robot.isOnCourse()) {
             robot.setDamage(robot.getDamage() + 1);
             if (robot.getDamage() - countBlockedRegisters() > 4) {
                 blockRegister();
             }
-            if (robot.isOnBoard()) {
+            if (robot.isOnCourse()) {
                 if (robot.getDamage() >= 10) {
-                    BoardHandler.remove(board, this.robot);
+                    CourseHandler.remove(course, this.robot);
                 }
             }
         }

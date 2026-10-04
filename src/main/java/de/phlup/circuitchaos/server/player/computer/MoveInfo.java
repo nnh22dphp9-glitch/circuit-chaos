@@ -1,18 +1,18 @@
 package de.phlup.circuitchaos.server.player.computer;
 
-import de.phlup.circuitchaos.board.BoardHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.ProgramType;
 import de.phlup.circuitchaos.common.enums.WallType;
-import de.phlup.circuitchaos.common.model.Board;
 import de.phlup.circuitchaos.common.model.Checkpoint;
-import de.phlup.circuitchaos.common.model.CircuitChaosObject;
+import de.phlup.circuitchaos.common.model.Course;
+import de.phlup.circuitchaos.common.model.CourseObject;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.Programme;
+import de.phlup.circuitchaos.course.CourseHandler;
 import de.phlup.circuitchaos.server.game.Game;
 import de.phlup.circuitchaos.server.player.Player;
 import lombok.Data;
@@ -41,7 +41,7 @@ public class MoveInfo {
 
     public MoveInfo(Game game, Programme[] programme, Direction sd, Checkpoint nextCP, Player player) {
         this.program = new Programme[5];
-        Board board = game.getBoard();
+        Course course = game.getCourse();
         System.arraycopy(programme, 0, program, 0, 5);
         startingDirection = sd;
         distance = Integer.MAX_VALUE;
@@ -55,7 +55,7 @@ public class MoveInfo {
         standsOnOpenFloor = false;
         keepsStaying = false;
         probableTargets = 0;
-        tf = BoardHandler.getFloor(board, player.getRobot().getPosition());
+        tf = CourseHandler.getFloor(course, player.getRobot().getPosition());
         for (int phase = 0; phase < 5; phase++) {
             checkForAbyss(phase);
             boolean flying = player.getRobot().isFlying();
@@ -70,7 +70,7 @@ public class MoveInfo {
                 if (movement != 0 && player.uses(ModuleType.BRAKES, phase)) {
                     movement = movement > 0 ? movement - 1 : movement + 1;
                 }
-                if ((tf.isWater() && !flying) || BoardHandler.getObjects(board, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
+                if ((tf.isWater() && !flying) || CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
                     if (movement > 0) {
                         movement--;
                     }
@@ -78,8 +78,8 @@ public class MoveInfo {
                         movement++;
                     }
                 }
-                if (movement != 0 && !BoardHandler.getObjects(board, new Position(x, y)).isEmpty()) {
-                    for (CircuitChaosObject cco : BoardHandler.getObjects(board, new Position(x, y))) {
+                if (movement != 0 && !CourseHandler.getObjects(course, new Position(x, y)).isEmpty()) {
+                    for (CourseObject cco : CourseHandler.getObjects(course, new Position(x, y))) {
                         if (cco.getType() == ObjectType.TELEPORTER && !flying) {
                             if (movement < 0) {
                                 movement = 1 - movement;
@@ -108,7 +108,7 @@ public class MoveInfo {
                 }
                 if (movement < 0) {
                     while (movement < 0) {
-                        if (notBlocked(board, true)) {
+                        if (notBlocked(course, true)) {
                             switch (endingDirection) {
                                 case NORTH:
                                     y++;
@@ -124,19 +124,19 @@ public class MoveInfo {
                                     break;
                             }
                         }
-                        tf = BoardHandler.getFloor(board, new Position(x, y));
+                        tf = CourseHandler.getFloor(course, new Position(x, y));
                         checkForAbyss(phase);
-                        for (CircuitChaosObject cco : BoardHandler.getObjects(board, new Position(x, y))) {
+                        for (CourseObject cco : CourseHandler.getObjects(course, new Position(x, y))) {
                             if (cco.getType().isPortal() && !flying) {
                                 x = cco.getTargetPosition().x();
                                 y = cco.getTargetPosition().y();
-                                tf = BoardHandler.getFloor(board, cco.getTargetPosition());
+                                tf = CourseHandler.getFloor(course, cco.getTargetPosition());
                                 break;
                             }
                         }
                         movement++;
                     }
-                    while (BoardHandler.getObjects(board, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
+                    while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
                         switch (endingDirection) {
                             case NORTH:
                                 y++;
@@ -151,20 +151,20 @@ public class MoveInfo {
                                 x++;
                                 break;
                         }
-                        tf = BoardHandler.getFloor(board, new Position(x, y));
+                        tf = CourseHandler.getFloor(course, new Position(x, y));
                         checkForAbyss(phase);
-                        for (CircuitChaosObject cco : BoardHandler.getObjects(board, new Position(x, y))) {
+                        for (CourseObject cco : CourseHandler.getObjects(course, new Position(x, y))) {
                             if (cco.getType().isPortal() && !flying) {
                                 x = cco.getTargetPosition().x();
                                 y = cco.getTargetPosition().y();
-                                tf = BoardHandler.getFloor(board, cco.getTargetPosition());
+                                tf = CourseHandler.getFloor(course, cco.getTargetPosition());
                                 break;
                             }
                         }
                     }
                 } else if (movement > 0) {
                     while (movement > 0) {
-                        if (notBlocked(board, false)) {
+                        if (notBlocked(course, false)) {
                             switch (endingDirection) {
                                 case NORTH:
                                     y--;
@@ -180,19 +180,19 @@ public class MoveInfo {
                                     break;
                             }
                         }
-                        tf = BoardHandler.getFloor(board, new Position(x, y));
+                        tf = CourseHandler.getFloor(course, new Position(x, y));
                         checkForAbyss(phase);
-                        for (CircuitChaosObject cco : BoardHandler.getObjects(board, new Position(x, y))) {
+                        for (CourseObject cco : CourseHandler.getObjects(course, new Position(x, y))) {
                             if (cco.getType().isPortal() && !flying) {
                                 x = cco.getTargetPosition().x();
                                 y = cco.getTargetPosition().y();
-                                tf = BoardHandler.getFloor(board, cco.getTargetPosition());
+                                tf = CourseHandler.getFloor(course, cco.getTargetPosition());
                                 break;
                             }
                         }
                         movement--;
                     }
-                    while (BoardHandler.getObjects(board, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
+                    while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
                         switch (endingDirection) {
                             case NORTH:
                                 y--;
@@ -207,13 +207,13 @@ public class MoveInfo {
                                 x--;
                                 break;
                         }
-                        tf = BoardHandler.getFloor(board, new Position(x, y));
+                        tf = CourseHandler.getFloor(course, new Position(x, y));
                         checkForAbyss(phase);
-                        for (CircuitChaosObject cco : BoardHandler.getObjects(board, new Position(x, y))) {
+                        for (CourseObject cco : CourseHandler.getObjects(course, new Position(x, y))) {
                             if (cco.getType().isPortal() && !flying) {
                                 x = cco.getTargetPosition().x();
                                 y = cco.getTargetPosition().y();
-                                tf = BoardHandler.getFloor(board, cco.getTargetPosition());
+                                tf = CourseHandler.getFloor(course, cco.getTargetPosition());
                                 break;
                             }
                         }
@@ -238,7 +238,7 @@ public class MoveInfo {
                         x--;
                         break;
                 }
-                tf = BoardHandler.getFloor(board, new Position(x, y));
+                tf = CourseHandler.getFloor(course, new Position(x, y));
                 if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW ||
                         tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW ||
                         tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW ||
@@ -252,17 +252,17 @@ public class MoveInfo {
                         (tf.getFacingDirection() == lastDirection.add(Direction.EAST) || (tf.getFacingDirection() == Direction.NORTH && lastDirection == Direction.WEST))) {
                     endingDirection = endingDirection.add(Direction.EAST);
                 }
-                for (CircuitChaosObject cco : BoardHandler.getObjects(board, new Position(x, y))) {
+                for (CourseObject cco : CourseHandler.getObjects(course, new Position(x, y))) {
                     if (cco.getType().isPortal() && !flying) {
                         x = cco.getTargetPosition().x();
                         y = cco.getTargetPosition().y();
-                        tf = BoardHandler.getFloor(board, cco.getTargetPosition());
+                        tf = CourseHandler.getFloor(course, cco.getTargetPosition());
                         break;
                     }
                 }
             }
             checkForAbyss(phase);
-            while (BoardHandler.getObjects(board, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
+            while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
                 switch (lastDirection) {
                     case NORTH:
                         y--;
@@ -277,13 +277,13 @@ public class MoveInfo {
                         x--;
                         break;
                 }
-                tf = BoardHandler.getFloor(board, new Position(x, y));
+                tf = CourseHandler.getFloor(course, new Position(x, y));
                 checkForAbyss(phase);
-                for (CircuitChaosObject cco : BoardHandler.getObjects(board, new Position(x, y))) {
+                for (CourseObject cco : CourseHandler.getObjects(course, new Position(x, y))) {
                     if (cco.getType().isPortal() && !flying) {
                         x = cco.getTargetPosition().x();
                         y = cco.getTargetPosition().y();
-                        tf = BoardHandler.getFloor(board, cco.getTargetPosition());
+                        tf = CourseHandler.getFloor(course, cco.getTargetPosition());
                         break;
                     }
                 }
@@ -305,7 +305,7 @@ public class MoveInfo {
                         x--;
                         break;
                 }
-                tf = BoardHandler.getFloor(board, new Position(x, y));
+                tf = CourseHandler.getFloor(course, new Position(x, y));
                 if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW ||
                         tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW ||
                         tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW ||
@@ -319,17 +319,17 @@ public class MoveInfo {
                         (tf.getFacingDirection() == lastDirection.add(Direction.EAST) || (tf.getFacingDirection() == Direction.NORTH && lastDirection == Direction.WEST))) {
                     endingDirection = endingDirection.add(Direction.EAST);
                 }
-                for (CircuitChaosObject cco : BoardHandler.getObjects(board, new Position(x, y))) {
+                for (CourseObject cco : CourseHandler.getObjects(course, new Position(x, y))) {
                     if (cco.getType().isPortal() && !flying) {
                         x = cco.getTargetPosition().x();
                         y = cco.getTargetPosition().y();
-                        tf = BoardHandler.getFloor(board, cco.getTargetPosition());
+                        tf = CourseHandler.getFloor(course, cco.getTargetPosition());
                         break;
                     }
                 }
             }
             checkForAbyss(phase);
-            while (BoardHandler.getObjects(board, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
+            while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
                 switch (lastDirection) {
                     case NORTH:
                         y--;
@@ -344,19 +344,19 @@ public class MoveInfo {
                         x--;
                         break;
                 }
-                tf = BoardHandler.getFloor(board, new Position(x, y));
+                tf = CourseHandler.getFloor(course, new Position(x, y));
                 checkForAbyss(phase);
-                for (CircuitChaosObject cco : BoardHandler.getObjects(board, new Position(x, y))) {
+                for (CourseObject cco : CourseHandler.getObjects(course, new Position(x, y))) {
                     if (cco.getType().isPortal() && !flying) {
                         x = cco.getTargetPosition().x();
                         y = cco.getTargetPosition().y();
-                        tf = BoardHandler.getFloor(board, cco.getTargetPosition());
+                        tf = CourseHandler.getFloor(course, cco.getTargetPosition());
                         break;
                     }
                 }
             }
             checkForAbyss(phase);
-            while (BoardHandler.getObjects(board, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
+            while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
                 switch (lastDirection) {
                     case NORTH:
                         y--;
@@ -371,13 +371,13 @@ public class MoveInfo {
                         x--;
                         break;
                 }
-                tf = BoardHandler.getFloor(board, new Position(x, y));
+                tf = CourseHandler.getFloor(course, new Position(x, y));
                 checkForAbyss(phase);
-                for (CircuitChaosObject cco : BoardHandler.getObjects(board, new Position(x, y))) {
+                for (CourseObject cco : CourseHandler.getObjects(course, new Position(x, y))) {
                     if (cco.getType().isPortal() && !flying) {
                         x = cco.getTargetPosition().x();
                         y = cco.getTargetPosition().y();
-                        tf = BoardHandler.getFloor(board, cco.getTargetPosition());
+                        tf = CourseHandler.getFloor(course, cco.getTargetPosition());
                         break;
                     }
                 }
@@ -399,18 +399,18 @@ public class MoveInfo {
                         x--;
                         break;
                 }
-                tf = BoardHandler.getFloor(board, new Position(x, y));
+                tf = CourseHandler.getFloor(course, new Position(x, y));
                 checkForAbyss(phase);
-                for (CircuitChaosObject cco : BoardHandler.getObjects(board, new Position(x, y))) {
+                for (CourseObject cco : CourseHandler.getObjects(course, new Position(x, y))) {
                     if (cco.getType().isPortal() && !flying) {
                         x = cco.getTargetPosition().x();
                         y = cco.getTargetPosition().y();
-                        tf = BoardHandler.getFloor(board, cco.getTargetPosition());
+                        tf = CourseHandler.getFloor(course, cco.getTargetPosition());
                         break;
                     }
                 }
                 //noinspection WhileCanBeDoWhile
-                while (BoardHandler.getObjects(board, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
+                while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
                     switch (lastDirection) {
                         case NORTH:
                             y--;
@@ -425,13 +425,13 @@ public class MoveInfo {
                             x--;
                             break;
                     }
-                    tf = BoardHandler.getFloor(board, new Position(x, y));
+                    tf = CourseHandler.getFloor(course, new Position(x, y));
                     checkForAbyss(phase);
-                    for (CircuitChaosObject cco : BoardHandler.getObjects(board, new Position(x, y))) {
+                    for (CourseObject cco : CourseHandler.getObjects(course, new Position(x, y))) {
                         if (cco.getType().isPortal() && !flying) {
                             x = cco.getTargetPosition().x();
                             y = cco.getTargetPosition().y();
-                            tf = BoardHandler.getFloor(board, cco.getTargetPosition());
+                            tf = CourseHandler.getFloor(course, cco.getTargetPosition());
                             break;
                         }
                     }
@@ -443,12 +443,12 @@ public class MoveInfo {
             } else if (tf.getFloortype() == Floortype.GEARS_CCW) {
                 endingDirection = endingDirection.add(Direction.WEST);
             }
-            // board mounted lasers (resolve laser fire)
+            // course mounted lasers (resolve laser fire)
             damage = damage + tf.getLasers()[0] + tf.getLasers()[1] + tf.getLasers()[2] + tf.getLasers()[3];
             // probableTargets (resolve laser fire)
             if (!player.getRobot().isVirtual()) {
                 for (Player player2 : game.getPlayers()) {
-                    if (player2.getRobot().isOnBoard()) {
+                    if (player2.getRobot().isOnCourse()) {
                         if (!player2.getRobot().equals(player.getRobot())) {
                             if (!player2.getRobot().isVirtual()) {
                                 boolean willCheck = true;
@@ -501,7 +501,7 @@ public class MoveInfo {
                     }
                 }
             }
-            // end of phase/turn board effects
+            // end of phase/turn course effects
             if (phase == 4 &&
                     !tf.getFloortype().isConveyorBelt() &&
                     tf.getFloortype() != Floortype.GEARS_CW &&
@@ -537,8 +537,8 @@ public class MoveInfo {
                             facesTowardsCheckpoint = nextCP.getPosition().x() <= x;
                             break;
                     }
-                    int minx = board.getRange().minX();
-                    int miny = board.getRange().minY();
+                    int minx = course.getRange().minX();
+                    int miny = course.getRange().minY();
                     if ((y - miny) - (nextCP.getPosition().y() - miny) == 0) {
                         distance2 = (x - minx) - (nextCP.getPosition().x() - minx);
                     } else if ((x - minx) - (nextCP.getPosition().x() - minx) == 0) {
@@ -561,13 +561,13 @@ public class MoveInfo {
         }
     }
 
-    private boolean notBlocked(Board board, boolean backup) {
-        Floor f = BoardHandler.getFloor(board, new Position(x, y));
+    private boolean notBlocked(Course course, boolean backup) {
+        Floor f = CourseHandler.getFloor(course, new Position(x, y));
         Floor tf = switch (endingDirection) {
-            case NORTH -> BoardHandler.getFloor(board, new Position(x, backup ? y + 1 : y - 1));
-            case EAST -> BoardHandler.getFloor(board, new Position(backup ? x - 1 : x + 1, y));
-            case SOUTH -> BoardHandler.getFloor(board, new Position(x, backup ? y - 1 : y + 1));
-            case WEST -> BoardHandler.getFloor(board, new Position(backup ? x + 1 : x - 1, y));
+            case NORTH -> CourseHandler.getFloor(course, new Position(x, backup ? y + 1 : y - 1));
+            case EAST -> CourseHandler.getFloor(course, new Position(backup ? x - 1 : x + 1, y));
+            case SOUTH -> CourseHandler.getFloor(course, new Position(x, backup ? y - 1 : y + 1));
+            case WEST -> CourseHandler.getFloor(course, new Position(backup ? x + 1 : x - 1, y));
             case null -> {
                 Floor t = new Floor();
                 t.setFloortype(Floortype.ABYSS);

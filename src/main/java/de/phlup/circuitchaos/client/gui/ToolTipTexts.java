@@ -1,13 +1,13 @@
 package de.phlup.circuitchaos.client.gui;
 
-import de.phlup.circuitchaos.board.BoardHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
-import de.phlup.circuitchaos.common.model.Board;
-import de.phlup.circuitchaos.common.model.CircuitChaosObject;
+import de.phlup.circuitchaos.common.model.Course;
+import de.phlup.circuitchaos.common.model.CourseObject;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Module;
 import de.phlup.circuitchaos.common.model.Robot;
+import de.phlup.circuitchaos.course.CourseHandler;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class ToolTipTexts {
     private static final String INCREMENT = "&nbsp;&nbsp;&nbsp;&nbsp;";
     private static final String NEW_LINE  = "<br>";
 
-    public static String getToolTipText(Board board, Floor floor) {
+    public static String getToolTipText(Course course, Floor floor) {
         if (floor == null) {
             return "";
         }
@@ -61,11 +61,11 @@ public class ToolTipTexts {
                 .append(floor.getActiveInPhase()[4] ? " 5 " : "")
                 .append(NEW_LINE);
         }
-        for (CircuitChaosObject cco : BoardHandler.getObjects(board, floor.getPosition())) {
+        for (CourseObject cco : CourseHandler.getObjects(course, floor.getPosition())) {
             text.append(INCREMENT).append(NEW_LINE)
                 .append("<strong>").append(cco.getType().getName()).append("</strong>").append(NEW_LINE);
         }
-        List<Robot> robots = BoardHandler.getRobots(board, floor.getPosition());
+        List<Robot> robots = CourseHandler.getRobots(course, floor.getPosition());
         if (!robots.isEmpty()) {
             for (Robot robot : robots) {
                 text.append(getToolTipText(robot));

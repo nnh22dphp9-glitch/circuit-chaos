@@ -9,11 +9,11 @@ import java.awt.Image;
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class BoardInfo {
+public class CourseInfo {
 
     private final String name;
     private       Image  image;
-    private       Board  board;
+    private       Course course;
 
     public String toString() {
         return name;

@@ -32,12 +32,10 @@ public interface PictureConstants {
     String GFX_PUSHER    = PREFIX + "pusher/pusher-";
     String GFX_WATER     = FOLDER_FLOOR + "water/water-";
 
-    String GFX_MOVE_NORTH_ARROW   = FOLDER_ARROWS + "move-arrow-north";
-    String GFX_MOVE_EAST_ARROW    = FOLDER_ARROWS + "move-arrow-east";
-    String GFX_MOVE_SOUTH_ARROW   = FOLDER_ARROWS + "move-arrow-south";
-    String GFX_MOVE_WEST_ARROW    = FOLDER_ARROWS + "move-arrow-west";
-    String GFX_ROTATE_LEFT_ARROW  = FOLDER_ARROWS + "rotate-arrow-left";
-    String GFX_ROTATE_RIGHT_ARROW = FOLDER_ARROWS + "rotate-arrow-right";
+    String GFX_MOVE_NORTH_ARROW = FOLDER_ARROWS + "move-arrow-north";
+    String GFX_MOVE_EAST_ARROW  = FOLDER_ARROWS + "move-arrow-east";
+    String GFX_MOVE_SOUTH_ARROW = FOLDER_ARROWS + "move-arrow-south";
+    String GFX_MOVE_WEST_ARROW  = FOLDER_ARROWS + "move-arrow-west";
 
     String GFX_EXCHANGE_BEAM   = FOLDER_BEAMS + "exchange-beam";
     String GFX_LASER_BEAM_1    = FOLDER_BEAMS + "laser-beam-1";
@@ -136,7 +134,6 @@ public interface PictureConstants {
             ProgramType.U_TURN, FOLDER_PROGRAMME + "u-turn"
     );
 
-    String GFX_MODULE_BACKGROUND        = PREFIX + "module-background";
     String GFX_PROGRAMME_NOT_SET        = FOLDER_PROGRAMME + "not-set";
     String GFX_PROGRAMME_SLOT_SUFFIX    = "-slot";
     String GFX_PROGRAMME_BLOCKED_SUFFIX = "-blocked";

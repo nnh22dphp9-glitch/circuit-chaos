@@ -1,6 +1,5 @@
 package de.phlup.circuitchaos.client.service;
 
-import de.phlup.circuitchaos.board.BoardHandler;
 import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
@@ -9,16 +8,17 @@ import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.RobotType;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.enums.WallType;
-import de.phlup.circuitchaos.common.model.Board;
-import de.phlup.circuitchaos.common.model.BoardElement;
 import de.phlup.circuitchaos.common.model.Checkpoint;
-import de.phlup.circuitchaos.common.model.CircuitChaosObject;
+import de.phlup.circuitchaos.common.model.Course;
+import de.phlup.circuitchaos.common.model.CourseElement;
+import de.phlup.circuitchaos.common.model.CourseObject;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Module;
 import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.Programme;
 import de.phlup.circuitchaos.common.model.Robot;
 import de.phlup.circuitchaos.common.settings.ClientSettings.Theme;
+import de.phlup.circuitchaos.course.CourseHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -163,10 +163,10 @@ public class ImageSupplier {
         return new ImageIcon(scaleImage(i, game.getZoomFactor() * theme.getZoomFactor()));
     }
 
-    public ImageIcon getImageIconPlain(BoardElement boardElement) {
-        if (boardElement instanceof Robot r) {
+    public ImageIcon getImageIconPlain(CourseElement courseElement) {
+        if (courseElement instanceof Robot r) {
             return getImageIconPlain(getRobotImagePathAndName(r));
-        } else if (boardElement instanceof CircuitChaosObject be) {
+        } else if (courseElement instanceof CourseObject be) {
             return getImageIconPlain(getGfxOfObjectType(be.getType()));
         } else {
             return new ImageIcon();
@@ -192,9 +192,9 @@ public class ImageSupplier {
     public void redrawFloor(Floor floor, GameGui game, Step step, Integer phase, Integer subPhase, int animationSteps) {
         Robot activeRobot = null;
         if (game instanceof GameGui cg) {
-            Optional<Robot> activeRobotOptional = game.getBoard().getRobots().stream()
+            Optional<Robot> activeRobotOptional = game.getCourse().getRobots().stream()
                                                       .filter((r) -> r.getName().equals(cg.getMyRobotsName()))
-                                                      .filter(BoardElement::isOnBoard)
+                                                      .filter(CourseElement::isOnCourse)
                                                       .filter((r) -> r.getPosition().equals(floor.getPosition()))
                                                       .findFirst();
             if (activeRobotOptional.isPresent()) {
@@ -205,28 +205,28 @@ public class ImageSupplier {
     }
 
     private void redrawFloor(Position position, Floor floor, GameGui game, Robot activeRobot, Step step, Integer phase, Integer subPhase, int animationSteps) {
-        Board         board  = game.getBoard();
+        Course        course = game.getCourse();
         BufferedImage image  = getImagePlain(game, floor);
         int           damage = floor.getExplosiveDamage();
         Graphics2D    gr     = image.createGraphics();
         try {
-            drawBasicFloor(floor, game, step, phase, subPhase, board, gr, animationSteps);
-            drawCheckpoint(position, board, gr);
-            drawFlatObjects(position, subPhase, board, gr, animationSteps);
+            drawBasicFloor(floor, game, step, phase, subPhase, course, gr, animationSteps);
+            drawCheckpoint(position, course, gr);
+            drawFlatObjects(position, subPhase, course, gr, animationSteps);
             if (subPhase != null) {
-                drawFlatObjectsMoving(position, subPhase, board, gr, animationSteps);
+                drawFlatObjectsMoving(position, subPhase, course, gr, animationSteps);
                 drawBeams(floor, step, subPhase, image, animationSteps);
             }
-            drawNonFlatObjects(position, subPhase, board, gr, animationSteps);
+            drawNonFlatObjects(position, subPhase, course, gr, animationSteps);
             if (subPhase != null && subPhase < animationSteps) {
-                drawNonFlatObjectsMoving(position, subPhase, board, gr, animationSteps);
+                drawNonFlatObjectsMoving(position, subPhase, course, gr, animationSteps);
             }
-            drawRobots(position, subPhase, board, gr, animationSteps);
+            drawRobots(position, subPhase, course, gr, animationSteps);
             if (subPhase != null) {
-                drawFallingRobotsAndObjects(position, subPhase, board, gr, animationSteps);
+                drawFallingRobotsAndObjects(position, subPhase, course, gr, animationSteps);
             }
             if (subPhase == null || subPhase < animationSteps) {
-                drawRobotsMovingAndActiveRobot(position, activeRobot, step, subPhase, board, gr, animationSteps);
+                drawRobotsMovingAndActiveRobot(position, activeRobot, step, subPhase, course, gr, animationSteps);
                 // TODO auch explosion malen, wenn ein Robotor getroffen wird oder stirbt
                 drawExplosion(damage, gr, subPhase, animationSteps, getExplosionVariant(position, step));
             }
@@ -239,8 +239,8 @@ public class ImageSupplier {
         return (position.x() + position.y() + step.ordinal()) % theme.getExplosionVariants();
     }
 
-    private void drawRobotsMovingAndActiveRobot(Position position, Robot activeRobot, Step step, Integer subPhase, Board board, Graphics2D gr, int animationSteps) {
-        for (Robot r : BoardHandler.getLeavingRobots(board, position)) {
+    private void drawRobotsMovingAndActiveRobot(Position position, Robot activeRobot, Step step, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+        for (Robot r : CourseHandler.getLeavingRobots(course, position)) {
             drawRobot(r, gr, subPhase, true, animationSteps);
         }
         if (activeRobot != null && step == Step.SETUP) {
@@ -248,33 +248,33 @@ public class ImageSupplier {
         }
     }
 
-    private void drawFallingRobotsAndObjects(Position position, Integer subPhase, Board board, Graphics2D gr, int animationSteps) {
-        for (BoardElement be : BoardHandler.getFallingIntoAbyss(board, position)) {
-            drawFalling(be, gr, subPhase, false, animationSteps);
+    private void drawFallingRobotsAndObjects(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+        for (CourseElement ce : CourseHandler.getFallingIntoAbyss(course, position)) {
+            drawFalling(ce, gr, subPhase, false, animationSteps);
         }
-        for (BoardElement be : BoardHandler.getLeavingFallingIntoAbyss(board, position)) {
+        for (CourseElement be : CourseHandler.getLeavingFallingIntoAbyss(course, position)) {
             drawFalling(be, gr, subPhase, true, animationSteps);
         }
     }
 
-    private void drawRobots(Position position, Integer subPhase, Board board, Graphics2D gr, int animationSteps) {
-        for (Robot r : BoardHandler.getRobots(board, position)) {
+    private void drawRobots(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+        for (Robot r : CourseHandler.getRobots(course, position)) {
             drawRobot(r, gr, subPhase, false, animationSteps);
         }
     }
 
-    private void drawNonFlatObjectsMoving(Position position, Integer subPhase, Board board, Graphics2D gr, int animationSteps) {
-        for (CircuitChaosObject cco : BoardHandler.getLeavingObjects(board, position)) {
-            if (!cco.getType().isFlat()) {
-                drawCircuitChaosObject(cco, gr, subPhase, true, animationSteps);
+    private void drawNonFlatObjectsMoving(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+        for (CourseObject co : CourseHandler.getLeavingObjects(course, position)) {
+            if (!co.getType().isFlat()) {
+                drawCircuitChaosObject(co, gr, subPhase, true, animationSteps);
             }
         }
     }
 
-    private void drawNonFlatObjects(Position position, Integer subPhase, Board board, Graphics2D gr, int animationSteps) {
-        for (CircuitChaosObject cco : BoardHandler.getObjects(board, position)) {
-            if (!cco.getType().isFlat()) {
-                drawCircuitChaosObject(cco, gr, subPhase, false, animationSteps);
+    private void drawNonFlatObjects(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+        for (CourseObject co : CourseHandler.getObjects(course, position)) {
+            if (!co.getType().isFlat()) {
+                drawCircuitChaosObject(co, gr, subPhase, false, animationSteps);
             }
         }
     }
@@ -299,53 +299,53 @@ public class ImageSupplier {
         }
     }
 
-    private void drawFlatObjectsMoving(Position position, Integer subPhase, Board board, Graphics2D gr, int animationSteps) {
-        for (CircuitChaosObject cco : BoardHandler.getLeavingObjects(board, position)) {
+    private void drawFlatObjectsMoving(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+        for (CourseObject cco : CourseHandler.getLeavingObjects(course, position)) {
             if (cco.getType().isFlat()) {
                 drawCircuitChaosObject(cco, gr, subPhase, true, animationSteps);
             }
         }
     }
 
-    private void drawFlatObjects(Position position, Integer subPhase, Board board, Graphics2D gr, int animationSteps) {
-        for (CircuitChaosObject cco : BoardHandler.getObjects(board, position)) {
+    private void drawFlatObjects(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+        for (CourseObject cco : CourseHandler.getObjects(course, position)) {
             if (cco.getType().isFlat()) {
                 drawCircuitChaosObject(cco, gr, subPhase, false, animationSteps);
             }
         }
     }
 
-    private void drawBasicFloor(Floor floor, GameGui game, Step step, Integer phase, Integer subPhase, Board board, Graphics2D gr, int animationSteps) {
-        BufferedImage bi = getFloorImage(floor, board, game.isNotStartedYet(), step, phase, subPhase, animationSteps);
+    private void drawBasicFloor(Floor floor, GameGui game, Step step, Integer phase, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+        BufferedImage bi = getFloorImage(floor, course, game.isNotStartedYet(), step, phase, subPhase, animationSteps);
         gr.drawImage(bi, new AffineTransform(), null);
     }
 
-    private void drawCheckpoint(Position position, Board board, Graphics2D gr) {
-        Checkpoint cp = BoardHandler.getCheckpoint(board, position);
+    private void drawCheckpoint(Position position, Course course, Graphics2D gr) {
+        Checkpoint cp = CourseHandler.getCheckpoint(course, position);
         if (cp != null) {
-            int maxCheckpoint = board.getCheckpoints().size() - 1;
+            int maxCheckpoint = course.getCheckpoints().size() - 1;
             drawCheckpoint(cp, gr, maxCheckpoint);
         }
     }
 
     private void drawRobot(Robot robot, Graphics2D gr, Integer subPhase, boolean leaving, int animationSteps) {
         String picture = getRobotImagePathAndName(robot);
-        drawBoardElement(robot, gr, subPhase, leaving, picture, animationSteps);
+        drawCourseElement(robot, gr, subPhase, leaving, picture, animationSteps);
     }
 
-    private void drawFalling(BoardElement be, Graphics2D gr, int subPhase, boolean leaving, int animationSteps) {
+    private void drawFalling(CourseElement be, Graphics2D gr, int subPhase, boolean leaving, int animationSteps) {
         String picture = be instanceof Robot r ? getRobotImagePathAndName(r) :
-                be instanceof CircuitChaosObject cco ? getGfxOfObjectType(cco.getType()) : null;
+                be instanceof CourseObject cco ? getGfxOfObjectType(cco.getType()) : null;
         if (picture != null) {
             if (subPhase < animationSteps) {
-                drawBoardElement(be, gr, subPhase, leaving, picture, animationSteps);
+                drawCourseElement(be, gr, subPhase, leaving, picture, animationSteps);
             } else if (!leaving) {
                 drawFalling(be, gr, subPhase - animationSteps, picture, animationSteps);
             }
         }
     }
 
-    private void drawFalling(BoardElement be, Graphics2D gr, int subPhase, String picture, int animationSteps) {
+    private void drawFalling(CourseElement be, Graphics2D gr, int subPhase, String picture, int animationSteps) {
         Image         image  = getImageIconPlain(picture).getImage();
         BufferedImage image2 = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
         Graphics2D    gr2    = image2.createGraphics();
@@ -361,7 +361,7 @@ public class ImageSupplier {
         gr.translate(-offset, -offset);
     }
 
-    private void drawBoardElement(BoardElement be, Graphics2D gr, Integer subPhase, boolean leaving, String picture, int animationSteps) {
+    private void drawCourseElement(CourseElement be, Graphics2D gr, Integer subPhase, boolean leaving, String picture, int animationSteps) {
         Image pictureImage = getImageIconPlain(picture).getImage();
         if (subPhase == null || subPhase >= animationSteps || be.getPosition().equals(be.getPrevPosition())) {
             if (!leaving) {
@@ -403,7 +403,7 @@ public class ImageSupplier {
         }
     }
 
-    private double calculateRotation(BoardElement be, Integer subPhase, int animationSteps) {
+    private double calculateRotation(CourseElement be, Integer subPhase, int animationSteps) {
         if (subPhase == null) {
             return 0.0;
         }
@@ -416,7 +416,7 @@ public class ImageSupplier {
         return target * subPhase * Math.PI / animationSteps;
     }
 
-    private Direction calculateMovingDirectionAccordingToBE(BoardElement be) {
+    private Direction calculateMovingDirectionAccordingToBE(CourseElement be) {
         if (be.getPosition().y() < be.getPrevPosition().y()) {
             return be.getDirection().add(NORTH);
         } else if (be.getPosition().y() > be.getPrevPosition().y()) {
@@ -457,7 +457,7 @@ public class ImageSupplier {
         gr.drawImage(i, 0, 0, null);
     }
 
-    private void drawCircuitChaosObject(CircuitChaosObject cco, Graphics2D gr, Integer subPhase, boolean leaving, int animationSteps) {
+    private void drawCircuitChaosObject(CourseObject cco, Graphics2D gr, Integer subPhase, boolean leaving, int animationSteps) {
         String picture = getGfxOfObjectType(cco.getType());
         if (cco.getType() == ObjectType.GLUE) {
             picture = picture + ((int) (cco.getVariantSeed() * theme.getGlueVariants()));
@@ -465,7 +465,7 @@ public class ImageSupplier {
         if (cco.getType() == ObjectType.OIL) {
             picture = picture + ((int) (cco.getVariantSeed() * theme.getOilVariants()));
         }
-        drawBoardElement(cco, gr, subPhase, leaving, picture, animationSteps);
+        drawCourseElement(cco, gr, subPhase, leaving, picture, animationSteps);
     }
 
     private void drawBeams(int amount, Graphics2D gr, boolean westEastDirection, Integer subPhase, int animationSteps, ModuleType type) {
@@ -502,7 +502,7 @@ public class ImageSupplier {
         }
     }
 
-    private BufferedImage getFloorImage(Floor floor, Board board, boolean gameIsNotStartedYet,
+    private BufferedImage getFloorImage(Floor floor, Course course, boolean gameIsNotStartedYet,
                                         Step step, Integer phase, Integer subPhase, int animationSteps) {
         Direction     rotation = determineRotation(floor);
         BufferedImage bi       = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
@@ -512,25 +512,25 @@ public class ImageSupplier {
 
             addGround(floor, rotation, gr, step, subPhase, animationSteps);
             addTrapdoor(floor, step, phase, subPhase, gr, rotation, animationSteps);
-            modifyAbyssEdges(board, floor, gr);
+            modifyAbyssEdges(course, floor, gr);
             addPusher(floor, gr, gameIsNotStartedYet, step, phase, subPhase, animationSteps);
-            if (step == Step.BOARD_MOUNTED_LASER_FIRE || gameIsNotStartedYet) {
-                drawBeams(floor.getBoardMountedLaserBeamsNS(), gr, false, subPhase, animationSteps, MAIN_LASER);
-                drawBeams(floor.getBoardMountedLaserBeamsWE(), gr, true, subPhase, animationSteps, MAIN_LASER);
+            if (step == Step.COURSE_MOUNTED_LASER_FIRE || gameIsNotStartedYet) {
+                drawBeams(floor.getCourseMountedLaserBeamsNS(), gr, false, subPhase, animationSteps, MAIN_LASER);
+                drawBeams(floor.getCourseMountedLaserBeamsWE(), gr, true, subPhase, animationSteps, MAIN_LASER);
             }
-            if (step == Step.BOARD_MOUNTED_PRESSURE_BEAMS_FIRE || gameIsNotStartedYet) {
-                if (floor.isBoardMountedPressureBeamsNS()) {
+            if (step == Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE || gameIsNotStartedYet) {
+                if (floor.isCourseMountedPressureBeamsNS()) {
                     drawBeams(1, gr, false, subPhase, animationSteps, PRESSURE_BEAM);
                 }
-                if (floor.isBoardMountedPressureBeamsWE()) {
+                if (floor.isCourseMountedPressureBeamsWE()) {
                     drawBeams(1, gr, true, subPhase, animationSteps, PRESSURE_BEAM);
                 }
             }
-            if (step == Step.BOARD_MOUNTED_TRACTOR_BEAMS_FIRE || gameIsNotStartedYet) {
-                if (floor.isBoardMountedTractorBeamsNS()) {
+            if (step == Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE || gameIsNotStartedYet) {
+                if (floor.isCourseMountedTractorBeamsNS()) {
                     drawBeams(1, gr, false, subPhase, animationSteps, TRACTOR_BEAM);
                 }
-                if (floor.isBoardMountedTractorBeamsWE()) {
+                if (floor.isCourseMountedTractorBeamsWE()) {
                     drawBeams(1, gr, true, subPhase, animationSteps, TRACTOR_BEAM);
                 }
             }
@@ -664,18 +664,18 @@ public class ImageSupplier {
         addToImage(GFX_WALL_TYPE.get(floor) + suffix, north, gr);
     }
 
-    private void modifyAbyssEdges(Board board, Floor floor, Graphics2D gr) {
+    private void modifyAbyssEdges(Course course, Floor floor, Graphics2D gr) {
         Floortype floortype = floor.getFloortype();
         if (floortype == Floortype.ABYSS) {
-            Floor floorWest  = BoardHandler.getFloor(board, floor.getPosition().neighbour(WEST));
-            Floor floorSouth = BoardHandler.getFloor(board, floor.getPosition().neighbour(SOUTH));
-            Floor floorEast  = BoardHandler.getFloor(board, floor.getPosition().neighbour(EAST));
-            Floor floorNorth = BoardHandler.getFloor(board, floor.getPosition().neighbour(NORTH));
-            addPlatformEdgesOnAbyss(board, gr, floorNorth, floorWest, floorEast, floorSouth);
+            Floor floorWest  = CourseHandler.getFloor(course, floor.getPosition().neighbour(WEST));
+            Floor floorSouth = CourseHandler.getFloor(course, floor.getPosition().neighbour(SOUTH));
+            Floor floorEast  = CourseHandler.getFloor(course, floor.getPosition().neighbour(EAST));
+            Floor floorNorth = CourseHandler.getFloor(course, floor.getPosition().neighbour(NORTH));
+            addPlatformEdgesOnAbyss(course, gr, floorNorth, floorWest, floorEast, floorSouth);
         }
     }
 
-    private void addPlatformEdgesOnAbyss(Board board, Graphics2D gr, Floor floorNorth, Floor floorWest, Floor floorEast, Floor floorSouth) {
+    private void addPlatformEdgesOnAbyss(Course course, Graphics2D gr, Floor floorNorth, Floor floorWest, Floor floorEast, Floor floorSouth) {
         if (floorNorth.getFloortype() != Floortype.ABYSS || floorNorth.isWater()) {
             addToImage(GFX_ABYSS_N, NORTH, gr);
             if (floorWest.getFloortype() == Floortype.ABYSS) {
@@ -713,19 +713,19 @@ public class ImageSupplier {
             }
         }
         if (floorNorth.getFloortype() == Floortype.ABYSS && floorEast.getFloortype() == Floortype.ABYSS
-                && BoardHandler.getFloor(board, floorNorth.getPosition().neighbour(EAST)).getFloortype() != Floortype.ABYSS) {
+                && CourseHandler.getFloor(course, floorNorth.getPosition().neighbour(EAST)).getFloortype() != Floortype.ABYSS) {
             addToImage(GFX_ABYSS_NE, NORTH, gr);
         }
         if (floorNorth.getFloortype() == Floortype.ABYSS && floorWest.getFloortype() == Floortype.ABYSS
-                && BoardHandler.getFloor(board, floorNorth.getPosition().neighbour(WEST)).getFloortype() != Floortype.ABYSS) {
+                && CourseHandler.getFloor(course, floorNorth.getPosition().neighbour(WEST)).getFloortype() != Floortype.ABYSS) {
             addToImage(GFX_ABYSS_NW, NORTH, gr);
         }
         if (floorSouth.getFloortype() == Floortype.ABYSS && floorEast.getFloortype() == Floortype.ABYSS
-                && BoardHandler.getFloor(board, floorSouth.getPosition().neighbour(EAST)).getFloortype() != Floortype.ABYSS) {
+                && CourseHandler.getFloor(course, floorSouth.getPosition().neighbour(EAST)).getFloortype() != Floortype.ABYSS) {
             addToImage(GFX_ABYSS_SE, NORTH, gr);
         }
         if (floorSouth.getFloortype() == Floortype.ABYSS && floorWest.getFloortype() == Floortype.ABYSS
-                && BoardHandler.getFloor(board, floorSouth.getPosition().neighbour(WEST)).getFloortype() != Floortype.ABYSS) {
+                && CourseHandler.getFloor(course, floorSouth.getPosition().neighbour(WEST)).getFloortype() != Floortype.ABYSS) {
             addToImage(GFX_ABYSS_SW, NORTH, gr);
         }
     }

@@ -28,9 +28,9 @@ public abstract class ClientAnswerWindow {
         response.setFilled(true);
         mainFrame = new JFrame("Circuit Chaos - %s - %s - %s".formatted(gameAttributes.getRegistration().getGameName(), request.getMyRobot().getName(), title));
         mainFrame.setVisible(false);
-        JFrame boardFrame = gameAttributes.getGameGui().getMainFrame();
-        mainFrame.setLocationRelativeTo(boardFrame);
-        mainFrame.setLocation(mainFrame.getLocation().x - boardFrame.getWidth() / 2 + 10,
+        JFrame courseFrame = gameAttributes.getGameGui().getMainFrame();
+        mainFrame.setLocationRelativeTo(courseFrame);
+        mainFrame.setLocation(mainFrame.getLocation().x - courseFrame.getWidth() / 2 + 10,
                               mainFrame.getLocation().y + 120);
     }
 

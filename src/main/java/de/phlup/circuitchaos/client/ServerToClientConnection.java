@@ -1,7 +1,7 @@
 package de.phlup.circuitchaos.client;
 
 import de.phlup.circuitchaos.common.enums.Step;
-import de.phlup.circuitchaos.common.model.Board;
+import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.Registration;
 import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
@@ -23,28 +23,28 @@ public class ServerToClientConnection {
     private final RestClient restClient;
 
     /**
-     * @see ClientController refreshBoard(String  NetworkRequest)
+     * @see ClientController refreshCourse(String  NetworkRequest)
      */
     // Nicht Async - Animationen könnten kaputtgehen
-    public void notifyOfBoardChange(Registration registration, Board board, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
-        log.debug("Send notifyOfBoardChange request");
+    public void notifyOfCourseChange(Registration registration, Course course, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
+        log.debug("Send notifyOfCourseChange request");
         try {
             NetworkRequest programRequest = new NetworkRequest();
-            programRequest.setBoard(board);
-            programRequest.setReasonForBoardChange(reason);
+            programRequest.setCourse(course);
+            programRequest.setReasonForCourseChange(reason);
             programRequest.setStep(step);
             programRequest.setPhase(phase);
             programRequest.setSubPhase(subPhase);
             programRequest.setAnimationSteps(animationSteps);
             programRequest.setMovingRobotName(movingRobotName);
             restClient.post()
-                      .uri(URI.create(registration.getUrl() + "/board"))
+                      .uri(URI.create(registration.getUrl() + "/course"))
                       .contentType(MediaType.APPLICATION_JSON)
                       .body(programRequest)
                       .retrieve()
                       .toBodilessEntity();
         } catch (HttpStatusCodeException e) {
-            log.info("notifyOfBoardChange: Ignoring http exception: {}: {}", e.getClass().getSimpleName(), e.getMessage());
+            log.info("notifyOfCourseChange: Ignoring http exception: {}: {}", e.getClass().getSimpleName(), e.getMessage());
         } catch (Exception e) {
             log.info("Ignoring exception", e);
         }

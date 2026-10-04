@@ -1,6 +1,6 @@
 package de.phlup.circuitchaos.client;
 
-import de.phlup.circuitchaos.client.gui.ClientBoardArranger;
+import de.phlup.circuitchaos.client.gui.ClientCourseArranger;
 import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.client.service.AsyncService;
 import de.phlup.circuitchaos.common.CircuitChaosException;
@@ -30,17 +30,17 @@ public class ClientController {
     private final AsyncService asyncService;
 
     /**
-     * @see de.phlup.circuitchaos.client.ServerToClientConnection notifyOfBoardChange(Registration, Board, String, Step, Integer)
+     * @see de.phlup.circuitchaos.client.ServerToClientConnection notifyOfCourseChange(Registration, Course, String, Step, Integer)
      */
-    @PostMapping("/{registrationId}/board")
-    public ResponseEntity<Void> refreshBoard(@PathVariable("registrationId") String registrationId,
-                                             @RequestBody NetworkRequest request) {
-        if (!StringUtils.hasText(registrationId) || request == null || request.getBoard() == null) {
+    @PostMapping("/{registrationId}/course")
+    public ResponseEntity<Void> refreshCourse(@PathVariable("registrationId") String registrationId,
+                                              @RequestBody NetworkRequest request) {
+        if (!StringUtils.hasText(registrationId) || request == null || request.getCourse() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        log.debug("Received refreshBoard request");
+        log.debug("Received refreshCourse request");
         GameGui gameGui = determineGame(registrationId);
-        asyncService.refreshBoard(gameGui, request);
+        asyncService.refreshCourse(gameGui, request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -104,9 +104,9 @@ public class ClientController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         log.debug("Received numberOfPlayersChanged request");
-        ClientBoardArranger boardArranger = determineGame(registrationId).getBoardArranger();
-        if (boardArranger != null) {
-            boardArranger.updatePlayersAndWatchers(numberOfPlayers, numberOfWatchers);
+        ClientCourseArranger courseArranger = determineGame(registrationId).getCourseArranger();
+        if (courseArranger != null) {
+            courseArranger.updatePlayersAndWatchers(numberOfPlayers, numberOfWatchers);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

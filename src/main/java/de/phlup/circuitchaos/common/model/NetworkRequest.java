@@ -10,13 +10,13 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NetworkRequest {
 
-    private Board   board;
+    private Course  course;
     private Robot   myRobot;
     private Step    step;
     private Integer phase;
     private Integer subPhase;
     private Integer animationSteps;
     private String  movingRobotName;
-    private String  reasonForBoardChange;
+    private String  reasonForCourseChange;
 
 }

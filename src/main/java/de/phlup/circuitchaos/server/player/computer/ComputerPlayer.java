@@ -2,8 +2,8 @@ package de.phlup.circuitchaos.server.player.computer;
 
 import de.phlup.circuitchaos.common.enums.ComputerType;
 import de.phlup.circuitchaos.common.enums.Direction;
-import de.phlup.circuitchaos.common.model.Board;
 import de.phlup.circuitchaos.common.model.Checkpoint;
+import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.Programme;
 import de.phlup.circuitchaos.common.model.Robot;
@@ -48,7 +48,7 @@ public class ComputerPlayer extends Player {
         Robot robot1 = getRobot();
         if (isMakesGoodMoves()) {
             if (!robot1.isPoweredDown()) {
-                Board       gameboard  = game.getBoard();
+                Course      gameCourse = game.getCourse();
                 MoveInfo    chosenMove = null;
                 Programme[] program    = new Programme[5];
                 for (int pr1 = 0; pr1 < robot.getPotentialProgramme().size(); pr1++) {
@@ -155,12 +155,12 @@ public class ComputerPlayer extends Player {
                                                         } else if (chosenMove.getReachesCheckpoint() == 6) {
                                                             if (chosenMove.getDistance2() < 5 || mi.getDistance2() < 5) {
                                                                 if (mi.getDistance() == Integer.MAX_VALUE) {
-                                                                    mi.setDistance(DistanceCalculator.calculateDistance(gameboard, new Position(mi.getX(), mi.getY()), nextCP.getPosition(), 100));
+                                                                    mi.setDistance(DistanceCalculator.calculateDistance(gameCourse, new Position(mi.getX(), mi.getY()), nextCP.getPosition(), 100));
                                                                 }
                                                                 if (chosenMove.getDistance() == Integer.MAX_VALUE) {
                                                                     chosenMove.setDistance(
                                                                             DistanceCalculator
-                                                                                    .calculateDistance(gameboard, new Position(chosenMove.getX(), chosenMove.getY()), nextCP.getPosition(), 100));
+                                                                                    .calculateDistance(gameCourse, new Position(chosenMove.getX(), chosenMove.getY()), nextCP.getPosition(), 100));
                                                                 }
                                                             }
                                                             if ((chosenMove.getDistance2() < 5 || mi.getDistance2() < 5) && chosenMove.getDistance() < mi.getDistance()) {
@@ -233,12 +233,12 @@ public class ComputerPlayer extends Player {
                                                         } else if (chosenMove.getReachesCheckpoint() == 6) {
                                                             if (chosenMove.getDistance2() < 5 || mi.getDistance2() < 5) {
                                                                 if (mi.getDistance() == Integer.MAX_VALUE) {
-                                                                    mi.setDistance(DistanceCalculator.calculateDistance(gameboard, new Position(mi.getX(), mi.getY()), nextCP.getPosition(), 100));
+                                                                    mi.setDistance(DistanceCalculator.calculateDistance(gameCourse, new Position(mi.getX(), mi.getY()), nextCP.getPosition(), 100));
                                                                 }
                                                                 if (chosenMove.getDistance() == Integer.MAX_VALUE) {
                                                                     chosenMove.setDistance(
                                                                             DistanceCalculator
-                                                                                    .calculateDistance(gameboard, new Position(chosenMove.getX(), chosenMove.getY()), nextCP.getPosition(), 100));
+                                                                                    .calculateDistance(gameCourse, new Position(chosenMove.getX(), chosenMove.getY()), nextCP.getPosition(), 100));
                                                                 }
                                                             }
                                                             if ((chosenMove.getDistance2() < 5 || mi.getDistance2() < 5) && chosenMove.getDistance() < mi.getDistance()) {
@@ -350,7 +350,7 @@ public class ComputerPlayer extends Player {
     private void initMoveInfo() {
         Game game = GlobalServerAttributes.getGame(gameId);
         nextCP = null;
-        for (Checkpoint cp : game.getBoard().getCheckpoints()) {
+        for (Checkpoint cp : game.getCourse().getCheckpoints()) {
             if (cp.getNumber() == robot.getNextCheckpoint()) {
                 nextCP = cp;
                 break;

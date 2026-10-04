@@ -3,8 +3,8 @@ package de.phlup.circuitchaos.client.gui;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.enums.ComputerType;
-import de.phlup.circuitchaos.common.model.Board;
-import de.phlup.circuitchaos.common.model.BoardInfo;
+import de.phlup.circuitchaos.common.model.Course;
+import de.phlup.circuitchaos.common.model.CourseInfo;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
 import de.phlup.circuitchaos.common.settings.GameSettings;
 import de.phlup.circuitchaos.server.game.GameOptions;
@@ -34,40 +34,40 @@ import java.util.Collection;
 import java.util.Objects;
 
 @Slf4j
-public class ClientBoardArranger implements GuiHelper {
+public class ClientCourseArranger implements GuiHelper {
 
     private final ImageSupplier imageSupplier;
     private final JFrame        frame = new JFrame("CC");
 
     // arrangement
 
-    private final JComboBox<BoardInfo> boardList = new JComboBox<>();
+    private final JComboBox<CourseInfo> courseList = new JComboBox<>();
 
-    private final JButton chooseBoardButton = new JButton("Choose");
+    private final JButton chooseCourseButton = new JButton("Choose");
     @Getter
-    private final JButton playButton        = new JButton("Play");
-    private final JPanel  chooserPanel      = new JPanel(new BorderLayout());
-    private final JLabel  regPlayers        = new JLabel(" 1 ");
-    private final JLabel  regWatchers       = new JLabel(" 0 ");
+    private final JButton playButton         = new JButton("Play");
+    private final JPanel  chooserPanel       = new JPanel(new BorderLayout());
+    private final JLabel  regPlayers         = new JLabel(" 1 ");
+    private final JLabel  regWatchers        = new JLabel(" 0 ");
 
     @SuppressWarnings("unchecked")
-    private final JComboBox<String>[]   computerTypes = new JComboBox[7];
-    private final Collection<BoardInfo> boardInfos;
-    private final ObjectMapper          objectMapper;
-    private final ClientSettings        clientSettings;
+    private final JComboBox<String>[]    computerTypes = new JComboBox[7];
+    private final Collection<CourseInfo> courseInfos;
+    private final ObjectMapper           objectMapper;
+    private final ClientSettings         clientSettings;
 
-    private JLabel boardPreview = new JLabel();
+    private JLabel coursePreview = new JLabel();
 
 
-    public ClientBoardArranger(GameGui game, GameSettings gameSettings, Collection<BoardInfo> boards, ObjectMapper objectMapper, ClientSettings clientSettings) {
+    public ClientCourseArranger(GameGui game, GameSettings gameSettings, Collection<CourseInfo> courses, ObjectMapper objectMapper, ClientSettings clientSettings) {
         imageSupplier = game.getImageSupplier();
-        boardInfos = boards;
+        courseInfos = courses;
         this.objectMapper = objectMapper;
         this.clientSettings = clientSettings;
 
         JPanel borderPanel = new JPanel(new BorderLayout());
         JPanel mainPanel   = new JPanel(new BorderLayout());
-        mainPanel.add(createBoardChooser(game), BorderLayout.NORTH);
+        mainPanel.add(createCourseChooser(game), BorderLayout.NORTH);
         mainPanel.add(createPlayersDisplay(), BorderLayout.CENTER);
         mainPanel.add(createComputerPlayerChooser(gameSettings), BorderLayout.SOUTH);
         borderPanel.add(mainPanel, BorderLayout.CENTER);
@@ -122,38 +122,38 @@ public class ClientBoardArranger implements GuiHelper {
         return compPlayers;
     }
 
-    private JPanel createBoardChooser(GameGui game) {
-        JPanel boardChooser = new JPanel(new BorderLayout());
-        boardList.setEditable(false);
-        BoardInfo item = new BoardInfo("Choose a board!");
+    private JPanel createCourseChooser(GameGui game) {
+        JPanel courseChooser = new JPanel(new BorderLayout());
+        courseList.setEditable(false);
+        CourseInfo item = new CourseInfo("Choose a course!");
         item.setImage(imageSupplier.getImageIconPlain(PictureConstants.GFX_PICTURE).getImage());
-        boardList.addItem(item);
-        for (BoardInfo bi : boardInfos) {
-            boardList.addItem(bi);
+        courseList.addItem(item);
+        for (CourseInfo bi : courseInfos) {
+            courseList.addItem(bi);
         }
-        boardList.addActionListener(new AbstractAction() {
+        courseList.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                chooseBoardButton.setEnabled(boardList.getSelectedIndex() > 0);
+                chooseCourseButton.setEnabled(courseList.getSelectedIndex() > 0);
                 redrawPreview();
             }
         });
-        boardChooser.add(boardList, BorderLayout.CENTER);
+        courseChooser.add(courseList, BorderLayout.CENTER);
 
-        chooseBoardButton.addActionListener(new AbstractAction() {
+        chooseCourseButton.addActionListener(new AbstractAction() {
             @Override
             @SneakyThrows
             public void actionPerformed(ActionEvent e) {
-                if (boardList.getSelectedIndex() > 0) {
-                    BoardInfo selectedItem = (BoardInfo) boardList.getSelectedItem();
-                    if (selectedItem != null && selectedItem.getBoard() != null) {
-                        Board board = copy(selectedItem.getBoard());
-                        game.getClientToServerConnection().setBoard(game.getGameAttributes().getGameUrl(), board);
+                if (courseList.getSelectedIndex() > 0) {
+                    CourseInfo selectedItem = (CourseInfo) courseList.getSelectedItem();
+                    if (selectedItem != null && selectedItem.getCourse() != null) {
+                        Course course = copy(selectedItem.getCourse());
+                        game.getClientToServerConnection().setCourse(game.getGameAttributes().getGameUrl(), course);
                     }
                 }
             }
         });
-        chooseBoardButton.setEnabled(false);
+        chooseCourseButton.setEnabled(false);
 
         playButton.addActionListener(new AbstractAction() {
             @Override
@@ -175,40 +175,40 @@ public class ClientBoardArranger implements GuiHelper {
         playButton.setEnabled(false);
 
         JPanel buttonPanel = new JPanel(new BorderLayout());
-        buttonPanel.add(chooseBoardButton, BorderLayout.NORTH);
+        buttonPanel.add(chooseCourseButton, BorderLayout.NORTH);
         buttonPanel.add(new JLabel(" "), BorderLayout.CENTER);
         buttonPanel.add(playButton, BorderLayout.SOUTH);
-        boardChooser.add(buttonPanel, BorderLayout.SOUTH);
+        courseChooser.add(buttonPanel, BorderLayout.SOUTH);
 
-        chooserPanel.add(boardChooser, BorderLayout.SOUTH);
+        chooserPanel.add(courseChooser, BorderLayout.SOUTH);
         redrawPreview();
         return chooserPanel;
     }
 
-    public Board copy(Board board) {
-        if (board == null) {
+    public Course copy(Course course) {
+        if (course == null) {
             return null;
         }
-        return objectMapper.convertValue(board, Board.class);
+        return objectMapper.convertValue(course, Course.class);
     }
 
     private void redrawPreview() {
-        chooserPanel.remove(boardPreview);
+        chooserPanel.remove(coursePreview);
         BufferedImage bi = new BufferedImage(150, 231, BufferedImage.TYPE_INT_ARGB);
         Graphics2D    gr = bi.createGraphics();
-        if (boardList.getSelectedIndex() > 0) {
-            BoardInfo boardInfo = (BoardInfo) boardList.getSelectedItem();
-            String    bild      = PictureConstants.GFX_LOGO_SMALL;
+        if (courseList.getSelectedIndex() > 0) {
+            CourseInfo courseInfo = (CourseInfo) courseList.getSelectedItem();
+            String     bild       = PictureConstants.GFX_LOGO_SMALL;
             gr.drawImage(imageSupplier.getImageIconPlain(bild).getImage(), 0, 0, null);
             gr.translate(0, 81);
-            gr.drawImage(Objects.requireNonNull(boardInfo).getImage(), 0, 0, null);
+            gr.drawImage(Objects.requireNonNull(courseInfo).getImage(), 0, 0, null);
         } else {
             gr.drawImage(imageSupplier.getImageIconPlain(PictureConstants.GFX_LOGO_SMALL).getImage(), 0, 0, null);
             gr.translate(0, 81);
             gr.drawImage(imageSupplier.getImageIconPlain(PictureConstants.GFX_PICTURE).getImage(), 0, 0, null);
         }
-        boardPreview = new JLabel(imageSupplier.getImageIconPlain(bi));
-        chooserPanel.add(boardPreview, BorderLayout.CENTER);
+        coursePreview = new JLabel(imageSupplier.getImageIconPlain(bi));
+        chooserPanel.add(coursePreview, BorderLayout.CENTER);
         chooserPanel.validate();
     }
 

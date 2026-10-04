@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class Robot extends BoardElement {
+public class Robot extends CourseElement {
 
     private String          id;
     private int             damage                 = 0;
@@ -57,7 +57,7 @@ public class Robot extends BoardElement {
         setPrevDirection(networkRobot.getPrevDirection());
         System.arraycopy(networkRobot.getProgram(), 0, getProgram(), 0,
                          Math.min(networkRobot.getProgram().length, getProgram().length));
-        setOnBoard(networkRobot.isOnBoard());
+        setOnCourse(networkRobot.isOnCourse());
         damage = networkRobot.getDamage();
         archivePosition = networkRobot.getArchivePosition();
         archiveLevel = networkRobot.getArchiveLevel();

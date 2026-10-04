@@ -1,7 +1,7 @@
 package de.phlup.circuitchaos.client;
 
 import de.phlup.circuitchaos.common.CircuitChaosException;
-import de.phlup.circuitchaos.common.model.Board;
+import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.GameItem;
 import de.phlup.circuitchaos.common.model.GameItemsWrapper;
 import de.phlup.circuitchaos.common.model.NetworkResponse;
@@ -101,14 +101,14 @@ public class ClientToServerConnection {
     }
 
     /**
-     * @see ServerController setBoard(String gameId, Board board)
+     * @see ServerController setCourse(String gameId, Course course)
      */
-    public void setBoard(String gameUrl, Board board) {
-        log.debug("Send setBoard request");
+    public void setCourse(String gameUrl, Course course) {
+        log.debug("Send setCourse request");
         showErrorMessage(() -> restClient.post()
-                                         .uri(URI.create(gameUrl + "/board"))
+                                         .uri(URI.create(gameUrl + "/course"))
                                          .contentType(MediaType.APPLICATION_JSON)
-                                         .body(board)
+                                         .body(course)
                                          .retrieve()
                                          .toBodilessEntity());
     }
@@ -136,15 +136,15 @@ public class ClientToServerConnection {
     }
 
     /**
-     * @see ServerController getBoard(String gameId)
+     * @see ServerController getCouse(String gameId)
      */
-    public Board getBoard(String gameUrl) {
-        log.debug("Send getBoard request");
+    public Course getCourse(String gameUrl) {
+        log.debug("Send getCourse request");
         return showErrorMessage(() -> restClient.get()
-                                                .uri(URI.create(gameUrl + "/board"))
+                                                .uri(URI.create(gameUrl + "/course"))
                                                 .accept(MediaType.APPLICATION_JSON)
                                                 .retrieve()
-                                                .body(Board.class));
+                                                .body(Course.class));
     }
 
     /**

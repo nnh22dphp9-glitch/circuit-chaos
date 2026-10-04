@@ -3,7 +3,7 @@ package de.phlup.circuitchaos.common.model;
 import lombok.Data;
 
 @Data
-public class BoardProperties {
+public class CourseProperties {
 
     private boolean lasers;
     private boolean pressureBeams;

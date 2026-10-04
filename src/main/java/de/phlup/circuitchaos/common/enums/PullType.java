@@ -2,7 +2,7 @@ package de.phlup.circuitchaos.common.enums;
 
 public enum PullType {
 
-    BOARD_CHANGE,
+    COURSE_CHANGE,
     SHOW_MESSAGE,
     REVEAL_PROGRAMME,
     PROGRAMME_QUESTION,

@@ -4,8 +4,8 @@ import de.phlup.circuitchaos.client.ClientToServerConnection;
 import de.phlup.circuitchaos.client.service.AudioSupplier;
 import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.enums.Step;
-import de.phlup.circuitchaos.common.model.Board;
-import de.phlup.circuitchaos.common.model.BoardElement;
+import de.phlup.circuitchaos.common.model.Course;
+import de.phlup.circuitchaos.common.model.CourseElement;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.Position;
@@ -69,16 +69,16 @@ public class GameGui {
     private final JPanel            revealPanel     = new JPanel(new FlowLayout());
     private final JCheckBoxMenuItem soundMenuItem   = new JCheckBoxMenuItem("Sound", true);
 
-    private       Board       board;
-    private final BoardJPanel boardJPanel;
+    private       Course       course;
+    private final CourseJPanel courseJPanel;
 
     @Setter
     private boolean notStartedYet = true;
     private boolean gameEnded     = false;
 
     @Setter
-    private       ClientBoardArranger          boardArranger = null;
-    private final Map<Position, BufferedImage> images        = new HashMap<>();
+    private       ClientCourseArranger         courseArranger = null;
+    private final Map<Position, BufferedImage> images         = new HashMap<>();
     private       float                        zoomFactor;
 
     public GameGui(@NotNull ResourceLoader resourceLoader,
@@ -92,19 +92,19 @@ public class GameGui {
         Theme theme = determineTheme();
         this.audioSupplier.setThemePath(theme.getPath());
         this.imageSupplier = new ImageSupplier(theme, resourceLoader);
-        boardJPanel = new BoardJPanel(imageSupplier);
+        courseJPanel = new CourseJPanel(imageSupplier);
         this.clientToServerConnection = clientToServerConnection;
         this.gameAttributes = gameAttributes;
         this.zoomFactor = clientSettings.getDefaultZoom();
         GlobalServerAttributes.CLIENT_GAMES.put(gameAttributes.getRegistration().getId(), gameAttributes);
-        board = clientToServerConnection.getBoard(gameAttributes.getGameUrl());
-        synchronized (boardJPanel) {
-            boardJPanel.arrangeElements(this, Step.GIVE_UP, null, null, 1);
+        course = clientToServerConnection.getCourse(gameAttributes.getGameUrl());
+        synchronized (courseJPanel) {
+            courseJPanel.arrangeElements(this, Step.GIVE_UP, null, null, 1);
         }
-        JScrollPane boardPane = new JScrollPane(boardJPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        boardPane.setPreferredSize(new Dimension(clientSettings.getDefaultBoardSizeX(), clientSettings.getDefaultBoardSizeY()));
-        mainFrame.setTitle("Circuit Chaos Board - %s - Game has not been started yet - %s".formatted(gameAttributes.getRegistration().getGameName(), Step.SETUP.getName()));
-        mainFrame.setContentPane(boardPane);
+        JScrollPane coursePane = new JScrollPane(courseJPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        coursePane.setPreferredSize(new Dimension(clientSettings.getDefaultCourseSizeX(), clientSettings.getDefaultCourseSizeY()));
+        mainFrame.setTitle("Circuit Chaos Course - %s - Game has not been started yet - %s".formatted(gameAttributes.getRegistration().getGameName(), Step.SETUP.getName()));
+        mainFrame.setContentPane(coursePane);
         mainFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         mainFrame.setResizable(true);
         addMenuBar(mainFrame, clientSettings.isSound());
@@ -191,12 +191,12 @@ public class GameGui {
         JRadioButtonMenuItem button    = (JRadioButtonMenuItem) e.getSource();
         float                newFactor = Float.parseFloat(button.getText().substring(0, button.getText().indexOf(" "))) / 100;
         if (newFactor != zoomFactor) {
-            Graphics2D gr = (Graphics2D) boardJPanel.getGraphics();
+            Graphics2D gr = (Graphics2D) courseJPanel.getGraphics();
             gr.setBackground(Color.black);
-            gr.clearRect(0, 0, boardJPanel.getWidth(), boardJPanel.getHeight());
+            gr.clearRect(0, 0, courseJPanel.getWidth(), courseJPanel.getHeight());
             gr.dispose();
             zoomFactor = newFactor;
-            refreshBoard(board, "zoom changed", Step.SETUP, null, null, 1, null);
+            refreshCourse(course, "zoom changed", Step.SETUP, null, null, 1, null);
         }
     }
 
@@ -207,9 +207,9 @@ public class GameGui {
             clientToServerConnection.deregister(gameAttributes.getGameUrl(), gameAttributes.getRegistration().getId());
         }
         mainFrame.dispose();
-        if (boardArranger != null) {
-            boardArranger.dispose();
-            boardArranger = null;
+        if (courseArranger != null) {
+            courseArranger.dispose();
+            courseArranger = null;
         }
         gameHasEnded();
     }
@@ -221,47 +221,47 @@ public class GameGui {
         }
     }
 
-    public void refreshBoard(Board board, String reasonForBoardChange, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
-        this.board = board;
-        if (getBoard().getFactoryFloor().isEmpty()) {
-            Graphics2D gr = (Graphics2D) boardJPanel.getGraphics();
+    public void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
+        this.course = course;
+        if (getCourse().getFloor().isEmpty()) {
+            Graphics2D gr = (Graphics2D) courseJPanel.getGraphics();
             gr.setBackground(Color.black);
-            gr.clearRect(0, 0, boardJPanel.getWidth(), boardJPanel.getHeight());
+            gr.clearRect(0, 0, courseJPanel.getWidth(), courseJPanel.getHeight());
             gr.dispose();
         }
-        mainFrame.setTitle("Circuit Chaos Board - %s - %s - %s".formatted(gameAttributes.getRegistration().getGameName(),
-                                                                          StringUtils.hasText(myRobotsName) ? myRobotsName : "Game has not been started yet",
-                                                                          StringUtils.hasText(reasonForBoardChange) ? reasonForBoardChange : ""));
-        synchronized (boardJPanel) {
-            boardJPanel.arrangeElements(this, step, phase, subPhase, animationSteps);
+        mainFrame.setTitle("Circuit Chaos Course - %s - %s - %s".formatted(gameAttributes.getRegistration().getGameName(),
+                                                                           StringUtils.hasText(myRobotsName) ? myRobotsName : "Game has not been started yet",
+                                                                           StringUtils.hasText(reasonForCourseChange) ? reasonForCourseChange : ""));
+        synchronized (courseJPanel) {
+            courseJPanel.arrangeElements(this, step, phase, subPhase, animationSteps);
             if (subPhase == null || gameEnded) {
                 audioSupplier.stop();
             } else if (subPhase == 0) {
                 boolean hover = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(movingRobotName);
-                playSound(step, board, hover);
+                playSound(step, course, hover);
             }
         }
-        if (boardArranger != null) {
-            boardArranger.getPlayButton().setEnabled(board.getCheckpoints().size() > 1);
+        if (courseArranger != null) {
+            courseArranger.getPlayButton().setEnabled(course.getCheckpoints().size() > 1);
         }
     }
 
     private boolean isHover(String movingRobotName) {
-        return board.getRobots().stream()
-                    .filter(r -> r.getName().equals(movingRobotName))
-                    .filter(BoardElement::isOnBoard)
-                    .anyMatch(BoardElement::isFlying);
+        return course.getRobots().stream()
+                     .filter(r -> r.getName().equals(movingRobotName))
+                     .filter(CourseElement::isOnCourse)
+                     .anyMatch(CourseElement::isFlying);
     }
 
-    private void playSound(Step step, Board board, boolean hover) {
+    private void playSound(Step step, Course course, boolean hover) {
         if (!soundMenuItem.isSelected()) {
             audioSupplier.stop();
             return;
         }
         switch (step) {
-            case ROBOT_MOUNTED_LASER_FIRE, BOARD_MOUNTED_LASER_FIRE,
-                 ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE, BOARD_MOUNTED_PRESSURE_BEAMS_FIRE,
-                 ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE, BOARD_MOUNTED_TRACTOR_BEAMS_FIRE,
+            case ROBOT_MOUNTED_LASER_FIRE, COURSE_MOUNTED_LASER_FIRE,
+                 ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE, COURSE_MOUNTED_PRESSURE_BEAMS_FIRE,
+                 ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE, COURSE_MOUNTED_TRACTOR_BEAMS_FIRE,
                  ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE, ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE,
                  ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE -> audioSupplier.playSound(AudioConstants.LASER_BEAM);
             case EXPRESS_CONVEYOR_BELTS_MOVE, CONVEYOR_BELTS_MOVE ->
@@ -269,7 +269,7 @@ public class GameGui {
             case PUSHERS_PUSH -> audioSupplier.playSound(AudioConstants.PUSHER);
             case GEARS_ROTATE -> audioSupplier.playSound(AudioConstants.GEARS);
             case OPEN_TRAPDOORS -> {
-                if (board.getProperties().isTrapdoor()) {
+                if (course.getProperties().isTrapdoor()) {
                     audioSupplier.playSound(AudioConstants.TRAPDOOR);
                 }
             }
@@ -289,7 +289,7 @@ public class GameGui {
             return;
         }
         myRobotsName = request.getMyRobot().getName();
-        mainFrame.setTitle("Circuit Chaos Board - %s - %s - Waiting for all to program their robots"
+        mainFrame.setTitle("Circuit Chaos Course - %s - %s - Waiting for all to program their robots"
                                    .formatted(gameAttributes.getRegistration().getGameName(), myRobotsName));
         if (lastRevealFrame != null) {
             lastRevealFrame.setVisible(false);
@@ -340,7 +340,7 @@ public class GameGui {
     }
 
     public void play(GameOptions gameOptions) {
-        boardArranger = null;
+        courseArranger = null;
         clientToServerConnection.play(gameAttributes.getGameUrl(), gameOptions);
     }
 

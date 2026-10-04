@@ -2,7 +2,7 @@ package de.phlup.circuitchaos.server;
 
 import de.phlup.circuitchaos.client.service.CircuitChaosGui;
 import de.phlup.circuitchaos.common.CircuitChaosException;
-import de.phlup.circuitchaos.common.model.Board;
+import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.GameItem;
 import de.phlup.circuitchaos.common.model.GameItemsWrapper;
 import de.phlup.circuitchaos.common.model.NetworkResponse;
@@ -13,7 +13,7 @@ import de.phlup.circuitchaos.common.settings.ClientSettings;
 import de.phlup.circuitchaos.common.settings.TimeSettings;
 import de.phlup.circuitchaos.server.game.Game;
 import de.phlup.circuitchaos.server.game.GameOptions;
-import de.phlup.circuitchaos.server.game.ServerBoardArranger;
+import de.phlup.circuitchaos.server.game.ServerCourseArranger;
 import de.phlup.circuitchaos.server.player.Player;
 import de.phlup.circuitchaos.server.player.network.NetworkPlayer;
 import de.phlup.circuitchaos.server.service.PollOrPushSwitchService;
@@ -104,7 +104,7 @@ public class ServerController {
      * @see de.phlup.circuitchaos.client.ClientToServerConnection deregister(String gameUrl, String clientRegistration)
      */
     @DeleteMapping("/{gameId}/{registrationId}")
-    public ResponseEntity<Board> deregister(@PathVariable("gameId") String gameId, @PathVariable("registrationId") String registrationId) {
+    public ResponseEntity<Course> deregister(@PathVariable("gameId") String gameId, @PathVariable("registrationId") String registrationId) {
         log.debug("Received deregister request");
         Game               game             = GlobalServerAttributes.getGame(gameId, true, true);
         List<Registration> registrationList = List.copyOf(game.getWatchers());
@@ -129,16 +129,16 @@ public class ServerController {
         } else if (game.getInitiator() != null && game.isNotStartedYet()) {
             pollOrPushSwitchService.notifyOfNumberOfPlayersChange(game.getInitiator(), game.getNetworkPlayers().size(), game.getWatchers().size());
         }
-        return new ResponseEntity<>(game.getBoard(), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(game.getCourse(), HttpStatus.NO_CONTENT);
     }
 
     /**
-     * @see de.phlup.circuitchaos.client.ClientToServerConnection getBoard(String gameUrl)
+     * @see de.phlup.circuitchaos.client.ClientToServerConnection getCourse(String gameUrl)
      */
-    @GetMapping("/{gameId}/board")
-    public Board getBoard(@PathVariable("gameId") String gameId) {
-        log.debug("Received getBoard request");
-        return GlobalServerAttributes.getGame(gameId, true, true).getBoard();
+    @GetMapping("/{gameId}/course")
+    public Course getCourse(@PathVariable("gameId") String gameId) {
+        log.debug("Received getCourse request");
+        return GlobalServerAttributes.getGame(gameId, true, true).getCourse();
     }
 
     /**
@@ -151,18 +151,18 @@ public class ServerController {
     }
 
     /**
-     * @see de.phlup.circuitchaos.client.ClientToServerConnection replaceBoard(String gameUrl, Board board)
+     * @see de.phlup.circuitchaos.client.ClientToServerConnection replaceCourse(String gameUrl, Course course)
      */
-    @PostMapping("/{gameId}/board")
-    public void replaceBoard(@PathVariable("gameId") String gameId, @RequestBody Board board) {
-        log.debug("Received addBoard request");
-        Game                game          = GlobalServerAttributes.getGame(gameId, false, true);
-        ServerBoardArranger boardArranger = game.getBoardArranger();
-        if (boardArranger == null || !game.isNotStartedYet()) {
+    @PostMapping("/{gameId}/course")
+    public void replaceCourse(@PathVariable("gameId") String gameId, @RequestBody Course course) {
+        log.debug("Received replaceCourse request");
+        Game                 game           = GlobalServerAttributes.getGame(gameId, false, true);
+        ServerCourseArranger courseArranger = game.getCourseArranger();
+        if (courseArranger == null || !game.isNotStartedYet()) {
             throw new CircuitChaosException("Game has already startet.");
         }
         try {
-            boardArranger.setBoard(game, board);
+            courseArranger.setCourse(game, course);
         } catch (Exception e) {
             log.info("Exception!", e);
             throw new CircuitChaosException("Exception! - " + e.getMessage(), e);
@@ -175,13 +175,13 @@ public class ServerController {
     @PostMapping("/{gameId}/checkpoint")
     public void addCheckpoint(@PathVariable("gameId") String gameId, @RequestParam("x") int x, @RequestParam("y") int y) {
         log.debug("Received addCheckpoint request");
-        Game                game          = GlobalServerAttributes.getGame(gameId, false, true);
-        ServerBoardArranger boardArranger = game.getBoardArranger();
-        if (boardArranger == null || !game.isNotStartedYet()) {
+        Game                 game           = GlobalServerAttributes.getGame(gameId, false, true);
+        ServerCourseArranger courseArranger = game.getCourseArranger();
+        if (courseArranger == null || !game.isNotStartedYet()) {
             throw new CircuitChaosException("Game has already startet.");
         }
         try {
-            boardArranger.addCheckpoint(game, new Position(x, y));
+            courseArranger.addCheckpoint(game, new Position(x, y));
         } catch (Exception e) {
             log.info("Exception!", e);
             throw new CircuitChaosException("Exception! - " + e.getMessage(), e);
@@ -194,13 +194,13 @@ public class ServerController {
     @DeleteMapping("/{gameId}/checkpoint")
     public void removeCheckpoint(@PathVariable("gameId") String gameId, @RequestParam("x") int x, @RequestParam("y") int y) {
         log.debug("Received removeCheckpoint request");
-        Game                game          = GlobalServerAttributes.getGame(gameId, false, true);
-        ServerBoardArranger boardArranger = game.getBoardArranger();
-        if (boardArranger == null || !game.isNotStartedYet()) {
+        Game                 game           = GlobalServerAttributes.getGame(gameId, false, true);
+        ServerCourseArranger courseArranger = game.getCourseArranger();
+        if (courseArranger == null || !game.isNotStartedYet()) {
             throw new CircuitChaosException("Game has already startet.");
         }
         try {
-            boardArranger.removeCheckpoint(game, new Position(x, y));
+            courseArranger.removeCheckpoint(game, new Position(x, y));
         } catch (Exception e) {
             log.info("Exception!", e);
             throw new CircuitChaosException("Exception! - " + e.getMessage(), e);

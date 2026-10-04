@@ -1,13 +1,13 @@
 package de.phlup.circuitchaos.server.game;
 
-import de.phlup.circuitchaos.board.BoardHandler;
 import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.Step;
-import de.phlup.circuitchaos.common.model.BoardElement;
-import de.phlup.circuitchaos.common.model.CircuitChaosObject;
+import de.phlup.circuitchaos.common.model.CourseElement;
+import de.phlup.circuitchaos.common.model.CourseObject;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.Robot;
+import de.phlup.circuitchaos.course.CourseHandler;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,14 +19,14 @@ public class Teleporter {
     private boolean hasBeenTeleported;
     private int     oldMovement;
 
-    public static Teleporter teleport(BoardElement be, int movement, Game game, int phase) {
+    public static Teleporter teleport(CourseElement be, int movement, Game game, int phase) {
         return new Teleporter().teleportInternal(be, movement, game, phase);
     }
 
-    private Teleporter teleportInternal(BoardElement be, int movement, Game game, int phase) {
+    private Teleporter teleportInternal(CourseElement be, int movement, Game game, int phase) {
         hasBeenTeleported = false;
         oldMovement = movement;
-        for (CircuitChaosObject cco : BoardHandler.getObjects(game.getBoard(), be.getPosition())) {
+        for (CourseObject cco : CourseHandler.getObjects(game.getCourse(), be.getPosition())) {
             if (cco.getType() == ObjectType.TELEPORTER && movement != 0 && !be.isFlying()) {
                 if (movement < 0) {
                     movement = 1 - movement;
@@ -35,24 +35,24 @@ public class Teleporter {
                 }
                 Floor targetFloor = switch (be.getDirection()) {
                     case NORTH ->
-                            BoardHandler.getFloor(game.getBoard(), new Position(be.getPosition().x(), be.getPosition().y() - movement));
+                            CourseHandler.getFloor(game.getCourse(), new Position(be.getPosition().x(), be.getPosition().y() - movement));
                     case EAST ->
-                            BoardHandler.getFloor(game.getBoard(), new Position(be.getPosition().x() + movement, be.getPosition().y()));
+                            CourseHandler.getFloor(game.getCourse(), new Position(be.getPosition().x() + movement, be.getPosition().y()));
                     case SOUTH ->
-                            BoardHandler.getFloor(game.getBoard(), new Position(be.getPosition().x(), be.getPosition().y() + movement));
+                            CourseHandler.getFloor(game.getCourse(), new Position(be.getPosition().x(), be.getPosition().y() + movement));
                     case WEST ->
-                            BoardHandler.getFloor(game.getBoard(), new Position(be.getPosition().x() - movement, be.getPosition().y()));
+                            CourseHandler.getFloor(game.getCourse(), new Position(be.getPosition().x() - movement, be.getPosition().y()));
                 };
                 boolean willTeleport = be instanceof Robot r && r.isVirtual();
                 if (willTeleport || !isTargetBlockedByObject(targetFloor, game)) {
                     willTeleport = true;
-                    for (Robot r : BoardHandler.getRobots(game.getBoard(), targetFloor.getPosition())) {
+                    for (Robot r : CourseHandler.getRobots(game.getCourse(), targetFloor.getPosition())) {
                         willTeleport = willTeleport && r.isVirtual();
                     }
                 }
                 if (willTeleport) {
                     game.setPosition(be, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.ROBOTS_AND_OBJECTS_MOVE, phase, null, false);
-                    game.notifyBoardMayHaveChanged(Step.ROBOTS_AND_OBJECTS_MOVE, phase, "%s was teleported".formatted(be.getName()), null);
+                    game.notifyCourseMayHaveChanged(Step.ROBOTS_AND_OBJECTS_MOVE, phase, "%s was teleported".formatted(be.getName()), null);
                     hasBeenTeleported = true;
                 }
             }
@@ -61,7 +61,7 @@ public class Teleporter {
     }
 
     private boolean isTargetBlockedByObject(Floor targetFloor, Game game) {
-        for (CircuitChaosObject rro2 : BoardHandler.getObjects(game.getBoard(), targetFloor.getPosition())) {
+        for (CourseObject rro2 : CourseHandler.getObjects(game.getCourse(), targetFloor.getPosition())) {
             if (!rro2.getType().isFlat()) {
                 return true;
             }

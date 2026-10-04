@@ -1,7 +1,7 @@
 package de.phlup.circuitchaos.server.scheduler;
 
 import de.phlup.circuitchaos.client.ClientToServerConnection;
-import de.phlup.circuitchaos.client.gui.ClientBoardArranger;
+import de.phlup.circuitchaos.client.gui.ClientCourseArranger;
 import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.client.service.AsyncService;
 import de.phlup.circuitchaos.common.model.PullingData;
@@ -41,7 +41,7 @@ public class PollingScheduler {
     private void handleSinglePullingData(GameAttributes reg, PullingData data, String registrationId) {
         final GameGui gameGui = reg.getGameGui();
         switch (data.getType()) {
-            case BOARD_CHANGE -> asyncService.refreshBoard(gameGui, data.getRequest());
+            case COURSE_CHANGE -> asyncService.refreshCourse(gameGui, data.getRequest());
             case SHOW_MESSAGE -> asyncService.showMessage(registrationId, data.getMessage());
             case REVEAL_PROGRAMME -> {
                 gameGui.setNotStartedYet(false);
@@ -53,9 +53,9 @@ public class PollingScheduler {
                 asyncService.perform(gameGui, answerUrl, data.getRequest());
             }
             case NUMBER_OF_PLAYERS_CHANGE -> {
-                ClientBoardArranger boardArranger = gameGui.getBoardArranger();
-                if (boardArranger != null) {
-                    boardArranger.updatePlayersAndWatchers(data.getNumberOfPlayers(), data.getNumberOfWatchers());
+                ClientCourseArranger courseArranger = gameGui.getCourseArranger();
+                if (courseArranger != null) {
+                    courseArranger.updatePlayersAndWatchers(data.getNumberOfPlayers(), data.getNumberOfWatchers());
                 }
             }
         }

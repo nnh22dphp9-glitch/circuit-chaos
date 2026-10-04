@@ -31,16 +31,16 @@ public class Floor {
     private WallType  wallWest        = WallType.NONE;
 
     // for drawing only
-    private int        explosiveDamage             = 0;
-    private boolean    beamsNS                     = false;
-    private boolean    beamsWE                     = false;
-    private ModuleType beamType                    = MAIN_LASER; // defining the beam type
-    private int        boardMountedLaserBeamsNS    = 0; // laser beams in preview
-    private int        boardMountedLaserBeamsWE    = 0; // laser beams in preview
-    private boolean    boardMountedPressureBeamsNS = false; // pressure beams in preview
-    private boolean    boardMountedPressureBeamsWE = false; // pressure beams in preview
-    private boolean    boardMountedTractorBeamsNS  = false; // tractor beams in preview
-    private boolean    boardMountedTractorBeamsWE  = false; // tractor beams in preview
+    private int        explosiveDamage              = 0;
+    private boolean    beamsNS                      = false;
+    private boolean    beamsWE                      = false;
+    private ModuleType beamType                     = MAIN_LASER; // defining the beam type
+    private int        courseMountedLaserBeamsNS    = 0; // laser beams in preview
+    private int        courseMountedLaserBeamsWE    = 0; // laser beams in preview
+    private boolean    courseMountedPressureBeamsNS = false; // pressure beams in preview
+    private boolean    courseMountedPressureBeamsWE = false; // pressure beams in preview
+    private boolean    courseMountedTractorBeamsNS  = false; // tractor beams in preview
+    private boolean    courseMountedTractorBeamsWE  = false; // tractor beams in preview
 
     @JsonIgnore
     public WallType wall(Direction direction) {
