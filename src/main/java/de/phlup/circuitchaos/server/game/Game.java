@@ -443,10 +443,10 @@ public class Game {
         }
     }
 
-    private Player getPlayerOf(CourseElement be) {
-        if (be instanceof Robot) {
+    private Player getPlayerOf(CourseElement ce) {
+        if (ce instanceof Robot) {
             for (Player player : players) {
-                if (player.getRobot().equals(be)) {
+                if (player.getRobot().equals(ce)) {
                     return player;
                 }
             }
@@ -459,8 +459,8 @@ public class Game {
             if (!gameAborted) {
                 if (player.getRobot().isOnCourse() && player.getRobot().isVirtual()) {
                     player.getRobot().setVirtual(false);
-                    for (Robot be : CourseHandler.getRobots(course, player.getRobot().getPosition())) {
-                        if (be != player.getRobot()) {
+                    for (Robot ce : CourseHandler.getRobots(course, player.getRobot().getPosition())) {
+                        if (ce != player.getRobot()) {
                             player.getRobot().setVirtual(true);
                             break;
                         }
@@ -581,21 +581,21 @@ public class Game {
                         if (player.hasWon()) {
                             winner = player;
                         }
-                    } else if (o instanceof CourseObject cco) {
-                        cco.setActive(true);
-                        switch (cco.getType()) {
+                    } else if (o instanceof CourseObject co) {
+                        co.setActive(true);
+                        switch (co.getType()) {
                             case MINE:
-                                if (hasNonVirtualRobot(cco.getPosition().x(), cco.getPosition().y())) {
-                                    goOff(Step.TOUCH_CHECKPOINTS, phase, cco);
+                                if (hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y())) {
+                                    goOff(Step.TOUCH_CHECKPOINTS, phase, co);
                                 }
                                 break;
                             case PROXIMITY_MINE:
-                                if (hasNonVirtualRobot(cco.getPosition().x(), cco.getPosition().y())
-                                        || hasNonVirtualRobot(cco.getPosition().x() + 1, cco.getPosition().y())
-                                        || hasNonVirtualRobot(cco.getPosition().x(), cco.getPosition().y() + 1)
-                                        || hasNonVirtualRobot(cco.getPosition().x() - 1, cco.getPosition().y())
-                                        || hasNonVirtualRobot(cco.getPosition().x(), cco.getPosition().y() - 1)) {
-                                    goOff(Step.TOUCH_CHECKPOINTS, phase, cco);
+                                if (hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y())
+                                        || hasNonVirtualRobot(co.getPosition().x() + 1, co.getPosition().y())
+                                        || hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y() + 1)
+                                        || hasNonVirtualRobot(co.getPosition().x() - 1, co.getPosition().y())
+                                        || hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y() - 1)) {
+                                    goOff(Step.TOUCH_CHECKPOINTS, phase, co);
                                 }
                                 break;
                         }
@@ -607,8 +607,8 @@ public class Game {
     }
 
     private boolean hasNonVirtualRobot(int posx, int posy) {
-        for (Robot be : course.getRobots()) {
-            if (be.getPosition().x() == posx && be.getPosition().y() == posy && !be.isVirtual()) {
+        for (Robot ce : course.getRobots()) {
+            if (ce.getPosition().x() == posx && ce.getPosition().y() == posy && !ce.isVirtual()) {
                 return true;
             }
         }
@@ -747,12 +747,12 @@ public class Game {
                 break;
             }
             if (f.getFloortype() == Floortype.GEARS_CCW || f.getFloortype() == Floortype.GEARS_CW) {
-                for (CourseElement be : CourseHandler.getObjectsAndRobots(course)) {
-                    if (be.isOnCourse()
-                            && be.getPosition().equals(f.getPosition())
-                            && !be.isFlying()
-                            && !(be instanceof Robot && getPlayerOf(be).uses(ModuleType.GYROSCOPIC_STABILIZER, phase))) {
-                        rotate(be, f.getFloortype() == Floortype.GEARS_CCW ? WEST : EAST, Step.GEARS_ROTATE, phase, false);
+                for (CourseElement ce : CourseHandler.getObjectsAndRobots(course)) {
+                    if (ce.isOnCourse()
+                            && ce.getPosition().equals(f.getPosition())
+                            && !ce.isFlying()
+                            && !(ce instanceof Robot && getPlayerOf(ce).uses(ModuleType.GYROSCOPIC_STABILIZER, phase))) {
+                        rotate(ce, f.getFloortype() == Floortype.GEARS_CCW ? WEST : EAST, Step.GEARS_ROTATE, phase, false);
                     }
                 }
             }
@@ -768,10 +768,10 @@ public class Game {
                 break;
             }
             if (f.isHasPusher() && f.getActiveInPhase()[phase]) {
-                for (CourseElement be : CourseHandler.getObjectsAndRobots(course)) {
-                    if (be.isOnCourse() && be.getPosition().equals(f.getPosition())) {
-                        if (willBePushed(be)) {
-                            moveInit(be, f.getPusherDirection(), 1, 1, Step.PUSHERS_PUSH, phase, true, false, null);
+                for (CourseElement ce : CourseHandler.getObjectsAndRobots(course)) {
+                    if (ce.isOnCourse() && ce.getPosition().equals(f.getPosition())) {
+                        if (willBePushed(ce)) {
+                            moveInit(ce, f.getPusherDirection(), 1, 1, Step.PUSHERS_PUSH, phase, true, false, null);
                         }
                     }
                 }
@@ -782,17 +782,17 @@ public class Game {
         }
     }
 
-    private boolean willBePushed(CourseElement be) {
-        if (be instanceof CourseObject cco) {
-            return cco.getType() != ObjectType.RANDOMIZER
-                    && cco.getType() != ObjectType.TELEPORTER
-                    && cco.getType() != ObjectType.GLUE
-                    && cco.getType() != ObjectType.OIL
-                    && cco.getType() != ObjectType.PORTAL_RED
-                    && cco.getType() != ObjectType.PORTAL_BLUE
-                    && cco.getType() != ObjectType.PORTAL_YELLOW
-                    && cco.getType() != ObjectType.PORTAL_PURPLE
-                    && cco.getType() != ObjectType.PORTAL_GREEN;
+    private boolean willBePushed(CourseElement ce) {
+        if (ce instanceof CourseObject co) {
+            return co.getType() != ObjectType.RANDOMIZER
+                    && co.getType() != ObjectType.TELEPORTER
+                    && co.getType() != ObjectType.GLUE
+                    && co.getType() != ObjectType.OIL
+                    && co.getType() != ObjectType.PORTAL_RED
+                    && co.getType() != ObjectType.PORTAL_BLUE
+                    && co.getType() != ObjectType.PORTAL_YELLOW
+                    && co.getType() != ObjectType.PORTAL_PURPLE
+                    && co.getType() != ObjectType.PORTAL_GREEN;
         } else {
             return true;
         }
@@ -954,9 +954,9 @@ public class Game {
         }
     }
 
-    private int applyWaterAndOilSlick(CourseElement be, Floor f, int movement) {
-        if (!be.isFlying() && (f.isWater()
-                || CourseHandler.getObjects(course, f.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL))) {
+    private int applyWaterAndOilSlick(CourseElement ce, Floor f, int movement) {
+        if (!ce.isFlying() && (f.isWater()
+                || CourseHandler.getObjects(course, f.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
             if (movement > 0) {
                 movement--;
             }
@@ -967,11 +967,11 @@ public class Game {
         return movement;
     }
 
-    private int determineMovementAmount(int phase, CourseElement be, Programme pc) {
+    private int determineMovementAmount(int phase, CourseElement ce, Programme pc) {
         int movement;
-        if (be instanceof Robot) {
+        if (ce instanceof Robot) {
             movement = pc.getType().getMovement();
-            if (movement != 0 && getPlayerOf(be).uses(ModuleType.BRAKES, phase)) {
+            if (movement != 0 && getPlayerOf(ce).uses(ModuleType.BRAKES, phase)) {
                 movement = movement > 0 ? movement - 1 : movement + 1;
             }
         } else {
@@ -1064,9 +1064,9 @@ public class Game {
         }
     }
 
-    private void reactivateRammingArmor(int phase, CourseElement be) {
-        if (be instanceof Robot robot) {
-            Player player = getPlayerOf(be);
+    private void reactivateRammingArmor(int phase, CourseElement ce) {
+        if (ce instanceof Robot robot) {
+            Player player = getPlayerOf(ce);
             if (robot.isReactivateRammingArmor()) {
                 if (player.getRobot().getModule(ModuleType.RAMMING_ARMOR) != null) {
                     robot.setReactivateRammingArmor(false);
@@ -1087,13 +1087,13 @@ public class Game {
     }
 
     private void openTrapdoors(int phase, List<Robot> robots) {
-        for (Robot be : robots) {
+        for (Robot ce : robots) {
             if (gameAborted) {
                 break;
             }
-            Floor f = CourseHandler.getFloor(course, be.getPosition());
+            Floor f = CourseHandler.getFloor(course, ce.getPosition());
             if (f.getFloortype() == Floortype.TRAPDOOR && f.getActiveInPhase()[phase]) {
-                die(be, Step.OPEN_TRAPDOORS, phase);
+                die(ce, Step.OPEN_TRAPDOORS, phase);
             }
         }
         if (!gameAborted) {
@@ -1126,18 +1126,18 @@ public class Game {
         return CourseHandler.getRobots(course)
                             .stream()
                             .filter(Objects::nonNull)
-                            .filter(be -> getPriority(be, phase) >= 0)
+                            .filter(ce -> getPriority(ce, phase) >= 0)
                             .sorted((a, b) -> Integer.compare(getPriority(b, phase), getPriority(a, phase)))
                             .toList();
     }
 
     private void revealProgrammesRandomizers(int phase) {
-        for (CourseObject cco : course.getObjects()) {
+        for (CourseObject co : course.getObjects()) {
             if (gameAborted) {
                 break;
             }
-            if (cco.getType() == ObjectType.RANDOMIZER) {
-                for (Robot r : CourseHandler.getRobots(course, cco.getPosition())) {
+            if (co.getType() == ObjectType.RANDOMIZER) {
+                for (Robot r : CourseHandler.getRobots(course, co.getPosition())) {
                     r.getProgram()[phase] = Programme.create(r.hasModule(ModuleType.OVERDRIVE), r.hasModule(ModuleType.REVERSE_DRIVE));
                 }
             }
@@ -1216,35 +1216,35 @@ public class Game {
         }
     }
 
-    public void moveInit(CourseElement be, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, String movingRobotName) {
-        move(be, direction, strength, amount, step, phase, notBlockedByMovableRobot, wait, movingRobotName);
+    public void moveInit(CourseElement ce, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, String movingRobotName) {
+        move(ce, direction, strength, amount, step, phase, notBlockedByMovableRobot, wait, movingRobotName);
     }
 
-    private boolean move(CourseElement be, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, String movingRobotName) {
-        Position oldPosition    = be.getPosition();
+    private boolean move(CourseElement ce, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, String movingRobotName) {
+        Position oldPosition    = ce.getPosition();
         Floor    floor1         = CourseHandler.getFloor(course, oldPosition);
-        Position targetPosition = be.getPosition().neighbour(direction);
+        Position targetPosition = ce.getPosition().neighbour(direction);
         Floor    floor2         = CourseHandler.getFloor(course, targetPosition);
-        if (!be.isFlying()) {
-            for (CourseObject cco : new ArrayList<>(CourseHandler.getObjects(course, floor1.getPosition()))) {
-                if (cco.getType() == ObjectType.GLUE && cco.isActive()) {
-                    while (cco.getGlue() > 0 && amount > 0) {
-                        deGlue(cco, phase);
+        if (!ce.isFlying()) {
+            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, floor1.getPosition()))) {
+                if (co.getType() == ObjectType.GLUE && co.isActive()) {
+                    while (co.getGlue() > 0 && amount > 0) {
+                        deGlue(co, phase);
                         amount--;
                     }
                 }
             }
         }
         Direction direction2 = direction.reverse();
-        if (floor1.wall(direction) == WallType.RAMP_UP && floor2.wall(direction2) == WallType.RAMP_DOWN && !be.isFlying()) {
+        if (floor1.wall(direction) == WallType.RAMP_UP && floor2.wall(direction2) == WallType.RAMP_DOWN && !ce.isFlying()) {
             amount--;
         }
-        if (!be.getPosition().inRange(course.getRange())) {
+        if (!ce.getPosition().inRange(course.getRange())) {
             amount = 0;
-            die(be, step, phase);
+            die(ce, step, phase);
         }
-        wait = wait && (movingRobotName == null || movingRobotName.equals(be.getName()));
-        Player player = getPlayerOf(be);
+        wait = wait && (movingRobotName == null || movingRobotName.equals(ce.getName()));
+        Player player = getPlayerOf(ce);
         if (amount > 0) {
             if (((floor1.wall(direction) == WallType.NONE
                     || floor1.wall(direction) == WallType.ONE_WAY_GREEN
@@ -1256,11 +1256,11 @@ public class Game {
                     || floor2.wall(direction2) == WallType.RAMP_DOWN))
                     || (floor1.wall(direction) == WallType.ONE_WAY_GREEN
                     && floor2.wall(direction2) == WallType.ONE_WAY_RED)) {
-                CourseElement conflictingElement = getConflictingElement(be, direction);
+                CourseElement conflictingElement = getConflictingElement(ce, direction);
                 if (conflictingElement == null) {
-                    be.setPosition(targetPosition);
-                    if (!be.isFlying()) {
-                        be.setLevel(CourseHandler.getFloor(course, be.getPosition()).getLevel());
+                    ce.setPosition(targetPosition);
+                    if (!ce.isFlying()) {
+                        ce.setLevel(CourseHandler.getFloor(course, ce.getPosition()).getLevel());
                     }
                 } else if (notBlockedByMovableRobot) {
                     if (player != null && player.uses(ModuleType.RAMMING_ARMOR, phase)) {
@@ -1270,27 +1270,27 @@ public class Game {
                         }
                     }
                     if (move(conflictingElement, direction, strength, 1, step, phase, true, wait, movingRobotName)) {
-                        be.setPosition(targetPosition);
-                        if (!be.isFlying()) {
-                            be.setLevel(CourseHandler.getFloor(course, be.getPosition()).getLevel());
+                        ce.setPosition(targetPosition);
+                        if (!ce.isFlying()) {
+                            ce.setLevel(CourseHandler.getFloor(course, ce.getPosition()).getLevel());
                         }
                     }
                 }
             } else if ((floor1.wall(direction) == WallType.NONE || floor1.wall(direction) == WallType.ONE_WAY_GREEN)
                     && (floor2.wall(direction2) == WallType.LEDGE)) {
-                if (!be.isFlying() && player != null) {
+                if (!ce.isFlying() && player != null) {
                     player.takeDamage(phase, null, null, false);
                     player.takeDamage(phase, null, null, false);
                 }
-                CourseElement conflictingElement = getConflictingElement(be, direction);
+                CourseElement conflictingElement = getConflictingElement(ce, direction);
                 if (conflictingElement == null) {
-                    be.setPosition(targetPosition);
-                    if (!be.isFlying()) {
-                        be.setLevel(CourseHandler.getFloor(course, be.getPosition()).getLevel());
+                    ce.setPosition(targetPosition);
+                    if (!ce.isFlying()) {
+                        ce.setLevel(CourseHandler.getFloor(course, ce.getPosition()).getLevel());
                     }
                 } else if (notBlockedByMovableRobot) {
                     if (move(conflictingElement, direction, strength, 1, step, phase, true, wait, movingRobotName)) {
-                        move(be, direction, strength, amount, step, phase, true, wait, movingRobotName);
+                        move(ce, direction, strength, amount, step, phase, true, wait, movingRobotName);
                     }
                 }
             } else if (floor1.wall(direction) == WallType.REPULSOR_FIELD
@@ -1298,39 +1298,39 @@ public class Game {
                     || floor1.wall(direction) == WallType.ONE_WAY_GREEN
                     || floor1.wall(direction) == WallType.RAMP_DOWN)
                     && floor2.wall(direction2) == WallType.REPULSOR_FIELD)) {
-                move(be, direction2, strength, strength, step, phase, true, wait, movingRobotName);
+                move(ce, direction2, strength, strength, step, phase, true, wait, movingRobotName);
             }
         }
         if (amount > 0 && wait) {
             notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
         }
-        Floor floor3 = CourseHandler.getFloor(course, be.getPosition());
-        if (player != null && !be.isFlying()) {
+        Floor floor3 = CourseHandler.getFloor(course, ce.getPosition());
+        if (player != null && !ce.isFlying()) {
             if (!player.getRobot().isVirtual()) {
-                for (CourseObject cco : new ArrayList<>(CourseHandler.getObjects(course, floor3.getPosition()))) {
-                    if ((cco.getType() == ObjectType.MINE || cco.getType() == ObjectType.PROXIMITY_MINE)
-                            && cco.isActive()) {
-                        goOff(step, phase, cco);
+                for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, floor3.getPosition()))) {
+                    if ((co.getType() == ObjectType.MINE || co.getType() == ObjectType.PROXIMITY_MINE)
+                            && co.isActive()) {
+                        goOff(step, phase, co);
                     }
                 }
-                for (CourseObject cco : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() - 1, floor3.getPosition().y())))) {
-                    if (cco.getType() == ObjectType.PROXIMITY_MINE && cco.isActive()) {
-                        goOff(step, phase, cco);
+                for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() - 1, floor3.getPosition().y())))) {
+                    if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                        goOff(step, phase, co);
                     }
                 }
-                for (CourseObject cco : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() + 1, floor3.getPosition().y())))) {
-                    if (cco.getType() == ObjectType.PROXIMITY_MINE && cco.isActive()) {
-                        goOff(step, phase, cco);
+                for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() + 1, floor3.getPosition().y())))) {
+                    if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                        goOff(step, phase, co);
                     }
                 }
-                for (CourseObject cco : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() - 1)))) {
-                    if (cco.getType() == ObjectType.PROXIMITY_MINE && cco.isActive()) {
-                        goOff(step, phase, cco);
+                for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() - 1)))) {
+                    if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                        goOff(step, phase, co);
                     }
                 }
-                for (CourseObject cco : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() + 1)))) {
-                    if (cco.getType() == ObjectType.PROXIMITY_MINE && cco.isActive()) {
-                        goOff(step, phase, cco);
+                for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() + 1)))) {
+                    if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                        goOff(step, phase, co);
                     }
                 }
             }
@@ -1354,36 +1354,36 @@ public class Game {
                     }
                     if (noConflict) {
                         floor3 = CourseHandler.getFloor(course, portal.getTargetPosition());
-                        be.setPosition(portal.getTargetPosition());
-                        be.setLevel(floor3.getLevel());
+                        ce.setPosition(portal.getTargetPosition());
+                        ce.setLevel(floor3.getLevel());
                         if (wait) {
                             notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
                         }
                         if (!player.getRobot().isVirtual()) {
-                            for (CourseObject cco : new ArrayList<>(CourseHandler.getObjects(course, floor3.getPosition()))) {
-                                if ((cco.getType() == ObjectType.MINE || cco.getType() == ObjectType.PROXIMITY_MINE)
-                                        && cco.isActive()) {
-                                    goOff(step, phase, cco);
+                            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, floor3.getPosition()))) {
+                                if ((co.getType() == ObjectType.MINE || co.getType() == ObjectType.PROXIMITY_MINE)
+                                        && co.isActive()) {
+                                    goOff(step, phase, co);
                                 }
                             }
-                            for (CourseObject cco : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() - 1, floor3.getPosition().y())))) {
-                                if (cco.getType() == ObjectType.PROXIMITY_MINE && cco.isActive()) {
-                                    goOff(step, phase, cco);
+                            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() - 1, floor3.getPosition().y())))) {
+                                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                                    goOff(step, phase, co);
                                 }
                             }
-                            for (CourseObject cco : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() + 1, floor3.getPosition().y())))) {
-                                if (cco.getType() == ObjectType.PROXIMITY_MINE && cco.isActive()) {
-                                    goOff(step, phase, cco);
+                            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() + 1, floor3.getPosition().y())))) {
+                                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                                    goOff(step, phase, co);
                                 }
                             }
-                            for (CourseObject cco : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() - 1)))) {
-                                if (cco.getType() == ObjectType.PROXIMITY_MINE && cco.isActive()) {
-                                    goOff(step, phase, cco);
+                            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() - 1)))) {
+                                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                                    goOff(step, phase, co);
                                 }
                             }
-                            for (CourseObject cco : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() + 1)))) {
-                                if (cco.getType() == ObjectType.PROXIMITY_MINE && cco.isActive()) {
-                                    goOff(step, phase, cco);
+                            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() + 1)))) {
+                                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                                    goOff(step, phase, co);
                                 }
                             }
                         }
@@ -1391,32 +1391,32 @@ public class Game {
                 }
             }
         }
-        if (!be.isFlying()) {
+        if (!ce.isFlying()) {
             if (floor3.getFloortype() == Floortype.ABYSS || (floor3.getFloortype() == Floortype.TRAPDOOR && floor3.getActiveInPhase()[phase])) {
                 amount = 0;
-                die(be, step, phase);
-                if (be instanceof Robot r) {
+                die(ce, step, phase);
+                if (ce instanceof Robot r) {
                     course.getRobotsFallingIntoAbyss().add(r);
-                } else if (be instanceof CourseObject cco) {
-                    course.getObjectsFallingIntoAbyss().add(cco);
+                } else if (ce instanceof CourseObject co) {
+                    course.getObjectsFallingIntoAbyss().add(co);
                 }
             }
         }
         if (amount > 1) {
-            move(be, direction, strength, amount - 1, step, phase, true, wait, movingRobotName);
+            move(ce, direction, strength, amount - 1, step, phase, true, wait, movingRobotName);
         }
-        if (!oldPosition.equals(be.getPosition())) {
+        if (!oldPosition.equals(ce.getPosition())) {
             boolean notBlocked = true;
-            if (!be.isFlying()) {
-                while (notBlocked && CourseHandler.getObjects(course, be.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
-                    notBlocked = move(be, direction, 0, 1, step, phase, false, wait, movingRobotName);
+            if (!ce.isFlying()) {
+                while (notBlocked && CourseHandler.getObjects(course, ce.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+                    notBlocked = move(ce, direction, 0, 1, step, phase, false, wait, movingRobotName);
                 }
             }
         }
         if (wait) {
             notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
         }
-        return !oldPosition.equals(be.getPosition());
+        return !oldPosition.equals(ce.getPosition());
     }
 
     private void land(Player player, Step step, int phase) {
@@ -1454,14 +1454,14 @@ public class Game {
             return null;
         }
         Position targetPosition = courseElement.getPosition().neighbour(direction);
-        for (CourseObject be : CourseHandler.getObjects(course, targetPosition)) {
-            if (!be.getType().isFlat() && !be.equals(courseElement) && !be.isFlying()) {
-                return be;
+        for (CourseObject ce : CourseHandler.getObjects(course, targetPosition)) {
+            if (!ce.getType().isFlat() && !ce.equals(courseElement) && !ce.isFlying()) {
+                return ce;
             }
         }
-        for (Robot be : CourseHandler.getRobots(course, targetPosition)) {
-            if (!be.isVirtual() && !be.equals(courseElement) && !be.isFlying()) {
-                return be;
+        for (Robot ce : CourseHandler.getRobots(course, targetPosition)) {
+            if (!ce.isVirtual() && !ce.equals(courseElement) && !ce.isFlying()) {
+                return ce;
             }
         }
         return null;
@@ -1469,9 +1469,9 @@ public class Game {
 
     private int getCBConflictingElementMark(CourseElement be2, Direction direction) {
         int           erg = 1;
-        CourseElement be  = getConflictingElement(be2, direction);
-        if (be != null) {
-            erg = be.getConflictingMark();
+        CourseElement ce  = getConflictingElement(be2, direction);
+        if (ce != null) {
+            erg = ce.getConflictingMark();
         }
         return erg;
     }
@@ -1520,41 +1520,41 @@ public class Game {
         return target;
     }
 
-    public void rotate(CourseElement be, Direction direction, Step step, int phase, boolean wait) {
-        be.setDirection(be.getDirection().add(direction));
+    public void rotate(CourseElement ce, Direction direction, Step step, int phase, boolean wait) {
+        ce.setDirection(ce.getDirection().add(direction));
         if (wait) {
-            notifyCourseMayHaveChanged(step, phase, "%s was rotated".formatted(be.getName()), null);
+            notifyCourseMayHaveChanged(step, phase, "%s was rotated".formatted(ce.getName()), null);
         }
     }
 
-    public void setPosition(CourseElement be, int x, int y, Step step, int phase, Direction direction, boolean wait) {
-        be.setPrevPosition(be.getPosition());
-        be.setPosition(new Position(x, y));
-        Floor floor3 = CourseHandler.getFloor(course, be.getPosition());
+    public void setPosition(CourseElement ce, int x, int y, Step step, int phase, Direction direction, boolean wait) {
+        ce.setPrevPosition(ce.getPosition());
+        ce.setPosition(new Position(x, y));
+        Floor floor3 = CourseHandler.getFloor(course, ce.getPosition());
         if (floor3.getFloortype() == Floortype.ABYSS || (floor3.getFloortype() == Floortype.TRAPDOOR && floor3.getActiveInPhase()[phase])) {
-            die(be, step, phase);
-            if (be instanceof Robot r) {
+            die(ce, step, phase);
+            if (ce instanceof Robot r) {
                 course.getRobotsFallingIntoAbyss().add(r);
-            } else if (be instanceof CourseObject cco) {
-                course.getObjectsFallingIntoAbyss().add(cco);
+            } else if (ce instanceof CourseObject co) {
+                course.getObjectsFallingIntoAbyss().add(co);
             }
         }
         if (direction != null) {
-            if (CourseHandler.getObjects(course, floor3.getPosition()).stream().anyMatch(cco -> cco.getType() == ObjectType.OIL)) {
-                moveInit(be, direction, 0, 1, step, phase, false, wait, null);
+            if (CourseHandler.getObjects(course, floor3.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+                moveInit(ce, direction, 0, 1, step, phase, false, wait, null);
             }
         }
-        moveInit(be, NORTH, 0, 0, step, phase, false, wait, null);
+        moveInit(ce, NORTH, 0, 0, step, phase, false, wait, null);
     }
 
-    public void die(CourseElement be, Step reason, Integer phase) {
-        Player player = getPlayerOf(be);
+    public void die(CourseElement ce, Step reason, Integer phase) {
+        Player player = getPlayerOf(ce);
         if (player != null) {
             player.getRobot().setDamage(10);
             player.takeNormalDamage(course);
         } else {
-            CourseHandler.remove(course, be);
-            notifyCourseMayHaveChanged(reason, phase, "%s died".formatted(be.getName()), null);
+            CourseHandler.remove(course, ce);
+            notifyCourseMayHaveChanged(reason, phase, "%s died".formatted(ce.getName()), null);
         }
     }
 

@@ -61,9 +61,9 @@ public class ToolTipTexts {
                 .append(floor.getActiveInPhase()[4] ? " 5 " : "")
                 .append(NEW_LINE);
         }
-        for (CourseObject cco : CourseHandler.getObjects(course, floor.getPosition())) {
+        for (CourseObject co : CourseHandler.getObjects(course, floor.getPosition())) {
             text.append(INCREMENT).append(NEW_LINE)
-                .append("<strong>").append(cco.getType().getName()).append("</strong>").append(NEW_LINE);
+                .append("<strong>").append(co.getType().getName()).append("</strong>").append(NEW_LINE);
         }
         List<Robot> robots = CourseHandler.getRobots(course, floor.getPosition());
         if (!robots.isEmpty()) {

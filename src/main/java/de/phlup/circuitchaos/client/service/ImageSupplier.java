@@ -166,8 +166,8 @@ public class ImageSupplier {
     public ImageIcon getImageIconPlain(CourseElement courseElement) {
         if (courseElement instanceof Robot r) {
             return getImageIconPlain(getRobotImagePathAndName(r));
-        } else if (courseElement instanceof CourseObject be) {
-            return getImageIconPlain(getGfxOfObjectType(be.getType()));
+        } else if (courseElement instanceof CourseObject ce) {
+            return getImageIconPlain(getGfxOfObjectType(ce.getType()));
         } else {
             return new ImageIcon();
         }
@@ -252,8 +252,8 @@ public class ImageSupplier {
         for (CourseElement ce : CourseHandler.getFallingIntoAbyss(course, position)) {
             drawFalling(ce, gr, subPhase, false, animationSteps);
         }
-        for (CourseElement be : CourseHandler.getLeavingFallingIntoAbyss(course, position)) {
-            drawFalling(be, gr, subPhase, true, animationSteps);
+        for (CourseElement ce : CourseHandler.getLeavingFallingIntoAbyss(course, position)) {
+            drawFalling(ce, gr, subPhase, true, animationSteps);
         }
     }
 
@@ -300,17 +300,17 @@ public class ImageSupplier {
     }
 
     private void drawFlatObjectsMoving(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
-        for (CourseObject cco : CourseHandler.getLeavingObjects(course, position)) {
-            if (cco.getType().isFlat()) {
-                drawCircuitChaosObject(cco, gr, subPhase, true, animationSteps);
+        for (CourseObject co : CourseHandler.getLeavingObjects(course, position)) {
+            if (co.getType().isFlat()) {
+                drawCircuitChaosObject(co, gr, subPhase, true, animationSteps);
             }
         }
     }
 
     private void drawFlatObjects(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
-        for (CourseObject cco : CourseHandler.getObjects(course, position)) {
-            if (cco.getType().isFlat()) {
-                drawCircuitChaosObject(cco, gr, subPhase, false, animationSteps);
+        for (CourseObject co : CourseHandler.getObjects(course, position)) {
+            if (co.getType().isFlat()) {
+                drawCircuitChaosObject(co, gr, subPhase, false, animationSteps);
             }
         }
     }
@@ -333,24 +333,24 @@ public class ImageSupplier {
         drawCourseElement(robot, gr, subPhase, leaving, picture, animationSteps);
     }
 
-    private void drawFalling(CourseElement be, Graphics2D gr, int subPhase, boolean leaving, int animationSteps) {
-        String picture = be instanceof Robot r ? getRobotImagePathAndName(r) :
-                be instanceof CourseObject cco ? getGfxOfObjectType(cco.getType()) : null;
+    private void drawFalling(CourseElement ce, Graphics2D gr, int subPhase, boolean leaving, int animationSteps) {
+        String picture = ce instanceof Robot r ? getRobotImagePathAndName(r) :
+                ce instanceof CourseObject co ? getGfxOfObjectType(co.getType()) : null;
         if (picture != null) {
             if (subPhase < animationSteps) {
-                drawCourseElement(be, gr, subPhase, leaving, picture, animationSteps);
+                drawCourseElement(ce, gr, subPhase, leaving, picture, animationSteps);
             } else if (!leaving) {
-                drawFalling(be, gr, subPhase - animationSteps, picture, animationSteps);
+                drawFalling(ce, gr, subPhase - animationSteps, picture, animationSteps);
             }
         }
     }
 
-    private void drawFalling(CourseElement be, Graphics2D gr, int subPhase, String picture, int animationSteps) {
+    private void drawFalling(CourseElement ce, Graphics2D gr, int subPhase, String picture, int animationSteps) {
         Image         image  = getImageIconPlain(picture).getImage();
         BufferedImage image2 = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
         Graphics2D    gr2    = image2.createGraphics();
         try {
-            gr2.drawImage(image, AffineTransform.getQuadrantRotateInstance(be.getDirection().ordinal(), imageSize / 2.0, imageSize / 2.0), null);
+            gr2.drawImage(image, AffineTransform.getQuadrantRotateInstance(ce.getDirection().ordinal(), imageSize / 2.0, imageSize / 2.0), null);
         } finally {
             gr2.dispose();
         }
@@ -361,33 +361,33 @@ public class ImageSupplier {
         gr.translate(-offset, -offset);
     }
 
-    private void drawCourseElement(CourseElement be, Graphics2D gr, Integer subPhase, boolean leaving, String picture, int animationSteps) {
+    private void drawCourseElement(CourseElement ce, Graphics2D gr, Integer subPhase, boolean leaving, String picture, int animationSteps) {
         Image pictureImage = getImageIconPlain(picture).getImage();
-        if (subPhase == null || subPhase >= animationSteps || be.getPosition().equals(be.getPrevPosition())) {
+        if (subPhase == null || subPhase >= animationSteps || ce.getPosition().equals(ce.getPrevPosition())) {
             if (!leaving) {
-                AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(be.getPrevDirection().ordinal(), imageSize / 2.0, imageSize / 2.0);
-                affineTransform.rotate(calculateRotation(be, subPhase, animationSteps), imageSize / 2.0, imageSize / 2.0);
+                AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(ce.getPrevDirection().ordinal(), imageSize / 2.0, imageSize / 2.0);
+                affineTransform.rotate(calculateRotation(ce, subPhase, animationSteps), imageSize / 2.0, imageSize / 2.0);
                 gr.drawImage(pictureImage, affineTransform, null);
             }
         } else {
-            if (!be.getPosition().isNeighbor(be.getPrevPosition())) {
+            if (!ce.getPosition().isNeighbor(ce.getPrevPosition())) {
                 float alpha = subPhase / (animationSteps + 0.0f);
                 if (leaving) {
                     alpha = 1 - alpha;
                 }
                 Composite oldComposite = gr.getComposite();
                 gr.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-                AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(be.getPrevDirection().ordinal(), imageSize / 2.0, imageSize / 2.0);
-                affineTransform.rotate(calculateRotation(be, subPhase, animationSteps), imageSize / 2.0, imageSize / 2.0);
+                AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(ce.getPrevDirection().ordinal(), imageSize / 2.0, imageSize / 2.0);
+                affineTransform.rotate(calculateRotation(ce, subPhase, animationSteps), imageSize / 2.0, imageSize / 2.0);
                 gr.drawImage(pictureImage, affineTransform, null);
                 gr.setComposite(oldComposite);
-            } else if (be.getDirection() == be.getPrevDirection()) {
+            } else if (ce.getDirection() == ce.getPrevDirection()) {
                 gr.translate(imageSize / 2, imageSize / 2);
-                addMovingAnimation(pictureImage, gr, be.getDirection(), calculateMovingDirectionAccordingToBE(be), subPhase, leaving, !leaving, animationSteps);
+                addMovingAnimation(pictureImage, gr, ce.getDirection(), calculateMovingDirectionAccordingToBE(ce), subPhase, leaving, !leaving, animationSteps);
                 gr.translate(-imageSize / 2, -imageSize / 2);
             } else {
-                AffineTransform affineTransform = AffineTransform.getRotateInstance(calculateRotation(be, subPhase, animationSteps), imageSize / 2.0, imageSize / 2.0);
-                affineTransform.quadrantRotate(be.getPrevDirection().minus(be.getDirection()).ordinal(), imageSize / 2.0, imageSize / 2.0);
+                AffineTransform affineTransform = AffineTransform.getRotateInstance(calculateRotation(ce, subPhase, animationSteps), imageSize / 2.0, imageSize / 2.0);
+                affineTransform.quadrantRotate(ce.getPrevDirection().minus(ce.getDirection()).ordinal(), imageSize / 2.0, imageSize / 2.0);
                 BufferedImage bi2 = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D    gr2 = bi2.createGraphics();
                 try {
@@ -397,17 +397,17 @@ public class ImageSupplier {
                 }
 
                 gr.translate(imageSize / 2, imageSize / 2);
-                addMovingAnimation(bi2, gr, be.getDirection(), calculateMovingDirectionAccordingToBE(be), subPhase, leaving, !leaving, animationSteps);
+                addMovingAnimation(bi2, gr, ce.getDirection(), calculateMovingDirectionAccordingToBE(ce), subPhase, leaving, !leaving, animationSteps);
                 gr.translate(-imageSize / 2, -imageSize / 2);
             }
         }
     }
 
-    private double calculateRotation(CourseElement be, Integer subPhase, int animationSteps) {
+    private double calculateRotation(CourseElement ce, Integer subPhase, int animationSteps) {
         if (subPhase == null) {
             return 0.0;
         }
-        float target = switch (be.getPrevDirection().minus(be.getDirection())) {
+        float target = switch (ce.getPrevDirection().minus(ce.getDirection())) {
             case SOUTH -> 1.0f;
             case EAST -> -0.5f;
             case WEST -> 0.5f;
@@ -416,15 +416,15 @@ public class ImageSupplier {
         return target * subPhase * Math.PI / animationSteps;
     }
 
-    private Direction calculateMovingDirectionAccordingToBE(CourseElement be) {
-        if (be.getPosition().y() < be.getPrevPosition().y()) {
-            return be.getDirection().add(NORTH);
-        } else if (be.getPosition().y() > be.getPrevPosition().y()) {
-            return be.getDirection().add(SOUTH);
-        } else if (be.getPosition().x() < be.getPrevPosition().x()) {
-            return be.getDirection().add(EAST);
+    private Direction calculateMovingDirectionAccordingToBE(CourseElement ce) {
+        if (ce.getPosition().y() < ce.getPrevPosition().y()) {
+            return ce.getDirection().add(NORTH);
+        } else if (ce.getPosition().y() > ce.getPrevPosition().y()) {
+            return ce.getDirection().add(SOUTH);
+        } else if (ce.getPosition().x() < ce.getPrevPosition().x()) {
+            return ce.getDirection().add(EAST);
         } else {
-            return be.getDirection().add(WEST);
+            return ce.getDirection().add(WEST);
         }
     }
 
@@ -457,15 +457,15 @@ public class ImageSupplier {
         gr.drawImage(i, 0, 0, null);
     }
 
-    private void drawCircuitChaosObject(CourseObject cco, Graphics2D gr, Integer subPhase, boolean leaving, int animationSteps) {
-        String picture = getGfxOfObjectType(cco.getType());
-        if (cco.getType() == ObjectType.GLUE) {
-            picture = picture + ((int) (cco.getVariantSeed() * theme.getGlueVariants()));
+    private void drawCircuitChaosObject(CourseObject co, Graphics2D gr, Integer subPhase, boolean leaving, int animationSteps) {
+        String picture = getGfxOfObjectType(co.getType());
+        if (co.getType() == ObjectType.GLUE) {
+            picture = picture + ((int) (co.getVariantSeed() * theme.getGlueVariants()));
         }
-        if (cco.getType() == ObjectType.OIL) {
-            picture = picture + ((int) (cco.getVariantSeed() * theme.getOilVariants()));
+        if (co.getType() == ObjectType.OIL) {
+            picture = picture + ((int) (co.getVariantSeed() * theme.getOilVariants()));
         }
-        drawCourseElement(cco, gr, subPhase, leaving, picture, animationSteps);
+        drawCourseElement(co, gr, subPhase, leaving, picture, animationSteps);
     }
 
     private void drawBeams(int amount, Graphics2D gr, boolean westEastDirection, Integer subPhase, int animationSteps, ModuleType type) {

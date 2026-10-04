@@ -19,31 +19,31 @@ public class Teleporter {
     private boolean hasBeenTeleported;
     private int     oldMovement;
 
-    public static Teleporter teleport(CourseElement be, int movement, Game game, int phase) {
-        return new Teleporter().teleportInternal(be, movement, game, phase);
+    public static Teleporter teleport(CourseElement ce, int movement, Game game, int phase) {
+        return new Teleporter().teleportInternal(ce, movement, game, phase);
     }
 
-    private Teleporter teleportInternal(CourseElement be, int movement, Game game, int phase) {
+    private Teleporter teleportInternal(CourseElement ce, int movement, Game game, int phase) {
         hasBeenTeleported = false;
         oldMovement = movement;
-        for (CourseObject cco : CourseHandler.getObjects(game.getCourse(), be.getPosition())) {
-            if (cco.getType() == ObjectType.TELEPORTER && movement != 0 && !be.isFlying()) {
+        for (CourseObject co : CourseHandler.getObjects(game.getCourse(), ce.getPosition())) {
+            if (co.getType() == ObjectType.TELEPORTER && movement != 0 && !ce.isFlying()) {
                 if (movement < 0) {
                     movement = 1 - movement;
                 } else {
                     movement = 2 + movement;
                 }
-                Floor targetFloor = switch (be.getDirection()) {
+                Floor targetFloor = switch (ce.getDirection()) {
                     case NORTH ->
-                            CourseHandler.getFloor(game.getCourse(), new Position(be.getPosition().x(), be.getPosition().y() - movement));
+                            CourseHandler.getFloor(game.getCourse(), new Position(ce.getPosition().x(), ce.getPosition().y() - movement));
                     case EAST ->
-                            CourseHandler.getFloor(game.getCourse(), new Position(be.getPosition().x() + movement, be.getPosition().y()));
+                            CourseHandler.getFloor(game.getCourse(), new Position(ce.getPosition().x() + movement, ce.getPosition().y()));
                     case SOUTH ->
-                            CourseHandler.getFloor(game.getCourse(), new Position(be.getPosition().x(), be.getPosition().y() + movement));
+                            CourseHandler.getFloor(game.getCourse(), new Position(ce.getPosition().x(), ce.getPosition().y() + movement));
                     case WEST ->
-                            CourseHandler.getFloor(game.getCourse(), new Position(be.getPosition().x() - movement, be.getPosition().y()));
+                            CourseHandler.getFloor(game.getCourse(), new Position(ce.getPosition().x() - movement, ce.getPosition().y()));
                 };
-                boolean willTeleport = be instanceof Robot r && r.isVirtual();
+                boolean willTeleport = ce instanceof Robot r && r.isVirtual();
                 if (willTeleport || !isTargetBlockedByObject(targetFloor, game)) {
                     willTeleport = true;
                     for (Robot r : CourseHandler.getRobots(game.getCourse(), targetFloor.getPosition())) {
@@ -51,8 +51,8 @@ public class Teleporter {
                     }
                 }
                 if (willTeleport) {
-                    game.setPosition(be, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.ROBOTS_AND_OBJECTS_MOVE, phase, null, false);
-                    game.notifyCourseMayHaveChanged(Step.ROBOTS_AND_OBJECTS_MOVE, phase, "%s was teleported".formatted(be.getName()), null);
+                    game.setPosition(ce, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.ROBOTS_AND_OBJECTS_MOVE, phase, null, false);
+                    game.notifyCourseMayHaveChanged(Step.ROBOTS_AND_OBJECTS_MOVE, phase, "%s was teleported".formatted(ce.getName()), null);
                     hasBeenTeleported = true;
                 }
             }

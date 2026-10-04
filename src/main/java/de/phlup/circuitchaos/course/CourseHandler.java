@@ -81,9 +81,9 @@ public class CourseHandler {
 
     public static List<CourseObject> getObjects(Course course, Position position) {
         List<CourseObject> elements2 = new ArrayList<>();
-        for (CourseObject be : course.getObjects()) {
-            if (position.x() == be.getPosition().x() && position.y() == be.getPosition().y()) {
-                elements2.add(be);
+        for (CourseObject ce : course.getObjects()) {
+            if (position.x() == ce.getPosition().x() && position.y() == ce.getPosition().y()) {
+                elements2.add(ce);
             }
         }
         return elements2;
@@ -91,10 +91,10 @@ public class CourseHandler {
 
     public static List<CourseObject> getLeavingObjects(Course course, Position position) {
         List<CourseObject> elements2 = new ArrayList<>();
-        for (CourseObject be : course.getObjects()) {
-            if (!be.getPosition().equals(be.getPrevPosition())) {
-                if (position.x() == be.getPrevPosition().x() && position.y() == be.getPrevPosition().y()) {
-                    elements2.add(be);
+        for (CourseObject ce : course.getObjects()) {
+            if (!ce.getPosition().equals(ce.getPrevPosition())) {
+                if (position.x() == ce.getPrevPosition().x() && position.y() == ce.getPrevPosition().y()) {
+                    elements2.add(ce);
                 }
             }
         }
@@ -103,9 +103,9 @@ public class CourseHandler {
 
     public static List<Robot> getRobots(Course course, Position position) {
         List<Robot> elements2 = new ArrayList<>();
-        for (Robot be : course.getRobots()) {
-            if (position.x() == be.getPosition().x() && position.y() == be.getPosition().y()) {
-                elements2.add(be);
+        for (Robot ce : course.getRobots()) {
+            if (position.x() == ce.getPosition().x() && position.y() == ce.getPosition().y()) {
+                elements2.add(ce);
             }
         }
         return elements2;
@@ -113,10 +113,10 @@ public class CourseHandler {
 
     public static List<Robot> getLeavingRobots(Course course, Position position) {
         List<Robot> elements2 = new ArrayList<>();
-        for (Robot be : course.getRobots()) {
-            if (!be.getPosition().equals(be.getPrevPosition())) {
-                if (position.x() == be.getPrevPosition().x() && position.y() == be.getPrevPosition().y()) {
-                    elements2.add(be);
+        for (Robot ce : course.getRobots()) {
+            if (!ce.getPosition().equals(ce.getPrevPosition())) {
+                if (position.x() == ce.getPrevPosition().x() && position.y() == ce.getPrevPosition().y()) {
+                    elements2.add(ce);
                 }
             }
         }
@@ -125,14 +125,14 @@ public class CourseHandler {
 
     public static List<CourseElement> getFallingIntoAbyss(Course course, Position position) {
         List<CourseElement> elements2 = new ArrayList<>();
-        for (CourseElement be : course.getRobotsFallingIntoAbyss()) {
-            if (position.x() == be.getPosition().x() && position.y() == be.getPosition().y()) {
-                elements2.add(be);
+        for (CourseElement ce : course.getRobotsFallingIntoAbyss()) {
+            if (position.x() == ce.getPosition().x() && position.y() == ce.getPosition().y()) {
+                elements2.add(ce);
             }
         }
-        for (CourseElement be : course.getObjectsFallingIntoAbyss()) {
-            if (position.x() == be.getPosition().x() && position.y() == be.getPosition().y()) {
-                elements2.add(be);
+        for (CourseElement ce : course.getObjectsFallingIntoAbyss()) {
+            if (position.x() == ce.getPosition().x() && position.y() == ce.getPosition().y()) {
+                elements2.add(ce);
             }
         }
         return elements2;
@@ -140,17 +140,17 @@ public class CourseHandler {
 
     public static List<CourseElement> getLeavingFallingIntoAbyss(Course course, Position position) {
         List<CourseElement> elements2 = new ArrayList<>();
-        for (CourseElement be : course.getRobotsFallingIntoAbyss()) {
-            if (!be.getPosition().equals(be.getPrevPosition())) {
-                if (position.x() == be.getPrevPosition().x() && position.y() == be.getPrevPosition().y()) {
-                    elements2.add(be);
+        for (CourseElement ce : course.getRobotsFallingIntoAbyss()) {
+            if (!ce.getPosition().equals(ce.getPrevPosition())) {
+                if (position.x() == ce.getPrevPosition().x() && position.y() == ce.getPrevPosition().y()) {
+                    elements2.add(ce);
                 }
             }
         }
-        for (CourseElement be : course.getObjectsFallingIntoAbyss()) {
-            if (!be.getPosition().equals(be.getPrevPosition())) {
-                if (position.x() == be.getPrevPosition().x() && position.y() == be.getPrevPosition().y()) {
-                    elements2.add(be);
+        for (CourseElement ce : course.getObjectsFallingIntoAbyss()) {
+            if (!ce.getPosition().equals(ce.getPrevPosition())) {
+                if (position.x() == ce.getPrevPosition().x() && position.y() == ce.getPrevPosition().y()) {
+                    elements2.add(ce);
                 }
             }
         }
@@ -183,14 +183,14 @@ public class CourseHandler {
     }
 
     public static CourseObject createCircuitChaosObject(Course course, ObjectType objectType, Position position) {
-        CourseObject cco = new CourseObject();
-        cco.setName(objectType.getName());
-        cco.setType(objectType);
-        cco.setFlying(objectType.isFlying());
-        cco.setPosition(position);
-        cco.setPrevPosition(position);
-        add(course, cco);
-        return cco;
+        CourseObject co = new CourseObject();
+        co.setName(objectType.getName());
+        co.setType(objectType);
+        co.setFlying(objectType.isFlying());
+        co.setPosition(position);
+        co.setPrevPosition(position);
+        add(course, co);
+        return co;
     }
 
     public static void createGlue(Course course, Position position) {
@@ -266,13 +266,13 @@ public class CourseHandler {
 
     public static void replaceGameCourse(Course newCourse, Course currentCourse) {
         currentCourse.getFloor().clear();
-        currentCourse.getObjects().forEach(be -> be.setOnCourse(false));
+        currentCourse.getObjects().forEach(ce -> ce.setOnCourse(false));
         currentCourse.getObjects().clear();
         currentCourse.getCheckpoints().clear();
         currentCourse.getFloor().addAll(newCourse.getFloor());
         currentCourse.getCheckpoints().addAll(newCourse.getCheckpoints());
         currentCourse.getObjects().addAll(newCourse.getObjects());
-        currentCourse.getObjects().forEach(be -> be.setOnCourse(true));
+        currentCourse.getObjects().forEach(ce -> ce.setOnCourse(true));
         currentCourse.setRange(newCourse.getRange());
     }
 
@@ -287,9 +287,9 @@ public class CourseHandler {
                 elements.add(new CourseElementStub(floor.getStubListName(), floor.getPosition(), floor.getFacingDirection()));
             }
         }
-        for (CourseObject cco : course.getObjects()) {
-            if (cco.isOnCourse()) {
-                elements.add(new CourseElementStub(cco.getName() + cco.getType(), cco.getPosition(), cco.getDirection()));
+        for (CourseObject co : course.getObjects()) {
+            if (co.isOnCourse()) {
+                elements.add(new CourseElementStub(co.getName() + co.getType(), co.getPosition(), co.getDirection()));
             }
         }
         for (Robot robot : course.getRobots()) {
@@ -303,8 +303,8 @@ public class CourseHandler {
         for (Robot robot : course.getRobotsFallingIntoAbyss()) {
             elements.add(new CourseElementStub(robot.getName(), robot.getPosition(), robot.getDirection()));
         }
-        for (CourseObject cco : course.getObjectsFallingIntoAbyss()) {
-            elements.add(new CourseElementStub(cco.getName(), cco.getPosition(), cco.getDirection()));
+        for (CourseObject co : course.getObjectsFallingIntoAbyss()) {
+            elements.add(new CourseElementStub(co.getName(), co.getPosition(), co.getDirection()));
         }
         return elements.stream()
                        .sorted(Comparator.comparing(CourseElementStub::name)
