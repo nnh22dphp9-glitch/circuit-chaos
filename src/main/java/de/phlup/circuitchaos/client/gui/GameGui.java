@@ -11,6 +11,7 @@ import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.RevealProgrammeListItem;
 import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
+import de.phlup.circuitchaos.common.model.Robot;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
 import de.phlup.circuitchaos.common.settings.ClientSettings.Theme;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
@@ -47,6 +48,7 @@ import java.awt.image.BufferedImage;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -99,7 +101,7 @@ public class GameGui {
         GlobalServerAttributes.CLIENT_GAMES.put(gameAttributes.getRegistration().getId(), gameAttributes);
         course = clientToServerConnection.getCourse(gameAttributes.getGameUrl());
         synchronized (courseJPanel) {
-            courseJPanel.arrangeElements(this, Step.GIVE_UP, null, null, 1);
+            courseJPanel.arrangeElements(this, Step.GIVE_UP, null, null, 1, -1);
         }
         JScrollPane coursePane = new JScrollPane(courseJPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         coursePane.setPreferredSize(new Dimension(clientSettings.getDefaultCourseSizeX(), clientSettings.getDefaultCourseSizeY()));
@@ -233,7 +235,7 @@ public class GameGui {
                                                                            StringUtils.hasText(myRobotsName) ? myRobotsName : "Game has not been started yet",
                                                                            StringUtils.hasText(reasonForCourseChange) ? reasonForCourseChange : ""));
         synchronized (courseJPanel) {
-            courseJPanel.arrangeElements(this, step, phase, subPhase, animationSteps);
+            courseJPanel.arrangeElements(this, step, phase, subPhase, animationSteps, myNextCheckpoint(course));
             if (subPhase == null || gameEnded) {
                 audioSupplier.stop();
             } else if (subPhase == 0) {
@@ -244,6 +246,16 @@ public class GameGui {
         if (courseArranger != null) {
             courseArranger.getPlayButton().setEnabled(course.getCheckpoints().size() > 1);
         }
+    }
+
+    private int myNextCheckpoint(Course course) {
+        if (StringUtils.hasText(myRobotsName)) {
+            Optional<Robot> myself = course.getRobots().stream().filter(r -> myRobotsName.equals(r.getName())).findFirst();
+            if (myself.isPresent()) {
+                return myself.get().getNextCheckpoint();
+            }
+        }
+        return -1;
     }
 
     private boolean isHover(String movingRobotName) {

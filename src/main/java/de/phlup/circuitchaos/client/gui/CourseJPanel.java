@@ -23,22 +23,22 @@ public class CourseJPanel extends JPanel {
         this.imageSupplier = imageSupplier;
     }
 
-    public void arrangeElements(GameGui game, Step step, Integer phase, Integer subPhase, int animationSteps) {
+    public void arrangeElements(GameGui game, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
         GridBagLayout layout      = new GridBagLayout();
         JPanel        contentPane = new JPanel(layout, true);
         contentPane.setBackground(Color.black);
         contentPane.setOpaque(true);
-        redrawAllElements(game, layout, contentPane, step, phase, subPhase, animationSteps);
+        redrawAllElements(game, layout, contentPane, step, phase, subPhase, animationSteps, nextCP);
         removeAll();
         add(contentPane);
         validate();
         game.getMainFrame().validate();
     }
 
-    private void redrawAllElements(GameGui game, GridBagLayout layout, JPanel contentPane, Step step, Integer phase, Integer subPhase, int animationSteps) {
+    private void redrawAllElements(GameGui game, GridBagLayout layout, JPanel contentPane, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
         for (Floor floor : game.getCourse().getFloor()) {
             createCourseElementLabel(game, layout, floor, contentPane);
-            imageSupplier.redrawFloor(floor, game, step, phase, subPhase, animationSteps);
+            imageSupplier.redrawFloor(floor, game, step, phase, subPhase, animationSteps, nextCP);
         }
     }
 

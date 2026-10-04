@@ -189,7 +189,7 @@ public class ImageSupplier {
         return new ImageIcon(i);
     }
 
-    public void redrawFloor(Floor floor, GameGui game, Step step, Integer phase, Integer subPhase, int animationSteps) {
+    public void redrawFloor(Floor floor, GameGui game, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
         Robot activeRobot = null;
         if (game instanceof GameGui cg) {
             Optional<Robot> activeRobotOptional = game.getCourse().getRobots().stream()
@@ -201,17 +201,17 @@ public class ImageSupplier {
                 activeRobot = activeRobotOptional.get();
             }
         }
-        redrawFloor(floor.getPosition(), floor, game, activeRobot, step, phase, subPhase, animationSteps);
+        redrawFloor(floor.getPosition(), floor, game, activeRobot, step, phase, subPhase, animationSteps, nextCP);
     }
 
-    private void redrawFloor(Position position, Floor floor, GameGui game, Robot activeRobot, Step step, Integer phase, Integer subPhase, int animationSteps) {
+    private void redrawFloor(Position position, Floor floor, GameGui game, Robot activeRobot, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
         Course        course = game.getCourse();
         BufferedImage image  = getImagePlain(game, floor);
         int           damage = floor.getExplosiveDamage();
         Graphics2D    gr     = image.createGraphics();
         try {
             drawBasicFloor(floor, game, step, phase, subPhase, course, gr, animationSteps);
-            drawCheckpoint(position, course, gr);
+            drawCheckpoint(position, course, gr, nextCP);
             drawFlatObjects(position, subPhase, course, gr, animationSteps);
             if (subPhase != null) {
                 drawFlatObjectsMoving(position, subPhase, course, gr, animationSteps);
@@ -320,11 +320,11 @@ public class ImageSupplier {
         gr.drawImage(bi, new AffineTransform(), null);
     }
 
-    private void drawCheckpoint(Position position, Course course, Graphics2D gr) {
+    private void drawCheckpoint(Position position, Course course, Graphics2D gr, int nextCP) {
         Checkpoint cp = CourseHandler.getCheckpoint(course, position);
         if (cp != null) {
             int maxCheckpoint = course.getCheckpoints().size() - 1;
-            drawCheckpoint(cp, gr, maxCheckpoint);
+            drawCheckpoint(cp, gr, maxCheckpoint, nextCP);
         }
     }
 
@@ -444,7 +444,7 @@ public class ImageSupplier {
         return FOLDER_ROBOTS + picture;
     }
 
-    private void drawCheckpoint(Checkpoint cp, Graphics2D gr, int maxCheckpoint) {
+    private void drawCheckpoint(Checkpoint cp, Graphics2D gr, int maxCheckpoint, int nextCP) {
         String imageName;
         if (cp.getNumber() == 0) {
             imageName = GFX_START;
@@ -453,8 +453,16 @@ public class ImageSupplier {
         } else {
             imageName = GFX_CHECKPOINT;
         }
-        Image i = getImageIconPlain(imageName).getImage();
-        gr.drawImage(i, 0, 0, null);
+        Graphics2D checkpointGraphics = (Graphics2D) gr.create();
+        try {
+            Image i = getImageIconPlain(imageName).getImage();
+            if (nextCP != -1 && nextCP != cp.getNumber()) {
+                checkpointGraphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+            }
+            checkpointGraphics.drawImage(i, 0, 0, null); // TODO
+        } finally {
+            checkpointGraphics.dispose();
+        }
     }
 
     private void drawCircuitChaosObject(CourseObject co, Graphics2D gr, Integer subPhase, boolean leaving, int animationSteps) {
