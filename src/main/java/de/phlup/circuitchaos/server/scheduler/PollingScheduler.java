@@ -4,6 +4,7 @@ import de.phlup.circuitchaos.client.ClientToServerConnection;
 import de.phlup.circuitchaos.client.gui.ClientCourseArranger;
 import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.client.service.AsyncService;
+import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.model.PullingData;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.GameAttributes;
@@ -44,11 +45,11 @@ public class PollingScheduler {
             case COURSE_CHANGE -> asyncService.refreshCourse(gameGui, data.getRequest());
             case SHOW_MESSAGE -> asyncService.showMessage(registrationId, data.getMessage());
             case REVEAL_PROGRAMME -> {
-                gameGui.setNotStartedYet(false);
+                gameGui.setState(CourseState.GAME_RUNNING);
                 asyncService.revealProgramme(gameGui, data.getRevealProgrammeResponse());
             }
             case PROGRAMME_QUESTION -> {
-                gameGui.setNotStartedYet(false);
+                gameGui.setState(CourseState.GAME_RUNNING);
                 String answerUrl = gameGui.getGameAttributes().getGameUrl() + "/answer/" + data.getPurposeId() + "/" + data.getRequestId();
                 asyncService.perform(gameGui, answerUrl, data.getRequest());
             }

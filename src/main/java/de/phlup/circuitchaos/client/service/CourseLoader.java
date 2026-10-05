@@ -14,10 +14,12 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -76,6 +78,29 @@ public class CourseLoader {
         } catch (IOException e) {
             log.warn("Could not load course {}", jsonResource, e);
             return null;
+        }
+    }
+
+    public Course loadCourse(Path path) {
+        try (InputStream inputStream = Files.newInputStream(path)) {
+            return objectMapper.readValue(inputStream, Course.class);
+        } catch (IOException e) {
+            log.warn("Could not load course {}", path, e);
+            JOptionPane.showMessageDialog(null, "Could not load course from "
+                    + path + ". See logs for details.");
+            return null;
+        }
+    }
+
+    public void saveCourse(Course course, Path path) {
+        try (OutputStream outputStream = Files.newOutputStream(path)) {
+            objectMapper.writerWithDefaultPrettyPrinter()
+                        .writeValue(outputStream, course);
+            JOptionPane.showMessageDialog(null, "Successfully saved the course.");
+        } catch (IOException e) {
+            log.warn("Could not save course {}", path, e);
+            JOptionPane.showMessageDialog(null, "Could not save course to "
+                    + path + ". See logs for details.");
         }
     }
 

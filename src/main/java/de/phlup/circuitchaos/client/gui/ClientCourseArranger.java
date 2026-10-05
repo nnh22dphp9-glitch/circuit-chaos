@@ -3,6 +3,7 @@ package de.phlup.circuitchaos.client.gui;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.enums.ComputerType;
+import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.CourseInfo;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
@@ -79,7 +80,7 @@ public class ClientCourseArranger implements GuiHelper {
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
-                if (game.isNotStartedYet()) {
+                if (game.getState() == CourseState.GAME_INIT) {
                     game.getMainFrame().dispose();
                 }
             }
@@ -158,7 +159,7 @@ public class ClientCourseArranger implements GuiHelper {
         playButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                game.setNotStartedYet(false);
+                game.setState(CourseState.GAME_RUNNING);
                 frame.dispose();
                 GameOptions gameOptions = new GameOptions();
                 for (int i = 0; i < 7; i++) {

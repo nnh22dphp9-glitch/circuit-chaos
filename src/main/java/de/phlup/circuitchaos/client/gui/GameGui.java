@@ -2,6 +2,7 @@ package de.phlup.circuitchaos.client.gui;
 
 import de.phlup.circuitchaos.client.ClientToServerConnection;
 import de.phlup.circuitchaos.client.service.AudioSupplier;
+import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.CourseElement;
@@ -54,10 +55,6 @@ public class GameGui extends BaseGui {
     private final JCheckBoxMenuItem soundMenuItem   = new JCheckBoxMenuItem("Sound", true);
 
     @Setter
-    private boolean notStartedYet = true;
-    private boolean gameEnded     = false;
-
-    @Setter
     private ClientCourseArranger courseArranger = null;
 
     public GameGui(@NotNull ResourceLoader resourceLoader,
@@ -83,6 +80,7 @@ public class GameGui extends BaseGui {
         });
         configureMainFrame("Circuit Chaos Course - %s - Game has not been started yet - %s"
                                    .formatted(gameAttributes.getRegistration().getGameName(), Step.SETUP.getName()));
+        state = CourseState.GAME_INIT;
     }
 
     private void addMenuBar(JFrame frame, boolean sound) {
@@ -116,7 +114,7 @@ public class GameGui extends BaseGui {
     public void end() {
         gameAttributes.setGameGui(null);
         GlobalServerAttributes.CLIENT_GAMES.remove(gameAttributes.getRegistration().getId());
-        if (!gameEnded) {
+        if (state != CourseState.GAME_ENDED) {
             clientToServerConnection.deregister(gameAttributes.getGameUrl(), gameAttributes.getRegistration().getId());
         }
         mainFrame.dispose();
@@ -128,7 +126,7 @@ public class GameGui extends BaseGui {
     }
 
     public void gameHasEnded() {
-        gameEnded = true;
+        state = CourseState.GAME_ENDED;
         if (lastRevealFrame != null) {
             lastRevealFrame.setVisible(false);
         }
@@ -141,7 +139,7 @@ public class GameGui extends BaseGui {
                                                                            StringUtils.hasText(reasonForCourseChange) ? reasonForCourseChange : ""));
         synchronized (courseJPanel) {
             courseJPanel.arrangeElements(this, step, phase, subPhase, animationSteps, myNextCheckpoint(course));
-            if (subPhase == null || gameEnded) {
+            if (subPhase == null || state == CourseState.GAME_ENDED) {
                 audioSupplier.stop();
             } else if (subPhase == 0) {
                 boolean hover = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(movingRobotName);
@@ -202,7 +200,7 @@ public class GameGui extends BaseGui {
     }
 
     public void perform(String answerUrl, NetworkRequest request) {
-        if (gameEnded) {
+        if (state == CourseState.GAME_ENDED) {
             return;
         }
         myRobotsName = request.getMyRobot().getName();
@@ -215,7 +213,7 @@ public class GameGui extends BaseGui {
     }
 
     public void revealProgramme(RevealProgrammeResponse revealProgrammeResponse) {
-        if (gameEnded) {
+        if (state == CourseState.GAME_ENDED) {
             return;
         }
         synchronized (revealPanel) {
@@ -250,6 +248,7 @@ public class GameGui extends BaseGui {
 
     public void play(GameOptions gameOptions) {
         courseArranger = null;
+        state = CourseState.GAME_RUNNING;
         clientToServerConnection.play(gameAttributes.getGameUrl(), gameOptions);
     }
 

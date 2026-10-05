@@ -4,6 +4,7 @@ import de.phlup.circuitchaos.client.gui.ClientCourseArranger;
 import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.client.service.AsyncService;
 import de.phlup.circuitchaos.common.CircuitChaosException;
+import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
@@ -69,7 +70,7 @@ public class ClientController {
         }
         log.debug("Received revealProgramme request");
         GameGui gameGui = determineGame(registrationId);
-        gameGui.setNotStartedYet(false);
+        gameGui.setState(CourseState.GAME_RUNNING);
         asyncService.revealProgramme(gameGui, revealProgrammeResponse);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -87,7 +88,7 @@ public class ClientController {
         }
         log.debug("Received programQuestion request");
         GameGui gameGui = determineGame(registrationId);
-        gameGui.setNotStartedYet(false);
+        gameGui.setState(CourseState.GAME_RUNNING);
         String answerUrl = gameGui.getGameAttributes().getGameUrl() + "/answer/" + purposeId + "/" + requestId;
         asyncService.perform(gameGui, answerUrl, request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

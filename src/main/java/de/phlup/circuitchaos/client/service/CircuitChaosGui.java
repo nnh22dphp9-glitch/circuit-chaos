@@ -112,7 +112,7 @@ public class CircuitChaosGui implements GuiHelper {
         menuBar.add(editorMenu);
         JMenuItem showEditor = new JMenuItem("Show editor");
         showEditor.setEnabled(true);
-        showEditor.addActionListener(e -> new EditorGui(resourceLoader, clientSettings, courseLoader, objectMapper).open());
+        showEditor.addActionListener(e -> new EditorGui(resourceLoader, clientSettings, courseLoader).open());
         editorMenu.add(showEditor);
         // TODO build new help menu
         //        JMenu    helpMenu = new JMenu("Help");

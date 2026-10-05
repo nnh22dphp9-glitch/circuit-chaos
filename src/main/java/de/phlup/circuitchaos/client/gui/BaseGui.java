@@ -2,6 +2,7 @@ package de.phlup.circuitchaos.client.gui;
 
 import de.phlup.circuitchaos.client.service.AudioSupplier;
 import de.phlup.circuitchaos.client.service.ImageSupplier;
+import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.Floor;
@@ -10,6 +11,7 @@ import de.phlup.circuitchaos.common.settings.ClientSettings;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ResourceLoader;
 
@@ -40,6 +42,8 @@ public abstract class BaseGui {
 
     protected final CourseJPanel courseJPanel;
     protected       Course       course;
+    @Setter
+    protected       CourseState  state;
 
     protected final JFrame mainFrame = new JFrame();
 
@@ -143,8 +147,6 @@ public abstract class BaseGui {
     public void putImageOfFloor(Floor f, BufferedImage bi) {
         images.put(f.getPosition(), bi);
     }
-
-    public abstract boolean isNotStartedYet();
 
     public abstract void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName);
 

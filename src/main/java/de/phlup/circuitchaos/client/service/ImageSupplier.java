@@ -3,6 +3,7 @@ package de.phlup.circuitchaos.client.service;
 import de.phlup.circuitchaos.client.gui.BaseGui;
 import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.common.CourseHandler;
+import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.ModuleType;
@@ -190,10 +191,6 @@ public class ImageSupplier {
         return new ImageIcon(i);
     }
 
-    public void redrawFloor(Floor floor, BaseGui gui) {
-        redrawFloor(floor, gui, Step.SETUP, null, null, 1, -1);
-    }
-
     public void redrawFloor(Floor floor, BaseGui gui, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
         Robot activeRobot = null;
         if (gui instanceof GameGui gameGui) {
@@ -321,7 +318,7 @@ public class ImageSupplier {
     }
 
     private void drawBasicFloor(Floor floor, BaseGui gui, Step step, Integer phase, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
-        BufferedImage bi = getFloorImage(floor, course, gui.isNotStartedYet(), step, phase, subPhase, animationSteps);
+        BufferedImage bi = getFloorImage(floor, course, gui.getState() != CourseState.GAME_RUNNING, step, phase, subPhase, animationSteps);
         gr.drawImage(bi, new AffineTransform(), null);
     }
 

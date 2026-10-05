@@ -1,6 +1,7 @@
 package de.phlup.circuitchaos.client.gui;
 
 import de.phlup.circuitchaos.common.CourseHandler;
+import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.model.Checkpoint;
 import de.phlup.circuitchaos.common.model.Floor;
@@ -29,14 +30,14 @@ public class CheckpointSettingMouseAdapter extends MouseAdapter {
     }
 
     private void handleMouseEventOnCheckpoint() {
-        if (game != null && game.isNotStartedYet()) {
+        if (game != null && game.getState() == CourseState.GAME_INIT) {
             game.getClientToServerConnection().removeCheckpoint(game.getGameAttributes().getGameUrl(), floor.getPosition());
         }
     }
 
     private void handleMouseEventOnFloor() {
         assert floor != null;
-        if (game != null && game.isNotStartedYet()) {
+        if (game != null && game.getState() == CourseState.GAME_INIT) {
             Floortype floortype = floor.getFloortype();
             if (floortype == Floortype.OPEN_FLOOR || floortype == Floortype.PIT_STOP) {
                 game.getClientToServerConnection().addCheckpoint(game.getGameAttributes().getGameUrl(), floor.getPosition());
