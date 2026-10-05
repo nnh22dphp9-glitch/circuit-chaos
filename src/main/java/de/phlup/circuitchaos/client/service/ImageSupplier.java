@@ -1,6 +1,8 @@
 package de.phlup.circuitchaos.client.service;
 
+import de.phlup.circuitchaos.client.gui.BaseGui;
 import de.phlup.circuitchaos.client.gui.GameGui;
+import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.ModuleType;
@@ -18,7 +20,6 @@ import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.Programme;
 import de.phlup.circuitchaos.common.model.Robot;
 import de.phlup.circuitchaos.common.settings.ClientSettings.Theme;
-import de.phlup.circuitchaos.course.CourseHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -158,9 +159,9 @@ public class ImageSupplier {
         return emptyImage;
     }
 
-    public ImageIcon getImageIcon(GameGui game, Floor floor) {
-        BufferedImage i = getImagePlain(game, floor);
-        return new ImageIcon(scaleImage(i, game.getZoomFactor() * theme.getZoomFactor()));
+    public ImageIcon getImageIcon(BaseGui gui, Floor floor) {
+        BufferedImage i = getImagePlain(gui, floor);
+        return new ImageIcon(scaleImage(i, gui.getZoomFactor() * theme.getZoomFactor()));
     }
 
     public ImageIcon getImageIconPlain(CourseElement courseElement) {
@@ -173,11 +174,11 @@ public class ImageSupplier {
         }
     }
 
-    private BufferedImage getImagePlain(GameGui game, Floor f) {
-        BufferedImage i = game.getImageByFloor(f);
+    private BufferedImage getImagePlain(BaseGui gui, Floor f) {
+        BufferedImage i = gui.getImageByFloor(f);
         if (i == null) {
             i = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
-            game.putImageOfFloor(f, i);
+            gui.putImageOfFloor(f, i);
         }
         return i;
     }
@@ -189,28 +190,32 @@ public class ImageSupplier {
         return new ImageIcon(i);
     }
 
-    public void redrawFloor(Floor floor, GameGui game, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
+    public void redrawFloor(Floor floor, BaseGui gui) {
+        redrawFloor(floor, gui, Step.SETUP, null, null, 1, -1);
+    }
+
+    public void redrawFloor(Floor floor, BaseGui gui, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
         Robot activeRobot = null;
-        if (game instanceof GameGui cg) {
-            Optional<Robot> activeRobotOptional = game.getCourse().getRobots().stream()
-                                                      .filter((r) -> r.getName().equals(cg.getMyRobotsName()))
-                                                      .filter(CourseElement::isOnCourse)
-                                                      .filter((r) -> r.getPosition().equals(floor.getPosition()))
-                                                      .findFirst();
+        if (gui instanceof GameGui gameGui) {
+            Optional<Robot> activeRobotOptional = gui.getCourse().getRobots().stream()
+                                                     .filter((r) -> r.getName().equals(gameGui.getMyRobotsName()))
+                                                     .filter(CourseElement::isOnCourse)
+                                                     .filter((r) -> r.getPosition().equals(floor.getPosition()))
+                                                     .findFirst();
             if (activeRobotOptional.isPresent()) {
                 activeRobot = activeRobotOptional.get();
             }
         }
-        redrawFloor(floor.getPosition(), floor, game, activeRobot, step, phase, subPhase, animationSteps, nextCP);
+        redrawFloor(floor.getPosition(), floor, gui, activeRobot, step, phase, subPhase, animationSteps, nextCP);
     }
 
-    private void redrawFloor(Position position, Floor floor, GameGui game, Robot activeRobot, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
-        Course        course = game.getCourse();
-        BufferedImage image  = getImagePlain(game, floor);
+    private void redrawFloor(Position position, Floor floor, BaseGui gui, Robot activeRobot, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
+        Course        course = gui.getCourse();
+        BufferedImage image  = getImagePlain(gui, floor);
         int           damage = floor.getExplosiveDamage();
         Graphics2D    gr     = image.createGraphics();
         try {
-            drawBasicFloor(floor, game, step, phase, subPhase, course, gr, animationSteps);
+            drawBasicFloor(floor, gui, step, phase, subPhase, course, gr, animationSteps);
             drawCheckpoint(position, course, gr, nextCP);
             drawFlatObjects(position, subPhase, course, gr, animationSteps);
             if (subPhase != null) {
@@ -315,8 +320,8 @@ public class ImageSupplier {
         }
     }
 
-    private void drawBasicFloor(Floor floor, GameGui game, Step step, Integer phase, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
-        BufferedImage bi = getFloorImage(floor, course, game.isNotStartedYet(), step, phase, subPhase, animationSteps);
+    private void drawBasicFloor(Floor floor, BaseGui gui, Step step, Integer phase, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+        BufferedImage bi = getFloorImage(floor, course, gui.isNotStartedYet(), step, phase, subPhase, animationSteps);
         gr.drawImage(bi, new AffineTransform(), null);
     }
 

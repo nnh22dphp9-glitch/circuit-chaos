@@ -2,6 +2,7 @@ package de.phlup.circuitchaos.server.game;
 
 import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.CircuitChaosException;
+import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.ComputerType;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
@@ -29,7 +30,6 @@ import de.phlup.circuitchaos.common.model.RevealProgrammeListItem;
 import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
 import de.phlup.circuitchaos.common.model.Robot;
 import de.phlup.circuitchaos.common.settings.TimeSettings;
-import de.phlup.circuitchaos.course.CourseHandler;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.player.Player;
 import de.phlup.circuitchaos.server.player.computer.ComputerPlayer;

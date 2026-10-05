@@ -1,9 +1,9 @@
 package de.phlup.circuitchaos.client.gui;
 
+import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.model.Checkpoint;
 import de.phlup.circuitchaos.common.model.Floor;
-import de.phlup.circuitchaos.course.CourseHandler;
 import lombok.RequiredArgsConstructor;
 
 import java.awt.event.MouseAdapter;

@@ -23,49 +23,49 @@ public class CourseJPanel extends JPanel {
         this.imageSupplier = imageSupplier;
     }
 
-    public void arrangeElements(GameGui game, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
+    public void arrangeElements(BaseGui gui, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
         GridBagLayout layout      = new GridBagLayout();
         JPanel        contentPane = new JPanel(layout, true);
         contentPane.setBackground(Color.black);
         contentPane.setOpaque(true);
-        redrawAllElements(game, layout, contentPane, step, phase, subPhase, animationSteps, nextCP);
+        redrawAllElements(gui, layout, contentPane, step, phase, subPhase, animationSteps, nextCP);
         removeAll();
         add(contentPane);
         validate();
-        game.getMainFrame().validate();
+        gui.getMainFrame().validate();
     }
 
-    private void redrawAllElements(GameGui game, GridBagLayout layout, JPanel contentPane, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
-        for (Floor floor : game.getCourse().getFloor()) {
-            createCourseElementLabel(game, layout, floor, contentPane);
-            imageSupplier.redrawFloor(floor, game, step, phase, subPhase, animationSteps, nextCP);
+    private void redrawAllElements(BaseGui gui, GridBagLayout layout, JPanel contentPane, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
+        for (Floor floor : gui.getCourse().getFloor()) {
+            createCourseElementLabel(gui, layout, floor, contentPane);
+            imageSupplier.redrawFloor(floor, gui, step, phase, subPhase, animationSteps, nextCP);
         }
     }
 
-    private void createCourseElementLabel(GameGui game, GridBagLayout layout, Floor floor, JPanel contentPane) {
+    private void createCourseElementLabel(BaseGui gui, GridBagLayout layout, Floor floor, JPanel contentPane) {
         if (floor != null) {
-            JLabel             label = createJLabel(game, floor);
-            GridBagConstraints gbc   = createGridBagConstraints(game, floor);
+            JLabel             label = createJLabel(gui, floor);
+            GridBagConstraints gbc   = createGridBagConstraints(gui, floor);
             layout.setConstraints(label, gbc);
             label.print(label.getGraphics());
             contentPane.add(label);
         }
     }
 
-    private JLabel createJLabel(GameGui game, Floor floor) {
-        JLabel label = new JLabel(imageSupplier.getImageIcon(game, floor));
-        label.setToolTipText(ToolTipTexts.getToolTipText(game.getCourse(), floor));
+    private JLabel createJLabel(BaseGui gui, Floor floor) {
+        JLabel label = new JLabel(imageSupplier.getImageIcon(gui, floor));
+        label.setToolTipText(ToolTipTexts.getToolTipText(gui.getCourse(), floor));
         label.setOpaque(false);
         label.getInsets().set(0, 0, 0, 0);
-        if (game.isNotStartedYet()) {
-            label.addMouseListener(new CheckpointSettingMouseAdapter(game, floor));
+        if (gui.isNotStartedYet() && gui instanceof GameGui gameGui) { // TODO remove me
+            label.addMouseListener(new CheckpointSettingMouseAdapter(gameGui, floor));
         }
         return label;
     }
 
-    private GridBagConstraints createGridBagConstraints(GameGui game, Floor floor) {
-        return new GridBagConstraints(floor.getPosition().x() - game.getCourse().getRange().minX(),
-                                      floor.getPosition().y() - game.getCourse().getRange().minY(),
+    private GridBagConstraints createGridBagConstraints(BaseGui gui, Floor floor) {
+        return new GridBagConstraints(floor.getPosition().x() - gui.getCourse().getRange().minX(),
+                                      floor.getPosition().y() - gui.getCourse().getRange().minY(),
                                       1, 1, 0, 0,
                                       GridBagConstraints.CENTER, GridBagConstraints.NONE,
                                       new Insets(0, 0, 0, 0), 0, 0);

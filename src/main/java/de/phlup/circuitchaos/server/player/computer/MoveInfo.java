@@ -1,5 +1,6 @@
 package de.phlup.circuitchaos.server.player.computer;
 
+import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.ModuleType;
@@ -12,7 +13,6 @@ import de.phlup.circuitchaos.common.model.CourseObject;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.Programme;
-import de.phlup.circuitchaos.course.CourseHandler;
 import de.phlup.circuitchaos.server.game.Game;
 import de.phlup.circuitchaos.server.player.Player;
 import lombok.Data;

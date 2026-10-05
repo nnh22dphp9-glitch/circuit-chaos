@@ -1,5 +1,6 @@
 package de.phlup.circuitchaos.server.game;
 
+import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.model.CourseElement;
@@ -7,7 +8,6 @@ import de.phlup.circuitchaos.common.model.CourseObject;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.Robot;
-import de.phlup.circuitchaos.course.CourseHandler;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

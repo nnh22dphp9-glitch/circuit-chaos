@@ -6,6 +6,7 @@ import de.phlup.circuitchaos.client.gui.ClientCourseArranger;
 import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.client.gui.GuiHelper;
 import de.phlup.circuitchaos.client.gui.PictureConstants;
+import de.phlup.circuitchaos.client.gui.editor.EditorGui;
 import de.phlup.circuitchaos.common.CircuitChaosException;
 import de.phlup.circuitchaos.common.model.CourseInfo;
 import de.phlup.circuitchaos.common.model.GameItem;
@@ -28,6 +29,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.border.LineBorder;
@@ -70,8 +74,8 @@ public class CircuitChaosGui implements GuiHelper {
     private JButton                playButton;
     private Collection<CourseInfo> courses;
 
-    @EventListener(ApplicationReadyEvent.class)
     @SuppressWarnings("unused")
+    @EventListener(ApplicationReadyEvent.class)
     public void initClientGUI() {
         ClientSettings.Theme theme = determineTheme();
         this.imageSupplier = new ImageSupplier(theme, resourceLoader);
@@ -102,13 +106,19 @@ public class CircuitChaosGui implements GuiHelper {
         return theme;
     }
 
-    private void addMenuBar(@SuppressWarnings("unused") JFrame frame) {
+    private void addMenuBar(JFrame frame) {
+        JMenuBar menuBar    = new JMenuBar();
+        JMenu    editorMenu = new JMenu("Editor");
+        menuBar.add(editorMenu);
+        JMenuItem showEditor = new JMenuItem("Show editor");
+        showEditor.setEnabled(true);
+        showEditor.addActionListener(e -> new EditorGui(resourceLoader, clientSettings, courseLoader, objectMapper).open());
+        editorMenu.add(showEditor);
         // TODO build new help menu
-        //        JMenuBar menuBar  = new JMenuBar();
         //        JMenu    helpMenu = new JMenu("Help");
         //        menuBar.add(helpMenu);
         //        new HelpMenu(imageSupplier).createHelpMenu(helpMenu);
-        //        frame.setJMenuBar(menuBar);
+        frame.setJMenuBar(menuBar);
     }
 
     private Container getStartPanel() {

@@ -1,11 +1,11 @@
 package de.phlup.circuitchaos.server.player;
 
+import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.Module;
 import de.phlup.circuitchaos.common.model.Robot;
-import de.phlup.circuitchaos.course.CourseHandler;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.Game;
 import jakarta.validation.constraints.NotNull;

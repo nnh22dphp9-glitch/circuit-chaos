@@ -2,18 +2,14 @@ package de.phlup.circuitchaos.client.gui;
 
 import de.phlup.circuitchaos.client.ClientToServerConnection;
 import de.phlup.circuitchaos.client.service.AudioSupplier;
-import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.CourseElement;
-import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
-import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.RevealProgrammeListItem;
 import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
 import de.phlup.circuitchaos.common.model.Robot;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
-import de.phlup.circuitchaos.common.settings.ClientSettings.Theme;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.GameAttributes;
 import de.phlup.circuitchaos.server.game.GameOptions;
@@ -25,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
 
-import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,82 +28,52 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
 @Getter
-public class GameGui {
+public class GameGui extends BaseGui {
 
     private final String id = UUID.randomUUID().toString();
 
     private final ClientToServerConnection clientToServerConnection;
     private final GameAttributes           gameAttributes;
-    private final ClientSettings           clientSettings;
 
     private String myRobotsName = null;
 
-    private final AudioSupplier     audioSupplier;
-    private final ImageSupplier     imageSupplier;
-    private final ResourceLoader    resourceLoader;
-    private final JFrame            mainFrame       = new JFrame();
     private       JFrame            lastRevealFrame = null;
     private final JPanel            revealPanel     = new JPanel(new FlowLayout());
     private final JCheckBoxMenuItem soundMenuItem   = new JCheckBoxMenuItem("Sound", true);
-
-    private       Course       course;
-    private final CourseJPanel courseJPanel;
 
     @Setter
     private boolean notStartedYet = true;
     private boolean gameEnded     = false;
 
     @Setter
-    private       ClientCourseArranger         courseArranger = null;
-    private final Map<Position, BufferedImage> images         = new HashMap<>();
-    private       float                        zoomFactor;
+    private ClientCourseArranger courseArranger = null;
 
     public GameGui(@NotNull ResourceLoader resourceLoader,
                    @NotNull AudioSupplier audioSupplier,
                    @NotNull ClientToServerConnection clientToServerConnection,
                    @NotNull GameAttributes gameAttributes,
                    @NotNull ClientSettings clientSettings) {
-        this.resourceLoader = resourceLoader;
-        this.clientSettings = clientSettings;
-        this.audioSupplier = audioSupplier;
-        Theme theme = determineTheme();
-        this.audioSupplier.setThemePath(theme.getPath());
-        this.imageSupplier = new ImageSupplier(theme, resourceLoader);
-        courseJPanel = new CourseJPanel(imageSupplier);
+        super(resourceLoader, clientSettings, audioSupplier);
+
         this.clientToServerConnection = clientToServerConnection;
         this.gameAttributes = gameAttributes;
-        this.zoomFactor = clientSettings.getDefaultZoom();
         GlobalServerAttributes.CLIENT_GAMES.put(gameAttributes.getRegistration().getId(), gameAttributes);
         course = clientToServerConnection.getCourse(gameAttributes.getGameUrl());
         synchronized (courseJPanel) {
             courseJPanel.arrangeElements(this, Step.GIVE_UP, null, null, 1, -1);
         }
-        JScrollPane coursePane = new JScrollPane(courseJPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        coursePane.setPreferredSize(new Dimension(clientSettings.getDefaultCourseSizeX(), clientSettings.getDefaultCourseSizeY()));
-        mainFrame.setTitle("Circuit Chaos Course - %s - Game has not been started yet - %s".formatted(gameAttributes.getRegistration().getGameName(), Step.SETUP.getName()));
-        mainFrame.setContentPane(coursePane);
-        mainFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        mainFrame.setResizable(true);
         addMenuBar(mainFrame, clientSettings.isSound());
         mainFrame.addWindowListener(new WindowAdapter() {
             @Override
@@ -116,25 +81,8 @@ public class GameGui {
                 end();
             }
         });
-        mainFrame.pack();
-        mainFrame.setVisible(true);
-        mainFrame.requestFocus();
-    }
-
-    private Theme determineTheme() {
-        Collection<Theme> themes = clientSettings.getThemeCollection();
-        if (themes.isEmpty()) {
-            log.error("No theme found");
-        }
-        for (Theme t : themes) {
-            if (t.getName().equals(clientSettings.getDefaultTheme())) {
-                return t;
-            }
-        }
-        //noinspection OptionalGetWithoutIsPresent
-        Theme theme = themes.stream().findFirst().get();
-        log.info("No default theme set - using '{}'", theme.getName());
-        return theme;
+        configureMainFrame("Circuit Chaos Course - %s - Game has not been started yet - %s"
+                                   .formatted(gameAttributes.getRegistration().getGameName(), Step.SETUP.getName()));
     }
 
     private void addMenuBar(JFrame frame, boolean sound) {
@@ -165,43 +113,6 @@ public class GameGui {
         gameMenu.add(giveUpAndCloseMenuItem);
     }
 
-    private JMenu createZoomMenu() {
-        JMenu       zoom      = new JMenu("Zoom");
-        ButtonGroup zoomGroup = new ButtonGroup();
-        createZoomButton("25 %", zoomGroup, zoom);
-        createZoomButton("50 %", zoomGroup, zoom);
-        createZoomButton("75 %", zoomGroup, zoom);
-        createZoomButton("100 %", zoomGroup, zoom);
-        createZoomButton("125 %", zoomGroup, zoom);
-        createZoomButton("150 %", zoomGroup, zoom);
-        createZoomButton("175 %", zoomGroup, zoom);
-        createZoomButton("200 %", zoomGroup, zoom);
-        return zoom;
-    }
-
-    private void createZoomButton(String title, ButtonGroup zoomGroup, JMenuItem zoom) {
-        JRadioButtonMenuItem zoomButton = new JRadioButtonMenuItem(title);
-        if (title.equals(((int) (zoomFactor * 100)) + " %")) {
-            zoomButton.setSelected(true);
-        }
-        zoomButton.addActionListener(this::zoomButtonAction);
-        zoomGroup.add(zoomButton);
-        zoom.add(zoomButton);
-    }
-
-    private void zoomButtonAction(ActionEvent e) {
-        JRadioButtonMenuItem button    = (JRadioButtonMenuItem) e.getSource();
-        float                newFactor = Float.parseFloat(button.getText().substring(0, button.getText().indexOf(" "))) / 100;
-        if (newFactor != zoomFactor) {
-            Graphics2D gr = (Graphics2D) courseJPanel.getGraphics();
-            gr.setBackground(Color.black);
-            gr.clearRect(0, 0, courseJPanel.getWidth(), courseJPanel.getHeight());
-            gr.dispose();
-            zoomFactor = newFactor;
-            refreshCourse(course, "zoom changed", Step.SETUP, null, null, 1, null);
-        }
-    }
-
     public void end() {
         gameAttributes.setGameGui(null);
         GlobalServerAttributes.CLIENT_GAMES.remove(gameAttributes.getRegistration().getId());
@@ -224,13 +135,7 @@ public class GameGui {
     }
 
     public void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
-        this.course = course;
-        if (getCourse().getFloor().isEmpty()) {
-            Graphics2D gr = (Graphics2D) courseJPanel.getGraphics();
-            gr.setBackground(Color.black);
-            gr.clearRect(0, 0, courseJPanel.getWidth(), courseJPanel.getHeight());
-            gr.dispose();
-        }
+        setAndClearIfEmpty(course);
         mainFrame.setTitle("Circuit Chaos Course - %s - %s - %s".formatted(gameAttributes.getRegistration().getGameName(),
                                                                            StringUtils.hasText(myRobotsName) ? myRobotsName : "Game has not been started yet",
                                                                            StringUtils.hasText(reasonForCourseChange) ? reasonForCourseChange : ""));
@@ -341,14 +246,6 @@ public class GameGui {
             lastRevealFrame.setVisible(true);
             lastRevealFrame.requestFocus();
         }
-    }
-
-    public BufferedImage getImageByFloor(Floor f) {
-        return images.get(f.getPosition());
-    }
-
-    public void putImageOfFloor(Floor f, BufferedImage bi) {
-        images.put(f.getPosition(), bi);
     }
 
     public void play(GameOptions gameOptions) {

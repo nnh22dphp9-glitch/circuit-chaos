@@ -1,4 +1,4 @@
-package de.phlup.circuitchaos.course;
+package de.phlup.circuitchaos.common;
 
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;

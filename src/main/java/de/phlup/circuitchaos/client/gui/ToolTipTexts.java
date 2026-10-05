@@ -1,5 +1,6 @@
 package de.phlup.circuitchaos.client.gui;
 
+import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.model.Course;
@@ -7,7 +8,6 @@ import de.phlup.circuitchaos.common.model.CourseObject;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Module;
 import de.phlup.circuitchaos.common.model.Robot;
-import de.phlup.circuitchaos.course.CourseHandler;
 
 import java.util.List;
 
