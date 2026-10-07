@@ -178,7 +178,8 @@ public class EditorGui extends BaseGui implements GuiHelper {
         wallSouth.removeAllItems();
         wallWest.removeAllItems();
         for (WallType wt : WallType.values()) {
-            if (wt == WallType.NONE || wt == WallType.SOLID || wt == WallType.REPULSOR_FIELD) {
+            if (wt == WallType.NONE || wt == WallType.SOLID || wt == WallType.REPULSOR_FIELD
+                    || wt == WallType.ONE_WAY_GREEN || wt == WallType.ONE_WAY_RED) {
                 wallNorth.addItem(wt);
                 wallEast.addItem(wt);
                 wallSouth.addItem(wt);
