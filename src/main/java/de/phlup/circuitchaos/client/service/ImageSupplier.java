@@ -2,6 +2,7 @@ package de.phlup.circuitchaos.client.service;
 
 import de.phlup.circuitchaos.client.gui.BaseGui;
 import de.phlup.circuitchaos.client.gui.GameGui;
+import de.phlup.circuitchaos.client.gui.editor.EditorGui;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.enums.Direction;
@@ -90,6 +91,7 @@ import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PROGRAMME_BL
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PROGRAMME_NOT_SET;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PROGRAMME_SLOT_SUFFIX;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PUSHER;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_SELECTION;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_SPIN_LEFT_BEAM;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_SPIN_RIGHT_BEAM;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_START;
@@ -231,6 +233,10 @@ public class ImageSupplier {
                 drawRobotsMovingAndActiveRobot(position, activeRobot, step, subPhase, course, gr, animationSteps);
                 // TODO auch explosion malen, wenn ein Robotor getroffen wird oder stirbt
                 drawExplosion(damage, gr, subPhase, animationSteps, getExplosionVariant(position, step));
+            }
+            if (gui instanceof EditorGui editorGui && editorGui.getSelectedFloor() != null
+                    && floor.getPosition().equals(editorGui.getSelectedFloor().getPosition())) {
+                gr.drawImage(getImageIconPlain(GFX_SELECTION).getImage(), 0, 0, null);
             }
         } finally {
             gr.dispose();

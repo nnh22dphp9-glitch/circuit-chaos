@@ -11,16 +11,17 @@ public enum Floortype {
     ABYSS("abyss"),
     TRAPDOOR("trapdoor"),
     PIT_STOP("pit stop"),
-    EXPRESS_CONVEYOR_BELT("express conveyor belt"),
-    TURNING_EXPRESS_CONVEYOR_BELT_CCW("turning expr. conv. belt (ccw)"),
-    TURNING_EXPRESS_CONVEYOR_BELT_CW("turning expr. conv. belt (cw)"),
-    TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW("turning expr. conv. belt"),
+    GEARS_CW("gears (clockwise)"),
+    GEARS_CCW("gears (counter clockwise)"),
     CONVEYOR_BELT("conveyor belt"),
-    TURNING_CONVEYOR_BELT_CCW("turning conveyor belt (ccw)"),
-    TURNING_CONVEYOR_BELT_CW("turning conveyor belt (cw)"),
     TURNING_CONVEYOR_BELT_CW_CCW("turning conveyor belt"),
-    GEARS_CW("gears (cw)"),
-    GEARS_CCW("gears (ccw)");
+    TURNING_CONVEYOR_BELT_CW("turning conveyor belt (clockwise)"),
+    TURNING_CONVEYOR_BELT_CCW("turning conveyor belt (counter clockwise)"),
+    EXPRESS_CONVEYOR_BELT("express conveyor belt"),
+    TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW("turning express conveyor belt"),
+    TURNING_EXPRESS_CONVEYOR_BELT_CW("turning express conveyor belt (clockwise)"),
+    TURNING_EXPRESS_CONVEYOR_BELT_CCW("turning express conveyor belt (counter clockwise)"),
+    ;
 
     private final String typeName;
 
@@ -47,6 +48,10 @@ public enum Floortype {
                 this == TURNING_EXPRESS_CONVEYOR_BELT_CCW ||
                 this == TURNING_EXPRESS_CONVEYOR_BELT_CW ||
                 this == TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW;
+    }
+
+    public String toString() {
+        return typeName;
     }
 }
 

@@ -54,6 +54,7 @@ public interface PictureConstants {
     String GFX_LASER_2      = FOLDER_FLOOR + "laser-double";
     String GFX_LASER_3      = FOLDER_FLOOR + "laser-triple";
     String GFX_PIT_STOP     = FOLDER_FLOOR + "pit-stop";
+    String GFX_SELECTION    = FOLDER_FLOOR + "selection";
 
     String GFX_ABYSS_BG  = FOLDER_FLOOR_ABYSS + "abyss-background";
     String GFX_ABYSS_E   = FOLDER_FLOOR_ABYSS + "abyss_e";

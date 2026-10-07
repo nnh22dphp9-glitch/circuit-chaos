@@ -132,6 +132,7 @@ public class GameGui extends BaseGui {
         }
     }
 
+    @Override
     public void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
         setAndClearIfEmpty(course);
         mainFrame.setTitle("Circuit Chaos Course - %s - %s - %s".formatted(gameAttributes.getRegistration().getGameName(),
