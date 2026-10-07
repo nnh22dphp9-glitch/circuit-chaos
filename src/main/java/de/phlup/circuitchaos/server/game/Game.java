@@ -364,7 +364,7 @@ public class Game {
                     }
 
                     movement = applyWaterAndOilSlick(robot, f, movement);
-                    singleRobotMoves(phase, robot, program, movement);
+                    singleRobotMove(phase, robot, program, movement);
                     if (robot.isFlying()) {
                         land(getPlayerOf(robot), Step.ROBOTS_AND_OBJECTS_MOVE, phase);
                     }
@@ -374,7 +374,7 @@ public class Game {
         }
     }
 
-    private void singleRobotMoves(int phase, Robot robot, Programme pc, int movement) {
+    private void singleRobotMove(int phase, Robot robot, Programme pc, int movement) {
         if (movement > 0) {
             moveInit(robot, robot.getDirection(), movement, movement, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true, true, robot.getName());
         } else if (movement < 0) {
