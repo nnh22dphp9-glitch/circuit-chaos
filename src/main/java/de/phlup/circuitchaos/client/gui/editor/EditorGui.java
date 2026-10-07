@@ -65,6 +65,8 @@ public class EditorGui extends BaseGui implements GuiHelper {
     private final JButton              directionButton    = new JButton();
     private final JLabel               activeInPhaseLabel = new JLabel("Trapdoor and Pusher activate at ");
     private final JCheckBox[]          activeInPhase      = new JCheckBox[]{new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox()};
+    private final JLabel               waterLabel         = new JLabel("Water: ");
+    private final JCheckBox            waterBox           = new JCheckBox();
 
     @Getter
     @Setter
@@ -84,7 +86,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
     }
 
     public void open() {
-        course = new Course();
+        initCourse();
         synchronized (courseJPanel) {
             courseJPanel.arrangeElements(this, Step.SETUP, null, null, 1, -1);
         }
@@ -97,6 +99,16 @@ public class EditorGui extends BaseGui implements GuiHelper {
         addMenuBar(mainFrame);
         configureMainFrame("Circuit Chaos - Course Editor");
         openEditorFrame();
+    }
+
+    private void initCourse() {
+        course = new Course();
+        selectedFloor = new Floor();
+        course.getFloor().add(selectedFloor);
+        course.setRange(new Range(0, 0, 0, 0).wide());
+        fillMissingCourseElementsWithAbyss();
+        redrawAll();
+        adjustValuesToSelectedFloor();
     }
 
     private void openEditorFrame() {
@@ -170,6 +182,19 @@ public class EditorGui extends BaseGui implements GuiHelper {
         addComponentToPanel(activeInPhase[2], courseEditorPanel, layout, 3, y, 1, GridBagConstraints.EAST);
         addComponentToPanel(activeInPhase[3], courseEditorPanel, layout, 4, y, 1, GridBagConstraints.EAST);
         addComponentToPanel(activeInPhase[4], courseEditorPanel, layout, 5, y++, 1, GridBagConstraints.EAST);
+
+        waterLabel.setEnabled(false);
+        addComponentToPanel(waterLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
+        waterBox.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                selectedFloor.setWater(waterBox.isSelected());
+                redrawAll();
+            }
+        });
+        waterBox.setEnabled(false);
+        addComponentToPanel(waterBox, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
+
         // TODO add more attributes
 
         addComponentToPanel(new JLabel(" "), courseEditorPanel, layout, 0, y++, 6, GridBagConstraints.EAST);
@@ -247,6 +272,9 @@ public class EditorGui extends BaseGui implements GuiHelper {
         directionLabel.setEnabled(newFloortype.isConveyorBelt());
         directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
         directionButton.setEnabled(newFloortype.isConveyorBelt());
+        waterLabel.setEnabled(true);
+        waterBox.setEnabled(true);
+        waterBox.setSelected(selectedFloor.isWater());
         for (int i = 0; i < 5; i++) {
             boolean activationValid = newFloortype == TRAPDOOR || selectedFloor.isHasPusher();
             activeInPhase[i].setSelected(activationValid && selectedFloor.getActiveInPhase()[i]);

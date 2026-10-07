@@ -539,6 +539,9 @@ public class ImageSupplier {
             addGround(floor, rotation, gr, step, subPhase, animationSteps);
             addTrapdoor(floor, step, phase, subPhase, gr, rotation, animationSteps);
             modifyAbyssEdges(course, floor, gr);
+            if (floor.isWater()) {
+                addToImage(GFX_WATER + RANDOM.nextInt(theme.getWaterVariants()), NORTH, gr);
+            }
             addPusher(floor, gr, gameIsNotStartedYet, step, phase, subPhase, animationSteps);
             if (step == Step.COURSE_MOUNTED_LASER_FIRE || gameIsNotStartedYet) {
                 drawBeams(floor.getCourseMountedLaserBeamsNS(), gr, false, subPhase, animationSteps, MAIN_LASER);
@@ -631,10 +634,6 @@ public class ImageSupplier {
         String picture = getGroundElementPicture(floor);
         addToImage(picture, rotation, gr);
         addAnimationToImage(floor.getFloortype(), gr, step, subPhase == null ? 1 : subPhase, rotation, animationSteps);
-        if (floor.isWater()) {
-            picture = GFX_WATER + RANDOM.nextInt(theme.getWaterVariants());
-            addToImage(picture, NORTH, gr);
-        }
     }
 
     private void addLasers(Floor floor, Graphics2D gr) {
