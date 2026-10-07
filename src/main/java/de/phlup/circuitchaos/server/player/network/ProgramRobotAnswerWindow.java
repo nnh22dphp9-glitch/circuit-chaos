@@ -151,7 +151,7 @@ public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiH
             addComponentToPanel(new JLabel("Starting Direction: "), panel, layout, 1, y, 1, GridBagConstraints.EAST);
             robot.setDirection(Direction.NORTH);
             robot.setPrevDirection(robot.getDirection());
-            JButton directionButton = new JButton(imageSupplier.getImageIconPlain(PictureConstants.GFX_MOVE_NORTH_ARROW));
+            JButton directionButton = new JButton(imageSupplier.getImageIconPlain(Direction.NORTH));
             directionButton.setMinimumSize(new Dimension(60, 60));
             directionButton.setPreferredSize(new Dimension(60, 60));
             directionButton.setMaximumSize(new Dimension(60, 60));
@@ -436,7 +436,7 @@ public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiH
             } else {
                 newDirection = setDirectionOfOption();
             }
-            button.setIcon(imageSupplier.getImageIconPlain(getDirectionImage(newDirection)));
+            button.setIcon(imageSupplier.getImageIconPlain(newDirection));
         }
 
         private Direction setDirectionOfRobot() {
@@ -449,16 +449,6 @@ public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiH
             module.setDirection(module.getDirection().add(Direction.EAST));
             return module.getDirection();
         }
-
-        private String getDirectionImage(Direction direction) {
-            return switch (direction) {
-                case NORTH -> PictureConstants.GFX_MOVE_NORTH_ARROW;
-                case EAST -> PictureConstants.GFX_MOVE_EAST_ARROW;
-                case SOUTH -> PictureConstants.GFX_MOVE_SOUTH_ARROW;
-                case WEST -> PictureConstants.GFX_MOVE_WEST_ARROW;
-            };
-        }
-
     }
 
     private class ConstraintChecker implements DocumentListener, ChangeListener {

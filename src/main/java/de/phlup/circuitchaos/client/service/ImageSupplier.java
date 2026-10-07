@@ -2,6 +2,7 @@ package de.phlup.circuitchaos.client.service;
 
 import de.phlup.circuitchaos.client.gui.BaseGui;
 import de.phlup.circuitchaos.client.gui.GameGui;
+import de.phlup.circuitchaos.client.gui.PictureConstants;
 import de.phlup.circuitchaos.client.gui.editor.EditorGui;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.CourseState;
@@ -134,6 +135,15 @@ public class ImageSupplier {
         this.theme = theme;
         imageSize = theme.getImageSize();
         emptyImage = new ImageIcon(new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB));
+    }
+
+    public ImageIcon getImageIconPlain(Direction direction) {
+        return getImageIconPlain(switch (direction) {
+            case NORTH -> PictureConstants.GFX_MOVE_NORTH_ARROW;
+            case EAST -> PictureConstants.GFX_MOVE_EAST_ARROW;
+            case SOUTH -> PictureConstants.GFX_MOVE_SOUTH_ARROW;
+            case WEST -> PictureConstants.GFX_MOVE_WEST_ARROW;
+        });
     }
 
     public ImageIcon getImageIconPlain(String name) {

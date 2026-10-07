@@ -32,15 +32,15 @@ public class Floor {
 
     // for drawing only
     private int        explosiveDamage              = 0;
-    private boolean    beamsNS                      = false;
-    private boolean    beamsWE                      = false;
-    private ModuleType beamType                     = MAIN_LASER; // defining the beam type
-    private int        courseMountedLaserBeamsNS    = 0; // laser beams in preview
-    private int        courseMountedLaserBeamsWE    = 0; // laser beams in preview
-    private boolean    courseMountedPressureBeamsNS = false; // pressure beams in preview
-    private boolean    courseMountedPressureBeamsWE = false; // pressure beams in preview
-    private boolean    courseMountedTractorBeamsNS  = false; // tractor beams in preview
-    private boolean    courseMountedTractorBeamsWE  = false; // tractor beams in preview
+    private boolean    beamsNS                      = false; // robot mounted
+    private boolean    beamsWE                      = false; // robot mounted
+    private ModuleType beamType                     = MAIN_LASER; // robot mounted
+    private int        courseMountedLaserBeamsNS    = 0; // currently firing laser beams
+    private int        courseMountedLaserBeamsWE    = 0; // currently firing laser beams
+    private boolean    courseMountedPressureBeamsNS = false; // currently firing pressure beams
+    private boolean    courseMountedPressureBeamsWE = false; // currently firing pressure beams
+    private boolean    courseMountedTractorBeamsNS  = false; // currently firing tractor beams
+    private boolean    courseMountedTractorBeamsWE  = false; // currently firing tractor beams
 
     @JsonIgnore
     public WallType wall(Direction direction) {

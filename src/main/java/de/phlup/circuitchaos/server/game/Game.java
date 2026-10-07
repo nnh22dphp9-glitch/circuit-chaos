@@ -17,14 +17,12 @@ import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.CourseElement;
 import de.phlup.circuitchaos.common.model.CourseElementStub;
 import de.phlup.circuitchaos.common.model.CourseObject;
-import de.phlup.circuitchaos.common.model.CourseProperties;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Module;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.NetworkResponse;
 import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.Programme;
-import de.phlup.circuitchaos.common.model.Range;
 import de.phlup.circuitchaos.common.model.Registration;
 import de.phlup.circuitchaos.common.model.RevealProgrammeListItem;
 import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
@@ -213,8 +211,6 @@ public class Game {
                                        .min(Comparator.comparingInt(Checkpoint::getNumber))
                                        .orElseThrow().getPosition();
         notStartedYet = false;
-        determineCourseProperties(course);
-        fillMissingCourseElementsWithAbyss();
         GlobalServerAttributes.setGameRunning(this.getGameId(), this);
 
         List<RobotType> availableRobotTypes = RobotType.mixedValues();
@@ -268,56 +264,6 @@ public class Game {
                 }
             } catch (Exception e) {
                 log.warn("Could not find module {}.", defaultModule);
-            }
-        }
-    }
-
-    private void fillMissingCourseElementsWithAbyss() {
-        Range range = course.getRange().wide();
-        course.setRange(range);
-        List<Floor> factoryFloors = course.getFloor();
-        for (int i = range.minX(); i <= range.maxX(); i++) {
-            for (int j = range.minY(); j <= range.maxY(); j++) {
-                boolean notFound = true;
-                for (Floor factoryFloor : factoryFloors) {
-                    if (factoryFloor.getPosition().x() == i && factoryFloor.getPosition().y() == j) {
-                        notFound = false;
-                        break;
-                    }
-                }
-                if (notFound) {
-                    Floor floor = new Floor();
-                    floor.setFloortype(Floortype.ABYSS);
-                    floor.setPosition(new Position(i, j));
-                    factoryFloors.add(floor);
-                }
-            }
-        }
-    }
-
-    private void determineCourseProperties(Course course) {
-        CourseProperties courseProperties = course.getProperties();
-        for (Floor floor : course.getFloor()) {
-            if (floor.isHasPusher()) {
-                courseProperties.setPushers(true);
-            }
-            switch (floor.getFloortype()) {
-                case GEARS_CCW, GEARS_CW -> courseProperties.setGears(true);
-                case TRAPDOOR -> courseProperties.setTrapdoor(true);
-                case CONVEYOR_BELT -> courseProperties.setConveyorBelts(true);
-                case EXPRESS_CONVEYOR_BELT -> {
-                    courseProperties.setConveyorBelts(true);
-                    courseProperties.setExpressConveyorBelts(true);
-                }
-            }
-            if (Math.max(Math.max(floor.getLasers()[0], floor.getLasers()[1]), Math.max(floor.getLasers()[2], floor.getLasers()[3])) > 0) {
-                courseProperties.setLasers(true);
-            }
-            if (floor.getPressureBeam()[0] || floor.getPressureBeam()[1] || floor.getPressureBeam()[2] || floor.getPressureBeam()[3]) {
-                courseProperties.setPressureBeams(true);
-            }
-            if (floor.getTractorBeam()[0] || floor.getTractorBeam()[1] || floor.getTractorBeam()[2] || floor.getTractorBeam()[3]) {
-                courseProperties.setTractorBeams(true);
             }
         }
     }
