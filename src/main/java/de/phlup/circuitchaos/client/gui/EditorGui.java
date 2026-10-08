@@ -480,11 +480,11 @@ public class EditorGui extends BaseGui implements GuiHelper {
         }
         secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(SOUTH));
         if (secondFloor.getLevel() == selectedFloor.getLevel()) {
-            if (selectedFloor.getWallNorth() == WallType.RAMP_UP || selectedFloor.getWallNorth() == WallType.RAMP_DOWN || selectedFloor.getWallNorth() == WallType.LEDGE) {
-                selectedFloor.setWallNorth(WallType.NONE);
+            if (selectedFloor.getWallSouth() == WallType.RAMP_UP || selectedFloor.getWallSouth() == WallType.RAMP_DOWN || selectedFloor.getWallSouth() == WallType.LEDGE) {
+                selectedFloor.setWallSouth(WallType.NONE);
             }
-            if (secondFloor.getWallSouth() == WallType.RAMP_UP || secondFloor.getWallSouth() == WallType.RAMP_DOWN || secondFloor.getWallSouth() == WallType.LEDGE) {
-                secondFloor.setWallSouth(WallType.NONE);
+            if (secondFloor.getWallNorth() == WallType.RAMP_UP || secondFloor.getWallNorth() == WallType.RAMP_DOWN || secondFloor.getWallNorth() == WallType.LEDGE) {
+                secondFloor.setWallNorth(WallType.NONE);
             }
         } else if (secondFloor.getLevel() + 1 == selectedFloor.getLevel() && secondFloor.getWallNorth() == WallType.NONE) {
             secondFloor.setWallNorth(WallType.LEDGE);

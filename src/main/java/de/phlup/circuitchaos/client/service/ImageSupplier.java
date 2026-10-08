@@ -844,7 +844,7 @@ public class ImageSupplier {
     }
 
     private String getOpenFloorImageName(Position position) {
-        return GFX_OPEN_FLOOR + ((position.x() + position.y() * 6) % theme.getOpenFloorVariants());
+        return GFX_OPEN_FLOOR + Math.floorMod(position.x() + position.y() * 6, theme.getOpenFloorVariants());
     }
 
     private void addToImage(String picture, Direction rotation, Graphics2D gr) {
