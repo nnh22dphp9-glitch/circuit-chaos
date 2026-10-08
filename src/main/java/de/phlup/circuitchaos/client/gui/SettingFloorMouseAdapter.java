@@ -19,7 +19,7 @@ public class SettingFloorMouseAdapter extends MouseAdapter {
         }
         gui.setSelectedFloor(floor);
         gui.redrawAll();
-        gui.adjustValuesToSelectedFloor();
+        gui.adjustSelectorValuesToSelectedFloor();
     }
 
 }

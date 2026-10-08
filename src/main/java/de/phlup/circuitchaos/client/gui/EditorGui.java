@@ -82,6 +82,11 @@ public class EditorGui extends BaseGui implements GuiHelper {
     private final JButton              levelMinus         = new JButton(" - ");
     private final JLabel               levelLabel         = new JLabel(" 0 ");
     private final JButton              levelPlus          = new JButton(" + ");
+    private final JLabel               beamLabel          = new JLabel("Beams: ");
+    private final JComboBox<String>    beamChooserNorth   = new JComboBox<>();
+    private final JComboBox<String>    beamChooserEast    = new JComboBox<>();
+    private final JComboBox<String>    beamChooserSouth   = new JComboBox<>();
+    private final JComboBox<String>    beamChooserWest    = new JComboBox<>();
 
     private boolean updatingFields = true;
 
@@ -125,7 +130,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         course.setRange(new Range(0, 0, 0, 0).wide());
         fillMissingCourseElementsWithAbyss();
         redrawAll();
-        adjustValuesToSelectedFloor();
+        adjustSelectorValuesToSelectedFloor();
     }
 
     private void openEditorFrame() {
@@ -267,6 +272,47 @@ public class EditorGui extends BaseGui implements GuiHelper {
         });
         addComponentToPanel(flowPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.EAST);
 
+        addComponentToPanel(beamLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
+        borderPanel = new JPanel(new BorderLayout());
+        borderPanel.add(beamChooserNorth, BorderLayout.NORTH);
+        borderPanel.add(beamChooserEast, BorderLayout.EAST);
+        borderPanel.add(beamChooserSouth, BorderLayout.SOUTH);
+        borderPanel.add(beamChooserWest, BorderLayout.WEST);
+        borderPanel.add(new JLabel(" "), BorderLayout.CENTER);
+        addComponentToPanel(borderPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.EAST);
+        beamChooserNorth.addItem("None");
+        beamChooserNorth.addItem("1 Laser Beam");
+        beamChooserNorth.addItem("2 Laser Beams");
+        beamChooserNorth.addItem("3 Laser Beams");
+        beamChooserNorth.addItem("Pressure Beam");
+        beamChooserNorth.addItem("Tractor Beam");
+        beamChooserNorth.addActionListener(floorChangedEvent);
+        beamChooserNorth.setEnabled(false);
+        beamChooserEast.addItem("None");
+        beamChooserEast.addItem("1 Laser Beam");
+        beamChooserEast.addItem("2 Laser Beams");
+        beamChooserEast.addItem("3 Laser Beams");
+        beamChooserEast.addItem("Pressure Beam");
+        beamChooserEast.addItem("Tractor Beam");
+        beamChooserEast.addActionListener(floorChangedEvent);
+        beamChooserEast.setEnabled(false);
+        beamChooserSouth.addItem("None");
+        beamChooserSouth.addItem("1 Laser Beam");
+        beamChooserSouth.addItem("2 Laser Beams");
+        beamChooserSouth.addItem("3 Laser Beams");
+        beamChooserSouth.addItem("Pressure Beam");
+        beamChooserSouth.addItem("Tractor Beam");
+        beamChooserSouth.addActionListener(floorChangedEvent);
+        beamChooserSouth.setEnabled(false);
+        beamChooserWest.addItem("None");
+        beamChooserWest.addItem("1 Laser Beam");
+        beamChooserWest.addItem("2 Laser Beams");
+        beamChooserWest.addItem("3 Laser Beams");
+        beamChooserWest.addItem("Pressure Beam");
+        beamChooserWest.addItem("Tractor Beam");
+        beamChooserWest.addActionListener(floorChangedEvent);
+        beamChooserWest.setEnabled(false);
+
         // TODO add more attributes
 
         addComponentToPanel(new JLabel(" "), courseEditorPanel, layout, 0, y++, 2, GridBagConstraints.EAST);
@@ -318,7 +364,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
             Course loadedCourse = courseLoader.loadCourse(path);
             if (loadedCourse != null) {
                 selectedFloor = loadedCourse.getFloor().getFirst();
-                adjustValuesToSelectedFloor();
+                adjustSelectorValuesToSelectedFloor();
                 refreshCourse(loadedCourse, null, Step.SETUP, null, null, 1, null);
             }
         }
@@ -340,7 +386,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         }
     }
 
-    public void adjustValuesToSelectedFloor() {
+    public void adjustSelectorValuesToSelectedFloor() {
         updatingFields = true;
         Floortype newFloortype = selectedFloor.getFloortype();
         floortypeBox.setSelectedItem(newFloortype);
@@ -363,9 +409,70 @@ public class EditorGui extends BaseGui implements GuiHelper {
         levelLabel.setText(" " + selectedFloor.getLevel() + " ");
         levelPlus.setEnabled(levelPlusOrMinusAllowed(true));
         levelMinus.setEnabled(levelPlusOrMinusAllowed(false));
+        if (isBeamAllowed(NORTH)) {
+            beamChooserNorth.setEnabled(true);
+            if (selectedFloor.getPressureBeam()[0]) {
+                beamChooserNorth.setSelectedItem(4);
+            } else if (selectedFloor.getTractorBeam()[0]) {
+                beamChooserNorth.setSelectedItem(5);
+            } else {
+                beamChooserNorth.setSelectedItem(selectedFloor.getLasers()[0]);
+            }
+        } else {
+            beamChooserNorth.setEnabled(false);
+            beamChooserNorth.setSelectedItem(0);
+        }
+        if (isBeamAllowed(EAST)) {
+            beamChooserEast.setEnabled(true);
+            if (selectedFloor.getPressureBeam()[1]) {
+                beamChooserEast.setSelectedItem(4);
+            } else if (selectedFloor.getTractorBeam()[1]) {
+                beamChooserEast.setSelectedItem(5);
+            } else {
+                beamChooserEast.setSelectedItem(selectedFloor.getLasers()[1]);
+            }
+        } else {
+            beamChooserEast.setEnabled(false);
+            beamChooserEast.setSelectedItem(0);
+        }
+        if (isBeamAllowed(SOUTH)) {
+            beamChooserSouth.setEnabled(true);
+            if (selectedFloor.getPressureBeam()[2]) {
+                beamChooserSouth.setSelectedItem(4);
+            } else if (selectedFloor.getTractorBeam()[2]) {
+                beamChooserSouth.setSelectedItem(5);
+            } else {
+                beamChooserSouth.setSelectedItem(selectedFloor.getLasers()[2]);
+            }
+        } else {
+            beamChooserSouth.setEnabled(false);
+            beamChooserSouth.setSelectedItem(0);
+        }
+        if (isBeamAllowed(WEST)) {
+            beamChooserWest.setEnabled(true);
+            if (selectedFloor.getPressureBeam()[3]) {
+                beamChooserWest.setSelectedItem(4);
+            } else if (selectedFloor.getTractorBeam()[3]) {
+                beamChooserWest.setSelectedItem(5);
+            } else {
+                beamChooserWest.setSelectedItem(selectedFloor.getLasers()[3]);
+            }
+        } else {
+            beamChooserWest.setEnabled(false);
+            beamChooserWest.setSelectedItem(0);
+        }
 
         // TODO add more attributes
         updatingFields = false;
+    }
+
+    private boolean isBeamAllowed(Direction dir) {
+        return !selectedFloor.isHasPusher() && switch (dir) {
+            case NORTH -> selectedFloor.getWallSouth();
+            case EAST -> selectedFloor.getWallWest();
+            case SOUTH -> selectedFloor.getWallNorth();
+            case WEST -> selectedFloor.getWallEast();
+        } == WallType.SOLID;
     }
 
     private void adjustWallTypeSelection() {
@@ -528,6 +635,51 @@ public class EditorGui extends BaseGui implements GuiHelper {
                     activeInPhaseLabel.setEnabled(activationValid);
                 }
                 adjustWallTypes();
+                if (isBeamAllowed(NORTH)) {
+                    beamChooserNorth.setEnabled(true);
+                    selectedFloor.getLasers()[0] = beamChooserNorth.getSelectedIndex() > 3 ? 0 : beamChooserNorth.getSelectedIndex();
+                    selectedFloor.getPressureBeam()[0] = beamChooserNorth.getSelectedIndex() == 4;
+                    selectedFloor.getTractorBeam()[0] = beamChooserNorth.getSelectedIndex() == 5;
+                } else {
+                    beamChooserNorth.setEnabled(false);
+                    selectedFloor.getLasers()[0] = 0;
+                    selectedFloor.getPressureBeam()[0] = false;
+                    selectedFloor.getTractorBeam()[0] = false;
+                }
+                if (isBeamAllowed(EAST)) {
+                    beamChooserEast.setEnabled(true);
+                    selectedFloor.getLasers()[1] = beamChooserEast.getSelectedIndex() > 3 ? 0 : beamChooserEast.getSelectedIndex();
+                    selectedFloor.getPressureBeam()[1] = beamChooserEast.getSelectedIndex() == 4;
+                    selectedFloor.getTractorBeam()[1] = beamChooserEast.getSelectedIndex() == 5;
+                } else {
+                    beamChooserEast.setEnabled(false);
+                    selectedFloor.getLasers()[1] = 0;
+                    selectedFloor.getPressureBeam()[1] = false;
+                    selectedFloor.getTractorBeam()[1] = false;
+                }
+                if (isBeamAllowed(SOUTH)) {
+                    beamChooserSouth.setEnabled(true);
+                    selectedFloor.getLasers()[2] = beamChooserSouth.getSelectedIndex() > 3 ? 0 : beamChooserSouth.getSelectedIndex();
+                    selectedFloor.getPressureBeam()[2] = beamChooserSouth.getSelectedIndex() == 4;
+                    selectedFloor.getTractorBeam()[2] = beamChooserSouth.getSelectedIndex() == 5;
+                } else {
+                    beamChooserSouth.setEnabled(false);
+                    selectedFloor.getLasers()[2] = 0;
+                    selectedFloor.getPressureBeam()[2] = false;
+                    selectedFloor.getTractorBeam()[2] = false;
+                }
+                if (isBeamAllowed(WEST)) {
+                    beamChooserWest.setEnabled(true);
+                    selectedFloor.getLasers()[3] = beamChooserWest.getSelectedIndex() > 3 ? 0 : beamChooserWest.getSelectedIndex();
+                    selectedFloor.getPressureBeam()[3] = beamChooserWest.getSelectedIndex() == 4;
+                    selectedFloor.getTractorBeam()[3] = beamChooserWest.getSelectedIndex() == 5;
+                } else {
+                    beamChooserWest.setEnabled(false);
+                    selectedFloor.getLasers()[3] = 0;
+                    selectedFloor.getPressureBeam()[3] = false;
+                    selectedFloor.getTractorBeam()[3] = false;
+                }
+
                 // TODO add more attributes
                 course.setRange(course.getRange().wideRangeToPosition(selectedFloor.getPosition()));
                 fillMissingCourseElementsWithAbyss();
@@ -631,6 +783,10 @@ public class EditorGui extends BaseGui implements GuiHelper {
             } else {
                 pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
             }
+            beamChooserNorth.setEnabled(isBeamAllowed(NORTH));
+            beamChooserEast.setEnabled(isBeamAllowed(EAST));
+            beamChooserSouth.setEnabled(isBeamAllowed(SOUTH));
+            beamChooserWest.setEnabled(isBeamAllowed(WEST));
             redrawAll();
         }
 

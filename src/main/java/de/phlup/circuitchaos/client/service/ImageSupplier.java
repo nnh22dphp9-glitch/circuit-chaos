@@ -87,6 +87,7 @@ import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LASER_BEAM_3
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_OPEN_FLOOR;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PIT_STOP;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PRESSURE_BEAM;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PRESSURE_SOCKET;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PROGRAMME;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PROGRAMME_BLOCKED_SUFFIX;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PROGRAMME_NOT_SET;
@@ -97,6 +98,7 @@ import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_SPIN_LEFT_BE
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_SPIN_RIGHT_BEAM;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_START;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRACTOR_BEAM;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRACTOR_SOCKET;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRAPDOOR_1;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRAPDOOR_2;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRAPDOOR_3;
@@ -641,6 +643,12 @@ public class ImageSupplier {
             int laserCount = floor.getLasers()[counter];
             if (laserCount > 0) {
                 addToImage(laserCount == 1 ? GFX_LASER_1 : laserCount == 2 ? GFX_LASER_2 : GFX_LASER_3, Direction.values()[counter], gr);
+            }
+            if (floor.getPressureBeam()[counter]) {
+                addToImage(GFX_PRESSURE_SOCKET, Direction.values()[counter], gr);
+            }
+            if (floor.getTractorBeam()[counter]) {
+                addToImage(GFX_TRACTOR_SOCKET, Direction.values()[counter], gr);
             }
         }
     }

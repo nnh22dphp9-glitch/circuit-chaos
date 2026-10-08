@@ -47,15 +47,17 @@ public interface PictureConstants {
     String GFX_SPIN_RIGHT_BEAM = FOLDER_BEAMS + "spin-right-beam";
     String GFX_TRACTOR_BEAM    = FOLDER_BEAMS + "tractor-beam";
 
-    String GFX_OPEN_FLOOR   = FOLDER_FLOOR + "open-floor/open-floor-";
-    String GFX_GEARS_SOCKET = FOLDER_FLOOR + "gears-socket";
-    String GFX_GEARS_CCW    = FOLDER_FLOOR + "gears-ccw";
-    String GFX_GEARS_CW     = FOLDER_FLOOR + "gears-cw";
-    String GFX_LASER_1      = FOLDER_FLOOR + "laser-single";
-    String GFX_LASER_2      = FOLDER_FLOOR + "laser-double";
-    String GFX_LASER_3      = FOLDER_FLOOR + "laser-triple";
-    String GFX_PIT_STOP     = FOLDER_FLOOR + "pit-stop";
-    String GFX_SELECTION    = FOLDER_FLOOR + "selection";
+    String GFX_OPEN_FLOOR      = FOLDER_FLOOR + "open-floor/open-floor-";
+    String GFX_GEARS_SOCKET    = FOLDER_FLOOR + "gears-socket";
+    String GFX_GEARS_CCW       = FOLDER_FLOOR + "gears-ccw";
+    String GFX_GEARS_CW        = FOLDER_FLOOR + "gears-cw";
+    String GFX_LASER_1         = FOLDER_FLOOR + "laser-single";
+    String GFX_LASER_2         = FOLDER_FLOOR + "laser-double";
+    String GFX_LASER_3         = FOLDER_FLOOR + "laser-triple";
+    String GFX_PRESSURE_SOCKET = FOLDER_FLOOR + "pressure-beam-socket";
+    String GFX_TRACTOR_SOCKET  = FOLDER_FLOOR + "tractor-beam-socket";
+    String GFX_PIT_STOP        = FOLDER_FLOOR + "pit-stop";
+    String GFX_SELECTION       = FOLDER_FLOOR + "selection";
 
     String GFX_ABYSS_BG  = FOLDER_FLOOR_ABYSS + "abyss-background";
     String GFX_ABYSS_E   = FOLDER_FLOOR_ABYSS + "abyss_e";
