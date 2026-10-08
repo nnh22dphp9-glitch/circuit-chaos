@@ -1,5 +1,6 @@
-package de.phlup.circuitchaos.client;
+package de.phlup.circuitchaos.server;
 
+import de.phlup.circuitchaos.client.ClientController;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.NetworkRequest;

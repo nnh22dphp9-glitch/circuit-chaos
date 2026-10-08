@@ -1,4 +1,4 @@
-package de.phlup.circuitchaos.server.player.computer;
+package de.phlup.circuitchaos.server.player;
 
 import de.phlup.circuitchaos.common.enums.ComputerType;
 import de.phlup.circuitchaos.common.enums.Direction;
@@ -11,7 +11,6 @@ import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.DistanceCalculator;
 import de.phlup.circuitchaos.server.game.Game;
 import de.phlup.circuitchaos.server.game.Sleep;
-import de.phlup.circuitchaos.server.player.Player;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,9 +47,9 @@ public class ComputerPlayer extends Player {
         Robot robot1 = getRobot();
         if (isMakesGoodMoves()) {
             if (!robot1.isPoweredDown()) {
-                Course      gameCourse = game.getCourse();
-                MoveInfo    chosenMove = null;
-                Programme[] program    = new Programme[5];
+                Course           gameCourse = game.getCourse();
+                ComputerMoveInfo chosenMove = null;
+                Programme[]      program    = new Programme[5];
                 for (int pr1 = 0; pr1 < robot.getPotentialProgramme().size(); pr1++) {
                     if (robot1.getBlocked()[4]) {
                         program[4] = robot.getProgram()[4];
@@ -87,7 +86,7 @@ public class ComputerPlayer extends Player {
                                         for (Direction dir : Direction.values()) {
                                             if ((dir == robot.getDirection() || robot
                                                     .isMayChooseDirection()) && program[0] != null && program[1] != null && program[2] != null && program[3] != null && program[4] != null) {
-                                                MoveInfo mi = new MoveInfo(game, program, dir, nextCP, this);
+                                                ComputerMoveInfo mi = new ComputerMoveInfo(game, program, dir, nextCP, this);
                                                 if (chosenMove == null) {
                                                     chosenMove = mi;
                                                 } else {

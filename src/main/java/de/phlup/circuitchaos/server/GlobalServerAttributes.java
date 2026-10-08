@@ -1,9 +1,9 @@
 package de.phlup.circuitchaos.server;
 
 import de.phlup.circuitchaos.common.CircuitChaosException;
+import de.phlup.circuitchaos.common.model.GameAttributes;
 import de.phlup.circuitchaos.common.model.GameItem;
 import de.phlup.circuitchaos.server.game.Game;
-import de.phlup.circuitchaos.server.game.GameAttributes;
 
 import java.security.SecureRandom;
 import java.time.ZonedDateTime;

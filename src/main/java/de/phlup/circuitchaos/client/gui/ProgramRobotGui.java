@@ -1,23 +1,24 @@
-package de.phlup.circuitchaos.server.player.network;
+package de.phlup.circuitchaos.client.gui;
 
-import de.phlup.circuitchaos.client.gui.GuiHelper;
-import de.phlup.circuitchaos.client.gui.PictureConstants;
 import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.ModuleType;
+import de.phlup.circuitchaos.common.model.GameAttributes;
 import de.phlup.circuitchaos.common.model.Module;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
+import de.phlup.circuitchaos.common.model.NetworkResponse;
 import de.phlup.circuitchaos.common.model.Programme;
 import de.phlup.circuitchaos.common.model.Robot;
-import de.phlup.circuitchaos.server.game.GameAttributes;
 import lombok.AllArgsConstructor;
 import org.springframework.util.StringUtils;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.SoftBevelBorder;
@@ -34,13 +35,22 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiHelper {
+public class ProgramRobotGui implements GuiHelper {
+
+    private final String          answerUrl;
+    private final NetworkRequest  request;
+    private final NetworkResponse response = new NetworkResponse();
+    private final JFrame          mainFrame;
+
+    private GameAttributes gameAttributes;
 
     private final JTextField[] programIds              = new JTextField[]{new JTextField(2), new JTextField(2), new JTextField(2), new JTextField(2), new JTextField(2)};
     private final JButton[]    weaponButton            = new JButton[]{new JButton(), new JButton(), new JButton(), new JButton(), new JButton()};
@@ -67,14 +77,48 @@ public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiH
     private int       potentialProgrammeCount;
     private boolean[] used;
 
-    public ProgramRobotAnswerWindow(GameAttributes gameAttributes, String answerUrl, NetworkRequest request) {
-        super(gameAttributes, answerUrl, request, "Program");
-        robot = getRequest().getMyRobot();
-        imageSupplier = getGameAttributes().getGameGui().getImageSupplier();
+    public void sendAnswer() {
+        if (gameAttributes != null) {
+            gameAttributes.getGameGui().getClientToServerConnection().postAnswer(answerUrl, response);
+        }
+        mainFrame.dispose();
+        gameAttributes = null;
+    }
+
+
+    public ProgramRobotGui(GameAttributes gameAttributes, String answerUrl, NetworkRequest request) {
+        this.answerUrl = answerUrl;
+        this.request = request;
+        this.gameAttributes = gameAttributes;
+        response.setFilled(true);
+        mainFrame = new JFrame("Circuit Chaos - %s - %s - Program".formatted(gameAttributes.getRegistration().getGameName(), request.getMyRobot().getName()));
+        mainFrame.setVisible(false);
+        JFrame courseFrame = gameAttributes.getGameGui().getMainFrame();
+        mainFrame.setLocationRelativeTo(courseFrame);
+        mainFrame.setLocation(mainFrame.getLocation().x - courseFrame.getWidth() / 2 + 10,
+                              mainFrame.getLocation().y + 120);
+
+        robot = request.getMyRobot();
+        imageSupplier = gameAttributes.getGameGui().getImageSupplier();
         robot.setPotentialProgramme(new ArrayList<>(robot.getPotentialProgramme()
                                                          .stream()
                                                          .sorted((a, b) -> a == null || b == null ? 0 : Integer.compare(a.getPriority(), b.getPriority()))
                                                          .toList()));
+    }
+
+    public void apply() {
+        JScrollPane contentPane = new JScrollPane(createContentPane(), JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        mainFrame.setContentPane(contentPane);
+        mainFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                sendAnswer();
+            }
+        });
+        mainFrame.setResizable(true);
+        mainFrame.pack();
+        mainFrame.setVisible(true);
+        mainFrame.requestFocus();
     }
 
     protected JPanel createContentPane() {
@@ -474,7 +518,7 @@ public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiH
         }
 
         public void action() {
-            for (int cnt = 0; cnt < getRequest().getMyRobot().getPotentialProgramme().size(); cnt++) {
+            for (int cnt = 0; cnt < request.getMyRobot().getPotentialProgramme().size(); cnt++) {
                 used[cnt] = false;
             }
             okButton.setEnabled(checkProgram());
@@ -484,7 +528,7 @@ public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiH
             boolean erg = true;
             for (int cnt = 0; cnt < 5; cnt++) {
                 if (!StringUtils.hasText(programIds[cnt].getText())) {
-                    erg = getRequest().getMyRobot().getBlocked()[cnt];
+                    erg = request.getMyRobot().getBlocked()[cnt];
                 } else {
                     try {
                         int c = Integer.parseInt(programIds[cnt].getText());
@@ -501,7 +545,7 @@ public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiH
                             }
                         }
                     } catch (ArrayIndexOutOfBoundsException | NumberFormatException nfe) {
-                        erg = getRequest().getMyRobot().getBlocked()[cnt];
+                        erg = request.getMyRobot().getBlocked()[cnt];
                     }
                 }
             }
@@ -609,7 +653,7 @@ public class ProgramRobotAnswerWindow extends ClientAnswerWindow implements GuiH
                 }
             }
             robot.setPowerDownAnnounced(powerdown.isSelected());
-            getResponse().setProgrammedRobot(robot);
+            response.setProgrammedRobot(robot);
             sendAnswer();
         }
 

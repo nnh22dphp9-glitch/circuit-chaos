@@ -1,4 +1,4 @@
-package de.phlup.circuitchaos.client.gui.editor;
+package de.phlup.circuitchaos.client.gui;
 
 import de.phlup.circuitchaos.common.model.Floor;
 import lombok.RequiredArgsConstructor;

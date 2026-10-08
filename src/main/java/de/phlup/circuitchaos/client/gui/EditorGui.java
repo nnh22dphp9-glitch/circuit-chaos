@@ -1,7 +1,5 @@
-package de.phlup.circuitchaos.client.gui.editor;
+package de.phlup.circuitchaos.client.gui;
 
-import de.phlup.circuitchaos.client.gui.BaseGui;
-import de.phlup.circuitchaos.client.gui.GuiHelper;
 import de.phlup.circuitchaos.client.service.CourseLoader;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.CourseState;
@@ -68,6 +66,8 @@ public class EditorGui extends BaseGui implements GuiHelper {
     private final JComboBox<Floortype> floortypeBox       = new JComboBox<>();
     private final JLabel               directionLabel     = new JLabel("Conveyor Belt Direction: ");
     private final JButton              directionButton    = new JButton();
+    private final JLabel               pusherLabel        = new JLabel("Pusher: ");
+    private final JButton              pusherButton       = new JButton();
     private final JLabel               activeInPhaseLabel = new JLabel("Trapdoor and Pusher phases: ");
     private final JCheckBox[]          activeInPhase      = new JCheckBox[]{new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox()};
     private final JLabel               waterLabel         = new JLabel("Water: ");
@@ -218,6 +218,23 @@ public class EditorGui extends BaseGui implements GuiHelper {
         activeInPhaseLabel.setEnabled(false);
         addComponentToPanel(activeInPhaseLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
         addComponentToPanel(flowPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.EAST);
+
+
+        addComponentToPanel(pusherLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
+        pusherButton.setIcon(imageSupplier.getImageIconPlain(Direction.NORTH));
+        pusherButton.setMinimumSize(new Dimension(60, 60));
+        pusherButton.setPreferredSize(new Dimension(60, 60));
+        pusherButton.setMaximumSize(new Dimension(60, 60));
+        pusherButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                selectedFloor.setPusherDirection(selectedFloor.getPusherDirection().add(Direction.EAST));
+                pusherButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getPusherDirection()));
+                redrawAll();
+            }
+        });
+        pusherButton.setEnabled(false);
+        addComponentToPanel(pusherButton, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
 
         waterLabel.setEnabled(true);
         addComponentToPanel(waterLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);

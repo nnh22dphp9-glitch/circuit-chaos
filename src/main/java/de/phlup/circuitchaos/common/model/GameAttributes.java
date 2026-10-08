@@ -1,7 +1,6 @@
-package de.phlup.circuitchaos.server.game;
+package de.phlup.circuitchaos.common.model;
 
 import de.phlup.circuitchaos.client.gui.GameGui;
-import de.phlup.circuitchaos.common.model.Registration;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 

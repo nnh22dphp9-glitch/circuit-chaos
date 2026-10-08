@@ -1,10 +1,10 @@
 package de.phlup.circuitchaos.client.service;
 
 import de.phlup.circuitchaos.client.gui.GameGui;
+import de.phlup.circuitchaos.common.model.GameAttributes;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
-import de.phlup.circuitchaos.server.game.GameAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;

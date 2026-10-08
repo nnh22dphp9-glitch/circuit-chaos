@@ -5,10 +5,10 @@ import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.client.service.AsyncService;
 import de.phlup.circuitchaos.common.CircuitChaosException;
 import de.phlup.circuitchaos.common.enums.CourseState;
+import de.phlup.circuitchaos.common.model.GameAttributes;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
-import de.phlup.circuitchaos.server.game.GameAttributes;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,7 +31,7 @@ public class ClientController {
     private final AsyncService asyncService;
 
     /**
-     * @see de.phlup.circuitchaos.client.ServerToClientConnection notifyOfCourseChange(Registration, Course, String, Step, Integer)
+     * @see de.phlup.circuitchaos.server.ServerToClientConnection notifyOfCourseChange(Registration, Course, String, Step, Integer)
      */
     @PostMapping("/{registrationId}/course")
     public ResponseEntity<Void> refreshCourse(@PathVariable("registrationId") String registrationId,
@@ -46,7 +46,7 @@ public class ClientController {
     }
 
     /**
-     * @see de.phlup.circuitchaos.client.ServerToClientConnection showMessage(Registration, String)
+     * @see de.phlup.circuitchaos.server.ServerToClientConnection showMessage(Registration, String)
      */
     @PostMapping("/{registrationId}/message")
     public ResponseEntity<Void> showMessage(@PathVariable("registrationId") String registrationId,
@@ -60,7 +60,7 @@ public class ClientController {
     }
 
     /**
-     * @see de.phlup.circuitchaos.client.ServerToClientConnection revealProgramme(Registration, RevealProgrammeResponse)
+     * @see de.phlup.circuitchaos.server.ServerToClientConnection revealProgramme(Registration, RevealProgrammeResponse)
      */
     @PostMapping("/{registrationId}/reveal")
     public ResponseEntity<Void> revealProgramme(@PathVariable("registrationId") String registrationId,
@@ -76,7 +76,7 @@ public class ClientController {
     }
 
     /**
-     * @see de.phlup.circuitchaos.client.ServerToClientConnection programQuestion(Registration, Action, String, String, NetworkRequest)
+     * @see de.phlup.circuitchaos.server.ServerToClientConnection programQuestion(Registration, Action, String, String, NetworkRequest)
      */
     @PostMapping("/{registrationId}/answer/program/{purposeId}/{requestId}")
     public ResponseEntity<Void> programQuestion(@PathVariable("registrationId") String registrationId,
@@ -95,7 +95,7 @@ public class ClientController {
     }
 
     /**
-     * @see de.phlup.circuitchaos.client.ServerToClientConnection notifyOfNumberOfPlayersChange(Registration, int, int)
+     * @see de.phlup.circuitchaos.server.ServerToClientConnection notifyOfNumberOfPlayersChange(Registration, int, int)
      */
     @GetMapping("/{registrationId}/numberOfPlayersChanged/{numberOfPlayers}/{numberOfWatchers}")
     public ResponseEntity<Void> numberOfPlayersChanged(@PathVariable("registrationId") String registrationId,

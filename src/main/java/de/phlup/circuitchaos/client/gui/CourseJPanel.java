@@ -1,7 +1,5 @@
 package de.phlup.circuitchaos.client.gui;
 
-import de.phlup.circuitchaos.client.gui.editor.EditorGui;
-import de.phlup.circuitchaos.client.gui.editor.SettingFloorMouseAdapter;
 import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.enums.Step;

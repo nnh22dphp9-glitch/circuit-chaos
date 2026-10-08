@@ -1,9 +1,9 @@
 package de.phlup.circuitchaos.client.service;
 
 import de.phlup.circuitchaos.client.gui.BaseGui;
+import de.phlup.circuitchaos.client.gui.EditorGui;
 import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.client.gui.PictureConstants;
-import de.phlup.circuitchaos.client.gui.editor.EditorGui;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.enums.Direction;

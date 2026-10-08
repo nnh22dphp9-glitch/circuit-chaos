@@ -6,15 +6,14 @@ import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.CourseElement;
+import de.phlup.circuitchaos.common.model.GameAttributes;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.RevealProgrammeListItem;
 import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
 import de.phlup.circuitchaos.common.model.Robot;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
-import de.phlup.circuitchaos.server.game.GameAttributes;
 import de.phlup.circuitchaos.server.game.GameOptions;
-import de.phlup.circuitchaos.server.player.network.ProgramRobotAnswerWindow;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -210,7 +209,7 @@ public class GameGui extends BaseGui {
         if (lastRevealFrame != null) {
             lastRevealFrame.setVisible(false);
         }
-        new ProgramRobotAnswerWindow(gameAttributes, answerUrl, request).apply();
+        new ProgramRobotGui(gameAttributes, answerUrl, request).apply();
     }
 
     public void revealProgramme(RevealProgrammeResponse revealProgrammeResponse) {

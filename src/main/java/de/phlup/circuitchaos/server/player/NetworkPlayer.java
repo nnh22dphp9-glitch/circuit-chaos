@@ -1,4 +1,4 @@
-package de.phlup.circuitchaos.server.player.network;
+package de.phlup.circuitchaos.server.player;
 
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.NetworkResponse;
@@ -6,7 +6,6 @@ import de.phlup.circuitchaos.common.model.Registration;
 import de.phlup.circuitchaos.common.model.Robot;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.Game;
-import de.phlup.circuitchaos.server.player.Player;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
