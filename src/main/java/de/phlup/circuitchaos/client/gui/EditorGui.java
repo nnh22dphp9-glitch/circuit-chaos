@@ -813,8 +813,9 @@ public class EditorGui extends BaseGui implements GuiHelper {
                 floor.setCourseMountedLaserBeamsWE(amount);
             }
         }
-        Floor nextFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(direction));
-        if (nextFloor.getPosition().inRange(course.getRange())) {
+        Position nextPosition = selectedFloor.getPosition().neighbour(direction);
+        if (nextPosition.inRange(course.getRange())) {
+            Floor nextFloor = CourseHandler.getFloor(course, nextPosition);
             WallType wallOutgoing = floor.wall(direction);
             WallType wallIncoming = nextFloor.wall(direction.reverse());
             if (wallOutgoing != WallType.SOLID && wallOutgoing != WallType.RAMP_UP && wallOutgoing != WallType.LEDGE && wallOutgoing != WallType.REPULSOR_FIELD
