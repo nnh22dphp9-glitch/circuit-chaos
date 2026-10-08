@@ -43,6 +43,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -679,6 +680,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
                     selectedFloor.getPressureBeam()[3] = false;
                     selectedFloor.getTractorBeam()[3] = false;
                 }
+                setBeams();
 
                 // TODO add more attributes
                 course.setRange(course.getRange().wideRangeToPosition(selectedFloor.getPosition()));
@@ -763,6 +765,61 @@ public class EditorGui extends BaseGui implements GuiHelper {
                     selectedFloor.setHasPusher(false);
                     pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
                 }
+            }
+        }
+    }
+
+    private void setBeams() {
+        course.getFloor().forEach(f -> {
+            f.setCourseMountedLaserBeamsNS(0);
+            f.setCourseMountedLaserBeamsWE(0);
+            f.setCourseMountedPressureBeamsNS(false);
+            f.setCourseMountedPressureBeamsWE(false);
+            f.setCourseMountedTractorBeamsNS(false);
+            f.setCourseMountedTractorBeamsWE(false);
+        });
+        for (Floor f : new ArrayList<>(course.getFloor())) {
+            for (Direction dir : Direction.values()) {
+                int amount;
+                if (f.getPressureBeam()[dir.ordinal()]) {
+                    amount = 4;
+                } else if (f.getTractorBeam()[dir.ordinal()]) {
+                    amount = 5;
+                } else {
+                    amount = f.getLasers()[dir.ordinal()];
+                }
+                if (amount > 0) {
+                    setBeam(f, dir, amount);
+                }
+            }
+        }
+    }
+
+    private void setBeam(Floor floor, Direction direction, int amount) {
+        if (direction == NORTH || direction == SOUTH) {
+            if (amount == 5) {
+                floor.setCourseMountedTractorBeamsNS(true);
+            } else if (amount == 4) {
+                floor.setCourseMountedTractorBeamsNS(true);
+            } else {
+                floor.setCourseMountedLaserBeamsNS(amount);
+            }
+        } else {
+            if (amount == 5) {
+                floor.setCourseMountedTractorBeamsWE(true);
+            } else if (amount == 4) {
+                floor.setCourseMountedTractorBeamsWE(true);
+            } else {
+                floor.setCourseMountedLaserBeamsWE(amount);
+            }
+        }
+        Floor nextFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(direction));
+        if (nextFloor.getPosition().inRange(course.getRange())) {
+            WallType wallOutgoing = floor.wall(direction);
+            WallType wallIncoming = nextFloor.wall(direction.reverse());
+            if (wallOutgoing != WallType.SOLID && wallOutgoing != WallType.RAMP_UP && wallOutgoing != WallType.LEDGE && wallOutgoing != WallType.REPULSOR_FIELD
+                    && wallOutgoing != WallType.ONE_WAY_RED && wallIncoming != WallType.SOLID && wallIncoming != WallType.REPULSOR_FIELD) {
+                setBeam(nextFloor, direction, amount);
             }
         }
     }

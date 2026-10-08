@@ -217,53 +217,6 @@ public class CourseHandler {
         add(course, oil);
     }
 
-    public static void readjustCourseMinMaxValues(Course course) {
-        boolean firstElement = true;
-        int     maxx         = 0;
-        int     maxy         = 0;
-        int     minx         = 0;
-        int     miny         = 0;
-        for (Floor element : course.getFloor()) {
-            if (firstElement) {
-                maxx = element.getPosition().x();
-                maxy = element.getPosition().y();
-                minx = element.getPosition().x();
-                miny = element.getPosition().y();
-                firstElement = false;
-            } else {
-                if (element.getPosition().x() > maxx) {
-                    maxx = element.getPosition().x();
-                }
-                if (element.getPosition().y() > maxy) {
-                    maxy = element.getPosition().y();
-                }
-                if (element.getPosition().x() < minx) {
-                    minx = element.getPosition().x();
-                }
-                if (element.getPosition().y() < miny) {
-                    miny = element.getPosition().y();
-                }
-            }
-        }
-        for (CourseElement element : getObjectsAndRobots(course)) {
-            if (element.isOnCourse()) {
-                if (element.getPosition().x() > maxx) {
-                    maxx = element.getPosition().x();
-                }
-                if (element.getPosition().y() > maxy) {
-                    maxy = element.getPosition().y();
-                }
-                if (element.getPosition().x() < minx) {
-                    minx = element.getPosition().x();
-                }
-                if (element.getPosition().y() < miny) {
-                    miny = element.getPosition().y();
-                }
-            }
-        }
-        course.setRange(new Range(minx, miny, maxx, maxy));
-    }
-
     public static void replaceGameCourse(Course newCourse, Course currentCourse) {
         currentCourse.getFloor().clear();
         currentCourse.getObjects().forEach(ce -> ce.setOnCourse(false));
