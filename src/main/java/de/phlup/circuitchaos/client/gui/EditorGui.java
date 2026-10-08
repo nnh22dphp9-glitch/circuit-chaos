@@ -800,7 +800,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
             if (amount == 5) {
                 floor.setCourseMountedTractorBeamsNS(true);
             } else if (amount == 4) {
-                floor.setCourseMountedTractorBeamsNS(true);
+                floor.setCourseMountedPressureBeamsNS(true);
             } else {
                 floor.setCourseMountedLaserBeamsNS(amount);
             }
@@ -808,12 +808,12 @@ public class EditorGui extends BaseGui implements GuiHelper {
             if (amount == 5) {
                 floor.setCourseMountedTractorBeamsWE(true);
             } else if (amount == 4) {
-                floor.setCourseMountedTractorBeamsWE(true);
+                floor.setCourseMountedPressureBeamsWE(true);
             } else {
                 floor.setCourseMountedLaserBeamsWE(amount);
             }
         }
-        Position nextPosition = selectedFloor.getPosition().neighbour(direction);
+        Position nextPosition = floor.getPosition().neighbour(direction);
         if (nextPosition.inRange(course.getRange())) {
             Floor nextFloor = CourseHandler.getFloor(course, nextPosition);
             WallType wallOutgoing = floor.wall(direction);
