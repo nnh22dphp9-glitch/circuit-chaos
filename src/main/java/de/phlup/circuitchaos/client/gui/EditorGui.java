@@ -44,8 +44,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LOGO_SMALL;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_NO_ACTION;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PICTURE;
 import static de.phlup.circuitchaos.common.enums.Direction.EAST;
 import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
@@ -153,6 +155,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         GridBagLayout     layout            = new GridBagLayout();
         JPanel            courseEditorPanel = new JPanel(layout);
         FloorChangedEvent floorChangedEvent = new FloorChangedEvent();
+        PusherButtonEvent pusherButtonEvent = new PusherButtonEvent();
 
         int y = 0;
         addComponentToPanel(new JLabel(imageSupplier.getImageIconPlain(GFX_LOGO_SMALL)), courseEditorPanel, layout, 0, y++, 2, GridBagConstraints.EAST);
@@ -208,6 +211,15 @@ public class EditorGui extends BaseGui implements GuiHelper {
         directionButton.setEnabled(false);
         addComponentToPanel(directionButton, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
 
+        addComponentToPanel(pusherLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
+        pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
+        pusherButton.setMinimumSize(new Dimension(60, 60));
+        pusherButton.setPreferredSize(new Dimension(60, 60));
+        pusherButton.setMaximumSize(new Dimension(60, 60));
+        pusherButton.addActionListener(pusherButtonEvent);
+        pusherButton.setEnabled(true);
+        addComponentToPanel(pusherButton, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
+
         JPanel flowPanel = new JPanel(new FlowLayout());
         for (int i = 0; i < 5; i++) {
             activeInPhase[i].setSelected(false);
@@ -218,23 +230,6 @@ public class EditorGui extends BaseGui implements GuiHelper {
         activeInPhaseLabel.setEnabled(false);
         addComponentToPanel(activeInPhaseLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
         addComponentToPanel(flowPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.EAST);
-
-
-        addComponentToPanel(pusherLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
-        pusherButton.setIcon(imageSupplier.getImageIconPlain(Direction.NORTH));
-        pusherButton.setMinimumSize(new Dimension(60, 60));
-        pusherButton.setPreferredSize(new Dimension(60, 60));
-        pusherButton.setMaximumSize(new Dimension(60, 60));
-        pusherButton.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                selectedFloor.setPusherDirection(selectedFloor.getPusherDirection().add(Direction.EAST));
-                pusherButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getPusherDirection()));
-                redrawAll();
-            }
-        });
-        pusherButton.setEnabled(false);
-        addComponentToPanel(pusherButton, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
 
         waterLabel.setEnabled(true);
         addComponentToPanel(waterLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
@@ -373,6 +368,11 @@ public class EditorGui extends BaseGui implements GuiHelper {
                 }
             }
         }
+        if (selectedFloor.isHasPusher()) {
+            pusherButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getPusherDirection()));
+        } else {
+            pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
+        }
 
         // TODO add more attributes
         updatingFields = false;
@@ -478,6 +478,64 @@ public class EditorGui extends BaseGui implements GuiHelper {
                     || secondFloor.getWallEast() == WallType.RAMP_DOWN) {
                 secondFloor.setWallEast(secondFloor.getLevel() < selectedFloor.getLevel() ? WallType.LEDGE : WallType.NONE);
             }
+            if (selectedFloor.isHasPusher()) {
+                if (switch (selectedFloor.getPusherDirection()) {
+                    case NORTH -> selectedFloor.getWallSouth();
+                    case EAST -> selectedFloor.getWallWest();
+                    case SOUTH -> selectedFloor.getWallNorth();
+                    case WEST -> selectedFloor.getWallEast();
+                } != WallType.SOLID) {
+                    selectedFloor.setHasPusher(false);
+                    pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
+                }
+            }
+        }
+    }
+
+    private class PusherButtonEvent extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Direction current = selectedFloor.isHasPusher() ? selectedFloor.getPusherDirection() : null;
+            Direction next    = findNextPusherDirection(current);
+            if (next == null) {
+                selectedFloor.setHasPusher(false);
+            } else {
+                selectedFloor.setHasPusher(true);
+                selectedFloor.setPusherDirection(next);
+            }
+            if (selectedFloor.isHasPusher()) {
+                pusherButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getPusherDirection()));
+            } else {
+                pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
+            }
+            redrawAll();
+        }
+
+        private Direction findNextPusherDirection(Direction current) {
+            Direction[] states = {null, Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
+            int         start  = 0;
+            for (int i = 0; i < states.length; i++) {
+                if (Objects.equals(states[i], current)) {
+                    start = i;
+                    break;
+                }
+            }
+            for (int i = 1; i <= states.length; i++) {
+                Direction candidate = states[(start + i) % states.length];
+                if (candidate == null || isSolidWall(candidate)) {
+                    return candidate;
+                }
+            }
+            return null;
+        }
+
+        private boolean isSolidWall(Direction direction) {
+            return switch (direction) {
+                case NORTH -> selectedFloor.getWallSouth() == WallType.SOLID;
+                case EAST -> selectedFloor.getWallWest() == WallType.SOLID;
+                case SOUTH -> selectedFloor.getWallNorth() == WallType.SOLID;
+                case WEST -> selectedFloor.getWallEast() == WallType.SOLID;
+            };
         }
     }
 

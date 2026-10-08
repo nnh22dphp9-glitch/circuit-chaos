@@ -36,6 +36,7 @@ public interface PictureConstants {
     String GFX_MOVE_EAST_ARROW  = FOLDER_ARROWS + "move-arrow-east";
     String GFX_MOVE_SOUTH_ARROW = FOLDER_ARROWS + "move-arrow-south";
     String GFX_MOVE_WEST_ARROW  = FOLDER_ARROWS + "move-arrow-west";
+    String GFX_NO_ACTION        = FOLDER_ARROWS + "no-action";
 
     String GFX_EXCHANGE_BEAM   = FOLDER_BEAMS + "exchange-beam";
     String GFX_LASER_BEAM_1    = FOLDER_BEAMS + "laser-beam-1";
