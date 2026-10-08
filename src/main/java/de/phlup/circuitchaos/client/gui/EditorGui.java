@@ -122,6 +122,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         addMenuBar(mainFrame);
         configureMainFrame("Circuit Chaos - Course Editor");
         openEditorFrame();
+        adjustSelectorValuesToSelectedFloor();
     }
 
     private void initCourse() {
@@ -131,7 +132,6 @@ public class EditorGui extends BaseGui implements GuiHelper {
         course.setRange(new Range(0, 0, 0, 0).wide());
         fillMissingCourseElementsWithAbyss();
         redrawAll();
-        adjustSelectorValuesToSelectedFloor();
     }
 
     private void openEditorFrame() {
@@ -413,54 +413,54 @@ public class EditorGui extends BaseGui implements GuiHelper {
         if (isBeamAllowed(NORTH)) {
             beamChooserNorth.setEnabled(true);
             if (selectedFloor.getPressureBeam()[0]) {
-                beamChooserNorth.setSelectedItem(4);
+                beamChooserNorth.setSelectedIndex(4);
             } else if (selectedFloor.getTractorBeam()[0]) {
-                beamChooserNorth.setSelectedItem(5);
+                beamChooserNorth.setSelectedIndex(5);
             } else {
-                beamChooserNorth.setSelectedItem(selectedFloor.getLasers()[0]);
+                beamChooserNorth.setSelectedIndex(selectedFloor.getLasers()[0]);
             }
         } else {
             beamChooserNorth.setEnabled(false);
-            beamChooserNorth.setSelectedItem(0);
+            beamChooserNorth.setSelectedIndex(0);
         }
         if (isBeamAllowed(EAST)) {
             beamChooserEast.setEnabled(true);
             if (selectedFloor.getPressureBeam()[1]) {
-                beamChooserEast.setSelectedItem(4);
+                beamChooserEast.setSelectedIndex(4);
             } else if (selectedFloor.getTractorBeam()[1]) {
-                beamChooserEast.setSelectedItem(5);
+                beamChooserEast.setSelectedIndex(5);
             } else {
-                beamChooserEast.setSelectedItem(selectedFloor.getLasers()[1]);
+                beamChooserEast.setSelectedIndex(selectedFloor.getLasers()[1]);
             }
         } else {
             beamChooserEast.setEnabled(false);
-            beamChooserEast.setSelectedItem(0);
+            beamChooserEast.setSelectedIndex(0);
         }
         if (isBeamAllowed(SOUTH)) {
             beamChooserSouth.setEnabled(true);
             if (selectedFloor.getPressureBeam()[2]) {
-                beamChooserSouth.setSelectedItem(4);
+                beamChooserSouth.setSelectedIndex(4);
             } else if (selectedFloor.getTractorBeam()[2]) {
-                beamChooserSouth.setSelectedItem(5);
+                beamChooserSouth.setSelectedIndex(5);
             } else {
-                beamChooserSouth.setSelectedItem(selectedFloor.getLasers()[2]);
+                beamChooserSouth.setSelectedIndex(selectedFloor.getLasers()[2]);
             }
         } else {
             beamChooserSouth.setEnabled(false);
-            beamChooserSouth.setSelectedItem(0);
+            beamChooserSouth.setSelectedIndex(0);
         }
         if (isBeamAllowed(WEST)) {
             beamChooserWest.setEnabled(true);
             if (selectedFloor.getPressureBeam()[3]) {
-                beamChooserWest.setSelectedItem(4);
+                beamChooserWest.setSelectedIndex(4);
             } else if (selectedFloor.getTractorBeam()[3]) {
-                beamChooserWest.setSelectedItem(5);
+                beamChooserWest.setSelectedIndex(5);
             } else {
-                beamChooserWest.setSelectedItem(selectedFloor.getLasers()[3]);
+                beamChooserWest.setSelectedIndex(selectedFloor.getLasers()[3]);
             }
         } else {
             beamChooserWest.setEnabled(false);
-            beamChooserWest.setSelectedItem(0);
+            beamChooserWest.setSelectedIndex(0);
         }
 
         // TODO add more attributes
