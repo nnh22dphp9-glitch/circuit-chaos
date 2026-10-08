@@ -79,6 +79,9 @@ public class EditorGui extends BaseGui implements GuiHelper {
     private final JComboBox<WallType>  wallEast           = new JComboBox<>();
     private final JComboBox<WallType>  wallSouth          = new JComboBox<>();
     private final JComboBox<WallType>  wallWest           = new JComboBox<>();
+    private final JButton              levelMinus         = new JButton(" - ");
+    private final JLabel               levelLabel         = new JLabel(" 0 ");
+    private final JButton              levelPlus          = new JButton(" + ");
 
     private boolean updatingFields = true;
 
@@ -243,6 +246,27 @@ public class EditorGui extends BaseGui implements GuiHelper {
         waterBox.setEnabled(true);
         addComponentToPanel(waterBox, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
 
+        addComponentToPanel(new JLabel("Level: "), courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
+        flowPanel = new JPanel(new FlowLayout());
+        flowPanel.add(levelMinus);
+        levelMinus.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedFloor.setLevel(selectedFloor.getLevel() - 1);
+                levelAdjustments();
+            }
+        });
+        flowPanel.add(levelLabel);
+        flowPanel.add(levelPlus);
+        levelPlus.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedFloor.setLevel(selectedFloor.getLevel() + 1);
+                levelAdjustments();
+            }
+        });
+        addComponentToPanel(flowPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.EAST);
+
         // TODO add more attributes
 
         addComponentToPanel(new JLabel(" "), courseEditorPanel, layout, 0, y++, 2, GridBagConstraints.EAST);
@@ -293,6 +317,8 @@ public class EditorGui extends BaseGui implements GuiHelper {
             currentFileDirectory = path.toFile();
             Course loadedCourse = courseLoader.loadCourse(path);
             if (loadedCourse != null) {
+                selectedFloor = loadedCourse.getFloor().getFirst();
+                adjustValuesToSelectedFloor();
                 refreshCourse(loadedCourse, null, Step.SETUP, null, null, 1, null);
             }
         }
@@ -328,6 +354,21 @@ public class EditorGui extends BaseGui implements GuiHelper {
             activeInPhase[i].setEnabled(activationValid);
             activeInPhaseLabel.setEnabled(activationValid);
         }
+        adjustWallTypeSelection();
+        if (selectedFloor.isHasPusher()) {
+            pusherButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getPusherDirection()));
+        } else {
+            pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
+        }
+        levelLabel.setText(" " + selectedFloor.getLevel() + " ");
+        levelPlus.setEnabled(levelPlusOrMinusAllowed(true));
+        levelMinus.setEnabled(levelPlusOrMinusAllowed(false));
+
+        // TODO add more attributes
+        updatingFields = false;
+    }
+
+    private void adjustWallTypeSelection() {
         wallNorth.removeAllItems();
         int secondFloorLevel = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(NORTH)).getLevel();
         for (WallType wt : WallType.values()) {
@@ -368,22 +409,104 @@ public class EditorGui extends BaseGui implements GuiHelper {
                 }
             }
         }
-        if (selectedFloor.isHasPusher()) {
-            pusherButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getPusherDirection()));
-        } else {
-            pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
-        }
-
-        // TODO add more attributes
-        updatingFields = false;
     }
 
     private boolean wallTypeAllowed(WallType wt, int levelSecondFlor) {
-        return (wt == WallType.SOLID || wt == WallType.REPULSOR_FIELD)
-                || (levelSecondFlor == selectedFloor.getLevel() && (wt == WallType.NONE || wt == WallType.ONE_WAY_GREEN || wt == WallType.ONE_WAY_RED))
-                || (levelSecondFlor == selectedFloor.getLevel() - 1 && wt == WallType.RAMP_DOWN)
+        return (wt == WallType.SOLID || wt == WallType.REPULSOR_FIELD || wt == WallType.ONE_WAY_GREEN || wt == WallType.ONE_WAY_RED)
+                || (levelSecondFlor <= selectedFloor.getLevel() && wt == WallType.NONE)
                 || (levelSecondFlor > selectedFloor.getLevel() && wt == WallType.LEDGE)
+                || (levelSecondFlor == selectedFloor.getLevel() - 1 && wt == WallType.RAMP_DOWN)
                 || (levelSecondFlor == selectedFloor.getLevel() + 1 && wt == WallType.RAMP_UP);
+    }
+
+    private boolean levelPlusOrMinusAllowed(boolean isPlus) {
+        Floor secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(NORTH));
+        if (secondFloor.getLevel() != selectedFloor.getLevel()
+                && (isPlus || secondFloor.getLevel() + 1 != selectedFloor.getLevel())
+                && (!isPlus || secondFloor.getLevel() - 1 != selectedFloor.getLevel())
+        ) {
+            return false;
+        }
+        secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(EAST));
+        if (secondFloor.getLevel() != selectedFloor.getLevel()
+                && (isPlus || secondFloor.getLevel() + 1 != selectedFloor.getLevel())
+                && (!isPlus || secondFloor.getLevel() - 1 != selectedFloor.getLevel())
+        ) {
+            return false;
+        }
+        secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(SOUTH));
+        if (secondFloor.getLevel() != selectedFloor.getLevel()
+                && (isPlus || secondFloor.getLevel() + 1 != selectedFloor.getLevel())
+                && (!isPlus || secondFloor.getLevel() - 1 != selectedFloor.getLevel())
+        ) {
+            return false;
+        }
+        secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(WEST));
+        return secondFloor.getLevel() == selectedFloor.getLevel()
+                || (!isPlus && secondFloor.getLevel() + 1 == selectedFloor.getLevel())
+                || (isPlus && secondFloor.getLevel() - 1 == selectedFloor.getLevel());
+    }
+
+    private void levelAdjustments() {
+        updatingFields = true;
+        levelLabel.setText(" " + selectedFloor.getLevel() + " ");
+        levelPlus.setEnabled(levelPlusOrMinusAllowed(true));
+        levelMinus.setEnabled(levelPlusOrMinusAllowed(false));
+        Floor secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(NORTH));
+        if (secondFloor.getLevel() == selectedFloor.getLevel()) {
+            if (selectedFloor.getWallNorth() == WallType.RAMP_UP || selectedFloor.getWallNorth() == WallType.RAMP_DOWN || selectedFloor.getWallNorth() == WallType.LEDGE) {
+                selectedFloor.setWallNorth(WallType.NONE);
+            }
+            if (secondFloor.getWallSouth() == WallType.RAMP_UP || secondFloor.getWallSouth() == WallType.RAMP_DOWN || secondFloor.getWallSouth() == WallType.LEDGE) {
+                secondFloor.setWallSouth(WallType.NONE);
+            }
+        } else if (secondFloor.getLevel() + 1 == selectedFloor.getLevel() && secondFloor.getWallSouth() == WallType.NONE) {
+            secondFloor.setWallSouth(WallType.LEDGE);
+        } else if (secondFloor.getLevel() - 1 == selectedFloor.getLevel() && selectedFloor.getWallNorth() == WallType.NONE) {
+            selectedFloor.setWallNorth(WallType.LEDGE);
+        }
+        secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(EAST));
+        if (secondFloor.getLevel() == selectedFloor.getLevel()) {
+            if (selectedFloor.getWallEast() == WallType.RAMP_UP || selectedFloor.getWallEast() == WallType.RAMP_DOWN || selectedFloor.getWallEast() == WallType.LEDGE) {
+                selectedFloor.setWallEast(WallType.NONE);
+            }
+            if (secondFloor.getWallWest() == WallType.RAMP_UP || secondFloor.getWallWest() == WallType.RAMP_DOWN || secondFloor.getWallWest() == WallType.LEDGE) {
+                secondFloor.setWallWest(WallType.NONE);
+            }
+        } else if (secondFloor.getLevel() + 1 == selectedFloor.getLevel() && secondFloor.getWallWest() == WallType.NONE) {
+            secondFloor.setWallWest(WallType.LEDGE);
+        } else if (secondFloor.getLevel() - 1 == selectedFloor.getLevel() && selectedFloor.getWallEast() == WallType.NONE) {
+            selectedFloor.setWallEast(WallType.LEDGE);
+        }
+        secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(SOUTH));
+        if (secondFloor.getLevel() == selectedFloor.getLevel()) {
+            if (selectedFloor.getWallNorth() == WallType.RAMP_UP || selectedFloor.getWallNorth() == WallType.RAMP_DOWN || selectedFloor.getWallNorth() == WallType.LEDGE) {
+                selectedFloor.setWallNorth(WallType.NONE);
+            }
+            if (secondFloor.getWallSouth() == WallType.RAMP_UP || secondFloor.getWallSouth() == WallType.RAMP_DOWN || secondFloor.getWallSouth() == WallType.LEDGE) {
+                secondFloor.setWallSouth(WallType.NONE);
+            }
+        } else if (secondFloor.getLevel() + 1 == selectedFloor.getLevel() && secondFloor.getWallNorth() == WallType.NONE) {
+            secondFloor.setWallNorth(WallType.LEDGE);
+        } else if (secondFloor.getLevel() - 1 == selectedFloor.getLevel() && selectedFloor.getWallSouth() == WallType.NONE) {
+            selectedFloor.setWallSouth(WallType.LEDGE);
+        }
+        secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(WEST));
+        if (secondFloor.getLevel() == selectedFloor.getLevel()) {
+            if (selectedFloor.getWallWest() == WallType.RAMP_UP || selectedFloor.getWallWest() == WallType.RAMP_DOWN || selectedFloor.getWallWest() == WallType.LEDGE) {
+                selectedFloor.setWallWest(WallType.NONE);
+            }
+            if (secondFloor.getWallEast() == WallType.RAMP_UP || secondFloor.getWallEast() == WallType.RAMP_DOWN || secondFloor.getWallEast() == WallType.LEDGE) {
+                secondFloor.setWallEast(WallType.NONE);
+            }
+        } else if (secondFloor.getLevel() + 1 == selectedFloor.getLevel() && secondFloor.getWallEast() == WallType.NONE) {
+            secondFloor.setWallEast(WallType.LEDGE);
+        } else if (secondFloor.getLevel() - 1 == selectedFloor.getLevel() && selectedFloor.getWallWest() == WallType.NONE) {
+            selectedFloor.setWallWest(WallType.LEDGE);
+        }
+        adjustWallTypeSelection();
+        updatingFields = false;
+        redrawAll();
     }
 
     private class FloorChangedEvent extends AbstractAction {
