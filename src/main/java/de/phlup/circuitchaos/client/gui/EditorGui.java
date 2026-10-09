@@ -5,9 +5,11 @@ import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
+import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.enums.WallType;
 import de.phlup.circuitchaos.common.model.Course;
+import de.phlup.circuitchaos.common.model.CourseObject;
 import de.phlup.circuitchaos.common.model.CourseProperties;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Position;
@@ -31,6 +33,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -44,8 +47,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LOGO_SMALL;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_NO_ACTION;
@@ -55,6 +60,7 @@ import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
 import static de.phlup.circuitchaos.common.enums.Direction.SOUTH;
 import static de.phlup.circuitchaos.common.enums.Direction.WEST;
 import static de.phlup.circuitchaos.common.enums.Floortype.ABYSS;
+import static de.phlup.circuitchaos.common.enums.Floortype.OPEN_FLOOR;
 import static de.phlup.circuitchaos.common.enums.Floortype.TRAPDOOR;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
 
@@ -88,6 +94,10 @@ public class EditorGui extends BaseGui implements GuiHelper {
     private final JComboBox<String>    beamChooserEast    = new JComboBox<>();
     private final JComboBox<String>    beamChooserSouth   = new JComboBox<>();
     private final JComboBox<String>    beamChooserWest    = new JComboBox<>();
+    private final JLabel               objectLabel        = new JLabel("Object: ");
+    private final JComboBox<String>    objectBox          = new JComboBox<>();
+    private final JTextField           portalTargetX      = new JTextField(4);
+    private final JTextField           portalTargetY      = new JTextField(4);
 
     private boolean updatingFields = true;
 
@@ -167,8 +177,8 @@ public class EditorGui extends BaseGui implements GuiHelper {
         PusherButtonEvent pusherButtonEvent = new PusherButtonEvent();
 
         int y = 0;
-        addComponentToPanel(new JLabel(imageSupplier.getImageIconPlain(GFX_LOGO_SMALL)), courseEditorPanel, layout, 0, y++, 2, GridBagConstraints.EAST);
-        addComponentToPanel(new JLabel(" "), courseEditorPanel, layout, 0, y++, 2, GridBagConstraints.EAST);
+        addComponentToPanel(new JLabel(imageSupplier.getImageIconPlain(GFX_LOGO_SMALL)), courseEditorPanel, layout, 0, y++, 2, GridBagConstraints.CENTER);
+        addComponentToPanel(new JLabel(" "), courseEditorPanel, layout, 0, y++, 2, GridBagConstraints.WEST);
 
         for (Floortype ft : Floortype.values()) {
             floortypeBox.addItem(ft);
@@ -177,14 +187,18 @@ public class EditorGui extends BaseGui implements GuiHelper {
         floortypeBox.addActionListener(floorChangedEvent);
         addComponentToPanel(floortypeBox, courseEditorPanel, layout, 0, y++, 2, GridBagConstraints.EAST);
 
-        addComponentToPanel(wallsLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
+        addComponentToPanel(wallsLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
         JPanel borderPanel = new JPanel(new BorderLayout());
-        borderPanel.add(wallNorth, BorderLayout.NORTH);
+        JPanel flowPanel   = new JPanel(new FlowLayout());
+        flowPanel.add(wallNorth);
+        borderPanel.add(flowPanel, BorderLayout.NORTH);
         borderPanel.add(wallEast, BorderLayout.EAST);
-        borderPanel.add(wallSouth, BorderLayout.SOUTH);
+        flowPanel = new JPanel(new FlowLayout());
+        flowPanel.add(wallSouth);
+        borderPanel.add(flowPanel, BorderLayout.SOUTH);
         borderPanel.add(wallWest, BorderLayout.WEST);
         borderPanel.add(new JLabel(" "), BorderLayout.CENTER);
-        addComponentToPanel(borderPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.EAST);
+        addComponentToPanel(borderPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.CENTER);
         wallNorth.removeAllItems();
         wallEast.removeAllItems();
         wallSouth.removeAllItems();
@@ -204,7 +218,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         wallWest.addActionListener(floorChangedEvent);
 
         directionLabel.setEnabled(false);
-        addComponentToPanel(directionLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
+        addComponentToPanel(directionLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
         directionButton.setIcon(imageSupplier.getImageIconPlain(Direction.NORTH));
         directionButton.setMinimumSize(new Dimension(60, 60));
         directionButton.setPreferredSize(new Dimension(60, 60));
@@ -212,7 +226,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         directionButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                selectedFloor.setFacingDirection(selectedFloor.getFacingDirection().add(Direction.EAST));
+                selectedFloor.setFacingDirection(selectedFloor.getFacingDirection().add(Direction.WEST));
                 directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
                 redrawAll();
             }
@@ -220,7 +234,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         directionButton.setEnabled(false);
         addComponentToPanel(directionButton, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
 
-        addComponentToPanel(pusherLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
+        addComponentToPanel(pusherLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
         pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
         pusherButton.setMinimumSize(new Dimension(60, 60));
         pusherButton.setPreferredSize(new Dimension(60, 60));
@@ -229,7 +243,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         pusherButton.setEnabled(true);
         addComponentToPanel(pusherButton, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
 
-        JPanel flowPanel = new JPanel(new FlowLayout());
+        flowPanel = new JPanel(new FlowLayout());
         for (int i = 0; i < 5; i++) {
             activeInPhase[i].setSelected(false);
             activeInPhase[i].setEnabled(false);
@@ -237,11 +251,11 @@ public class EditorGui extends BaseGui implements GuiHelper {
             flowPanel.add(activeInPhase[i]);
         }
         activeInPhaseLabel.setEnabled(false);
-        addComponentToPanel(activeInPhaseLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
-        addComponentToPanel(flowPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.EAST);
+        addComponentToPanel(activeInPhaseLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
+        addComponentToPanel(flowPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
 
         waterLabel.setEnabled(true);
-        addComponentToPanel(waterLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
+        addComponentToPanel(waterLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
         waterBox.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -271,16 +285,20 @@ public class EditorGui extends BaseGui implements GuiHelper {
                 levelAdjustments();
             }
         });
-        addComponentToPanel(flowPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.EAST);
+        addComponentToPanel(flowPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
 
-        addComponentToPanel(beamLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.EAST);
+        addComponentToPanel(beamLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
         borderPanel = new JPanel(new BorderLayout());
-        borderPanel.add(beamChooserNorth, BorderLayout.NORTH);
+        flowPanel = new JPanel(new FlowLayout());
+        flowPanel.add(beamChooserNorth);
+        borderPanel.add(flowPanel, BorderLayout.NORTH);
         borderPanel.add(beamChooserEast, BorderLayout.EAST);
-        borderPanel.add(beamChooserSouth, BorderLayout.SOUTH);
+        flowPanel = new JPanel(new FlowLayout());
+        flowPanel.add(beamChooserSouth);
+        borderPanel.add(flowPanel, BorderLayout.SOUTH);
         borderPanel.add(beamChooserWest, BorderLayout.WEST);
         borderPanel.add(new JLabel(" "), BorderLayout.CENTER);
-        addComponentToPanel(borderPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.EAST);
+        addComponentToPanel(borderPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.CENTER);
         beamChooserNorth.addItem("None");
         beamChooserNorth.addItem("1 Laser Beam");
         beamChooserNorth.addItem("2 Laser Beams");
@@ -314,10 +332,32 @@ public class EditorGui extends BaseGui implements GuiHelper {
         beamChooserWest.addActionListener(floorChangedEvent);
         beamChooserWest.setEnabled(false);
 
-        // TODO add more attributes
+        objectBox.addItem("None");
+        for (ObjectType ot : ObjectType.values()) {
+            objectBox.addItem(ot.name());
+        }
+        portalTargetX.setText("0");
+        portalTargetY.setText("0");
+        flowPanel = new JPanel(new FlowLayout());
+        flowPanel.add(objectBox);
+        flowPanel.add(new JLabel(" "));
+        flowPanel.add(portalTargetX);
+        flowPanel.add(new JLabel(" "));
+        flowPanel.add(portalTargetY);
+        objectLabel.setEnabled(true);
+        objectBox.setEnabled(true);
+        objectBox.addActionListener(floorChangedEvent);
+        portalTargetX.setEnabled(false);
+        portalTargetX.addActionListener(floorChangedEvent);
+        portalTargetY.setEnabled(false);
+        portalTargetY.addActionListener(floorChangedEvent);
+        addComponentToPanel(objectLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
+        addComponentToPanel(flowPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
 
-        addComponentToPanel(new JLabel(" "), courseEditorPanel, layout, 0, y++, 2, GridBagConstraints.EAST);
-        addComponentToPanel(new JLabel(imageSupplier.getImageIconPlain(GFX_PICTURE)), courseEditorPanel, layout, 0, y, 2, GridBagConstraints.EAST);
+        // TODO add checkpoint
+
+        addComponentToPanel(new JLabel(" "), courseEditorPanel, layout, 0, y++, 2, GridBagConstraints.WEST);
+        addComponentToPanel(new JLabel(imageSupplier.getImageIconPlain(GFX_PICTURE)), courseEditorPanel, layout, 0, y, 2, GridBagConstraints.CENTER);
         updatingFields = false;
         return courseEditorPanel;
     }
@@ -463,7 +503,21 @@ public class EditorGui extends BaseGui implements GuiHelper {
             beamChooserWest.setSelectedIndex(0);
         }
 
-        // TODO add more attributes
+        Optional<CourseObject> courseObjectOptional = CourseHandler.getObjects(course, selectedFloor.getPosition()).stream().findFirst();
+        if (courseObjectOptional.isEmpty()) {
+            objectBox.setSelectedIndex(0);
+            portalTargetX.setEnabled(false);
+            portalTargetY.setEnabled(false);
+        } else {
+            ObjectType objectType = courseObjectOptional.get().getType();
+            objectBox.setSelectedItem(objectType.getName());
+            portalTargetX.setEnabled(objectType.isPortal());
+            portalTargetY.setEnabled(objectType.isPortal());
+        }
+        objectLabel.setEnabled(newFloortype == OPEN_FLOOR);
+        objectBox.setEnabled(newFloortype == OPEN_FLOOR);
+
+        // TODO add Checkpoints
         updatingFields = false;
     }
 
@@ -682,8 +736,49 @@ public class EditorGui extends BaseGui implements GuiHelper {
                 }
                 setBeams();
 
-                // TODO add more attributes
-                course.setRange(course.getRange().wideRangeToPosition(selectedFloor.getPosition()));
+                Position               selectedPosition     = selectedFloor.getPosition();
+                Optional<CourseObject> courseObjectOptional = CourseHandler.getObjects(course, selectedPosition).stream().findFirst();
+                String                 selectedItem         = (String) objectBox.getSelectedItem();
+                if (newFloortype == OPEN_FLOOR || selectedItem == null || "None".equals(selectedItem)) {
+                    courseObjectOptional.ifPresent(courseObject -> course.getObjects().remove(courseObject));
+                    portalTargetX.setEnabled(false);
+                    portalTargetY.setEnabled(false);
+                } else {
+                    if (courseObjectOptional.isPresent() && !selectedItem.equals(courseObjectOptional.get().getType().getName())) {
+                        course.getObjects().remove(courseObjectOptional.get());
+                        portalTargetX.setEnabled(false);
+                        portalTargetY.setEnabled(false);
+                    } else if (courseObjectOptional.isEmpty()) {
+                        ObjectType selectedType = Arrays.stream(ObjectType.values()).filter(co -> selectedItem.equals(co.getName())).findFirst().orElseThrow();
+                        switch (selectedType) {
+                            case OIL -> CourseHandler.createOil(course, selectedPosition).setActive(true);
+                            case GLUE -> CourseHandler.createGlue(course, selectedPosition).setActive(true);
+                            case TELEPORTER -> CourseHandler.createCircuitChaosObject(course, ObjectType.TELEPORTER, selectedPosition).setActive(true);
+                            case RANDOMIZER -> CourseHandler.createCircuitChaosObject(course, ObjectType.RANDOMIZER, selectedPosition).setActive(true);
+                            case MINE -> CourseHandler.createCircuitChaosObject(course, ObjectType.MINE, selectedPosition).setActive(true);
+                            case PROXIMITY_MINE -> CourseHandler.createCircuitChaosObject(course, ObjectType.PROXIMITY_MINE, selectedPosition).setActive(true);
+                            case PORTAL_BLUE -> CourseHandler.createCircuitChaosObject(course, ObjectType.PORTAL_BLUE, selectedPosition).setActive(true);
+                            case PORTAL_RED -> CourseHandler.createCircuitChaosObject(course, ObjectType.PORTAL_RED, selectedPosition).setActive(true);
+                            case PORTAL_YELLOW -> CourseHandler.createCircuitChaosObject(course, ObjectType.PORTAL_YELLOW, selectedPosition).setActive(true);
+                            case PORTAL_PURPLE -> CourseHandler.createCircuitChaosObject(course, ObjectType.PORTAL_PURPLE, selectedPosition).setActive(true);
+                            case PORTAL_GREEN -> CourseHandler.createCircuitChaosObject(course, ObjectType.PORTAL_GREEN, selectedPosition).setActive(true);
+                        }
+                    } // else: courseObjectOptional.isPresent() && selectedItem.equals(courseObjectOptional.get().getType().getName()) -> nothing to do
+                    CourseObject courseObject = CourseHandler.getObjects(course, selectedPosition).stream().findFirst().orElseThrow();
+                    if (courseObject.getType().isPortal()) {
+                        courseObject.setTargetPosition(new Position(Integer.parseInt(portalTargetX.getText()), Integer.parseInt(portalTargetY.getText())));
+                        portalTargetX.setEnabled(true);
+                        portalTargetY.setEnabled(true);
+                    } else {
+                        portalTargetX.setEnabled(false);
+                        portalTargetY.setEnabled(false);
+                    }
+                }
+                objectLabel.setEnabled(newFloortype == OPEN_FLOOR);
+                objectBox.setEnabled(newFloortype == OPEN_FLOOR);
+
+                // TODO add Checkpoints
+                course.setRange(course.getRange().wideRangeToPosition(selectedPosition));
                 fillMissingCourseElementsWithAbyss();
                 determineCourseProperties();
                 redrawAll();
@@ -815,7 +910,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         }
         Position nextPosition = floor.getPosition().neighbour(direction);
         if (nextPosition.inRange(course.getRange())) {
-            Floor nextFloor = CourseHandler.getFloor(course, nextPosition);
+            Floor    nextFloor    = CourseHandler.getFloor(course, nextPosition);
             WallType wallOutgoing = floor.wall(direction);
             WallType wallIncoming = nextFloor.wall(direction.reverse());
             if (wallOutgoing != WallType.SOLID && wallOutgoing != WallType.RAMP_UP && wallOutgoing != WallType.LEDGE && wallOutgoing != WallType.REPULSOR_FIELD

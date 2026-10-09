@@ -33,10 +33,10 @@ public class CourseHandler {
     public static void add(Course course, CourseElement ce) {
         if (ce != null) {
             ce.setOnCourse(true);
-            if (ce instanceof Robot) {
-                course.getRobots().add((Robot) ce);
-            } else if (ce instanceof CourseObject) {
-                course.getObjects().add((CourseObject) ce);
+            if (ce instanceof Robot r) {
+                course.getRobots().add(r);
+            } else if (ce instanceof CourseObject co) {
+                course.getObjects().add(co);
             }
         }
     }
@@ -188,33 +188,41 @@ public class CourseHandler {
         co.setType(objectType);
         co.setFlying(objectType.isFlying());
         co.setPosition(position);
+        co.setLevel(getFloor(course, position).getLevel());
         co.setPrevPosition(position);
         add(course, co);
         return co;
     }
 
-    public static void createGlue(Course course, Position position) {
+    public static CourseObject createGlue(Course course, Position position) {
         CourseObject glue = new CourseObject();
         glue.setName(ObjectType.GLUE.getName());
         glue.setType(ObjectType.GLUE);
         glue.setFlying(false);
         glue.setPosition(position);
+        glue.setLevel(getFloor(course, position).getLevel());
         glue.setPrevPosition(position);
         glue.setDirection(Direction.random());
         glue.setVariantSeed(RANDOM.nextDouble());
+        glue.setGlue(CourseObject.GLUE_INITIAL_AMOUNT);
+        glue.setActive(false);
         add(course, glue);
+        return glue;
     }
 
-    public static void createOil(Course course, Position position) {
+    public static CourseObject createOil(Course course, Position position) {
         CourseObject oil = new CourseObject();
         oil.setName(ObjectType.OIL.getName());
         oil.setType(ObjectType.OIL);
         oil.setFlying(false);
         oil.setPosition(position);
+        oil.setLevel(getFloor(course, position).getLevel());
         oil.setPrevPosition(position);
         oil.setDirection(Direction.random());
         oil.setVariantSeed(RANDOM.nextDouble());
+        oil.setActive(false);
         add(course, oil);
+        return oil;
     }
 
     public static void replaceGameCourse(Course newCourse, Course currentCourse) {

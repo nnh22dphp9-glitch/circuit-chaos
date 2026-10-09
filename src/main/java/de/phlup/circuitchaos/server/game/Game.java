@@ -930,7 +930,7 @@ public class Game {
         Robot robot      = player.getRobot();
         Floor standingOn = CourseHandler.getFloor(course, robot.getPosition());
         if (!robot.isVirtual()) {
-            if (player.uses(ModuleType.MOBILE_TELEPORTER, phase)) {
+            if (player.uses(ModuleType.MOBILE_TELEPORTER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
                 Module module = player.getRobot().getModule(ModuleType.MOBILE_TELEPORTER);
                 if (module.getAmmunition() > 0) {
                     CourseHandler.createCircuitChaosObject(course, ObjectType.TELEPORTER, player);
@@ -939,35 +939,34 @@ public class Game {
             }
         }
         if (!robot.isVirtual()) {
-            if (player.uses(ModuleType.GLUE_DISPENSER, phase)) {
-                if (!standingOn.isWater() && (standingOn.getFloortype() == Floortype.OPEN_FLOOR //
-                        || standingOn.getFloortype() == Floortype.PIT_STOP //
-                        || standingOn.getFloortype() == Floortype.GEARS_CW //
-                        || standingOn.getFloortype() == Floortype.GEARS_CCW)) {
-                    Module glueDispenser = player.getRobot().getModule(ModuleType.GLUE_DISPENSER);
-                    if (glueDispenser.getAmmunition() > 0) {
-                        CourseHandler.createGlue(course, player.getRobot().getPosition());
-                        glueDispenser.setAmmunition(glueDispenser.getAmmunition() - 1);
-                    }
+            if (player.uses(ModuleType.MOBILE_RANDOMIZER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+                Module module = player.getRobot().getModule(ModuleType.MOBILE_RANDOMIZER);
+                if (module.getAmmunition() > 0) {
+                    CourseHandler.createCircuitChaosObject(course, ObjectType.RANDOMIZER, player);
+                    module.setAmmunition(module.getAmmunition() - 1);
                 }
             }
         }
         if (!robot.isVirtual()) {
-            if (player.uses(ModuleType.OIL_DISPENSER, phase)) {
-                if (!standingOn.isWater() && (standingOn.getFloortype() == Floortype.OPEN_FLOOR //
-                        || standingOn.getFloortype() == Floortype.PIT_STOP //
-                        || standingOn.getFloortype() == Floortype.GEARS_CW //
-                        || standingOn.getFloortype() == Floortype.GEARS_CCW)) {
-                    Module oilDispenser = player.getRobot().getModule(ModuleType.OIL_DISPENSER);
-                    if (oilDispenser.getAmmunition() > 0) {
-                        CourseHandler.createOil(course, player.getRobot().getPosition());
-                        oilDispenser.setAmmunition(oilDispenser.getAmmunition() - 1);
-                    }
+            if (player.uses(ModuleType.GLUE_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+                Module glueDispenser = player.getRobot().getModule(ModuleType.GLUE_DISPENSER);
+                if (glueDispenser.getAmmunition() > 0) {
+                    CourseHandler.createGlue(course, player.getRobot().getPosition());
+                    glueDispenser.setAmmunition(glueDispenser.getAmmunition() - 1);
                 }
             }
         }
         if (!robot.isVirtual()) {
-            if (player.uses(ModuleType.MINE_LAYER, phase)) {
+            if (player.uses(ModuleType.OIL_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+                Module oilDispenser = player.getRobot().getModule(ModuleType.OIL_DISPENSER);
+                if (oilDispenser.getAmmunition() > 0) {
+                    CourseHandler.createOil(course, player.getRobot().getPosition());
+                    oilDispenser.setAmmunition(oilDispenser.getAmmunition() - 1);
+                }
+            }
+        }
+        if (!robot.isVirtual()) {
+            if (player.uses(ModuleType.MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
                 Module mineLayer = player.getRobot().getModule(ModuleType.MINE_LAYER);
                 if (mineLayer.getAmmunition() > 0) {
                     CourseHandler.createCircuitChaosObject(course, ObjectType.MINE, player);
@@ -976,7 +975,7 @@ public class Game {
             }
         }
         if (!robot.isVirtual()) {
-            if (player.uses(ModuleType.PROXIMITY_MINE_LAYER, phase)) {
+            if (player.uses(ModuleType.PROXIMITY_MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
                 Module mineLayer = player.getRobot().getModule(ModuleType.PROXIMITY_MINE_LAYER);
                 if (mineLayer.getAmmunition() > 0) {
                     CourseHandler.createCircuitChaosObject(course, ObjectType.PROXIMITY_MINE, player);

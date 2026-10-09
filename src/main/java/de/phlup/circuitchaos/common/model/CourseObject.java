@@ -10,6 +10,8 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class CourseObject extends CourseElement {
 
+    public final static int GLUE_INITIAL_AMOUNT = 3;
+
     private ObjectType type;
     private Position   targetPosition;
     private int        glue        = 0;
