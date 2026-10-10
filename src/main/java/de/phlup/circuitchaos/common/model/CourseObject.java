@@ -1,5 +1,6 @@
 package de.phlup.circuitchaos.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.phlup.circuitchaos.common.enums.ObjectType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,5 +18,12 @@ public class CourseObject extends CourseElement {
     private int        glue        = 0;
     private double     variantSeed = 0;
     private boolean    active      = false;
+
+    @JsonIgnore
+    @Override
+    public boolean isFlying() {
+        // currently there are no flying objects
+        return false;
+    }
 
 }

@@ -29,6 +29,7 @@ public class Robot extends CourseElement {
     private boolean         mayChooseDirection     = true;
     private int             nextCheckpoint         = 1;
     private boolean         reactivateRammingArmor = false;
+    private boolean         flying                 = false;
 
     @JsonIgnore
     public Module getModule(ModuleType moduleType) {

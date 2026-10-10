@@ -11,12 +11,14 @@ public abstract class CourseElement {
     private Position    position      = new Position(0, 0);
     private Position    prevPosition  = new Position(0, 0);
     private int         level         = 0;
-    private boolean     flying        = false;
     private Direction   direction     = Direction.NORTH;
     private Direction   prevDirection = Direction.NORTH;
     private boolean     onCourse      = false;
 
     @JsonIgnore
     private int conflictingMark = 0;
+
+    @JsonIgnore
+    public abstract boolean isFlying();
 
 }
