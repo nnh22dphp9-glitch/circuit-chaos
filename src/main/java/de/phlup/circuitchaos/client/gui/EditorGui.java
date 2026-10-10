@@ -41,6 +41,8 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -171,9 +173,24 @@ public class EditorGui extends BaseGui implements GuiHelper {
     }
 
     private JPanel createContent() {
+        AbstractAction floorChangedActionEvent = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ignored) {
+                adjustFloorToSelection();
+            }
+        };
+        FocusListener floorChangedFocusEvent = new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent ignored) {
+            }
+
+            @Override
+            public void focusLost(FocusEvent ignored) {
+                adjustFloorToSelection();
+            }
+        };
         GridBagLayout     layout            = new GridBagLayout();
         JPanel            courseEditorPanel = new JPanel(layout);
-        FloorChangedEvent floorChangedEvent = new FloorChangedEvent();
         PusherButtonEvent pusherButtonEvent = new PusherButtonEvent();
 
         int y = 0;
@@ -184,7 +201,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
             floortypeBox.addItem(ft);
         }
         floortypeBox.setEnabled(true);
-        floortypeBox.addActionListener(floorChangedEvent);
+        floortypeBox.addActionListener(floorChangedActionEvent);
         addComponentToPanel(floortypeBox, courseEditorPanel, layout, 0, y++, 2, GridBagConstraints.EAST);
 
         addComponentToPanel(wallsLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
@@ -212,10 +229,10 @@ public class EditorGui extends BaseGui implements GuiHelper {
                 wallWest.addItem(wt);
             }
         }
-        wallNorth.addActionListener(floorChangedEvent);
-        wallEast.addActionListener(floorChangedEvent);
-        wallSouth.addActionListener(floorChangedEvent);
-        wallWest.addActionListener(floorChangedEvent);
+        wallNorth.addActionListener(floorChangedActionEvent);
+        wallEast.addActionListener(floorChangedActionEvent);
+        wallSouth.addActionListener(floorChangedActionEvent);
+        wallWest.addActionListener(floorChangedActionEvent);
 
         directionLabel.setEnabled(false);
         addComponentToPanel(directionLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
@@ -247,7 +264,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         for (int i = 0; i < 5; i++) {
             activeInPhase[i].setSelected(false);
             activeInPhase[i].setEnabled(false);
-            activeInPhase[i].addActionListener(floorChangedEvent);
+            activeInPhase[i].addActionListener(floorChangedActionEvent);
             flowPanel.add(activeInPhase[i]);
         }
         activeInPhaseLabel.setEnabled(false);
@@ -305,7 +322,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         beamChooserNorth.addItem("3 Laser Beams");
         beamChooserNorth.addItem("Pressure Beam");
         beamChooserNorth.addItem("Tractor Beam");
-        beamChooserNorth.addActionListener(floorChangedEvent);
+        beamChooserNorth.addActionListener(floorChangedActionEvent);
         beamChooserNorth.setEnabled(false);
         beamChooserEast.addItem("None");
         beamChooserEast.addItem("1 Laser Beam");
@@ -313,7 +330,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         beamChooserEast.addItem("3 Laser Beams");
         beamChooserEast.addItem("Pressure Beam");
         beamChooserEast.addItem("Tractor Beam");
-        beamChooserEast.addActionListener(floorChangedEvent);
+        beamChooserEast.addActionListener(floorChangedActionEvent);
         beamChooserEast.setEnabled(false);
         beamChooserSouth.addItem("None");
         beamChooserSouth.addItem("1 Laser Beam");
@@ -321,7 +338,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         beamChooserSouth.addItem("3 Laser Beams");
         beamChooserSouth.addItem("Pressure Beam");
         beamChooserSouth.addItem("Tractor Beam");
-        beamChooserSouth.addActionListener(floorChangedEvent);
+        beamChooserSouth.addActionListener(floorChangedActionEvent);
         beamChooserSouth.setEnabled(false);
         beamChooserWest.addItem("None");
         beamChooserWest.addItem("1 Laser Beam");
@@ -329,7 +346,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         beamChooserWest.addItem("3 Laser Beams");
         beamChooserWest.addItem("Pressure Beam");
         beamChooserWest.addItem("Tractor Beam");
-        beamChooserWest.addActionListener(floorChangedEvent);
+        beamChooserWest.addActionListener(floorChangedActionEvent);
         beamChooserWest.setEnabled(false);
 
         objectBox.addItem("None");
@@ -346,11 +363,13 @@ public class EditorGui extends BaseGui implements GuiHelper {
         flowPanel.add(portalTargetY);
         objectLabel.setEnabled(true);
         objectBox.setEnabled(true);
-        objectBox.addActionListener(floorChangedEvent);
+        objectBox.addActionListener(floorChangedActionEvent);
         portalTargetX.setEnabled(false);
-        portalTargetX.addActionListener(floorChangedEvent);
+        portalTargetX.addActionListener(floorChangedActionEvent);
+        portalTargetX.addFocusListener(floorChangedFocusEvent);
         portalTargetY.setEnabled(false);
-        portalTargetY.addActionListener(floorChangedEvent);
+        portalTargetY.addActionListener(floorChangedActionEvent);
+        portalTargetY.addFocusListener(floorChangedFocusEvent);
         addComponentToPanel(objectLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
         addComponentToPanel(flowPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
 
@@ -515,9 +534,9 @@ public class EditorGui extends BaseGui implements GuiHelper {
             ObjectType   objectType   = courseObject.getType();
             objectBox.setSelectedItem(objectType.getName());
             if (objectType.isPortal()) {
-                portalTargetX.setText("" + courseObject.getPosition().x());
+                portalTargetX.setText("" + courseObject.getTargetPosition().x());
                 portalTargetX.setEnabled(true);
-                portalTargetY.setText("" + courseObject.getPosition().y());
+                portalTargetY.setText("" + courseObject.getTargetPosition().y());
                 portalTargetY.setEnabled(true);
             } else {
                 portalTargetX.setText("0");
@@ -683,190 +702,188 @@ public class EditorGui extends BaseGui implements GuiHelper {
         redrawAll();
     }
 
-    private class FloorChangedEvent extends AbstractAction {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (updatingFields) {
-                return;
+    private void adjustFloorToSelection() {
+        if (updatingFields) {
+            return;
+        }
+        Floortype newFloortype = (Floortype) floortypeBox.getSelectedItem();
+        if (newFloortype != null) {
+            selectedFloor.setFloortype(newFloortype);
+            directionLabel.setEnabled(newFloortype.isConveyorBelt());
+            directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
+            directionButton.setEnabled(newFloortype.isConveyorBelt());
+            for (int i = 0; i < 5; i++) {
+                boolean activationValid = newFloortype == TRAPDOOR || selectedFloor.isHasPusher();
+                selectedFloor.getActiveInPhase()[i] = activationValid && activeInPhase[i].isSelected();
+                activeInPhase[i].setEnabled(activationValid);
+                activeInPhaseLabel.setEnabled(activationValid);
             }
-            Floortype newFloortype = (Floortype) floortypeBox.getSelectedItem();
-            if (newFloortype != null) {
-                selectedFloor.setFloortype(newFloortype);
-                directionLabel.setEnabled(newFloortype.isConveyorBelt());
-                directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
-                directionButton.setEnabled(newFloortype.isConveyorBelt());
-                for (int i = 0; i < 5; i++) {
-                    boolean activationValid = newFloortype == TRAPDOOR || selectedFloor.isHasPusher();
-                    selectedFloor.getActiveInPhase()[i] = activationValid && activeInPhase[i].isSelected();
-                    activeInPhase[i].setEnabled(activationValid);
-                    activeInPhaseLabel.setEnabled(activationValid);
-                }
-                adjustWallTypes();
-                if (isBeamAllowed(NORTH)) {
-                    beamChooserNorth.setEnabled(true);
-                    selectedFloor.getLasers()[0] = beamChooserNorth.getSelectedIndex() > 3 ? 0 : beamChooserNorth.getSelectedIndex();
-                    selectedFloor.getPressureBeam()[0] = beamChooserNorth.getSelectedIndex() == 4;
-                    selectedFloor.getTractorBeam()[0] = beamChooserNorth.getSelectedIndex() == 5;
-                } else {
-                    beamChooserNorth.setEnabled(false);
-                    selectedFloor.getLasers()[0] = 0;
-                    selectedFloor.getPressureBeam()[0] = false;
-                    selectedFloor.getTractorBeam()[0] = false;
-                }
-                if (isBeamAllowed(EAST)) {
-                    beamChooserEast.setEnabled(true);
-                    selectedFloor.getLasers()[1] = beamChooserEast.getSelectedIndex() > 3 ? 0 : beamChooserEast.getSelectedIndex();
-                    selectedFloor.getPressureBeam()[1] = beamChooserEast.getSelectedIndex() == 4;
-                    selectedFloor.getTractorBeam()[1] = beamChooserEast.getSelectedIndex() == 5;
-                } else {
-                    beamChooserEast.setEnabled(false);
-                    selectedFloor.getLasers()[1] = 0;
-                    selectedFloor.getPressureBeam()[1] = false;
-                    selectedFloor.getTractorBeam()[1] = false;
-                }
-                if (isBeamAllowed(SOUTH)) {
-                    beamChooserSouth.setEnabled(true);
-                    selectedFloor.getLasers()[2] = beamChooserSouth.getSelectedIndex() > 3 ? 0 : beamChooserSouth.getSelectedIndex();
-                    selectedFloor.getPressureBeam()[2] = beamChooserSouth.getSelectedIndex() == 4;
-                    selectedFloor.getTractorBeam()[2] = beamChooserSouth.getSelectedIndex() == 5;
-                } else {
-                    beamChooserSouth.setEnabled(false);
-                    selectedFloor.getLasers()[2] = 0;
-                    selectedFloor.getPressureBeam()[2] = false;
-                    selectedFloor.getTractorBeam()[2] = false;
-                }
-                if (isBeamAllowed(WEST)) {
-                    beamChooserWest.setEnabled(true);
-                    selectedFloor.getLasers()[3] = beamChooserWest.getSelectedIndex() > 3 ? 0 : beamChooserWest.getSelectedIndex();
-                    selectedFloor.getPressureBeam()[3] = beamChooserWest.getSelectedIndex() == 4;
-                    selectedFloor.getTractorBeam()[3] = beamChooserWest.getSelectedIndex() == 5;
-                } else {
-                    beamChooserWest.setEnabled(false);
-                    selectedFloor.getLasers()[3] = 0;
-                    selectedFloor.getPressureBeam()[3] = false;
-                    selectedFloor.getTractorBeam()[3] = false;
-                }
-                setBeams();
+            adjustWallTypes();
+            if (isBeamAllowed(NORTH)) {
+                beamChooserNorth.setEnabled(true);
+                selectedFloor.getLasers()[0] = beamChooserNorth.getSelectedIndex() > 3 ? 0 : beamChooserNorth.getSelectedIndex();
+                selectedFloor.getPressureBeam()[0] = beamChooserNorth.getSelectedIndex() == 4;
+                selectedFloor.getTractorBeam()[0] = beamChooserNorth.getSelectedIndex() == 5;
+            } else {
+                beamChooserNorth.setEnabled(false);
+                selectedFloor.getLasers()[0] = 0;
+                selectedFloor.getPressureBeam()[0] = false;
+                selectedFloor.getTractorBeam()[0] = false;
+            }
+            if (isBeamAllowed(EAST)) {
+                beamChooserEast.setEnabled(true);
+                selectedFloor.getLasers()[1] = beamChooserEast.getSelectedIndex() > 3 ? 0 : beamChooserEast.getSelectedIndex();
+                selectedFloor.getPressureBeam()[1] = beamChooserEast.getSelectedIndex() == 4;
+                selectedFloor.getTractorBeam()[1] = beamChooserEast.getSelectedIndex() == 5;
+            } else {
+                beamChooserEast.setEnabled(false);
+                selectedFloor.getLasers()[1] = 0;
+                selectedFloor.getPressureBeam()[1] = false;
+                selectedFloor.getTractorBeam()[1] = false;
+            }
+            if (isBeamAllowed(SOUTH)) {
+                beamChooserSouth.setEnabled(true);
+                selectedFloor.getLasers()[2] = beamChooserSouth.getSelectedIndex() > 3 ? 0 : beamChooserSouth.getSelectedIndex();
+                selectedFloor.getPressureBeam()[2] = beamChooserSouth.getSelectedIndex() == 4;
+                selectedFloor.getTractorBeam()[2] = beamChooserSouth.getSelectedIndex() == 5;
+            } else {
+                beamChooserSouth.setEnabled(false);
+                selectedFloor.getLasers()[2] = 0;
+                selectedFloor.getPressureBeam()[2] = false;
+                selectedFloor.getTractorBeam()[2] = false;
+            }
+            if (isBeamAllowed(WEST)) {
+                beamChooserWest.setEnabled(true);
+                selectedFloor.getLasers()[3] = beamChooserWest.getSelectedIndex() > 3 ? 0 : beamChooserWest.getSelectedIndex();
+                selectedFloor.getPressureBeam()[3] = beamChooserWest.getSelectedIndex() == 4;
+                selectedFloor.getTractorBeam()[3] = beamChooserWest.getSelectedIndex() == 5;
+            } else {
+                beamChooserWest.setEnabled(false);
+                selectedFloor.getLasers()[3] = 0;
+                selectedFloor.getPressureBeam()[3] = false;
+                selectedFloor.getTractorBeam()[3] = false;
+            }
+            setBeams();
 
-                Position               selectedPosition     = selectedFloor.getPosition();
-                Optional<CourseObject> courseObjectOptional = CourseHandler.getObjects(course, selectedPosition).stream().findFirst();
-                String                 selectedItem         = (String) objectBox.getSelectedItem();
-                if (newFloortype != OPEN_FLOOR || selectedItem == null || "None".equals(selectedItem)) {
-                    courseObjectOptional.ifPresent(courseObject -> course.getObjects().remove(courseObject));
+            Position               selectedPosition     = selectedFloor.getPosition();
+            Optional<CourseObject> courseObjectOptional = CourseHandler.getObjects(course, selectedPosition).stream().findFirst();
+            String                 selectedItem         = (String) objectBox.getSelectedItem();
+            if (newFloortype != OPEN_FLOOR || selectedItem == null || "None".equals(selectedItem)) {
+                courseObjectOptional.ifPresent(courseObject -> course.getObjects().remove(courseObject));
+                portalTargetX.setEnabled(false);
+                portalTargetY.setEnabled(false);
+            } else {
+                if (courseObjectOptional.isPresent() && !selectedItem.equals(courseObjectOptional.get().getType().getName())) {
+                    course.getObjects().remove(courseObjectOptional.get());
                     portalTargetX.setEnabled(false);
                     portalTargetY.setEnabled(false);
+                }
+                if (CourseHandler.getObjects(course, selectedPosition).isEmpty()) {
+                    ObjectType selectedType = Arrays.stream(ObjectType.values())
+                                                    .filter(co -> selectedItem.equals(co.getName()))
+                                                    .findFirst().orElseThrow();
+                    switch (selectedType) {
+                        case OIL -> CourseHandler.createOil(course, selectedPosition).setActive(true);
+                        case GLUE -> CourseHandler.createGlue(course, selectedPosition).setActive(true);
+                        default ->
+                                CourseHandler.createCircuitChaosObject(course, selectedType, selectedPosition).setActive(true);
+                    }
+                }
+                CourseObject courseObject = CourseHandler.getObjects(course, selectedPosition).stream().findFirst().orElseThrow();
+                if (courseObject.getType().isPortal()) {
+                    courseObject.setTargetPosition(new Position(Integer.parseInt(portalTargetX.getText()), Integer.parseInt(portalTargetY.getText())));
+                    portalTargetX.setEnabled(true);
+                    portalTargetY.setEnabled(true);
                 } else {
-                    if (courseObjectOptional.isPresent() && !selectedItem.equals(courseObjectOptional.get().getType().getName())) {
-                        course.getObjects().remove(courseObjectOptional.get());
-                        portalTargetX.setEnabled(false);
-                        portalTargetY.setEnabled(false);
-                    }
-                    if (CourseHandler.getObjects(course, selectedPosition).isEmpty()) {
-                        ObjectType selectedType = Arrays.stream(ObjectType.values())
-                                                        .filter(co -> selectedItem.equals(co.getName()))
-                                                        .findFirst().orElseThrow();
-                        switch (selectedType) {
-                            case OIL -> CourseHandler.createOil(course, selectedPosition).setActive(true);
-                            case GLUE -> CourseHandler.createGlue(course, selectedPosition).setActive(true);
-                            default -> CourseHandler.createCircuitChaosObject(course, selectedType, selectedPosition).setActive(true);
-                        }
-                    }
-                    CourseObject courseObject = CourseHandler.getObjects(course, selectedPosition).stream().findFirst().orElseThrow();
-                    if (courseObject.getType().isPortal()) {
-                        courseObject.setTargetPosition(new Position(Integer.parseInt(portalTargetX.getText()), Integer.parseInt(portalTargetY.getText())));
-                        portalTargetX.setEnabled(true);
-                        portalTargetY.setEnabled(true);
-                    } else {
-                        portalTargetX.setEnabled(false);
-                        portalTargetY.setEnabled(false);
-                    }
+                    portalTargetX.setEnabled(false);
+                    portalTargetY.setEnabled(false);
                 }
-                objectLabel.setEnabled(newFloortype == OPEN_FLOOR);
-                objectBox.setEnabled(newFloortype == OPEN_FLOOR);
-
-                // TODO add Checkpoints
-                course.setRange(course.getRange().wideRangeToPosition(selectedPosition));
-                fillMissingCourseElementsWithAbyss();
-                determineCourseProperties();
-                redrawAll();
             }
+            objectLabel.setEnabled(newFloortype == OPEN_FLOOR);
+            objectBox.setEnabled(newFloortype == OPEN_FLOOR);
+
+            // TODO add Checkpoints
+            course.setRange(course.getRange().wideRangeToPosition(selectedPosition));
+            fillMissingCourseElementsWithAbyss();
+            determineCourseProperties();
+            redrawAll();
         }
+    }
 
-        private void adjustWallTypes() {
-            selectedFloor.setWallNorth((WallType) wallNorth.getSelectedItem());
-            Floor secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(NORTH));
-            if (selectedFloor.getWallNorth() == WallType.ONE_WAY_GREEN) {
-                secondFloor.setWallSouth(WallType.ONE_WAY_RED);
-            } else if (selectedFloor.getWallNorth() == WallType.ONE_WAY_RED) {
-                secondFloor.setWallSouth(WallType.ONE_WAY_GREEN);
-            } else if (selectedFloor.getWallNorth() == WallType.RAMP_UP) {
-                secondFloor.setWallSouth(WallType.RAMP_DOWN);
-            } else if (selectedFloor.getWallNorth() == WallType.RAMP_DOWN) {
-                secondFloor.setWallSouth(WallType.RAMP_UP);
-            } else if (secondFloor.getWallSouth() == WallType.ONE_WAY_GREEN
-                    || secondFloor.getWallSouth() == WallType.ONE_WAY_RED
-                    || secondFloor.getWallSouth() == WallType.RAMP_UP
-                    || secondFloor.getWallSouth() == WallType.RAMP_DOWN) {
-                secondFloor.setWallSouth(secondFloor.getLevel() < selectedFloor.getLevel() ? WallType.LEDGE : WallType.NONE);
-            }
-            selectedFloor.setWallEast((WallType) wallEast.getSelectedItem());
-            secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(EAST));
-            if (selectedFloor.getWallEast() == WallType.ONE_WAY_GREEN) {
-                secondFloor.setWallWest(WallType.ONE_WAY_RED);
-            } else if (selectedFloor.getWallEast() == WallType.ONE_WAY_RED) {
-                secondFloor.setWallWest(WallType.ONE_WAY_GREEN);
-            } else if (selectedFloor.getWallEast() == WallType.RAMP_UP) {
-                secondFloor.setWallWest(WallType.RAMP_DOWN);
-            } else if (selectedFloor.getWallEast() == WallType.RAMP_DOWN) {
-                secondFloor.setWallWest(WallType.RAMP_UP);
-            } else if (secondFloor.getWallWest() == WallType.ONE_WAY_GREEN
-                    || secondFloor.getWallWest() == WallType.ONE_WAY_RED
-                    || secondFloor.getWallWest() == WallType.RAMP_UP
-                    || secondFloor.getWallWest() == WallType.RAMP_DOWN) {
-                secondFloor.setWallWest(secondFloor.getLevel() < selectedFloor.getLevel() ? WallType.LEDGE : WallType.NONE);
-            }
-            selectedFloor.setWallSouth((WallType) wallSouth.getSelectedItem());
-            secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(SOUTH));
-            if (selectedFloor.getWallSouth() == WallType.ONE_WAY_GREEN) {
-                secondFloor.setWallNorth(WallType.ONE_WAY_RED);
-            } else if (selectedFloor.getWallSouth() == WallType.ONE_WAY_RED) {
-                secondFloor.setWallNorth(WallType.ONE_WAY_GREEN);
-            } else if (selectedFloor.getWallSouth() == WallType.RAMP_UP) {
-                secondFloor.setWallNorth(WallType.RAMP_DOWN);
-            } else if (selectedFloor.getWallSouth() == WallType.RAMP_DOWN) {
-                secondFloor.setWallNorth(WallType.RAMP_UP);
-            } else if (secondFloor.getWallNorth() == WallType.ONE_WAY_GREEN
-                    || secondFloor.getWallNorth() == WallType.ONE_WAY_RED
-                    || secondFloor.getWallNorth() == WallType.RAMP_UP
-                    || secondFloor.getWallNorth() == WallType.RAMP_DOWN) {
-                secondFloor.setWallNorth(secondFloor.getLevel() < selectedFloor.getLevel() ? WallType.LEDGE : WallType.NONE);
-            }
-            selectedFloor.setWallWest((WallType) wallWest.getSelectedItem());
-            secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(WEST));
-            if (selectedFloor.getWallWest() == WallType.ONE_WAY_GREEN) {
-                secondFloor.setWallEast(WallType.ONE_WAY_RED);
-            } else if (selectedFloor.getWallWest() == WallType.ONE_WAY_RED) {
-                secondFloor.setWallEast(WallType.ONE_WAY_GREEN);
-            } else if (selectedFloor.getWallWest() == WallType.RAMP_UP) {
-                secondFloor.setWallEast(WallType.RAMP_DOWN);
-            } else if (selectedFloor.getWallWest() == WallType.RAMP_DOWN) {
-                secondFloor.setWallEast(WallType.RAMP_UP);
-            } else if (secondFloor.getWallEast() == WallType.ONE_WAY_GREEN
-                    || secondFloor.getWallEast() == WallType.ONE_WAY_RED
-                    || secondFloor.getWallEast() == WallType.RAMP_UP
-                    || secondFloor.getWallEast() == WallType.RAMP_DOWN) {
-                secondFloor.setWallEast(secondFloor.getLevel() < selectedFloor.getLevel() ? WallType.LEDGE : WallType.NONE);
-            }
-            if (selectedFloor.isHasPusher()) {
-                if (switch (selectedFloor.getPusherDirection()) {
-                    case NORTH -> selectedFloor.getWallSouth();
-                    case EAST -> selectedFloor.getWallWest();
-                    case SOUTH -> selectedFloor.getWallNorth();
-                    case WEST -> selectedFloor.getWallEast();
-                } != WallType.SOLID) {
-                    selectedFloor.setHasPusher(false);
-                    pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
-                }
+    private void adjustWallTypes() {
+        selectedFloor.setWallNorth((WallType) wallNorth.getSelectedItem());
+        Floor secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(NORTH));
+        if (selectedFloor.getWallNorth() == WallType.ONE_WAY_GREEN) {
+            secondFloor.setWallSouth(WallType.ONE_WAY_RED);
+        } else if (selectedFloor.getWallNorth() == WallType.ONE_WAY_RED) {
+            secondFloor.setWallSouth(WallType.ONE_WAY_GREEN);
+        } else if (selectedFloor.getWallNorth() == WallType.RAMP_UP) {
+            secondFloor.setWallSouth(WallType.RAMP_DOWN);
+        } else if (selectedFloor.getWallNorth() == WallType.RAMP_DOWN) {
+            secondFloor.setWallSouth(WallType.RAMP_UP);
+        } else if (secondFloor.getWallSouth() == WallType.ONE_WAY_GREEN
+                || secondFloor.getWallSouth() == WallType.ONE_WAY_RED
+                || secondFloor.getWallSouth() == WallType.RAMP_UP
+                || secondFloor.getWallSouth() == WallType.RAMP_DOWN) {
+            secondFloor.setWallSouth(secondFloor.getLevel() < selectedFloor.getLevel() ? WallType.LEDGE : WallType.NONE);
+        }
+        selectedFloor.setWallEast((WallType) wallEast.getSelectedItem());
+        secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(EAST));
+        if (selectedFloor.getWallEast() == WallType.ONE_WAY_GREEN) {
+            secondFloor.setWallWest(WallType.ONE_WAY_RED);
+        } else if (selectedFloor.getWallEast() == WallType.ONE_WAY_RED) {
+            secondFloor.setWallWest(WallType.ONE_WAY_GREEN);
+        } else if (selectedFloor.getWallEast() == WallType.RAMP_UP) {
+            secondFloor.setWallWest(WallType.RAMP_DOWN);
+        } else if (selectedFloor.getWallEast() == WallType.RAMP_DOWN) {
+            secondFloor.setWallWest(WallType.RAMP_UP);
+        } else if (secondFloor.getWallWest() == WallType.ONE_WAY_GREEN
+                || secondFloor.getWallWest() == WallType.ONE_WAY_RED
+                || secondFloor.getWallWest() == WallType.RAMP_UP
+                || secondFloor.getWallWest() == WallType.RAMP_DOWN) {
+            secondFloor.setWallWest(secondFloor.getLevel() < selectedFloor.getLevel() ? WallType.LEDGE : WallType.NONE);
+        }
+        selectedFloor.setWallSouth((WallType) wallSouth.getSelectedItem());
+        secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(SOUTH));
+        if (selectedFloor.getWallSouth() == WallType.ONE_WAY_GREEN) {
+            secondFloor.setWallNorth(WallType.ONE_WAY_RED);
+        } else if (selectedFloor.getWallSouth() == WallType.ONE_WAY_RED) {
+            secondFloor.setWallNorth(WallType.ONE_WAY_GREEN);
+        } else if (selectedFloor.getWallSouth() == WallType.RAMP_UP) {
+            secondFloor.setWallNorth(WallType.RAMP_DOWN);
+        } else if (selectedFloor.getWallSouth() == WallType.RAMP_DOWN) {
+            secondFloor.setWallNorth(WallType.RAMP_UP);
+        } else if (secondFloor.getWallNorth() == WallType.ONE_WAY_GREEN
+                || secondFloor.getWallNorth() == WallType.ONE_WAY_RED
+                || secondFloor.getWallNorth() == WallType.RAMP_UP
+                || secondFloor.getWallNorth() == WallType.RAMP_DOWN) {
+            secondFloor.setWallNorth(secondFloor.getLevel() < selectedFloor.getLevel() ? WallType.LEDGE : WallType.NONE);
+        }
+        selectedFloor.setWallWest((WallType) wallWest.getSelectedItem());
+        secondFloor = CourseHandler.getFloor(course, selectedFloor.getPosition().neighbour(WEST));
+        if (selectedFloor.getWallWest() == WallType.ONE_WAY_GREEN) {
+            secondFloor.setWallEast(WallType.ONE_WAY_RED);
+        } else if (selectedFloor.getWallWest() == WallType.ONE_WAY_RED) {
+            secondFloor.setWallEast(WallType.ONE_WAY_GREEN);
+        } else if (selectedFloor.getWallWest() == WallType.RAMP_UP) {
+            secondFloor.setWallEast(WallType.RAMP_DOWN);
+        } else if (selectedFloor.getWallWest() == WallType.RAMP_DOWN) {
+            secondFloor.setWallEast(WallType.RAMP_UP);
+        } else if (secondFloor.getWallEast() == WallType.ONE_WAY_GREEN
+                || secondFloor.getWallEast() == WallType.ONE_WAY_RED
+                || secondFloor.getWallEast() == WallType.RAMP_UP
+                || secondFloor.getWallEast() == WallType.RAMP_DOWN) {
+            secondFloor.setWallEast(secondFloor.getLevel() < selectedFloor.getLevel() ? WallType.LEDGE : WallType.NONE);
+        }
+        if (selectedFloor.isHasPusher()) {
+            if (switch (selectedFloor.getPusherDirection()) {
+                case NORTH -> selectedFloor.getWallSouth();
+                case EAST -> selectedFloor.getWallWest();
+                case SOUTH -> selectedFloor.getWallNorth();
+                case WEST -> selectedFloor.getWallEast();
+            } != WallType.SOLID) {
+                selectedFloor.setHasPusher(false);
+                pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
             }
         }
     }
