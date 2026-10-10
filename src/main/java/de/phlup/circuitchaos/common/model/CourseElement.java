@@ -14,7 +14,6 @@ public abstract class CourseElement {
     private boolean     flying        = false;
     private Direction   direction     = Direction.NORTH;
     private Direction   prevDirection = Direction.NORTH;
-    private Programme[] program       = new Programme[5];
     private boolean     onCourse      = false;
 
     @JsonIgnore

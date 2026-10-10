@@ -18,6 +18,7 @@ public class Robot extends CourseElement {
     private int             damage                 = 0;
     private Position        archivePosition;
     private int             archiveLevel;
+    private Programme[]     program                = new Programme[5];
     private List<Programme> potentialProgramme     = new ArrayList<>();
     private List<Module>    modules                = new ArrayList<>();
     private boolean[]       blocked                = new boolean[]{false, false, false, false, false};
