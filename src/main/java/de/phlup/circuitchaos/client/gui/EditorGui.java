@@ -334,7 +334,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
 
         objectBox.addItem("None");
         for (ObjectType ot : ObjectType.values()) {
-            objectBox.addItem(ot.name());
+            objectBox.addItem(ot.getName());
         }
         portalTargetX.setText("0");
         portalTargetY.setText("0");
@@ -751,7 +751,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
                 Position               selectedPosition     = selectedFloor.getPosition();
                 Optional<CourseObject> courseObjectOptional = CourseHandler.getObjects(course, selectedPosition).stream().findFirst();
                 String                 selectedItem         = (String) objectBox.getSelectedItem();
-                if (newFloortype == OPEN_FLOOR || selectedItem == null || "None".equals(selectedItem)) {
+                if (newFloortype != OPEN_FLOOR || selectedItem == null || "None".equals(selectedItem)) {
                     courseObjectOptional.ifPresent(courseObject -> course.getObjects().remove(courseObject));
                     portalTargetX.setEnabled(false);
                     portalTargetY.setEnabled(false);
