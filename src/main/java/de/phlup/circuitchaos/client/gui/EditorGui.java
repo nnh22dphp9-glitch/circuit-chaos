@@ -506,13 +506,25 @@ public class EditorGui extends BaseGui implements GuiHelper {
         Optional<CourseObject> courseObjectOptional = CourseHandler.getObjects(course, selectedFloor.getPosition()).stream().findFirst();
         if (courseObjectOptional.isEmpty()) {
             objectBox.setSelectedIndex(0);
+            portalTargetX.setText("0");
             portalTargetX.setEnabled(false);
+            portalTargetY.setText("0");
             portalTargetY.setEnabled(false);
         } else {
-            ObjectType objectType = courseObjectOptional.get().getType();
+            CourseObject courseObject = courseObjectOptional.get();
+            ObjectType   objectType   = courseObject.getType();
             objectBox.setSelectedItem(objectType.getName());
-            portalTargetX.setEnabled(objectType.isPortal());
-            portalTargetY.setEnabled(objectType.isPortal());
+            if (objectType.isPortal()) {
+                portalTargetX.setText("" + courseObject.getPosition().x());
+                portalTargetX.setEnabled(true);
+                portalTargetY.setText("" + courseObject.getPosition().y());
+                portalTargetY.setEnabled(true);
+            } else {
+                portalTargetX.setText("0");
+                portalTargetX.setEnabled(false);
+                portalTargetY.setText("0");
+                portalTargetY.setEnabled(false);
+            }
         }
         objectLabel.setEnabled(newFloortype == OPEN_FLOOR);
         objectBox.setEnabled(newFloortype == OPEN_FLOOR);
