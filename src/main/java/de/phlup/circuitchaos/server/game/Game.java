@@ -72,8 +72,9 @@ import static de.phlup.circuitchaos.server.GlobalServerAttributes.RANDOM;
 @RequiredArgsConstructor
 public class Game {
 
-    public static final String AND_THE_WINNER_IS  = "And The Winner Is: ";
-    public static final String THIS_GAME_IS_A_TIE = "This game is a tie.";
+    public static final String AND_THE_WINNER_IS   = "And The Winner Is: ";
+    public static final String THIS_GAME_IS_A_TIE  = "This game is a tie.";
+    public static final int    MINE_INITIAL_DAMAGE = 4;
 
     private final PollOrPushSwitchService pollOrPushSwitchService;
     private final TimeSettings            timeSettings;
@@ -1515,8 +1516,8 @@ public class Game {
     }
 
     private void goOff(Step step, Integer phase, CourseObject courseObject) {
-        if (courseObject.getType().getInitialDamage() > 0) {
-            explode(step, phase, courseObject.getPosition(), courseObject.getType().getInitialDamage());
+        if (courseObject.getType() == ObjectType.MINE || courseObject.getType() == ObjectType.PROXIMITY_MINE) {
+            explode(step, phase, courseObject.getPosition(), MINE_INITIAL_DAMAGE);
         }
         die(courseObject, step, phase);
     }
