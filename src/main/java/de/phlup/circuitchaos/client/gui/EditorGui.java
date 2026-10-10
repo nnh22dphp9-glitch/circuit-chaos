@@ -760,22 +760,17 @@ public class EditorGui extends BaseGui implements GuiHelper {
                         course.getObjects().remove(courseObjectOptional.get());
                         portalTargetX.setEnabled(false);
                         portalTargetY.setEnabled(false);
-                    } else if (courseObjectOptional.isEmpty()) {
-                        ObjectType selectedType = Arrays.stream(ObjectType.values()).filter(co -> selectedItem.equals(co.getName())).findFirst().orElseThrow();
+                    }
+                    if (CourseHandler.getObjects(course, selectedPosition).isEmpty()) {
+                        ObjectType selectedType = Arrays.stream(ObjectType.values())
+                                                        .filter(co -> selectedItem.equals(co.getName()))
+                                                        .findFirst().orElseThrow();
                         switch (selectedType) {
                             case OIL -> CourseHandler.createOil(course, selectedPosition).setActive(true);
                             case GLUE -> CourseHandler.createGlue(course, selectedPosition).setActive(true);
-                            case TELEPORTER -> CourseHandler.createCircuitChaosObject(course, ObjectType.TELEPORTER, selectedPosition).setActive(true);
-                            case RANDOMIZER -> CourseHandler.createCircuitChaosObject(course, ObjectType.RANDOMIZER, selectedPosition).setActive(true);
-                            case MINE -> CourseHandler.createCircuitChaosObject(course, ObjectType.MINE, selectedPosition).setActive(true);
-                            case PROXIMITY_MINE -> CourseHandler.createCircuitChaosObject(course, ObjectType.PROXIMITY_MINE, selectedPosition).setActive(true);
-                            case PORTAL_BLUE -> CourseHandler.createCircuitChaosObject(course, ObjectType.PORTAL_BLUE, selectedPosition).setActive(true);
-                            case PORTAL_RED -> CourseHandler.createCircuitChaosObject(course, ObjectType.PORTAL_RED, selectedPosition).setActive(true);
-                            case PORTAL_YELLOW -> CourseHandler.createCircuitChaosObject(course, ObjectType.PORTAL_YELLOW, selectedPosition).setActive(true);
-                            case PORTAL_PURPLE -> CourseHandler.createCircuitChaosObject(course, ObjectType.PORTAL_PURPLE, selectedPosition).setActive(true);
-                            case PORTAL_GREEN -> CourseHandler.createCircuitChaosObject(course, ObjectType.PORTAL_GREEN, selectedPosition).setActive(true);
+                            default -> CourseHandler.createCircuitChaosObject(course, selectedType, selectedPosition).setActive(true);
                         }
-                    } // else: courseObjectOptional.isPresent() && selectedItem.equals(courseObjectOptional.get().getType().getName()) -> nothing to do
+                    }
                     CourseObject courseObject = CourseHandler.getObjects(course, selectedPosition).stream().findFirst().orElseThrow();
                     if (courseObject.getType().isPortal()) {
                         courseObject.setTargetPosition(new Position(Integer.parseInt(portalTargetX.getText()), Integer.parseInt(portalTargetY.getText())));
