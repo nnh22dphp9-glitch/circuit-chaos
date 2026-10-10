@@ -465,18 +465,16 @@ public class Game {
                 }
                 robot.setBlocked(new boolean[]{false, false, false, false, false});
             }
-        } else {
-            if (robot.isPowerDownAnnounced()) {
-                robot.setPowerDownAnnounced(false);
-                robot.setPoweredDown(true);
-                robot.setDamage(0);
-                for (int phase = 0; phase < 5; phase++) {
-                    if (robot.getBlocked()[phase]) {
-                        robot.getProgram()[phase] = null;
-                    }
+        } else if (robot.isPowerDownAnnounced()) {
+            robot.setPowerDownAnnounced(false);
+            robot.setPoweredDown(true);
+            robot.setDamage(0);
+            for (int phase = 0; phase < 5; phase++) {
+                if (robot.getBlocked()[phase]) {
+                    robot.getProgram()[phase] = null;
                 }
-                robot.setBlocked(new boolean[]{false, false, false, false, false});
             }
+            robot.setBlocked(new boolean[]{false, false, false, false, false});
         }
     }
 
@@ -490,61 +488,60 @@ public class Game {
     private Player setTouchCheckpoints(int phase) {
         Player winner = null;
         for (CourseElement o : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
-            if (!gameAborted) {
-                if (o.isOnCourse()) {
-                    Player player = getPlayerOf(o);
-                    if (player != null) {
-                        Checkpoint cp = CourseHandler.getCheckpoint(course, player.getRobot().getPosition());
-                        Floor      f  = CourseHandler.getFloor(course, player.getRobot().getPosition());
-                        Floor      f2 = f;
-                        if (player.uses(ModuleType.MECHANICAL_ARM, phase)) {
-                            if (!(cp != null || f.getFloortype() == Floortype.PIT_STOP)) {
-                                f = CourseHandler.getFloor(course, new Position(player.getRobot().getPosition().x(), player.getRobot().getPosition().y() - 1));
-                                cp = CourseHandler.getCheckpoint(course, new Position(player.getRobot().getPosition().x(), player.getRobot().getPosition().y() - 1));
-                            }
-                            if (!(cp != null || f.getFloortype() == Floortype.PIT_STOP)) {
-                                f = CourseHandler.getFloor(course, new Position(player.getRobot().getPosition().x() + 1, player.getRobot().getPosition().y()));
-                                cp = CourseHandler.getCheckpoint(course, new Position(player.getRobot().getPosition().x() + 1, player.getRobot().getPosition().y()));
-                            }
-                            if (!(cp != null || f.getFloortype() == Floortype.PIT_STOP)) {
-                                f = CourseHandler.getFloor(course, new Position(player.getRobot().getPosition().x(), player.getRobot().getPosition().y() + 1));
-                                cp = CourseHandler.getCheckpoint(course, new Position(player.getRobot().getPosition().x(), player.getRobot().getPosition().y() + 1));
-                            }
-                            if (!(cp != null || f.getFloortype() == Floortype.PIT_STOP)) {
-                                f = CourseHandler.getFloor(course, new Position(player.getRobot().getPosition().x() - 2, player.getRobot().getPosition().y()));
-                                cp = CourseHandler.getCheckpoint(course, new Position(player.getRobot().getPosition().x() - 1, player.getRobot().getPosition().y()));
+            if (!gameAborted && o.isOnCourse()) {
+                Player player = getPlayerOf(o);
+                if (player != null) {
+                    Robot      robot = player.getRobot();
+                    Checkpoint cp    = CourseHandler.getCheckpoint(course, robot.getPosition());
+                    Floor      f     = CourseHandler.getFloor(course, robot.getPosition());
+                    Floor      f2    = f;
+                    if (player.uses(ModuleType.MECHANICAL_ARM, phase)) {
+                        if (!(cp != null || f.getFloortype() == Floortype.PIT_STOP)) {
+                            f = CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
+                            cp = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
+                        }
+                        if (!(cp != null || f.getFloortype() == Floortype.PIT_STOP)) {
+                            f = CourseHandler.getFloor(course, new Position(robot.getPosition().x() + 1, robot.getPosition().y()));
+                            cp = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x() + 1, robot.getPosition().y()));
+                        }
+                        if (!(cp != null || f.getFloortype() == Floortype.PIT_STOP)) {
+                            f = CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() + 1));
+                            cp = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x(), robot.getPosition().y() + 1));
+                        }
+                        if (!(cp != null || f.getFloortype() == Floortype.PIT_STOP)) {
+                            f = CourseHandler.getFloor(course, new Position(robot.getPosition().x() - 2, robot.getPosition().y()));
+                            cp = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x() - 1, robot.getPosition().y()));
+                        }
+                    }
+                    if (cp != null || f.getFloortype() == Floortype.PIT_STOP) {
+                        robot.setArchivePosition(f.getPosition());
+                        robot.setArchiveLevel(f.getLevel());
+                        if (cp != null && cp.getNumber() == robot.getNextCheckpoint()) {
+                            robot.setNextCheckpoint(robot.getNextCheckpoint() + 1);
+                        }
+                    }
+                    if (phase == 4 && f2.getFloortype() == Floortype.PIT_STOP) {
+                        player.arriveAtPitStop();
+                    }
+                    if (player.hasWon()) {
+                        winner = player;
+                    }
+                } else if (o instanceof CourseObject co) {
+                    co.setActive(true);
+                    switch (co.getType()) {
+                        case MINE -> {
+                            if (hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y())) {
+                                goOff(Step.TOUCH_CHECKPOINTS, phase, co);
                             }
                         }
-                        if (cp != null || f.getFloortype() == Floortype.PIT_STOP) {
-                            player.getRobot().setArchivePosition(f.getPosition());
-                            player.getRobot().setArchiveLevel(f.getLevel());
-                            if (cp != null && cp.getNumber() == player.getRobot().getNextCheckpoint()) {
-                                player.getRobot().setNextCheckpoint(player.getRobot().getNextCheckpoint() + 1);
+                        case PROXIMITY_MINE -> {
+                            if (hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y())
+                                    || hasNonVirtualRobot(co.getPosition().x() + 1, co.getPosition().y())
+                                    || hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y() + 1)
+                                    || hasNonVirtualRobot(co.getPosition().x() - 1, co.getPosition().y())
+                                    || hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y() - 1)) {
+                                goOff(Step.TOUCH_CHECKPOINTS, phase, co);
                             }
-                        }
-                        if (phase == 4 && f2.getFloortype() == Floortype.PIT_STOP) {
-                            player.arriveAtPitStop();
-                        }
-                        if (player.hasWon()) {
-                            winner = player;
-                        }
-                    } else if (o instanceof CourseObject co) {
-                        co.setActive(true);
-                        switch (co.getType()) {
-                            case MINE:
-                                if (hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y())) {
-                                    goOff(Step.TOUCH_CHECKPOINTS, phase, co);
-                                }
-                                break;
-                            case PROXIMITY_MINE:
-                                if (hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y())
-                                        || hasNonVirtualRobot(co.getPosition().x() + 1, co.getPosition().y())
-                                        || hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y() + 1)
-                                        || hasNonVirtualRobot(co.getPosition().x() - 1, co.getPosition().y())
-                                        || hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y() - 1)) {
-                                    goOff(Step.TOUCH_CHECKPOINTS, phase, co);
-                                }
-                                break;
                         }
                     }
                 }
@@ -554,8 +551,8 @@ public class Game {
     }
 
     private boolean hasNonVirtualRobot(int posx, int posy) {
-        for (Robot ce : course.getRobots()) {
-            if (ce.getPosition().x() == posx && ce.getPosition().y() == posy && !ce.isVirtual()) {
+        for (Robot r : course.getRobots()) {
+            if (r.getPosition().x() == posx && r.getPosition().y() == posy && !r.isVirtual()) {
                 return true;
             }
         }
@@ -716,10 +713,8 @@ public class Game {
             }
             if (f.isHasPusher() && f.getActiveInPhase()[phase]) {
                 for (CourseElement ce : CourseHandler.getObjectsAndRobots(course)) {
-                    if (ce.isOnCourse() && ce.getPosition().equals(f.getPosition())) {
-                        if (willBePushed(ce)) {
-                            moveInit(ce, f.getPusherDirection(), 1, 1, Step.PUSHERS_PUSH, phase, true, false, null);
-                        }
+                    if (ce.isOnCourse() && ce.getPosition().equals(f.getPosition()) && willBePushed(ce)) {
+                        moveInit(ce, f.getPusherDirection(), 1, 1, Step.PUSHERS_PUSH, phase, true, false, null);
                     }
                 }
             }
@@ -764,29 +759,27 @@ public class Game {
             needToGoAgain = false;
             iteration++;
             for (CourseElement obj : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
-                if (obj.isOnCourse()) {
-                    if (obj.getConflictingMark() == 0) {
-                        Floor     f                = CourseHandler.getFloor(course, obj.getPosition());
-                        Floor     targetFloor      = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                        Direction counterDirection = f.getFacingDirection().reverse();
-                        if ((!(((f.wall(f.getFacingDirection()) == WallType.NONE
-                                || f.wall(f.getFacingDirection()) == WallType.ONE_WAY_GREEN
-                                || f.wall(f.getFacingDirection()) == WallType.RAMP_DOWN)
-                                && (targetFloor.wall(counterDirection) == WallType.NONE
-                                || targetFloor.wall(counterDirection) == WallType.LEDGE
-                                || targetFloor.wall(counterDirection) == WallType.ONE_WAY_GREEN
-                                || targetFloor.wall(counterDirection) == WallType.RAMP_UP))
-                                || (f.wall(f.getFacingDirection()) == WallType.ONE_WAY_GREEN
-                                && targetFloor.wall(counterDirection) == WallType.ONE_WAY_RED)))
-                                || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
-                            obj.setConflictingMark(-1);
-                        } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
-                            obj.setConflictingMark(-1);
-                            rotateObjectsOnConveyorBelts(Step.CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
-                            setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
-                        } else {
-                            needToGoAgain = true;
-                        }
+                if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
+                    Floor     f                = CourseHandler.getFloor(course, obj.getPosition());
+                    Floor     targetFloor      = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
+                    Direction counterDirection = f.getFacingDirection().reverse();
+                    if ((!(((f.wall(f.getFacingDirection()) == WallType.NONE
+                            || f.wall(f.getFacingDirection()) == WallType.ONE_WAY_GREEN
+                            || f.wall(f.getFacingDirection()) == WallType.RAMP_DOWN)
+                            && (targetFloor.wall(counterDirection) == WallType.NONE
+                            || targetFloor.wall(counterDirection) == WallType.LEDGE
+                            || targetFloor.wall(counterDirection) == WallType.ONE_WAY_GREEN
+                            || targetFloor.wall(counterDirection) == WallType.RAMP_UP))
+                            || (f.wall(f.getFacingDirection()) == WallType.ONE_WAY_GREEN
+                            && targetFloor.wall(counterDirection) == WallType.ONE_WAY_RED)))
+                            || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
+                        obj.setConflictingMark(-1);
+                    } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
+                        obj.setConflictingMark(-1);
+                        rotateObjectsOnConveyorBelts(Step.CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
+                        setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
+                    } else {
+                        needToGoAgain = true;
                     }
                 }
             }
@@ -795,13 +788,11 @@ public class Game {
             if (gameAborted) {
                 break;
             }
-            if (obj.isOnCourse()) {
-                if (obj.getConflictingMark() == 0) {
-                    Floor f           = CourseHandler.getFloor(course, obj.getPosition());
-                    Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    rotateObjectsOnConveyorBelts(Step.CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
-                    setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
-                }
+            if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
+                Floor f           = CourseHandler.getFloor(course, obj.getPosition());
+                Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
+                rotateObjectsOnConveyorBelts(Step.CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
+                setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
             }
         }
         if (!gameAborted) {
@@ -831,29 +822,27 @@ public class Game {
                 if (gameAborted) {
                     break;
                 }
-                if (obj.isOnCourse()) {
-                    if (obj.getConflictingMark() == 0) {
-                        Floor     f                = CourseHandler.getFloor(course, obj.getPosition());
-                        Floor     targetFloor      = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                        Direction counterDirection = f.getFacingDirection().reverse();
-                        if ((!(((f.wall(f.getFacingDirection()) == WallType.NONE
-                                || f.wall(f.getFacingDirection()) == WallType.ONE_WAY_GREEN
-                                || f.wall(f.getFacingDirection()) == WallType.RAMP_DOWN)
-                                && (targetFloor.wall(counterDirection) == WallType.NONE
-                                || targetFloor.wall(counterDirection) == WallType.LEDGE
-                                || targetFloor.wall(counterDirection) == WallType.ONE_WAY_GREEN
-                                || targetFloor.wall(counterDirection) == WallType.RAMP_UP))
-                                || (f.wall(f.getFacingDirection()) == WallType.ONE_WAY_GREEN
-                                && targetFloor.wall(counterDirection) == WallType.ONE_WAY_RED)))
-                                || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
-                            obj.setConflictingMark(-1);
-                        } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
-                            obj.setConflictingMark(-1);
-                            rotateObjectsOnConveyorBelts(Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
-                            setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
-                        } else {
-                            needToGoAgain = true;
-                        }
+                if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
+                    Floor     f                = CourseHandler.getFloor(course, obj.getPosition());
+                    Floor     targetFloor      = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
+                    Direction counterDirection = f.getFacingDirection().reverse();
+                    if ((!(((f.wall(f.getFacingDirection()) == WallType.NONE
+                            || f.wall(f.getFacingDirection()) == WallType.ONE_WAY_GREEN
+                            || f.wall(f.getFacingDirection()) == WallType.RAMP_DOWN)
+                            && (targetFloor.wall(counterDirection) == WallType.NONE
+                            || targetFloor.wall(counterDirection) == WallType.LEDGE
+                            || targetFloor.wall(counterDirection) == WallType.ONE_WAY_GREEN
+                            || targetFloor.wall(counterDirection) == WallType.RAMP_UP))
+                            || (f.wall(f.getFacingDirection()) == WallType.ONE_WAY_GREEN
+                            && targetFloor.wall(counterDirection) == WallType.ONE_WAY_RED)))
+                            || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
+                        obj.setConflictingMark(-1);
+                    } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
+                        obj.setConflictingMark(-1);
+                        rotateObjectsOnConveyorBelts(Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
+                        setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
+                    } else {
+                        needToGoAgain = true;
                     }
                 }
             }
@@ -930,78 +919,64 @@ public class Game {
     private void releaseDevices(int phase, Player player) {
         Robot robot      = player.getRobot();
         Floor standingOn = CourseHandler.getFloor(course, robot.getPosition());
-        if (!robot.isVirtual()) {
-            if (player.uses(ModuleType.MOBILE_TELEPORTER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-                Module module = player.getRobot().getModule(ModuleType.MOBILE_TELEPORTER);
-                if (module.getAmmunition() > 0) {
-                    CourseHandler.createCircuitChaosObject(course, ObjectType.TELEPORTER, player);
-                    module.setAmmunition(module.getAmmunition() - 1);
-                }
+        if (!robot.isVirtual() && player.uses(ModuleType.MOBILE_TELEPORTER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            Module module = player.getRobot().getModule(ModuleType.MOBILE_TELEPORTER);
+            if (module.getAmmunition() > 0) {
+                CourseHandler.createCircuitChaosObject(course, ObjectType.TELEPORTER, player);
+                module.setAmmunition(module.getAmmunition() - 1);
             }
         }
-        if (!robot.isVirtual()) {
-            if (player.uses(ModuleType.MOBILE_RANDOMIZER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-                Module module = player.getRobot().getModule(ModuleType.MOBILE_RANDOMIZER);
-                if (module.getAmmunition() > 0) {
-                    CourseHandler.createCircuitChaosObject(course, ObjectType.RANDOMIZER, player);
-                    module.setAmmunition(module.getAmmunition() - 1);
-                }
+        if (!robot.isVirtual() && player.uses(ModuleType.MOBILE_RANDOMIZER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            Module module = player.getRobot().getModule(ModuleType.MOBILE_RANDOMIZER);
+            if (module.getAmmunition() > 0) {
+                CourseHandler.createCircuitChaosObject(course, ObjectType.RANDOMIZER, player);
+                module.setAmmunition(module.getAmmunition() - 1);
             }
         }
-        if (!robot.isVirtual()) {
-            if (player.uses(ModuleType.GLUE_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-                Module glueDispenser = player.getRobot().getModule(ModuleType.GLUE_DISPENSER);
-                if (glueDispenser.getAmmunition() > 0) {
-                    CourseHandler.createGlue(course, player.getRobot().getPosition());
-                    glueDispenser.setAmmunition(glueDispenser.getAmmunition() - 1);
-                }
+        if (!robot.isVirtual() && player.uses(ModuleType.GLUE_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            Module glueDispenser = player.getRobot().getModule(ModuleType.GLUE_DISPENSER);
+            if (glueDispenser.getAmmunition() > 0) {
+                CourseHandler.createGlue(course, player.getRobot().getPosition());
+                glueDispenser.setAmmunition(glueDispenser.getAmmunition() - 1);
             }
         }
-        if (!robot.isVirtual()) {
-            if (player.uses(ModuleType.OIL_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-                Module oilDispenser = player.getRobot().getModule(ModuleType.OIL_DISPENSER);
-                if (oilDispenser.getAmmunition() > 0) {
-                    CourseHandler.createOil(course, player.getRobot().getPosition());
-                    oilDispenser.setAmmunition(oilDispenser.getAmmunition() - 1);
-                }
+        if (!robot.isVirtual() && player.uses(ModuleType.OIL_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            Module oilDispenser = player.getRobot().getModule(ModuleType.OIL_DISPENSER);
+            if (oilDispenser.getAmmunition() > 0) {
+                CourseHandler.createOil(course, player.getRobot().getPosition());
+                oilDispenser.setAmmunition(oilDispenser.getAmmunition() - 1);
             }
         }
-        if (!robot.isVirtual()) {
-            if (player.uses(ModuleType.MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-                Module mineLayer = player.getRobot().getModule(ModuleType.MINE_LAYER);
-                if (mineLayer.getAmmunition() > 0) {
-                    CourseHandler.createCircuitChaosObject(course, ObjectType.MINE, player);
-                    mineLayer.setAmmunition(mineLayer.getAmmunition() - 1);
-                }
+        if (!robot.isVirtual() && player.uses(ModuleType.MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            Module mineLayer = player.getRobot().getModule(ModuleType.MINE_LAYER);
+            if (mineLayer.getAmmunition() > 0) {
+                CourseHandler.createCircuitChaosObject(course, ObjectType.MINE, player);
+                mineLayer.setAmmunition(mineLayer.getAmmunition() - 1);
             }
         }
-        if (!robot.isVirtual()) {
-            if (player.uses(ModuleType.PROXIMITY_MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-                Module mineLayer = player.getRobot().getModule(ModuleType.PROXIMITY_MINE_LAYER);
-                if (mineLayer.getAmmunition() > 0) {
-                    CourseHandler.createCircuitChaosObject(course, ObjectType.PROXIMITY_MINE, player);
-                    mineLayer.setAmmunition(mineLayer.getAmmunition() - 1);
-                }
+        if (!robot.isVirtual() && player.uses(ModuleType.PROXIMITY_MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            Module mineLayer = player.getRobot().getModule(ModuleType.PROXIMITY_MINE_LAYER);
+            if (mineLayer.getAmmunition() > 0) {
+                CourseHandler.createCircuitChaosObject(course, ObjectType.PROXIMITY_MINE, player);
+                mineLayer.setAmmunition(mineLayer.getAmmunition() - 1);
             }
         }
-        if (!robot.isVirtual()) {
-            if (player.uses(ModuleType.BRIDGE_PROJECTOR, phase)) {
-                Module bridgeProjector = player.getRobot().getModule(ModuleType.BRIDGE_PROJECTOR);
-                if (bridgeProjector.getAmmunition() > 0) {
-                    Floor f2 = switch (robot.getDirection()) {
-                        case NORTH ->
-                                CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
-                        case EAST ->
-                                CourseHandler.getFloor(course, new Position(robot.getPosition().x() + 1, robot.getPosition().y()));
-                        case SOUTH ->
-                                CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() + 1));
-                        case WEST ->
-                                CourseHandler.getFloor(course, new Position(robot.getPosition().x() - 1, robot.getPosition().y()));
-                    };
-                    if (f2.getFloortype() == Floortype.ABYSS || f2.getFloortype() == Floortype.TRAPDOOR) {
-                        bridgeProjector.setAmmunition(bridgeProjector.getAmmunition() - 1);
-                        f2.setFloortype(Floortype.OPEN_FLOOR);
-                    }
+        if (!robot.isVirtual() && player.uses(ModuleType.BRIDGE_PROJECTOR, phase)) {
+            Module bridgeProjector = player.getRobot().getModule(ModuleType.BRIDGE_PROJECTOR);
+            if (bridgeProjector.getAmmunition() > 0) {
+                Floor f2 = switch (robot.getDirection()) {
+                    case NORTH ->
+                            CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
+                    case EAST ->
+                            CourseHandler.getFloor(course, new Position(robot.getPosition().x() + 1, robot.getPosition().y()));
+                    case SOUTH ->
+                            CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() + 1));
+                    case WEST ->
+                            CourseHandler.getFloor(course, new Position(robot.getPosition().x() - 1, robot.getPosition().y()));
+                };
+                if (f2.getFloortype() == Floortype.ABYSS || f2.getFloortype() == Floortype.TRAPDOOR) {
+                    bridgeProjector.setAmmunition(bridgeProjector.getAmmunition() - 1);
+                    f2.setFloortype(Floortype.OPEN_FLOOR);
                 }
             }
         }
@@ -1013,11 +988,9 @@ public class Game {
     private void reactivateRammingArmor(int phase, CourseElement ce) {
         if (ce instanceof Robot robot) {
             Player player = getPlayerOf(ce);
-            if (robot.isReactivateRammingArmor()) {
-                if (player.getRobot().getModule(ModuleType.RAMMING_ARMOR) != null) {
-                    robot.setReactivateRammingArmor(false);
-                    player.getRobot().getModule(ModuleType.RAMMING_ARMOR).getActiveInPhase()[phase] = true;
-                }
+            if (robot.isReactivateRammingArmor() && player.getRobot().getModule(ModuleType.RAMMING_ARMOR) != null) {
+                robot.setReactivateRammingArmor(false);
+                player.getRobot().getModule(ModuleType.RAMMING_ARMOR).getActiveInPhase()[phase] = true;
             }
         }
     }
@@ -1581,10 +1554,6 @@ public class Game {
             case 0 -> initialDamage;
             case 1 -> initialDamage / 2;
             case 2 -> initialDamage / 4;
-            case 3 -> initialDamage / 8;
-            case 4 -> initialDamage / 16;
-            case 5 -> initialDamage / 32;
-            case 6 -> initialDamage / 64;
             default -> 0;
         };
     }
