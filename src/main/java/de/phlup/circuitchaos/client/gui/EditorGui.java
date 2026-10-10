@@ -8,6 +8,7 @@ import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.enums.WallType;
+import de.phlup.circuitchaos.common.model.Checkpoint;
 import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.CourseObject;
 import de.phlup.circuitchaos.common.model.CourseProperties;
@@ -50,13 +51,13 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LOGO_SMALL;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_NO_ACTION;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PICTURE;
 import static de.phlup.circuitchaos.common.enums.Direction.EAST;
 import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
 import static de.phlup.circuitchaos.common.enums.Direction.SOUTH;
@@ -100,6 +101,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
     private final JComboBox<String>    objectBox          = new JComboBox<>();
     private final JTextField           portalTargetX      = new JTextField(4);
     private final JTextField           portalTargetY      = new JTextField(4);
+    private final JButton              checkpointButton   = new JButton("Add");
 
     private boolean updatingFields = true;
 
@@ -134,7 +136,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         addMenuBar(mainFrame);
         configureMainFrame("Circuit Chaos - Course Editor");
         openEditorFrame();
-        adjustSelectorValuesToSelectedFloor();
+        adjustSelectionToFloor();
     }
 
     private void initCourse() {
@@ -373,10 +375,37 @@ public class EditorGui extends BaseGui implements GuiHelper {
         addComponentToPanel(objectLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
         addComponentToPanel(flowPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
 
-        // TODO add checkpoint
+        checkpointButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Checkpoint checkpoint = CourseHandler.getCheckpoint(course, selectedFloor.getPosition());
+                if (checkpoint != null) {
+                    course.getCheckpoints().remove(checkpoint);
+                    adjustCheckpointNumbers();
+                    checkpointButton.setText("Add");
+                } else {
+                    Floortype floortype = selectedFloor.getFloortype();
+                    if (floortype != ABYSS) {
+                        course.getCheckpoints().add(new Checkpoint(selectedFloor.getPosition(), Integer.MAX_VALUE));
+                        adjustCheckpointNumbers();
+                        checkpointButton.setText("Remove");
+                    }
+                }
+                redrawAll();
+            }
 
-        addComponentToPanel(new JLabel(" "), courseEditorPanel, layout, 0, y++, 2, GridBagConstraints.WEST);
-        addComponentToPanel(new JLabel(imageSupplier.getImageIconPlain(GFX_PICTURE)), courseEditorPanel, layout, 0, y, 2, GridBagConstraints.CENTER);
+            public void adjustCheckpointNumbers() {
+                if (!course.getCheckpoints().isEmpty()) {
+                    int              number      = 0;
+                    List<Checkpoint> orderedList = course.getCheckpoints().stream().sorted(Comparator.comparingInt(Checkpoint::getNumber)).toList();
+                    for (Checkpoint cp : orderedList) {
+                        cp.setNumber(number++);
+                    }
+                }
+            }
+        });
+        addComponentToPanel(new JLabel("Start / Checkpoint / Finish: "), courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
+        addComponentToPanel(checkpointButton, courseEditorPanel, layout, 1, y, 1, GridBagConstraints.WEST);
         updatingFields = false;
         return courseEditorPanel;
     }
@@ -424,7 +453,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
             Course loadedCourse = courseLoader.loadCourse(path);
             if (loadedCourse != null) {
                 selectedFloor = loadedCourse.getFloor().getFirst();
-                adjustSelectorValuesToSelectedFloor();
+                adjustSelectionToFloor();
                 refreshCourse(loadedCourse, null, Step.SETUP, null, null, 1, null);
             }
         }
@@ -446,7 +475,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         }
     }
 
-    public void adjustSelectorValuesToSelectedFloor() {
+    public void adjustSelectionToFloor() {
         updatingFields = true;
         Floortype newFloortype = selectedFloor.getFloortype();
         floortypeBox.setSelectedItem(newFloortype);
@@ -548,7 +577,9 @@ public class EditorGui extends BaseGui implements GuiHelper {
         objectLabel.setEnabled(newFloortype == OPEN_FLOOR);
         objectBox.setEnabled(newFloortype == OPEN_FLOOR);
 
-        // TODO add Checkpoints
+        boolean checkpointExists = course.getCheckpoints().stream().anyMatch(cp -> selectedFloor.getPosition().equals(cp.getPosition()));
+        checkpointButton.setText(checkpointExists ? "Remove" : "Add");
+        checkpointButton.setEnabled(newFloortype != ABYSS);
         updatingFields = false;
     }
 
@@ -802,7 +833,6 @@ public class EditorGui extends BaseGui implements GuiHelper {
             objectLabel.setEnabled(newFloortype == OPEN_FLOOR);
             objectBox.setEnabled(newFloortype == OPEN_FLOOR);
 
-            // TODO add Checkpoints
             course.setRange(course.getRange().wideRangeToPosition(selectedPosition));
             fillMissingCourseElementsWithAbyss();
             determineCourseProperties();
