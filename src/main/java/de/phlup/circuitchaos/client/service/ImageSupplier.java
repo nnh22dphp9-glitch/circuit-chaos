@@ -228,14 +228,10 @@ public class ImageSupplier {
         try {
             drawBasicFloor(floor, gui, step, phase, subPhase, course, gr, animationSteps);
             drawCheckpoint(position, course, gr, nextCP);
-            drawFlatObjects(position, subPhase, course, gr, animationSteps);
+            drawObjects(position, subPhase, course, gr, animationSteps);
             if (subPhase != null) {
-                drawFlatObjectsMoving(position, subPhase, course, gr, animationSteps);
+                drawObjectsMoving(position, subPhase, course, gr, animationSteps);
                 drawBeams(floor, step, subPhase, image, animationSteps);
-            }
-            drawNonFlatObjects(position, subPhase, course, gr, animationSteps);
-            if (subPhase != null && subPhase < animationSteps) {
-                drawNonFlatObjectsMoving(position, subPhase, course, gr, animationSteps);
             }
             drawRobots(position, subPhase, course, gr, animationSteps);
             if (subPhase != null) {
@@ -283,22 +279,6 @@ public class ImageSupplier {
         }
     }
 
-    private void drawNonFlatObjectsMoving(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
-        for (CourseObject co : CourseHandler.getLeavingObjects(course, position)) {
-            if (!co.getType().isFlat()) {
-                drawCircuitChaosObject(co, gr, subPhase, true, animationSteps);
-            }
-        }
-    }
-
-    private void drawNonFlatObjects(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
-        for (CourseObject co : CourseHandler.getObjects(course, position)) {
-            if (!co.getType().isFlat()) {
-                drawCircuitChaosObject(co, gr, subPhase, false, animationSteps);
-            }
-        }
-    }
-
     private void drawBeams(Floor floor, Step step, Integer subPhase, BufferedImage image, int animationSteps) {
         if (subPhase < animationSteps) {
             if (step == Step.ROBOT_MOUNTED_LASER_FIRE
@@ -319,19 +299,15 @@ public class ImageSupplier {
         }
     }
 
-    private void drawFlatObjectsMoving(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+    private void drawObjectsMoving(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
         for (CourseObject co : CourseHandler.getLeavingObjects(course, position)) {
-            if (co.getType().isFlat()) {
-                drawCircuitChaosObject(co, gr, subPhase, true, animationSteps);
-            }
+            drawCircuitChaosObject(co, gr, subPhase, true, animationSteps);
         }
     }
 
-    private void drawFlatObjects(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+    private void drawObjects(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
         for (CourseObject co : CourseHandler.getObjects(course, position)) {
-            if (co.getType().isFlat()) {
-                drawCircuitChaosObject(co, gr, subPhase, false, animationSteps);
-            }
+            drawCircuitChaosObject(co, gr, subPhase, false, animationSteps);
         }
     }
 

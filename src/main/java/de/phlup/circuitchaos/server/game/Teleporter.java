@@ -44,8 +44,7 @@ public class Teleporter {
                             CourseHandler.getFloor(game.getCourse(), new Position(ce.getPosition().x() - movement, ce.getPosition().y()));
                 };
                 boolean willTeleport = ce instanceof Robot r && r.isVirtual();
-                if (willTeleport || !isTargetBlockedByObject(targetFloor, game)) {
-                    willTeleport = true;
+                if (willTeleport) {
                     for (Robot r : CourseHandler.getRobots(game.getCourse(), targetFloor.getPosition())) {
                         willTeleport = willTeleport && r.isVirtual();
                     }
@@ -58,15 +57,6 @@ public class Teleporter {
             }
         }
         return this;
-    }
-
-    private boolean isTargetBlockedByObject(Floor targetFloor, Game game) {
-        for (CourseObject rro2 : CourseHandler.getObjects(game.getCourse(), targetFloor.getPosition())) {
-            if (!rro2.getType().isFlat()) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

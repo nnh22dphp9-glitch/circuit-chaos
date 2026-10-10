@@ -1283,18 +1283,10 @@ public class Game {
             if (portal != null) {
                 if (portal.getTargetPosition() != null) {
                     boolean noConflict = true;
-                    for (CourseObject courseObject : CourseHandler.getObjects(course, portal.getTargetPosition())) {
-                        if (!courseObject.getType().isFlat() && !courseObject.isFlying()) {
+                    for (Robot courseRobot : CourseHandler.getRobots(course, portal.getTargetPosition())) {
+                        if (!courseRobot.isVirtual()) {
                             noConflict = false;
                             break;
-                        }
-                    }
-                    if (noConflict) {
-                        for (Robot courseRobot : CourseHandler.getRobots(course, portal.getTargetPosition())) {
-                            if (!courseRobot.isVirtual()) {
-                                noConflict = false;
-                                break;
-                            }
                         }
                     }
                     if (noConflict) {
@@ -1399,11 +1391,6 @@ public class Game {
             return null;
         }
         Position targetPosition = courseElement.getPosition().neighbour(direction);
-        for (CourseObject ce : CourseHandler.getObjects(course, targetPosition)) {
-            if (!ce.getType().isFlat() && !ce.equals(courseElement) && !ce.isFlying()) {
-                return ce;
-            }
-        }
         for (Robot ce : CourseHandler.getRobots(course, targetPosition)) {
             if (!ce.isVirtual() && !ce.equals(courseElement) && !ce.isFlying()) {
                 return ce;

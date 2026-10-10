@@ -11,7 +11,6 @@ import de.phlup.circuitchaos.common.model.CourseElementStub;
 import de.phlup.circuitchaos.common.model.CourseObject;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Position;
-import de.phlup.circuitchaos.common.model.Range;
 import de.phlup.circuitchaos.common.model.Robot;
 import de.phlup.circuitchaos.server.player.Player;
 import jakarta.validation.constraints.NotNull;
@@ -186,7 +185,6 @@ public class CourseHandler {
         CourseObject co = new CourseObject();
         co.setName(objectType.getName());
         co.setType(objectType);
-        co.setFlying(objectType.isFlying());
         co.setPosition(position);
         co.setLevel(getFloor(course, position).getLevel());
         co.setPrevPosition(position);
