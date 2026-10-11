@@ -63,7 +63,6 @@ import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
 import static de.phlup.circuitchaos.common.enums.Direction.SOUTH;
 import static de.phlup.circuitchaos.common.enums.Direction.WEST;
 import static de.phlup.circuitchaos.common.enums.Floortype.ABYSS;
-import static de.phlup.circuitchaos.common.enums.Floortype.OPEN_FLOOR;
 import static de.phlup.circuitchaos.common.enums.Floortype.TRAPDOOR;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
 
@@ -574,8 +573,8 @@ public class EditorGui extends BaseGui implements GuiHelper {
                 portalTargetY.setEnabled(false);
             }
         }
-        objectLabel.setEnabled(newFloortype == OPEN_FLOOR);
-        objectBox.setEnabled(newFloortype == OPEN_FLOOR);
+        objectLabel.setEnabled(newFloortype != ABYSS);
+        objectBox.setEnabled(newFloortype != ABYSS);
 
         boolean checkpointExists = course.getCheckpoints().stream().anyMatch(cp -> selectedFloor.getPosition().equals(cp.getPosition()));
         checkpointButton.setText(checkpointExists ? "Remove" : "Add");
@@ -799,7 +798,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
             Position               selectedPosition     = selectedFloor.getPosition();
             Optional<CourseObject> courseObjectOptional = CourseHandler.getObjects(course, selectedPosition).stream().findFirst();
             String                 selectedItem         = (String) objectBox.getSelectedItem();
-            if (newFloortype != OPEN_FLOOR || selectedItem == null || "None".equals(selectedItem)) {
+            if (newFloortype == ABYSS || selectedItem == null || "None".equals(selectedItem)) {
                 courseObjectOptional.ifPresent(courseObject -> course.getObjects().remove(courseObject));
                 portalTargetX.setEnabled(false);
                 portalTargetY.setEnabled(false);
@@ -830,8 +829,8 @@ public class EditorGui extends BaseGui implements GuiHelper {
                     portalTargetY.setEnabled(false);
                 }
             }
-            objectLabel.setEnabled(newFloortype == OPEN_FLOOR);
-            objectBox.setEnabled(newFloortype == OPEN_FLOOR);
+            objectLabel.setEnabled(newFloortype != ABYSS);
+            objectBox.setEnabled(newFloortype != ABYSS);
 
             course.setRange(course.getRange().wideRangeToPosition(selectedPosition));
             fillMissingCourseElementsWithAbyss();
