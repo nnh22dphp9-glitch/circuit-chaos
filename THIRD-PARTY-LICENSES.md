@@ -9,35 +9,35 @@ are included because they are part of the runtime software stack.
 
 ## Runtime dependencies
 
-| Component | Version | License |
-|---|---:|---|
-| Spring Boot | 3.5.16 | Apache License 2.0 |
-| Spring Framework | 6.2.19 | Apache License 2.0 |
-| Micrometer Observation / Commons | 1.15.12 | Apache License 2.0 |
-| Jackson | 2.21.4 | Apache License 2.0 |
-| Jackson Annotations | 2.21 | Apache License 2.0 |
-| SnakeYAML | 2.4 | Apache License 2.0 |
-| Jakarta Annotation API | 2.1.1 | EPL 2.0 / GPL 2.0 with Classpath Exception |
-| Tomcat Embed | 10.1.55 | Apache License 2.0 |
-| Hibernate Validator | 8.0.3.Final | Apache License 2.0 |
-| Jakarta Validation API | 3.0.2 | Apache License 2.0 |
-| JBoss Logging | 3.6.3.Final | Apache License 2.0 |
-| Classmate | 1.7.3 | Apache License 2.0 |
-| Logback | 1.5.34 | EPL 1.0 / LGPL 2.1 |
-| Log4j | 2.24.3 | Apache License 2.0 |
-| SLF4J | 2.0.18 | MIT License |
+| Component                        |     Version | License                                    |
+|----------------------------------|------------:|--------------------------------------------|
+| Spring Boot                      |      3.5.16 | Apache License 2.0                         |
+| Spring Framework                 |      6.2.19 | Apache License 2.0                         |
+| Micrometer Observation / Commons |     1.15.12 | Apache License 2.0                         |
+| Jackson                          |      2.21.4 | Apache License 2.0                         |
+| Jackson Annotations              |        2.21 | Apache License 2.0                         |
+| SnakeYAML                        |         2.4 | Apache License 2.0                         |
+| Jakarta Annotation API           |       2.1.1 | EPL 2.0 / GPL 2.0 with Classpath Exception |
+| Tomcat Embed                     |     10.1.55 | Apache License 2.0                         |
+| Hibernate Validator              | 8.0.3.Final | Apache License 2.0                         |
+| Jakarta Validation API           |       3.0.2 | Apache License 2.0                         |
+| JBoss Logging                    | 3.6.3.Final | Apache License 2.0                         |
+| Classmate                        |       1.7.3 | Apache License 2.0                         |
+| Logback                          |      1.5.34 | EPL 1.0 / LGPL 2.1                         |
+| Log4j                            |      2.24.3 | Apache License 2.0                         |
+| SLF4J                            |      2.0.18 | MIT License                                |
 
 ## Build-time dependencies
 
 The following libraries are used while building Circuit Chaos and are not
 part of the application's runtime dependency set:
 
-| Component | Version | License |
-|---|---:|---|
-| Project Lombok | 1.18.46 | MIT License |
-| Spring Boot Gradle Plugin | 3.5.16 | Apache License 2.0 |
-| Spring Dependency Management Gradle Plugin | 1.1.7 | Apache License 2.0 |
-| Spring Boot Configuration Processor | 3.5.16 | Apache License 2.0 |
+| Component                                  | Version | License            |
+|--------------------------------------------|--------:|--------------------|
+| Project Lombok                             | 1.18.46 | MIT License        |
+| Spring Boot Gradle Plugin                  |  3.5.16 | Apache License 2.0 |
+| Spring Dependency Management Gradle Plugin |   1.1.7 | Apache License 2.0 |
+| Spring Boot Configuration Processor        |  3.5.16 | Apache License 2.0 |
 
 ## License texts and project pages
 

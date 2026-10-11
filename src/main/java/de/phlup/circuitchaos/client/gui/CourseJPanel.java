@@ -82,7 +82,7 @@ public class CourseJPanel extends JPanel {
         JPanel    contentPane  = (JPanel) getComponent(0);
         Dimension originalSize = contentPane.getPreferredSize();
         if (originalSize.width <= 0 || originalSize.height <= 0) {
-            throw new IllegalStateException("Course has no renderable content");
+            throw new IllegalStateException("Course has no content that can be rendered.");
         }
         contentPane.setSize(originalSize);
         contentPane.doLayout();
