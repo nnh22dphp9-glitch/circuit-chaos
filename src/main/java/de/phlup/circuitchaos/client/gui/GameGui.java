@@ -134,6 +134,7 @@ public class GameGui extends BaseGui {
     @Override
     public void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
         setAndClearIfEmpty(course);
+        log.debug("Received new course because '{}': {}", reasonForCourseChange, course);
         mainFrame.setTitle("Circuit Chaos Course - %s - %s - %s".formatted(gameAttributes.getRegistration().getGameName(),
                                                                            StringUtils.hasText(myRobotsName) ? myRobotsName : "Game has not been started yet",
                                                                            StringUtils.hasText(reasonForCourseChange) ? reasonForCourseChange : ""));

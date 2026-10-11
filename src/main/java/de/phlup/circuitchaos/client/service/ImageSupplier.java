@@ -497,6 +497,7 @@ public class ImageSupplier {
 
     private void drawExplosion(int damage, Graphics2D gr, Integer subPhase, int animationSteps, int variant) {
         if (damage > 0) {
+            log.debug("Drawing explosion({})", damage);
             Composite oldComposite = gr.getComposite();
             if (subPhase != null) {
                 gr.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, calculateAlpha(subPhase, 1.0f / animationSteps, animationSteps)));
