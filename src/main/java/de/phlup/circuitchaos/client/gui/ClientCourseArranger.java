@@ -168,8 +168,7 @@ public class ClientCourseArranger implements GuiHelper {
                         gameOptions.getComputerType().addLast(i + "-" + type);
                     }
                 }
-                gameOptions.setDefaultModules(clientSettings.getDefaultModules()); // TODO im Dialog konfigurierbar machen
-
+                gameOptions.setDefaultModules(clientSettings.getDefaultModules());
                 game.play(gameOptions);
             }
         });
