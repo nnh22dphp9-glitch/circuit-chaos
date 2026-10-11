@@ -33,6 +33,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -392,16 +393,6 @@ public class EditorGui extends BaseGui implements GuiHelper {
                 }
                 redrawAll();
             }
-
-            public void adjustCheckpointNumbers() {
-                if (!course.getCheckpoints().isEmpty()) {
-                    int              number      = 0;
-                    List<Checkpoint> orderedList = course.getCheckpoints().stream().sorted(Comparator.comparingInt(Checkpoint::getNumber)).toList();
-                    for (Checkpoint cp : orderedList) {
-                        cp.setNumber(number++);
-                    }
-                }
-            }
         });
         addComponentToPanel(new JLabel("Start / Checkpoint / Finish: "), courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
         addComponentToPanel(checkpointButton, courseEditorPanel, layout, 1, y, 1, GridBagConstraints.WEST);
@@ -463,14 +454,41 @@ public class EditorGui extends BaseGui implements GuiHelper {
         fileChooser.setCurrentDirectory(currentFileDirectory);
         fileChooser.setDialogTitle("Choose the file to save your course to");
         fileChooser.setFileFilter(new FileNameExtensionFilter("course files (*.json)", "json"));
-
-        if (fileChooser.showSaveDialog(mainFrame) == APPROVE_OPTION) {
-            Path path = fileChooser.getSelectedFile().toPath();
-            currentFileDirectory = path.toFile();
-            if (!path.toString().toLowerCase().endsWith(".json")) {
-                path = path.resolveSibling(path.getFileName() + ".json");
+        if (cleanupCourse()) {
+            if (fileChooser.showSaveDialog(mainFrame) == APPROVE_OPTION) {
+                Path path = fileChooser.getSelectedFile().toPath();
+                currentFileDirectory = path.toFile();
+                if (!path.toString().toLowerCase().endsWith(".json")) {
+                    path = path.resolveSibling(path.getFileName() + ".json");
+                }
+                courseLoader.saveCourse(course, path); // TODO auch die preview speichern
             }
-            courseLoader.saveCourse(course, path); // TODO auch die preview speichern
+        }
+    }
+
+    private boolean cleanupCourse() {
+        course.getFloor().removeIf(f -> f.getFloortype() == ABYSS);
+        if (course.getFloor().isEmpty()) {
+            JOptionPane.showMessageDialog(mainFrame, "No floor available. Course won't be saved.");
+            return false;
+        } else {
+            Position firstFloor = course.getFloor().getFirst().getPosition();
+            Range range =  new Range(firstFloor.x(), firstFloor.y(), firstFloor.x(), firstFloor.y());
+            for (Floor f : course.getFloor()) {
+                range = new Range(Math.min(range.minX(), f.getPosition().x()),
+                                  Math.min(range.minY(), f.getPosition().y()),
+                                  Math.max(range.maxX(), f.getPosition().x()),
+                                  Math.max(range.maxY(), f.getPosition().y()));
+            }
+            Range rangeToCheck = range;
+            course.getObjects().removeIf(co -> !co.getPosition().inRange(rangeToCheck));
+            course.getCheckpoints().removeIf(cp -> !cp.getPosition().inRange(rangeToCheck));
+            course.setRange(range.wide());
+            adjustCheckpointNumbers();
+            fillMissingCourseElementsWithAbyss();
+            determineCourseProperties();
+            redrawAll();
+            return true;
         }
     }
 
@@ -1069,6 +1087,16 @@ public class EditorGui extends BaseGui implements GuiHelper {
             }
             if (floor.getTractorBeam()[0] || floor.getTractorBeam()[1] || floor.getTractorBeam()[2] || floor.getTractorBeam()[3]) {
                 courseProperties.setTractorBeams(true);
+            }
+        }
+    }
+
+    private void adjustCheckpointNumbers() {
+        if (!course.getCheckpoints().isEmpty()) {
+            int              number      = 0;
+            List<Checkpoint> orderedList = course.getCheckpoints().stream().sorted(Comparator.comparingInt(Checkpoint::getNumber)).toList();
+            for (Checkpoint cp : orderedList) {
+                cp.setNumber(number++);
             }
         }
     }

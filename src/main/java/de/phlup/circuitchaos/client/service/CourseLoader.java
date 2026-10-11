@@ -96,7 +96,11 @@ public class CourseLoader {
         try (OutputStream outputStream = Files.newOutputStream(path)) {
             objectMapper.writerWithDefaultPrettyPrinter()
                         .writeValue(outputStream, course);
-            JOptionPane.showMessageDialog(null, "Successfully saved the course.");
+            if (course.getCheckpoints().size() < 2) {
+                JOptionPane.showMessageDialog(null, "Successfully saved the course,\nbut it contains to finishing point, so it cannot be played.");
+            } else {
+                JOptionPane.showMessageDialog(null, "Successfully saved the course.");
+            }
         } catch (IOException e) {
             log.warn("Could not save course {}", path, e);
             JOptionPane.showMessageDialog(null, "Could not save course to "

@@ -196,7 +196,6 @@ public class CourseHandler {
         CourseObject glue = new CourseObject();
         glue.setName(ObjectType.GLUE.getName());
         glue.setType(ObjectType.GLUE);
-        glue.setFlying(false);
         glue.setPosition(position);
         glue.setLevel(getFloor(course, position).getLevel());
         glue.setPrevPosition(position);
@@ -212,7 +211,6 @@ public class CourseHandler {
         CourseObject oil = new CourseObject();
         oil.setName(ObjectType.OIL.getName());
         oil.setType(ObjectType.OIL);
-        oil.setFlying(false);
         oil.setPosition(position);
         oil.setLevel(getFloor(course, position).getLevel());
         oil.setPrevPosition(position);

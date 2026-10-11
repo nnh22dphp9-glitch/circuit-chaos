@@ -1,7 +1,6 @@
 package de.phlup.circuitchaos.client.gui;
 
 import de.phlup.circuitchaos.client.service.ImageSupplier;
-import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.model.Floor;
 import org.springframework.validation.annotation.Validated;
@@ -58,9 +57,6 @@ public class CourseJPanel extends JPanel {
         label.setToolTipText(ToolTipTexts.getToolTipText(gui.getCourse(), floor));
         label.setOpaque(false);
         label.getInsets().set(0, 0, 0, 0);
-        if (gui.getState() != CourseState.GAME_RUNNING && gui instanceof GameGui gameGui) { // TODO remove me
-            label.addMouseListener(new CheckpointSettingMouseAdapter(gameGui, floor));
-        }
         if (gui instanceof EditorGui editorGui) {
             label.addMouseListener(new SettingFloorMouseAdapter(editorGui, floor));
         }
