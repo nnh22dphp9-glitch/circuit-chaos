@@ -1554,6 +1554,10 @@ public class Game {
             case 0 -> initialDamage;
             case 1 -> initialDamage / 2;
             case 2 -> initialDamage / 4;
+            case 3 -> initialDamage / 8;
+            case 4 -> initialDamage / 16;
+            case 5 -> initialDamage / 32;
+            case 6 -> initialDamage / 64;
             default -> 0;
         };
     }
