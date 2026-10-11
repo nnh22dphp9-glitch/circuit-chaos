@@ -1,6 +1,7 @@
 package de.phlup.circuitchaos.client.gui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.phlup.circuitchaos.client.service.CourseLoader;
 import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.enums.ComputerType;
 import de.phlup.circuitchaos.common.enums.CourseState;
@@ -60,9 +61,10 @@ public class ClientCourseArranger implements GuiHelper {
     private JLabel coursePreview = new JLabel();
 
 
-    public ClientCourseArranger(GameGui game, GameSettings gameSettings, Collection<CourseInfo> courses, ObjectMapper objectMapper, ClientSettings clientSettings) {
+    public ClientCourseArranger(GameGui game, GameSettings gameSettings, CourseLoader courseLoader, ObjectMapper objectMapper, ClientSettings clientSettings) {
         imageSupplier = game.getImageSupplier();
-        courseInfos = courses;
+        courseInfos = courseLoader.loadCourses(imageSupplier.getImageIconPlain(PictureConstants.GFX_PICTURE).getImage());
+        ;
         this.objectMapper = objectMapper;
         this.clientSettings = clientSettings;
 

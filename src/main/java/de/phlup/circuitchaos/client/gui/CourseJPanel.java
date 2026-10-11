@@ -103,11 +103,11 @@ public class CourseJPanel extends JPanel {
         try {
             g.setColor(Color.BLACK);
             g.fillRect(0, 0, size, size);
-            double scale = Math.min((double) size / original.getWidth(), (double) size / original.getHeight());
-            int width = (int) Math.round(original.getWidth() * scale);
-            int height = (int) Math.round(original.getHeight() * scale);
-            int x = (size - width) / 2;
-            int y = (size - height) / 2;
+            double scale  = Math.min((double) size / original.getWidth(), (double) size / original.getHeight());
+            int    width  = (int) Math.round(original.getWidth() * scale);
+            int    height = (int) Math.round(original.getHeight() * scale);
+            int    x      = (size - width) / 2;
+            int    y      = (size - height) / 2;
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             g.drawImage(original, x, y, width, height, null);

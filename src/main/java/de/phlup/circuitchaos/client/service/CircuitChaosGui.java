@@ -8,7 +8,6 @@ import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.client.gui.GuiHelper;
 import de.phlup.circuitchaos.client.gui.PictureConstants;
 import de.phlup.circuitchaos.common.CircuitChaosException;
-import de.phlup.circuitchaos.common.model.CourseInfo;
 import de.phlup.circuitchaos.common.model.GameAttributes;
 import de.phlup.circuitchaos.common.model.GameItem;
 import de.phlup.circuitchaos.common.model.Registration;
@@ -67,19 +66,17 @@ public class CircuitChaosGui implements GuiHelper {
     private final ObjectMapper             objectMapper;
 
 
-    private ImageSupplier          imageSupplier;
-    private JTextArea              serverAddressInput;
-    private JComboBox<GameItem>    gameChooser;
-    private JButton                watchButton;
-    private JButton                playButton;
-    private Collection<CourseInfo> courses;
+    private ImageSupplier       imageSupplier;
+    private JTextArea           serverAddressInput;
+    private JComboBox<GameItem> gameChooser;
+    private JButton             watchButton;
+    private JButton             playButton;
 
     @SuppressWarnings("unused")
     @EventListener(ApplicationReadyEvent.class)
     public void initClientGUI() {
         ClientSettings.Theme theme = determineTheme();
         this.imageSupplier = new ImageSupplier(theme, resourceLoader);
-        courses = courseLoader.loadCourses(imageSupplier.getImageIconPlain(PictureConstants.GFX_PICTURE).getImage());
         JFrame frame = new JFrame("Circuit Chaos - " + clientSettings.getOwnUrl());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(getStartPanel());
@@ -216,7 +213,7 @@ public class CircuitChaosGui implements GuiHelper {
 
             GameGui gui = new GameGui(resourceLoader, audioSupplier, clientToServerConnection, gameAttributes, clientSettings);
             gameAttributes.setGameGui(gui);
-            gui.setCourseArranger(new ClientCourseArranger(gui, gameSettings, courses, objectMapper, clientSettings));
+            gui.setCourseArranger(new ClientCourseArranger(gui, gameSettings, courseLoader, objectMapper, clientSettings));
         } catch (Exception exc) {
             log.error("Exception occurred - shutting game down", exc);
             if (gameAttributes != null) {
