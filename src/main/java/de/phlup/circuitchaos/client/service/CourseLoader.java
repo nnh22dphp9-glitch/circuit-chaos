@@ -108,6 +108,16 @@ public class CourseLoader {
         }
     }
 
+    public void savePreview(BufferedImage preview, Path path) {
+        try {
+            String jsonName = path.getFileName().toString();
+            String pngName  = jsonName.substring(0, jsonName.length() - 5) + ".png";
+            ImageIO.write(preview, "png", path.resolveSibling(pngName).toFile());
+        } catch (IOException ioe) {
+            log.debug("IOException while saving preview", ioe);
+        }
+    }
+
     private Image findPreview(Resource jsonResource) {
         try {
             String filename = jsonResource.getFilename();

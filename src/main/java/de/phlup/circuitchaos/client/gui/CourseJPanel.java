@@ -8,9 +8,13 @@ import org.springframework.validation.annotation.Validated;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 
 @Validated
 public class CourseJPanel extends JPanel {
@@ -69,6 +73,48 @@ public class CourseJPanel extends JPanel {
                                       1, 1, 0, 0,
                                       GridBagConstraints.CENTER, GridBagConstraints.NONE,
                                       new Insets(0, 0, 0, 0), 0, 0);
+    }
+
+    public BufferedImage createPreview(int size) {
+        if (getComponentCount() == 0) {
+            throw new IllegalStateException("CourseJPanel has no content");
+        }
+        JPanel    contentPane  = (JPanel) getComponent(0);
+        Dimension originalSize = contentPane.getPreferredSize();
+        if (originalSize.width <= 0 || originalSize.height <= 0) {
+            throw new IllegalStateException("Course has no renderable content");
+        }
+        contentPane.setSize(originalSize);
+        contentPane.doLayout();
+        BufferedImage original = new BufferedImage(
+                originalSize.width,
+                originalSize.height,
+                BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = original.createGraphics();
+        try {
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, originalSize.width, originalSize.height);
+            contentPane.printAll(g);
+        } finally {
+            g.dispose();
+        }
+        BufferedImage preview = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+        g = preview.createGraphics();
+        try {
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, size, size);
+            double scale = Math.min((double) size / original.getWidth(), (double) size / original.getHeight());
+            int width = (int) Math.round(original.getWidth() * scale);
+            int height = (int) Math.round(original.getHeight() * scale);
+            int x = (size - width) / 2;
+            int y = (size - height) / 2;
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g.drawImage(original, x, y, width, height, null);
+        } finally {
+            g.dispose();
+        }
+        return preview;
     }
 
 }

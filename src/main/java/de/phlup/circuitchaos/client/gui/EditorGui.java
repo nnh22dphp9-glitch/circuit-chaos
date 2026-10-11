@@ -70,8 +70,9 @@ import static javax.swing.JFileChooser.APPROVE_OPTION;
 @Slf4j
 public class EditorGui extends BaseGui implements GuiHelper {
 
-    private final CourseLoader courseLoader;
-    private final JFrame       editorFrame;
+    public static final int          PREVIEW_SIZE = 150;
+    private final       CourseLoader courseLoader;
+    private final       JFrame       editorFrame;
 
     private File currentFileDirectory;
 
@@ -461,10 +462,12 @@ public class EditorGui extends BaseGui implements GuiHelper {
                 if (!path.toString().toLowerCase().endsWith(".json")) {
                     path = path.resolveSibling(path.getFileName() + ".json");
                 }
-                courseLoader.saveCourse(course, path); // TODO auch die preview speichern
+                courseLoader.saveCourse(course, path);
+                courseLoader.savePreview(courseJPanel.createPreview(PREVIEW_SIZE), path);
             }
         }
     }
+
 
     private boolean cleanupCourse() {
         course.getFloor().removeIf(f -> f.getFloortype() == ABYSS);
@@ -473,7 +476,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
             return false;
         } else {
             Position firstFloor = course.getFloor().getFirst().getPosition();
-            Range range =  new Range(firstFloor.x(), firstFloor.y(), firstFloor.x(), firstFloor.y());
+            Range    range      = new Range(firstFloor.x(), firstFloor.y(), firstFloor.x(), firstFloor.y());
             for (Floor f : course.getFloor()) {
                 range = new Range(Math.min(range.minX(), f.getPosition().x()),
                                   Math.min(range.minY(), f.getPosition().y()),
@@ -1073,8 +1076,8 @@ public class EditorGui extends BaseGui implements GuiHelper {
             switch (floor.getFloortype()) {
                 case GEARS_CCW, GEARS_CW -> courseProperties.setGears(true);
                 case TRAPDOOR -> courseProperties.setTrapdoor(true);
-                case CONVEYOR_BELT, TURNING_CONVEYOR_BELT_CCW, TURNING_CONVEYOR_BELT_CW_CCW, TURNING_EXPRESS_CONVEYOR_BELT_CW
-                        -> courseProperties.setConveyorBelts(true);
+                case CONVEYOR_BELT, TURNING_CONVEYOR_BELT_CCW, TURNING_CONVEYOR_BELT_CW_CCW,
+                     TURNING_EXPRESS_CONVEYOR_BELT_CW -> courseProperties.setConveyorBelts(true);
                 case EXPRESS_CONVEYOR_BELT, TURNING_EXPRESS_CONVEYOR_BELT_CCW, TURNING_CONVEYOR_BELT_CW,
                      TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW -> {
                     courseProperties.setConveyorBelts(true);

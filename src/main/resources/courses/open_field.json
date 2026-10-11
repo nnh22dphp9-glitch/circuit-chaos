@@ -253,7 +253,19 @@
   ],
   "objects": [],
   "robots": [],
-  "checkpoints": [],
+  "checkpoints": [ {
+    "position" : {
+      "x" : 0,
+      "y" : 1
+    },
+    "number" : 0
+  }, {
+    "position" : {
+      "x" : 0,
+      "y" : 0
+    },
+    "number" : 1
+  }],
   "objectsFallingIntoABYSS": [],
   "robotsFallingIntoABYSS": [],
   "range": {
