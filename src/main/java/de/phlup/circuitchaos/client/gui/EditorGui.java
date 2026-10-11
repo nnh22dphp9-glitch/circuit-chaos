@@ -1073,8 +1073,10 @@ public class EditorGui extends BaseGui implements GuiHelper {
             switch (floor.getFloortype()) {
                 case GEARS_CCW, GEARS_CW -> courseProperties.setGears(true);
                 case TRAPDOOR -> courseProperties.setTrapdoor(true);
-                case CONVEYOR_BELT -> courseProperties.setConveyorBelts(true);
-                case EXPRESS_CONVEYOR_BELT -> {
+                case CONVEYOR_BELT, TURNING_CONVEYOR_BELT_CCW, TURNING_CONVEYOR_BELT_CW_CCW, TURNING_EXPRESS_CONVEYOR_BELT_CW
+                        -> courseProperties.setConveyorBelts(true);
+                case EXPRESS_CONVEYOR_BELT, TURNING_EXPRESS_CONVEYOR_BELT_CCW, TURNING_CONVEYOR_BELT_CW,
+                     TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW -> {
                     courseProperties.setConveyorBelts(true);
                     courseProperties.setExpressConveyorBelts(true);
                 }

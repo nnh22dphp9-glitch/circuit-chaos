@@ -231,6 +231,7 @@ public class CourseHandler {
         currentCourse.getObjects().addAll(newCourse.getObjects());
         currentCourse.getObjects().forEach(ce -> ce.setOnCourse(true));
         currentCourse.setRange(newCourse.getRange());
+        currentCourse.setProperties(newCourse.getProperties());
     }
 
     public static List<CourseElementStub> createCourseElementStubList(Course course) {
