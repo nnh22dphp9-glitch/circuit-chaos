@@ -83,12 +83,12 @@ public abstract class Player {
                 }
             }
             if (takesDamage) {
-                takeNormalDamage(game.getCourse());
+                takeDamage(game.getCourse());
             }
         }
     }
 
-    public void takeNormalDamage(Course course) {
+    public void takeDamage(Course course) {
         if (robot.isOnCourse()) {
             robot.setDamage(robot.getDamage() + 1);
             if (robot.getDamage() - countBlockedRegisters() > 4) {

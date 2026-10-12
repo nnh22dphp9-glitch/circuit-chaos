@@ -170,6 +170,10 @@ public class Game {
         elementStubs = stubList;
     }
 
+    private void resetStubs() {
+        elementStubs = CourseHandler.createCourseElementStubList(course);
+    }
+
     private void randomlySetFloorOrientationForDisplay() {
         for (Floor floor : course.getFloor()) {
             if (floor.isWater() && !floor.getFloortype().isConveyorBelt()) {
@@ -1457,7 +1461,7 @@ public class Game {
         Player player = getPlayerOf(ce);
         if (player != null) {
             player.getRobot().setDamage(10);
-            player.takeNormalDamage(course);
+            player.takeDamage(course);
         } else {
             CourseHandler.remove(course, ce);
             notifyCourseMayHaveChanged(reason, phase, "%s died".formatted(ce.getName()), null);
@@ -1490,9 +1494,10 @@ public class Game {
 
     private void goOff(Step step, Integer phase, CourseObject courseObject) {
         if (courseObject.getType() == ObjectType.MINE || courseObject.getType() == ObjectType.PROXIMITY_MINE) {
+            CourseHandler.remove(course, courseObject);
             explode(step, phase, courseObject.getPosition(), MINE_INITIAL_DAMAGE);
+            resetStubs();
         }
-        die(courseObject, step, phase);
     }
 
     private int getPriority(Robot robot, int phase) {
@@ -1517,11 +1522,10 @@ public class Game {
                 Floor f      = CourseHandler.getFloor(course, obj.getPosition());
                 int   damage = calculateEffectiveDamage(initialDamage, f.getDistanceCounter());
                 for (int damagePoints = 0; damagePoints < damage; damagePoints++) {
-                    this.getPlayerOf(obj).takeNormalDamage(course);
+                    this.getPlayerOf(obj).takeDamage(course);
                 }
             }
             notifyCourseMayHaveChanged(step, phase, "explosion", null);
-            Sleep.sleepForMillis(timeSettings.getTimeToShowExplosions());
             for (Floor marker : markers) {
                 marker.setExplosiveDamage(0);
             }
