@@ -119,8 +119,11 @@ import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
 import static de.phlup.circuitchaos.common.enums.ModuleType.PRESSURE_BEAM;
 import static de.phlup.circuitchaos.common.enums.ModuleType.TRACTOR_BEAM;
 import static de.phlup.circuitchaos.common.enums.Step.CONVEYOR_BELTS_MOVE;
+import static de.phlup.circuitchaos.common.enums.Step.COURSE_MOUNTED_LASER_FIRE;
 import static de.phlup.circuitchaos.common.enums.Step.EXPRESS_CONVEYOR_BELTS_MOVE;
 import static de.phlup.circuitchaos.common.enums.Step.GEARS_ROTATE;
+import static de.phlup.circuitchaos.common.enums.Step.OPEN_TRAPDOORS;
+import static de.phlup.circuitchaos.common.enums.Step.ROBOT_MOUNTED_LASER_FIRE;
 import static de.phlup.circuitchaos.server.GlobalServerAttributes.RANDOM;
 
 @Slf4j
@@ -233,13 +236,12 @@ public class ImageSupplier {
                 drawObjectsMoving(position, subPhase, course, gr, animationSteps);
                 drawBeams(floor, step, subPhase, image, animationSteps);
             }
-            drawRobots(position, subPhase, course, gr, animationSteps);
+            drawRobots(floor, subPhase, course, gr, animationSteps, step, phase);
             if (subPhase != null) {
                 drawFallingRobotsAndObjects(position, subPhase, course, gr, animationSteps);
             }
             if (subPhase == null || subPhase < animationSteps) {
-                drawRobotsMovingAndActiveRobot(position, activeRobot, step, subPhase, course, gr, animationSteps);
-                // TODO auch explosion malen, wenn ein Robotor getroffen wird oder stirbt
+                drawRobotsMovingAndActiveRobot(floor, activeRobot, step, subPhase, course, gr, animationSteps, phase);
                 drawExplosion(damage, gr, subPhase, animationSteps, floor.getVariant());
             }
             if (gui instanceof EditorGui editorGui && editorGui.getSelectedFloor() != null
@@ -251,12 +253,12 @@ public class ImageSupplier {
         }
     }
 
-    private void drawRobotsMovingAndActiveRobot(Position position, Robot activeRobot, Step step, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
-        for (Robot r : CourseHandler.getLeavingRobots(course, position)) {
-            drawRobot(r, gr, subPhase, true, animationSteps);
+    private void drawRobotsMovingAndActiveRobot(Floor floor, Robot activeRobot, Step step, Integer subPhase, Course course, Graphics2D gr, int animationSteps, Integer phase) {
+        for (Robot r : CourseHandler.getLeavingRobots(course, floor.getPosition())) {
+            drawRobot(r, gr, subPhase, true, animationSteps, floor, step, phase);
         }
         if (activeRobot != null && step == Step.SETUP) {
-            drawRobot(activeRobot, gr, subPhase, false, animationSteps);
+            drawRobot(activeRobot, gr, subPhase, false, animationSteps, floor, step, phase);
         }
     }
 
@@ -269,9 +271,9 @@ public class ImageSupplier {
         }
     }
 
-    private void drawRobots(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
-        for (Robot r : CourseHandler.getRobots(course, position)) {
-            drawRobot(r, gr, subPhase, false, animationSteps);
+    private void drawRobots(Floor floor, Integer subPhase, Course course, Graphics2D gr, int animationSteps, Step step, Integer phase) {
+        for (Robot r : CourseHandler.getRobots(course, floor.getPosition())) {
+            drawRobot(r, gr, subPhase, false, animationSteps, floor, step, phase);
         }
     }
 
@@ -320,9 +322,15 @@ public class ImageSupplier {
         }
     }
 
-    private void drawRobot(Robot robot, Graphics2D gr, Integer subPhase, boolean leaving, int animationSteps) {
+    private void drawRobot(Robot robot, Graphics2D gr, Integer subPhase, boolean leaving, int animationSteps, Floor floor, Step step, Integer phase) {
         String picture = getRobotImagePathAndName(robot);
         drawCourseElement(robot, gr, subPhase, leaving, picture, animationSteps);
+        if (robot.isOnCourse() && !leaving
+                && ((!robot.isVirtual() && step == ROBOT_MOUNTED_LASER_FIRE && (floor.isBeamsNS() || floor.isBeamsWE()))
+                || (step == COURSE_MOUNTED_LASER_FIRE && (floor.getCourseMountedLaserBeamsNS() > 0 || floor.getCourseMountedLaserBeamsWE() > 0)))
+                || (step == OPEN_TRAPDOORS && floor.getFloortype() == Floortype.TRAPDOOR && phase != null && floor.getActiveInPhase()[phase])) {
+            drawExplosion(1, gr, subPhase, animationSteps, floor.getVariant());
+        }
     }
 
     private void drawFalling(CourseElement ce, Graphics2D gr, int subPhase, boolean leaving, int animationSteps) {

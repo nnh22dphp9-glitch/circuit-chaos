@@ -170,7 +170,7 @@ public class Game {
         elementStubs = stubList;
     }
 
-    private void resetStubs() {
+    private void synchronizeElementStubs() {
         elementStubs = CourseHandler.createCourseElementStubList(course);
     }
 
@@ -1496,7 +1496,7 @@ public class Game {
         if (courseObject.getType() == ObjectType.MINE || courseObject.getType() == ObjectType.PROXIMITY_MINE) {
             CourseHandler.remove(course, courseObject);
             explode(step, phase, courseObject.getPosition(), MINE_INITIAL_DAMAGE);
-            resetStubs();
+            synchronizeElementStubs();
         }
     }
 

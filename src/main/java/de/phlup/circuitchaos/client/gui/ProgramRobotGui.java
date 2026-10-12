@@ -380,7 +380,6 @@ public class ProgramRobotGui implements GuiHelper {
                 } else {
                     innerPanel.add(new JLabel(" "), BorderLayout.CENTER);
                 }
-                innerPanel.add(new JLabel(" - BLOCKED - "), BorderLayout.SOUTH);
                 programIds[cnt].setText("BLOCKED");
                 programmePanel[cnt].add(innerPanel);
             } else {
