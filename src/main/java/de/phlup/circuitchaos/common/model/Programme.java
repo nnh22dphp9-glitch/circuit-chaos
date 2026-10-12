@@ -4,15 +4,14 @@ import de.phlup.circuitchaos.common.enums.ProgramType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+
+import static de.phlup.circuitchaos.server.GlobalServerAttributes.RANDOM;
 
 @Data
 @NoArgsConstructor
 public class Programme {
-
-    private static final SecureRandom RANDOM = new SecureRandom();
 
     private int         priority;
     private ProgramType type;

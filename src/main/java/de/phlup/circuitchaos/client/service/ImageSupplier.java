@@ -240,7 +240,7 @@ public class ImageSupplier {
             if (subPhase == null || subPhase < animationSteps) {
                 drawRobotsMovingAndActiveRobot(position, activeRobot, step, subPhase, course, gr, animationSteps);
                 // TODO auch explosion malen, wenn ein Robotor getroffen wird oder stirbt
-                drawExplosion(damage, gr, subPhase, animationSteps, getExplosionVariant(position, step));
+                drawExplosion(damage, gr, subPhase, animationSteps, floor.getVariant());
             }
             if (gui instanceof EditorGui editorGui && editorGui.getSelectedFloor() != null
                     && floor.getPosition().equals(editorGui.getSelectedFloor().getPosition())) {
@@ -249,10 +249,6 @@ public class ImageSupplier {
         } finally {
             gr.dispose();
         }
-    }
-
-    private int getExplosionVariant(Position position, Step step) {
-        return (position.x() + position.y() + step.ordinal()) % theme.getExplosionVariants();
     }
 
     private void drawRobotsMovingAndActiveRobot(Position position, Robot activeRobot, Step step, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
@@ -495,16 +491,21 @@ public class ImageSupplier {
         gr.setComposite(oldComposite);
     }
 
-    private void drawExplosion(int damage, Graphics2D gr, Integer subPhase, int animationSteps, int variant) {
-        if (damage > 0) {
-            log.debug("Drawing explosion({})", damage);
-            Composite oldComposite = gr.getComposite();
-            if (subPhase != null) {
-                gr.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, calculateAlpha(subPhase, 1.0f / animationSteps, animationSteps)));
-            }
-            gr.drawImage(getImageIconPlain(GFX_EXPLOSION + variant).getImage(), 0, 0, null);
-            gr.setComposite(oldComposite);
+    private void drawExplosion(int damage, Graphics2D gr, Integer subPhase, int animationSteps, double variant) {
+        if (damage <= 0) {
+            return;
         }
+        Image  image  = getImageIconPlain(GFX_EXPLOSION + ((int) (variant * theme.getExplosionVariants()))).getImage();
+        double factor = 1.0;
+        if (subPhase != null && animationSteps > 1) {
+            double progress = subPhase / (double) (animationSteps - 1);
+            factor = 1.0 - Math.abs(2.0 * progress - 1.0);
+        }
+        double          offset    = imageSize * (1.0 - factor) / 2.0;
+        AffineTransform transform = new AffineTransform();
+        transform.translate(offset, offset);
+        transform.scale(factor, factor);
+        gr.drawImage(image, transform, null);
     }
 
     private BufferedImage getFloorImage(Floor floor, Course course, boolean gameIsNotStartedYet,
@@ -815,7 +816,7 @@ public class ImageSupplier {
 
     private String getGroundElementPicture(Floor floor) {
         return switch (floor.getFloortype()) {
-            case Floortype.OPEN_FLOOR -> getOpenFloorImageName(floor.getPosition());
+            case Floortype.OPEN_FLOOR -> GFX_OPEN_FLOOR + ((int) (floor.getVariant() * theme.getOpenFloorVariants()));
             case Floortype.PIT_STOP -> GFX_PIT_STOP;
             case Floortype.ABYSS -> GFX_ABYSS_BG;
             case Floortype.TRAPDOOR -> GFX_TRAPDOOR_3;
@@ -826,10 +827,6 @@ public class ImageSupplier {
                  Floortype.TURNING_CONVEYOR_BELT_CW_CCW, Floortype.CONVEYOR_BELT -> GFX_CONVEYOR_BELT_BACKGROUND;
             case Floortype.GEARS_CCW, Floortype.GEARS_CW -> GFX_GEARS_SOCKET;
         };
-    }
-
-    private String getOpenFloorImageName(Position position) {
-        return GFX_OPEN_FLOOR + Math.floorMod(position.x() + position.y() * 6, theme.getOpenFloorVariants());
     }
 
     private void addToImage(String picture, Direction rotation, Graphics2D gr) {

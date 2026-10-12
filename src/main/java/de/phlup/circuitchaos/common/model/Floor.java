@@ -8,6 +8,7 @@ import de.phlup.circuitchaos.common.enums.WallType;
 import lombok.Data;
 
 import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
+import static de.phlup.circuitchaos.server.GlobalServerAttributes.RANDOM;
 
 @Data
 public class Floor {
@@ -29,6 +30,7 @@ public class Floor {
     private WallType  wallEast        = WallType.NONE;
     private WallType  wallSouth       = WallType.NONE;
     private WallType  wallWest        = WallType.NONE;
+    private double    variant         = RANDOM.nextDouble();
 
     // for drawing only
     private int        explosiveDamage              = 0;
