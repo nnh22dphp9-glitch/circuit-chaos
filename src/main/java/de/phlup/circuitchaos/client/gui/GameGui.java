@@ -144,7 +144,8 @@ public class GameGui extends BaseGui {
                 audioSupplier.stop();
             } else if (subPhase == 0) {
                 boolean hover = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(movingRobotName);
-                playSound(step, course, hover);
+                boolean explode = step == Step.ROBOTS_AND_OBJECTS_MOVE && course.getFloor().stream().anyMatch(f -> f.getExplosiveDamage() > 0);
+                playSound(step, course, hover, explode);
             }
         }
         if (courseArranger != null) {
@@ -169,7 +170,7 @@ public class GameGui extends BaseGui {
                      .anyMatch(CourseElement::isFlying);
     }
 
-    private void playSound(Step step, Course course, boolean hover) {
+    private void playSound(Step step, Course course, boolean hover, boolean explode) {
         if (!soundMenuItem.isSelected()) {
             audioSupplier.stop();
             return;
@@ -190,7 +191,9 @@ public class GameGui extends BaseGui {
                 }
             }
             case ROBOTS_AND_OBJECTS_MOVE -> {
-                if (hover) {
+                if (explode) {
+                    audioSupplier.playSound(AudioConstants.EXPLOSION);
+                } else if (hover) {
                     audioSupplier.playSound(AudioConstants.ROBOTS_HOVER);
                 } else {
                     audioSupplier.playSound(AudioConstants.ROBOTS_MOVE);

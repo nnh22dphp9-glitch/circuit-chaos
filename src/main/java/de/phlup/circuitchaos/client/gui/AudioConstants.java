@@ -12,5 +12,6 @@ public interface AudioConstants {
     String ROBOTS_MOVE   = PREFIX + "robots-move" + SUFFIX_WAV;
     String PUSHER        = PREFIX + "pusher" + SUFFIX_WAV;
     String TRAPDOOR      = PREFIX + "trapdoor" + SUFFIX_WAV;
+    String EXPLOSION     = PREFIX + "explosion" + SUFFIX_WAV;
 
 }
