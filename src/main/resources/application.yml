@@ -44,9 +44,21 @@ circuit-chaos:
       - "file:courses"
       - "file:temp"
     themes:
-      ki-lowres:
-        name: "ki-lowres"
-        path: "classpath:themes/ki-lowres"
+      default:
+        name: "default"
+        path: "classpath:themes/default"
+        open-floor-variants: 8
+        water-variants: 8
+        explosion-variants: 7
+        glue-variants: 12
+        oil-variants: 12
+        pusher-animation-steps: 10
+        repulsor-animation-steps: 9
+        zoom-factor: 0.30
+        image-size: 200
+      lowres:
+        name: "lowres"
+        path: "classpath:themes/lowres"
         open-floor-variants: 8
         water-variants: 8
         explosion-variants: 7
@@ -56,9 +68,9 @@ circuit-chaos:
         repulsor-animation-steps: 9
         zoom-factor: 1
         image-size: 40
-      ki-hires:
-        name: "ki-hires"
-        path: "classpath:themes/ki-hires"
+      hires:
+        name: "hires"
+        path: "classpath:themes/hires"
         open-floor-variants: 8
         water-variants: 8
         explosion-variants: 7
