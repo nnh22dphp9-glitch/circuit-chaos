@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.util.StringUtils;
 
 import javax.swing.AbstractAction;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -32,6 +33,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -158,7 +160,9 @@ public class ProgramRobotGui implements GuiHelper {
     }
 
     private void fillInfoPanel(JPanel panel) {
-        JLabel robotLabel = new JLabel(imageSupplier.getImageIconPlain(robot));
+        ImageIcon originalIcon = imageSupplier.getImageIconPlain(robot);
+        Image scaledImage = originalIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+        JLabel robotLabel = new JLabel(new ImageIcon(scaledImage));
         robotLabel.setToolTipText(robot.getName());
         panel.add(robotLabel);
         panel.add(new JLabel("   "));

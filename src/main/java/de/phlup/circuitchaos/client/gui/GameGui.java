@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
 
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,6 +34,7 @@ import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Image;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Optional;
@@ -143,7 +145,7 @@ public class GameGui extends BaseGui {
             if (subPhase == null || state == CourseState.GAME_ENDED) {
                 audioSupplier.stop();
             } else if (subPhase == 0) {
-                boolean hover = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(movingRobotName);
+                boolean hover   = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(movingRobotName);
                 boolean explode = step == Step.ROBOTS_AND_OBJECTS_MOVE && course.getFloor().stream().anyMatch(f -> f.getExplosiveDamage() > 0);
                 playSound(step, course, hover, explode);
             }
@@ -225,8 +227,10 @@ public class GameGui extends BaseGui {
             revealPanel.setBackground(Color.WHITE);
             revealPanel.add(new JLabel(" Phase: %s ".formatted(revealProgrammeResponse.getPhase() + 1)));
             for (RevealProgrammeListItem item : revealProgrammeResponse.getProgramme()) {
-                JPanel p = new JPanel(new BorderLayout());
-                p.add(new JLabel(imageSupplier.getImageIconPlain(item.imageIconPath())), BorderLayout.NORTH);
+                JPanel    p            = new JPanel(new BorderLayout());
+                ImageIcon originalIcon = imageSupplier.getImageIconPlain(item.imageIconPath());
+                Image     scaledImage  = originalIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                p.add(new JLabel(new ImageIcon(scaledImage)), BorderLayout.NORTH);
                 p.add(new JLabel(imageSupplier.getImageIcon(item.programme(), true, false)), BorderLayout.CENTER);
                 p.setBackground(Color.WHITE);
                 JPanel p2 = new JPanel(new BorderLayout());
