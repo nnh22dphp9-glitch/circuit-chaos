@@ -88,10 +88,6 @@ public class GameGui extends BaseGui {
         JMenuBar menuBar  = new JMenuBar();
         JMenu    gameMenu = new JMenu("Game");
         menuBar.add(gameMenu);
-        // TODO build new help menu
-        //  JMenu helpMenu = new JMenu("Help");
-        //  menuBar.add(helpMenu);
-        //  new HelpMenu(imageSupplier).createHelpMenu(helpMenu);
         createGameMenu(gameMenu, sound);
         frame.setJMenuBar(menuBar);
     }

@@ -413,10 +413,6 @@ public class EditorGui extends BaseGui implements GuiHelper {
         editorMenu.add(saveMenuItem);
         editorMenu.addSeparator();
         editorMenu.add(createZoomMenu());
-        // TODO build new help menu
-        //  JMenu helpMenu = new JMenu("Help");
-        //  menuBar.add(helpMenu);
-        //  new HelpMenu(imageSupplier).createHelpMenu(helpMenu);
         frame.setJMenuBar(menuBar);
     }
 
