@@ -41,8 +41,8 @@ public class CourseJPanel extends JPanel {
 
     private void redrawAllElements(BaseGui gui, GridBagLayout layout, JPanel contentPane, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {
         for (Floor floor : gui.getCourse().getFloor()) {
-            createCourseElementLabel(gui, layout, floor, contentPane);
             imageSupplier.redrawFloor(floor, gui, step, phase, subPhase, animationSteps, nextCP);
+            createCourseElementLabel(gui, layout, floor, contentPane);
         }
     }
 
@@ -51,7 +51,6 @@ public class CourseJPanel extends JPanel {
             JLabel             label = createJLabel(gui, floor);
             GridBagConstraints gbc   = createGridBagConstraints(gui, floor);
             layout.setConstraints(label, gbc);
-            label.print(label.getGraphics());
             contentPane.add(label);
         }
     }
