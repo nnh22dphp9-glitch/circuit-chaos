@@ -86,6 +86,7 @@ import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LASER_BEAM_2
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LASER_BEAM_3;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_OPEN_FLOOR;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PIT_STOP;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PORTAL_TARGET_SUFFIX;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PRESSURE_BEAM;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PRESSURE_SOCKET;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PROGRAMME;
@@ -244,9 +245,16 @@ public class ImageSupplier {
                 drawRobotsMovingAndActiveRobot(floor, activeRobot, step, subPhase, course, gr, animationSteps, phase);
                 drawExplosion(damage, gr, subPhase, animationSteps, floor.getVariant());
             }
-            if (gui instanceof EditorGui editorGui && editorGui.getSelectedFloor() != null
-                    && floor.getPosition().equals(editorGui.getSelectedFloor().getPosition())) {
-                gr.drawImage(getImageIconPlain(GFX_SELECTION).getImage(), 0, 0, null);
+            if (gui instanceof EditorGui editorGui) {
+                course.getObjects().stream().filter(obj -> obj.getType().isPortal())
+                      .filter(obj -> floor.getPosition().equals(obj.getTargetPosition()))
+                      .filter(CourseElement::isOnCourse)
+                      .forEach(portal -> gr.drawImage(getImageIconPlain(
+                              getGfxOfObjectType(portal.getType()) + GFX_PORTAL_TARGET_SUFFIX).getImage(), 0, 0, null));
+                if (editorGui.getSelectedFloor() != null
+                        && floor.getPosition().equals(editorGui.getSelectedFloor().getPosition())) {
+                    gr.drawImage(getImageIconPlain(GFX_SELECTION).getImage(), 0, 0, null);
+                }
             }
         } finally {
             gr.dispose();

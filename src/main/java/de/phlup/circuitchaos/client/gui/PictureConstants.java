@@ -122,6 +122,8 @@ public interface PictureConstants {
         };
     }
 
+    String GFX_PORTAL_TARGET_SUFFIX = "-target";
+
     static String getGfxOfModuleType(ModuleType moduleType) {
         return FOLDER_MODULES + moduleType.getPicture();
     }
