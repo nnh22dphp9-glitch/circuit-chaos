@@ -35,8 +35,10 @@ public class CourseJPanel extends JPanel {
         redrawAllElements(gui, layout, contentPane, step, phase, subPhase, animationSteps, nextCP);
         removeAll();
         add(contentPane);
-        validate();
-        gui.getMainFrame().validate();
+        revalidate();
+        repaint();
+        gui.getMainFrame().revalidate();
+        gui.getMainFrame().repaint();
     }
 
     private void redrawAllElements(BaseGui gui, GridBagLayout layout, JPanel contentPane, Step step, Integer phase, Integer subPhase, int animationSteps, int nextCP) {

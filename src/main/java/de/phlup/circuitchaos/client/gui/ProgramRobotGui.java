@@ -569,9 +569,9 @@ public class ProgramRobotGui implements GuiHelper {
             } else {
                 handleNextProgramStep();
             }
-            potentialProgrammePanel.validate();
+            potentialProgrammePanel.revalidate();
             for (JPanel panel : programmePanel) {
-                panel.validate();
+                panel.revalidate();
             }
         }
 
