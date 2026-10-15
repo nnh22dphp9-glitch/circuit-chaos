@@ -161,8 +161,8 @@ public class ProgramRobotGui implements GuiHelper {
 
     private void fillInfoPanel(JPanel panel) {
         ImageIcon originalIcon = imageSupplier.getImageIconPlain(robot);
-        Image scaledImage = originalIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-        JLabel robotLabel = new JLabel(new ImageIcon(scaledImage));
+        Image     scaledImage  = originalIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+        JLabel    robotLabel   = new JLabel(new ImageIcon(scaledImage));
         robotLabel.setToolTipText(robot.getName());
         panel.add(robotLabel);
         panel.add(new JLabel("   "));

@@ -70,9 +70,8 @@ import static javax.swing.JFileChooser.APPROVE_OPTION;
 @Slf4j
 public class EditorGui extends BaseGui implements GuiHelper {
 
-    public static final int          PREVIEW_SIZE = 150;
-    private final       CourseLoader courseLoader;
-    private final       JFrame       editorFrame;
+    private final CourseLoader courseLoader;
+    private final JFrame       editorFrame;
 
     private File currentFileDirectory;
 
@@ -459,7 +458,6 @@ public class EditorGui extends BaseGui implements GuiHelper {
                     path = path.resolveSibling(path.getFileName() + ".json");
                 }
                 courseLoader.saveCourse(course, path);
-                courseLoader.savePreview(courseJPanel.createPreview(PREVIEW_SIZE), path);
             }
         }
     }

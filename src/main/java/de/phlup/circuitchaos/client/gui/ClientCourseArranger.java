@@ -11,7 +11,6 @@ import de.phlup.circuitchaos.common.settings.ClientSettings;
 import de.phlup.circuitchaos.common.settings.GameSettings;
 import de.phlup.circuitchaos.server.game.GameOptions;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.AbstractAction;
@@ -33,7 +32,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.util.Collection;
-import java.util.Objects;
 
 @Slf4j
 public class ClientCourseArranger implements GuiHelper {
@@ -41,16 +39,13 @@ public class ClientCourseArranger implements GuiHelper {
     private final ImageSupplier imageSupplier;
     private final JFrame        frame = new JFrame("CC");
 
-    // arrangement
-
     private final JComboBox<CourseInfo> courseList = new JComboBox<>();
 
-    private final JButton chooseCourseButton = new JButton("Choose");
     @Getter
-    private final JButton playButton         = new JButton("Play");
-    private final JPanel  chooserPanel       = new JPanel(new BorderLayout());
-    private final JLabel  regPlayers         = new JLabel(" 1 ");
-    private final JLabel  regWatchers        = new JLabel(" 0 ");
+    private final JButton playButton   = new JButton("Play");
+    private final JPanel  chooserPanel = new JPanel(new BorderLayout());
+    private final JLabel  regPlayers   = new JLabel(" 1 ");
+    private final JLabel  regWatchers  = new JLabel(" 0 ");
 
     @SuppressWarnings("unchecked")
     private final JComboBox<String>[]    computerTypes = new JComboBox[7];
@@ -58,13 +53,10 @@ public class ClientCourseArranger implements GuiHelper {
     private final ObjectMapper           objectMapper;
     private final ClientSettings         clientSettings;
 
-    private JLabel coursePreview = new JLabel();
-
 
     public ClientCourseArranger(GameGui game, GameSettings gameSettings, CourseLoader courseLoader, ObjectMapper objectMapper, ClientSettings clientSettings) {
         imageSupplier = game.getImageSupplier();
-        courseInfos = courseLoader.loadCourses(imageSupplier.getImageIconPlain(PictureConstants.GFX_PICTURE).getImage());
-        ;
+        courseInfos = courseLoader.loadCourses();
         this.objectMapper = objectMapper;
         this.clientSettings = clientSettings;
 
@@ -129,23 +121,12 @@ public class ClientCourseArranger implements GuiHelper {
         JPanel courseChooser = new JPanel(new BorderLayout());
         courseList.setEditable(false);
         CourseInfo item = new CourseInfo("Choose a course!");
-        item.setImage(imageSupplier.getImageIconPlain(PictureConstants.GFX_PICTURE).getImage());
         courseList.addItem(item);
         for (CourseInfo bi : courseInfos) {
             courseList.addItem(bi);
         }
         courseList.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                chooseCourseButton.setEnabled(courseList.getSelectedIndex() > 0);
-                redrawPreview();
-            }
-        });
-        courseChooser.add(courseList, BorderLayout.CENTER);
-
-        chooseCourseButton.addActionListener(new AbstractAction() {
-            @Override
-            @SneakyThrows
             public void actionPerformed(ActionEvent e) {
                 if (courseList.getSelectedIndex() > 0) {
                     CourseInfo selectedItem = (CourseInfo) courseList.getSelectedItem();
@@ -156,7 +137,7 @@ public class ClientCourseArranger implements GuiHelper {
                 }
             }
         });
-        chooseCourseButton.setEnabled(false);
+        courseChooser.add(courseList, BorderLayout.CENTER);
 
         playButton.addActionListener(new AbstractAction() {
             @Override
@@ -177,13 +158,20 @@ public class ClientCourseArranger implements GuiHelper {
         playButton.setEnabled(false);
 
         JPanel buttonPanel = new JPanel(new BorderLayout());
-        buttonPanel.add(chooseCourseButton, BorderLayout.NORTH);
         buttonPanel.add(new JLabel(" "), BorderLayout.CENTER);
         buttonPanel.add(playButton, BorderLayout.SOUTH);
         courseChooser.add(buttonPanel, BorderLayout.SOUTH);
 
+        BufferedImage bi = new BufferedImage(150, 231, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D    gr = bi.createGraphics();
+        gr.drawImage(imageSupplier.getImageIconPlain(PictureConstants.GFX_LOGO_SMALL).getImage(), 0, 0, null);
+        gr.translate(0, 81);
+        gr.drawImage(imageSupplier.getImageIconPlain(PictureConstants.GFX_PICTURE).getImage(), 0, 0, null);
+        JLabel coursePreview = new JLabel(imageSupplier.getImageIconPlain(bi));
+        chooserPanel.add(coursePreview, BorderLayout.NORTH);
+        chooserPanel.add(new JLabel(" "), BorderLayout.CENTER);
         chooserPanel.add(courseChooser, BorderLayout.SOUTH);
-        redrawPreview();
+
         return chooserPanel;
     }
 
@@ -192,26 +180,6 @@ public class ClientCourseArranger implements GuiHelper {
             return null;
         }
         return objectMapper.convertValue(course, Course.class);
-    }
-
-    private void redrawPreview() {
-        chooserPanel.remove(coursePreview);
-        BufferedImage bi = new BufferedImage(150, 231, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D    gr = bi.createGraphics();
-        if (courseList.getSelectedIndex() > 0) {
-            CourseInfo courseInfo = (CourseInfo) courseList.getSelectedItem();
-            String     bild       = PictureConstants.GFX_LOGO_SMALL;
-            gr.drawImage(imageSupplier.getImageIconPlain(bild).getImage(), 0, 0, null);
-            gr.translate(0, 81);
-            gr.drawImage(Objects.requireNonNull(courseInfo).getImage(), 0, 0, null);
-        } else {
-            gr.drawImage(imageSupplier.getImageIconPlain(PictureConstants.GFX_LOGO_SMALL).getImage(), 0, 0, null);
-            gr.translate(0, 81);
-            gr.drawImage(imageSupplier.getImageIconPlain(PictureConstants.GFX_PICTURE).getImage(), 0, 0, null);
-        }
-        coursePreview = new JLabel(imageSupplier.getImageIconPlain(bi));
-        chooserPanel.add(coursePreview, BorderLayout.CENTER);
-        chooserPanel.validate();
     }
 
     public void updatePlayersAndWatchers(int players, int watchers) {
