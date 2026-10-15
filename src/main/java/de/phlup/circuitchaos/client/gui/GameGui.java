@@ -231,7 +231,6 @@ public class GameGui extends BaseGui {
                 p.setBackground(Color.WHITE);
                 JPanel p2 = new JPanel(new BorderLayout());
                 p2.add(new JLabel(item.name()), BorderLayout.NORTH);
-                p2.add(new JLabel(item.programme().getType().getCommand() + " (" + item.programme().getPriority() + ")"), BorderLayout.SOUTH);
                 p2.setBackground(Color.WHITE);
                 p.add(p2, BorderLayout.SOUTH);
                 revealPanel.add(p);

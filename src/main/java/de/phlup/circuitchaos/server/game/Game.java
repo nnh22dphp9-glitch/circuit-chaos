@@ -302,9 +302,8 @@ public class Game {
                         for (Player player : players) {
                             Robot       r = player.getRobot();
                             Programme[] p = r.getProgram();
-                            log.debug("Received program for {}: {} - {} - {} - {} - {}", r.getName(), p[0].getType().getCommand(),
-                                      p[1].getType().getCommand(), p[2].getType().getCommand(),
-                                      p[3].getType().getCommand(), p[4].getType().getCommand());
+                            log.debug("Received program for {}: {} - {} - {} - {} - {}", r.getName(), p[0].getType().name(),
+                                      p[1].getType().name(), p[2].getType().name(), p[3].getType().name(), p[4].getType().name());
                         }
                     }
 

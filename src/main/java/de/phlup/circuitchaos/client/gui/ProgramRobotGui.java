@@ -375,17 +375,9 @@ public class ProgramRobotGui implements GuiHelper {
         for (int cnt = 0; cnt < 5; cnt++) {
             programmePanel[cnt] = new JPanel(new BorderLayout());
             if (robot.getBlocked()[cnt]) {
-                Programme programme  = robot.getProgram()[cnt];
-                JLabel    progPanel  = new JLabel(imageSupplier.getImageIcon(programme, true, true));
-                JPanel    innerPanel = new JPanel(new BorderLayout());
-                innerPanel.add(progPanel, BorderLayout.NORTH);
-                if (programme.getPriority() > 0) {
-                    innerPanel.add(new JLabel(" Prio %s ".formatted(programme.getPriority())), BorderLayout.CENTER);
-                } else {
-                    innerPanel.add(new JLabel(" "), BorderLayout.CENTER);
-                }
+                Programme programme = robot.getProgram()[cnt];
                 programIds[cnt].setText("BLOCKED");
-                programmePanel[cnt].add(innerPanel);
+                programmePanel[cnt].add(new JLabel(imageSupplier.getImageIcon(programme, true, true)));
             } else {
                 programmePanel[cnt].add(programIds[cnt]);
             }
@@ -394,28 +386,18 @@ public class ProgramRobotGui implements GuiHelper {
 
     public void updateProgramPlaceID(int placeID, int id) {
         programmePanel[placeID].removeAll();
-        JPanel    innerPanel = new JPanel(new BorderLayout());
-        Programme programme  = id >= 0 ? robot.getPotentialProgramme().get(id) : null;
-        JLabel    progPanel  = new JLabel(programme == null ? imageSupplier.getProgrammeNotSetIcon(true) : imageSupplier.getImageIcon(programme, true, false));
+        Programme programme = id >= 0 ? robot.getPotentialProgramme().get(id) : null;
+        JLabel progPanel = new JLabel(programme == null
+                                              ? imageSupplier.getProgrammeNotSetIcon(true)
+                                              : imageSupplier.getImageIcon(programme, true, false));
         if (programme != null) {
             ProgramMouseAdapter ma = new ProgramMouseAdapter(id);
             progPanel.addMouseListener(ma);
-            innerPanel.addMouseListener(ma);
-            if (programme.getPriority() > 0) {
-                innerPanel.add(new JLabel(" Prio %s ".formatted(programme.getPriority()), SwingConstants.CENTER), BorderLayout.CENTER);
-            } else {
-                innerPanel.add(new JLabel(" "), BorderLayout.CENTER);
-            }
             used[id] = true;
-        } else {
-            innerPanel.add(new JLabel(" "), BorderLayout.CENTER);
-            if (id >= 0) {
-                used[id] = false;
-            }
+        } else if (id >= 0) {
+            used[id] = false;
         }
-        innerPanel.add(progPanel, BorderLayout.NORTH);
-        // innerPanel.add(programIds[placeID], BorderLayout.SOUTH); // if mouse adapter fails again
-        programmePanel[placeID].add(innerPanel);
+        programmePanel[placeID].add(progPanel);
         updatePotProgPanel();
     }
 
@@ -424,22 +406,14 @@ public class ProgramRobotGui implements GuiHelper {
         int counter = 0;
         for (Programme pr : robot.getPotentialProgramme()) {
             JLabel progPanel;
-            JPanel innerPanel = new JPanel(new BorderLayout());
-            if (pr.getPriority() > 0) {
-                innerPanel.add(new JLabel(" Prio %s ".formatted(pr.getPriority()), SwingConstants.CENTER), BorderLayout.CENTER);
-            } else {
-                innerPanel.add(new JLabel(" "), BorderLayout.CENTER);
-            }
             if (used[counter]) {
                 progPanel = new JLabel(imageSupplier.getProgrammeNotSetIcon(false));
             } else {
                 progPanel = new JLabel(imageSupplier.getImageIcon(pr, false, false));
                 ProgramMouseAdapter ma = new ProgramMouseAdapter(counter);
                 progPanel.addMouseListener(ma);
-                innerPanel.addMouseListener(ma);
             }
-            innerPanel.add(progPanel, BorderLayout.NORTH);
-            potentialProgrammePanel.add(innerPanel);
+            potentialProgrammePanel.add(progPanel);
             counter++;
         }
     }
