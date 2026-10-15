@@ -21,7 +21,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -44,6 +43,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_EXPLOSION;
 
 public class ProgramRobotGui implements GuiHelper {
 
@@ -167,16 +168,10 @@ public class ProgramRobotGui implements GuiHelper {
         panel.add(robotLabel);
         panel.add(new JLabel("   "));
 
-        String template = "<html><font face=\"sans-serif\">&nbsp;<br>&nbsp;<b style=\"color:Navy\">%s</b>&nbsp;&nbsp;%s&nbsp;<br>&nbsp;<br></font></html>";
-        panel.add(new JLabel(template.formatted("Damage:", robot.getDamage())));
-        panel.add(new JLabel(template.formatted("Next Checkpoint:", robot.getNextCheckpoint())));
-
-        if (robot.isVirtual()) {
-            panel.add(new JLabel(template.formatted("VIRTUAL", "")));
-        }
-
-        if (robot.isPoweredDown()) {
-            panel.add(new JLabel(template.formatted("POWERED DOWN", "")));
+        for (int i = 0; i < robot.getDamage(); i++) {
+            ImageIcon originalExplosion = imageSupplier.getImageIconPlain(GFX_EXPLOSION + "0");
+            scaledImage = originalExplosion.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+            panel.add(new JLabel(new ImageIcon(scaledImage)));
         }
     }
 
