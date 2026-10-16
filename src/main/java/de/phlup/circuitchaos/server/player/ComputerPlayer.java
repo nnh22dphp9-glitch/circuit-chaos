@@ -17,8 +17,11 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -109,49 +112,45 @@ public class ComputerPlayer extends Player {
 
     private List<ComputerMoveInfo> generatePrograms(Game game) {
         List<ComputerMoveInfo> programList = new ArrayList<>();
-        Programme[]      program    = new Programme[5];
-        for (int pr1 = 0; pr1 < robot.getPotentialProgramme().size(); pr1++) {
-            if (robot.getBlocked()[4]) {
-                program[4] = robot.getProgram()[4];
-            } else {
-                program[4] = robot.getPotentialProgramme().get(pr1);
-            }
-            for (int pr2 = 0; pr2 < robot.getPotentialProgramme().size(); pr2++) {
-                if (robot.getBlocked()[3]) {
-                    program[3] = robot.getProgram()[3];
-                } else {
-                    program[3] = robot.getPotentialProgramme().get(pr2);
-                }
-                for (int pr3 = 0; pr3 < robot.getPotentialProgramme().size(); pr3++) {
-                    if (robot.getBlocked()[2]) {
-                        program[2] = robot.getProgram()[2];
-                    } else {
-                        program[2] = robot.getPotentialProgramme().get(pr3);
-                    }
-                    for (int pr4 = 0; pr4 < robot.getPotentialProgramme().size(); pr4++) {
-                        if (robot.getBlocked()[1]) {
-                            program[1] = robot.getProgram()[1];
-                        } else {
-                            program[1] = robot.getPotentialProgramme().get(pr4);
-                        }
-                        for (int pr5 = 0; pr5 < robot.getPotentialProgramme().size(); pr5++) {
-                            if (robot.getBlocked()[0]) {
-                                program[0] = robot.getProgram()[0];
-                            } else {
-                                program[0] = robot.getPotentialProgramme().get(pr5);
-                            }
-                            if (program[0] != program[1] && program[0] != program[2] && program[0] != program[3] && program[0] != program[4]
-                                    && program[1] != program[2] && program[1] != program[3] && program[1] != program[4]
-                                    && program[2] != program[3] && program[2] != program[4] && program[3] != program[4]
-                                    && program[0] != null && program[1] != null && program[2] != null && program[3] != null && program[4] != null) {
-                                programList.addAll(createProgrammeForEveryPossibleStartingDirection(game, program));
-                            }
-                        }
-                    }
+        Programme[] program = new Programme[5];
+        // use blocked registers
+        for (int slot = 0; slot < program.length; slot++) {
+            if (robot.getBlocked()[slot]) {
+                program[slot] = robot.getProgram()[slot];
+                if (program[slot] == null) {
+                    return programList; // illegal case: a blocked register without a program step
                 }
             }
         }
+        Set<Programme> usedPrograms = Collections.newSetFromMap(new IdentityHashMap<>());
+        // blocked registers are already used
+        for (int slot = 0; slot < program.length; slot++) {
+            if (robot.getBlocked()[slot] && !usedPrograms.add(program[slot])) {
+                return programList; // illegal: one program step used twice
+            }
+        }
+        generatePrograms(game, 0, program, usedPrograms, programList);
         return programList;
+    }
+
+    private void generatePrograms(Game game, int slot, Programme[] program, Set<Programme> usedPrograms, List<ComputerMoveInfo> programList) {
+        if (slot == program.length) {
+            programList.addAll(createProgrammeForEveryPossibleStartingDirection(game, program));
+            return;
+        }
+        // blocked registers are already set
+        if (robot.getBlocked()[slot]) {
+            generatePrograms(game, slot + 1, program, usedPrograms, programList);
+            return;
+        }
+        for (Programme candidate : robot.getPotentialProgramme()) {
+            if (candidate != null && usedPrograms.add(candidate)) { // identity constraint: don't use a program step twice
+                program[slot] = candidate;
+                generatePrograms(game, slot + 1, program, usedPrograms, programList);
+                usedPrograms.remove(candidate); // backtracking: free the program card for the next use
+                program[slot] = null;
+            }
+        }
     }
 
     private List<ComputerMoveInfo> createProgrammeForEveryPossibleStartingDirection(Game game, Programme[] program) {
@@ -169,7 +168,7 @@ public class ComputerPlayer extends Player {
     private ComputerMoveInfo createComputerMoveInfo(Game game, Programme[] program, Direction dir) {
         ComputerMoveInfo mi = new ComputerMoveInfo(game, nextCP, this);
         mi.setStartingDirection(dir);
-        mi.setProgram(program);
+        mi.setProgram(program.clone());
         return mi;
     }
 
