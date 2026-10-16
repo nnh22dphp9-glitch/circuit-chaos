@@ -19,6 +19,11 @@ import lombok.Data;
 @Data
 public class ComputerMoveInfo {
 
+    private final Game game;
+    private final Course course;
+    private final Player player;
+    private final Checkpoint nextCP;
+
     private Programme[] program;
     private Direction   startingDirection;
     private boolean     willDie;
@@ -38,22 +43,25 @@ public class ComputerMoveInfo {
 
     private Floor tf;
 
-    public ComputerMoveInfo(Game game, Programme[] programme, Direction sd, Checkpoint nextCP, Player player) {
-        this.program = new Programme[5];
-        Course course = game.getCourse();
-        System.arraycopy(programme, 0, program, 0, 5);
-        startingDirection = sd;
-        distance = Integer.MAX_VALUE;
-
-        endingDirection = sd;
+    public ComputerMoveInfo(Game game, Checkpoint nextCP, Player player) {
+        this.game = game;
+        course = game.getCourse();
+        this.nextCP = nextCP;
+        this.player = player;
         x = player.getRobot().getPosition().x();
         y = player.getRobot().getPosition().y();
+    }
+
+    public void simulateCourse() {
+        distance = Integer.MAX_VALUE;
+        endingDirection = startingDirection;
         willDie = false;
         reachesCheckpoint = 5;
         reachesPitStop = false;
         standsOnOpenFloor = false;
         keepsStaying = false;
         probableTargets = 0;
+
         tf = CourseHandler.getFloor(course, player.getRobot().getPosition());
         for (int phase = 0; phase < 5; phase++) {
             checkForAbyss(phase);
