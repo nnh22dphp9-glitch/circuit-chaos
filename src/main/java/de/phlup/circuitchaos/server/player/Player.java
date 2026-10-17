@@ -35,9 +35,7 @@ public abstract class Player {
     }
 
     public boolean hasWon() {
-        return !hasLost()
-                && ((goal == Goal.FINISH && robot.getNextCheckpoint() > getGame(gameId).getCourse().getCheckpoints().size() - 1)
-                || (goal == Goal.KILL_ALL && getGame(gameId).getPlayers().size() == 1));
+        return !hasLost() && (goal == Goal.FINISH && robot.getNextCheckpoint() > getGame(gameId).getCourse().getCheckpoints().size() - 1);
     }
 
     protected void initTurn() {

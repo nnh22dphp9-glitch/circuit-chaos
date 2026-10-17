@@ -459,21 +459,23 @@ public class Game {
     private void handleDestroyedRobots(Player player) {
         Robot robot = player.getRobot();
         if (robot.getDamage() >= 10 && !gameAborted) {
-            robot.setDamage((player.getRobot().hasModule(ModuleType.SUPERIOR_ARCHIVE_COPY) ? 0 : 2));
-            if (!player.hasLost()) {
-                robot.setPosition(robot.getArchivePosition());
-                robot.setPrevPosition(robot.getArchivePosition());
-                robot.setLevel(robot.getArchiveLevel());
-                robot.setMayChooseDirection(true);
-                robot.setVirtual(true);
-                notifyCourseMayHaveChanged(Step.END_OF_TURN_COURSE_EFFECTS, null, "%s was destroyed".formatted(robot.getName()), null);
-                CourseHandler.add(course, robot);
-                for (int phase = 0; phase < 5; phase++) {
-                    if (robot.getBlocked()[phase]) {
-                        robot.getProgram()[phase] = null;
+            if (goal == Goal.FINISH) {
+                robot.setDamage((player.getRobot().hasModule(ModuleType.SUPERIOR_ARCHIVE_COPY) ? 0 : 2));
+                if (!player.hasLost()) {
+                    robot.setPosition(robot.getArchivePosition());
+                    robot.setPrevPosition(robot.getArchivePosition());
+                    robot.setLevel(robot.getArchiveLevel());
+                    robot.setMayChooseDirection(true);
+                    robot.setVirtual(true);
+                    notifyCourseMayHaveChanged(Step.END_OF_TURN_COURSE_EFFECTS, null, "%s was destroyed".formatted(robot.getName()), null);
+                    CourseHandler.add(course, robot);
+                    for (int phase = 0; phase < 5; phase++) {
+                        if (robot.getBlocked()[phase]) {
+                            robot.getProgram()[phase] = null;
+                        }
                     }
+                    robot.setBlocked(new boolean[]{false, false, false, false, false});
                 }
-                robot.setBlocked(new boolean[]{false, false, false, false, false});
             }
         } else if (robot.isPowerDownAnnounced()) {
             robot.setPowerDownAnnounced(false);
