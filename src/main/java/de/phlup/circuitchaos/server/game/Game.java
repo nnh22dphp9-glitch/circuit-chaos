@@ -3,7 +3,7 @@ package de.phlup.circuitchaos.server.game;
 import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.CircuitChaosException;
 import de.phlup.circuitchaos.common.CourseHandler;
-import de.phlup.circuitchaos.common.enums.ComputerType;
+import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.ModuleType;
@@ -240,10 +240,7 @@ public class Game {
             RobotType robotType = availableRobotTypes.getFirst();
             availableRobotTypes.remove(robotType);
             Robot robot = createRobot(robotType, startPosition);
-            ComputerType computerType = i < gameOptions.getComputerType().size()
-                    ? ComputerType.getByName(gameOptions.getComputerType().get(i))
-                    : ComputerType.NORMAL;
-            players.addLast(new ComputerPlayer(robot, gameId, computerType));
+            players.addLast(new ComputerPlayer(robot, gameId, gameOptions.getGoal()));
             CourseHandler.add(course, robot);
         }
         int playersSize = players.size();

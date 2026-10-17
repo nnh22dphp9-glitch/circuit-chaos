@@ -3,8 +3,8 @@ package de.phlup.circuitchaos.client.gui;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.phlup.circuitchaos.client.service.CourseLoader;
 import de.phlup.circuitchaos.client.service.ImageSupplier;
-import de.phlup.circuitchaos.common.enums.ComputerType;
 import de.phlup.circuitchaos.common.enums.CourseState;
+import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.CourseInfo;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
@@ -20,10 +20,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.LineBorder;
-import javax.swing.border.TitledBorder;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -36,10 +33,14 @@ import java.util.Collection;
 @Slf4j
 public class ClientCourseArranger implements GuiHelper {
 
+    private static final int GLOBAL_MAX_COMPUTER_PLAYERS = 8;
+
     private final ImageSupplier imageSupplier;
     private final JFrame        frame = new JFrame("CC");
 
-    private final JComboBox<CourseInfo> courseList = new JComboBox<>();
+    private final JComboBox<CourseInfo> courseList         = new JComboBox<>();
+    private final JComboBox<Goal>       goal               = new JComboBox<>();
+    private final JComboBox<Integer>    maxComputerPlayers = new JComboBox<>();
 
     @Getter
     private final JButton playButton   = new JButton("Play");
@@ -47,8 +48,6 @@ public class ClientCourseArranger implements GuiHelper {
     private final JLabel  regPlayers   = new JLabel(" 1 ");
     private final JLabel  regWatchers  = new JLabel(" 0 ");
 
-    @SuppressWarnings("unchecked")
-    private final JComboBox<String>[]    computerTypes = new JComboBox[7];
     private final Collection<CourseInfo> courseInfos;
     private final ObjectMapper           objectMapper;
     private final ClientSettings         clientSettings;
@@ -59,12 +58,17 @@ public class ClientCourseArranger implements GuiHelper {
         courseInfos = courseLoader.loadCourses();
         this.objectMapper = objectMapper;
         this.clientSettings = clientSettings;
+        maxComputerPlayers.setSelectedItem(gameSettings.getMaxNumberOfComputerPlayers());
 
         JPanel borderPanel = new JPanel(new BorderLayout());
         JPanel mainPanel   = new JPanel(new BorderLayout());
         mainPanel.add(createCourseChooser(game), BorderLayout.NORTH);
-        mainPanel.add(createPlayersDisplay(), BorderLayout.CENTER);
-        mainPanel.add(createComputerPlayerChooser(gameSettings), BorderLayout.SOUTH);
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        mainPanel.add(centerPanel);
+        centerPanel.add(createGoalChooser(), BorderLayout.NORTH);
+        centerPanel.add(createComputerPlayerChooser(), BorderLayout.SOUTH);
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
+        mainPanel.add(createPlayersDisplay(), BorderLayout.SOUTH);
         borderPanel.add(mainPanel, BorderLayout.CENTER);
         borderPanel.add(new JLabel(new ImageIcon(new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB))), BorderLayout.SOUTH);
         borderPanel.add(new JLabel(new ImageIcon(new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB))), BorderLayout.EAST);
@@ -89,6 +93,27 @@ public class ClientCourseArranger implements GuiHelper {
         frame.requestFocus();
     }
 
+    private JPanel createGoalChooser() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel(" "), BorderLayout.NORTH);
+        for (Goal g : Goal.values()) {
+            goal.addItem(g);
+        }
+        panel.add(goal, BorderLayout.CENTER);
+        panel.add(new JLabel(" "), BorderLayout.SOUTH);
+        return panel;
+    }
+
+    private JPanel createComputerPlayerChooser() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel("Max. number of computer players:"), BorderLayout.CENTER);
+        for (int i = 0; i < GLOBAL_MAX_COMPUTER_PLAYERS; i++) {
+            maxComputerPlayers.addItem(i);
+        }
+        panel.add(maxComputerPlayers, BorderLayout.SOUTH);
+        return panel;
+    }
+
     private JPanel createPlayersDisplay() {
         GridBagLayout gbl   = new GridBagLayout();
         JPanel        panel = new JPanel(gbl);
@@ -99,22 +124,6 @@ public class ClientCourseArranger implements GuiHelper {
         addComponentToPanel(regWatchers, panel, gbl, 2, 3, 1, GridBagConstraints.EAST);
         addComponentToPanel(new JLabel(" "), panel, gbl, 1, 4, 1, GridBagConstraints.WEST);
         return panel;
-    }
-
-    private JPanel createComputerPlayerChooser(GameSettings gameSettings) {
-        GridBagLayout layout      = new GridBagLayout();
-        JPanel        compPlayers = new JPanel(layout);
-        compPlayers.setBorder(new TitledBorder(new LineBorder(Color.black), " Computer players "));
-        for (int i = 0; i < 7; i++) {
-            addComponentToPanel(new JLabel("#%s: ".formatted(i + 1)), compPlayers, layout, 1, 6 + i, 1, GridBagConstraints.WEST);
-            computerTypes[i] = new JComboBox<>();
-            for (ComputerType ct : ComputerType.values()) {
-                computerTypes[i].addItem(ct.getName());
-            }
-            computerTypes[i].setSelectedIndex(i + 1 <= gameSettings.getMaxNumberOfComputerPlayers() ? 1 : 0);
-            addComponentToPanel(computerTypes[i], compPlayers, layout, 2, 6 + i, 1, GridBagConstraints.WEST);
-        }
-        return compPlayers;
     }
 
     private JPanel createCourseChooser(GameGui game) {
@@ -145,11 +154,11 @@ public class ClientCourseArranger implements GuiHelper {
                 game.setState(CourseState.GAME_RUNNING);
                 frame.dispose();
                 GameOptions gameOptions = new GameOptions();
-                for (int i = 0; i < 7; i++) {
-                    String type = (String) computerTypes[i].getSelectedItem();
-                    if (!ComputerType.NONE.getName().equals(type)) {
-                        gameOptions.getComputerType().addLast(i + "-" + type);
-                    }
+                gameOptions.setGoal((Goal) goal.getSelectedItem());
+                if (maxComputerPlayers.getSelectedItem() != null) {
+                    gameOptions.setMaxNumberOfComputerPlayers((Integer) maxComputerPlayers.getSelectedItem());
+                } else {
+                    gameOptions.setMaxNumberOfComputerPlayers(0);
                 }
                 gameOptions.setDefaultModules(clientSettings.getDefaultModules());
                 game.play(gameOptions);

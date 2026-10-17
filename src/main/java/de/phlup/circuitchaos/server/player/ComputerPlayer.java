@@ -1,7 +1,7 @@
 package de.phlup.circuitchaos.server.player;
 
-import de.phlup.circuitchaos.common.enums.ComputerType;
 import de.phlup.circuitchaos.common.enums.Direction;
+import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.model.Checkpoint;
 import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.Position;
@@ -28,16 +28,14 @@ import java.util.Set;
 @Slf4j
 public class ComputerPlayer extends Player {
 
-    private final boolean    aggressive;
-    private final boolean    makesGoodMoves;
+    private final Goal       goal;
     private       Checkpoint nextCP;
 
     private boolean turnFinished;
 
-    public ComputerPlayer(@NotNull Robot robot, @NotNull String gameId, @NotNull ComputerType computerType) {
+    public ComputerPlayer(@NotNull Robot robot, @NotNull String gameId, @NotNull Goal goal) {
         super(robot, gameId);
-        this.aggressive = computerType == ComputerType.AGGRESSIVE;
-        this.makesGoodMoves = computerType != ComputerType.STUPID;
+        this.goal = goal;
     }
 
     public void perform() {
@@ -60,16 +58,12 @@ public class ComputerPlayer extends Player {
         this.setTurnFinished(false);
         initTurn();
         initMoveInfo();
-        if (isMakesGoodMoves()) {
-            programRobot(game);
-        } else {
-            programCompletelyRandomly();
-        }
+        programRobot(game);
         this.setTurnFinished(true);
     }
 
     private void programRobot(Game game) {
-        Course           gameCourse = game.getCourse();
+        Course           gameCourse  = game.getCourse();
         ComputerMoveInfo bestProgram = evaluateAllPrograms(game, gameCourse);
         setBestProgram(bestProgram);
     }
@@ -112,7 +106,7 @@ public class ComputerPlayer extends Player {
 
     private List<ComputerMoveInfo> generatePrograms(Game game) {
         List<ComputerMoveInfo> programList = new ArrayList<>();
-        Programme[] program = new Programme[5];
+        Programme[]            program     = new Programme[5];
         // use blocked registers
         for (int slot = 0; slot < program.length; slot++) {
             if (robot.getBlocked()[slot]) {
@@ -195,7 +189,7 @@ public class ComputerPlayer extends Player {
                 } else if (chosenMove.getProgram()[4].getPriority() > mi.getProgram()[4].getPriority()) {
                     newMove = false;
                 } // else  "new move has better priority";
-            } else if (isAggressive()) {
+            } else if (goal == Goal.KILL_ALL) {
                 if (mi.isWillDie() && !chosenMove.isWillDie()) {
                     newMove = false; // "old move won't result in death";
                 } else if (chosenMove.isWillDie() && !mi.isWillDie()) {
@@ -356,19 +350,6 @@ public class ComputerPlayer extends Player {
             }
         }
         return chosenMove;
-    }
-
-    private void programCompletelyRandomly() {
-        if (robot.isMayChooseDirection()) {
-            robot.setDirection(Direction.values()[GlobalServerAttributes.RANDOM.nextInt(4)]);
-            robot.setPrevDirection(robot.getDirection());
-        }
-        Iterator<Programme> i = robot.getPotentialProgramme().iterator();
-        for (int j = 0; j < 5; j++) {
-            if (!robot.getBlocked()[j]) {
-                robot.getProgram()[j] = i.next();
-            }
-        }
     }
 
     private void initMoveInfo() {

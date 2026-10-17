@@ -146,7 +146,7 @@ public class ServerController {
      */
     @PostMapping("/{gameId}/play")
     public void play(@PathVariable("gameId") String gameId, @RequestBody GameOptions options) {
-        log.debug("Received play request");
+        log.debug("Received play request - Options: {}", options);
         GlobalServerAttributes.getGame(gameId, false, true).play(options);
     }
 
@@ -215,7 +215,7 @@ public class ServerController {
                               @PathVariable("purposeId") String purposeId,
                               @PathVariable("requestId") String requestId,
                               @RequestBody NetworkResponse response) {
-        log.info("Received receivedAnswer request: game {}, purpose {}, request {}, response {}",
+        log.debug("Received receivedAnswer request: game {}, purpose {}, request {}, response {}",
                  gameId, purposeId, requestId, response);
         Game                                      game                   = GlobalServerAttributes.getGame(gameId, true, false);
         Map<String, Map<String, NetworkResponse>> awaitingResponses      = game.getAwaitingResponses();

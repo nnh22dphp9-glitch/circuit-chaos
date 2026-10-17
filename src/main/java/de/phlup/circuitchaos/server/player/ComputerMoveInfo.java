@@ -3,6 +3,7 @@ package de.phlup.circuitchaos.server.player;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
+import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.ProgramType;
@@ -460,7 +461,7 @@ public class ComputerMoveInfo {
                             if (!player2.getRobot().isVirtual()) {
                                 boolean willCheck = true;
                                 if (player2 instanceof ComputerPlayer) {
-                                    willCheck = !((ComputerPlayer) player2).isAggressive();
+                                    willCheck = ((ComputerPlayer) player2).getGoal() == Goal.FINISH;
                                 }
                                 if (willCheck) {
                                     int maxDist = 4;
