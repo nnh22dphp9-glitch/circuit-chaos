@@ -335,13 +335,16 @@ public class Game {
         Player winner = null;
         for (int phase = 0; phase < 5 && winner == null && !players.isEmpty() && !gameAborted; phase++) {
             notifyCourseMayHaveChanged(Step.START_OF_TURN_COURSE_EFFECTS, phase, "begin of phase %s".formatted(phase + 1), null);
-
             List<Robot> robots = stepRevealProgrammes(phase);
             stepRobotsMove(phase, robots);
             stepCourseElementsMove(phase);
             stepResolveBeamsAndLaserFire(phase);
             winner = setTouchCheckpoints(phase);
             discardVirtualStateWhenPossible();
+            if (goal == Goal.KILL_ALL) {
+                List.copyOf(players).stream().filter(Player::hasLost).forEach(this::removeLostPlayer);
+                winner = checkKillAllWinner();
+            }
         }
         return winner;
     }
@@ -432,7 +435,7 @@ public class Game {
     }
 
     private Player endOfTurnCourseEffects(Player winner) {
-        for (Player player : List.copyOf(players)) {
+        for (Player player : players) {
             if (winner == null && !gameAborted) {
                 if (player.getRobot().isFlying()) {
                     land(player, Step.END_OF_TURN_COURSE_EFFECTS, 4);
@@ -444,27 +447,34 @@ public class Game {
 
                 if (goal == Goal.FINISH && player.hasWon()) {
                     winner = player;
-                } else if (player.hasLost()) {
-                    players.remove(player);
-                    if (player instanceof NetworkPlayer networkPlayer) {
-                        for (Registration reg : List.copyOf(networkPlayers)) {
-                            if (reg.getId().equals(networkPlayer.getRegistration().getId())) {
-                                networkPlayers.remove(reg);
-                            }
-                        }
-                    }
                 }
             }
         }
+        List.copyOf(players).stream().filter(Player::hasLost).forEach(this::removeLostPlayer);
         if (goal == Goal.KILL_ALL) {
-            if (players.isEmpty()) {
-                gameAborted = true;
-                winner = null;
-            } else if (players.size() == 1) {
-                winner = players.getFirst();
-            }
+            winner = checkKillAllWinner();
         }
         return winner;
+    }
+
+    private void removeLostPlayer(Player player) {
+        players.remove(player);
+        if (player instanceof NetworkPlayer networkPlayer) {
+            for (Registration reg : List.copyOf(networkPlayers)) {
+                if (reg.getId().equals(networkPlayer.getRegistration().getId())) {
+                    networkPlayers.remove(reg);
+                }
+            }
+        }
+    }
+
+    private Player checkKillAllWinner() {
+        if (players.isEmpty()) {
+            gameAborted = true;
+        } else if (players.size() == 1) {
+            return players.getFirst();
+        }
+        return null;
     }
 
     private void handleDestroyedRobots(Player player) {
