@@ -1,5 +1,6 @@
 package de.phlup.circuitchaos.server.player;
 
+import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.NetworkResponse;
 import de.phlup.circuitchaos.common.model.Registration;
@@ -22,8 +23,8 @@ public class NetworkPlayer extends Player {
     private final String       id;
     private final Registration registration;
 
-    public NetworkPlayer(Robot robot, String gameId, Registration registration) {
-        super(robot, gameId);
+    public NetworkPlayer(Robot robot, String gameId, Registration registration, Goal goal) {
+        super(robot, gameId, goal);
         this.registration = registration;
         this.id = UUID.randomUUID().toString();
     }

@@ -216,7 +216,7 @@ public class ServerController {
                               @PathVariable("requestId") String requestId,
                               @RequestBody NetworkResponse response) {
         log.debug("Received receivedAnswer request: game {}, purpose {}, request {}, response {}",
-                 gameId, purposeId, requestId, response);
+                  gameId, purposeId, requestId, response);
         Game                                      game                   = GlobalServerAttributes.getGame(gameId, true, false);
         Map<String, Map<String, NetworkResponse>> awaitingResponses      = game.getAwaitingResponses();
         Map<String, NetworkResponse>              networkResponseHashMap = awaitingResponses.get(purposeId);

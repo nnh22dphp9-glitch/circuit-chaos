@@ -2,11 +2,11 @@ package de.phlup.circuitchaos.server.player;
 
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
+import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.Module;
 import de.phlup.circuitchaos.common.model.Robot;
-import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.Game;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -14,24 +14,30 @@ import lombok.Data;
 import static de.phlup.circuitchaos.common.enums.ModuleType.LAYERED_ARMOR;
 import static de.phlup.circuitchaos.common.enums.ModuleType.POWER_DOWN_SHIELD;
 import static de.phlup.circuitchaos.common.enums.ModuleType.SHIELD;
+import static de.phlup.circuitchaos.server.GlobalServerAttributes.getGame;
 
 @Data
 public abstract class Player {
 
     protected final Robot  robot;
     protected final String gameId;
+    protected final Goal   goal;
+    protected       int    dieCounter;
 
-    protected Player(@NotNull Robot robot, @NotNull String gameId) {
+    protected Player(@NotNull Robot robot, @NotNull String gameId, @NotNull Goal goal) {
         this.robot = robot;
         this.gameId = gameId;
+        this.goal = goal;
     }
 
     public boolean hasLost() {
-        return robot.isGiveUp();
+        return robot.isGiveUp() || (goal == Goal.KILL_ALL && dieCounter > 0);
     }
 
     public boolean hasWon() {
-        return !hasLost() && robot.getNextCheckpoint() > GlobalServerAttributes.getGame(gameId).getCourse().getCheckpoints().size() - 1;
+        return !hasLost()
+                && ((goal == Goal.FINISH && robot.getNextCheckpoint() > getGame(gameId).getCourse().getCheckpoints().size() - 1)
+                || (goal == Goal.KILL_ALL && getGame(gameId).getPlayers().size() == 1));
     }
 
     protected void initTurn() {
@@ -49,7 +55,7 @@ public abstract class Player {
     }
 
     public void takeDamage(Integer phase, Player source, Direction direction, boolean considerShields) {
-        Game game = GlobalServerAttributes.getGame(gameId);
+        Game game = getGame(gameId);
         if (robot.isOnCourse() && (source == null || !robot.isVirtual())) {
             boolean takesDamage = true;
             if (considerShields) {
@@ -94,10 +100,9 @@ public abstract class Player {
             if (robot.getDamage() - countBlockedRegisters() > 4) {
                 blockRegister();
             }
-            if (robot.isOnCourse()) {
-                if (robot.getDamage() >= 10) {
-                    CourseHandler.remove(course, this.robot);
-                }
+            if (robot.isOnCourse() && robot.getDamage() >= 10) {
+                CourseHandler.remove(course, this.robot);
+                dieCounter++;
             }
         }
     }
@@ -138,7 +143,7 @@ public abstract class Player {
     }
 
     public void arriveAtPitStop() {
-        Game game = GlobalServerAttributes.getGame(gameId);
+        Game game = getGame(gameId);
         game.addNewModuleToRobot(robot);
         if (robot.getDamage() > 0) {
             robot.setDamage(robot.getDamage() - 1);

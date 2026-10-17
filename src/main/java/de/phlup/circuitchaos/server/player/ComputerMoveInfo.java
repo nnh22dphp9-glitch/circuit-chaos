@@ -20,9 +20,9 @@ import lombok.Data;
 @Data
 public class ComputerMoveInfo {
 
-    private final Game game;
-    private final Course course;
-    private final Player player;
+    private final Game       game;
+    private final Course     course;
+    private final Player     player;
     private final Checkpoint nextCP;
 
     private Programme[] program;

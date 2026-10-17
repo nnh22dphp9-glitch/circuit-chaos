@@ -3,9 +3,9 @@ package de.phlup.circuitchaos.server.game;
 import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.CircuitChaosException;
 import de.phlup.circuitchaos.common.CourseHandler;
-import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
+import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.ProgramType;
@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import static de.phlup.circuitchaos.common.enums.Direction.EAST;
 import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
@@ -95,6 +96,7 @@ public class Game {
     private Thread loopThread;
 
     private final Course               course         = new Course();
+    private       Goal                 goal           = Goal.FINISH;
     @Getter
     private final ServerCourseArranger courseArranger = new ServerCourseArranger();
     @Setter
@@ -215,6 +217,7 @@ public class Game {
         Position startPosition = course.getCheckpoints().stream()
                                        .min(Comparator.comparingInt(Checkpoint::getNumber))
                                        .orElseThrow().getPosition();
+        goal = gameOptions.getGoal();
         notStartedYet = false;
         GlobalServerAttributes.setGameRunning(this.getGameId(), this);
 
@@ -231,7 +234,7 @@ public class Game {
                 RobotType robotType = availableRobotTypes.getFirst();
                 availableRobotTypes.remove(robotType);
                 Robot         robot         = createRobot(robotType, startPosition);
-                NetworkPlayer networkPlayer = new NetworkPlayer(robot, gameId, reg);
+                NetworkPlayer networkPlayer = new NetworkPlayer(robot, gameId, reg, goal);
                 players.addLast(networkPlayer);
                 CourseHandler.add(course, robot);
             }
@@ -240,7 +243,7 @@ public class Game {
             RobotType robotType = availableRobotTypes.getFirst();
             availableRobotTypes.remove(robotType);
             Robot robot = createRobot(robotType, startPosition);
-            players.addLast(new ComputerPlayer(robot, gameId, gameOptions.getGoal()));
+            players.addLast(new ComputerPlayer(robot, gameId, goal));
             CourseHandler.add(course, robot);
         }
         int playersSize = players.size();
@@ -323,8 +326,8 @@ public class Game {
         for (int phase = 0; phase < 5 && winner == null && !players.isEmpty() && !gameAborted; phase++) {
             notifyCourseMayHaveChanged(Step.START_OF_TURN_COURSE_EFFECTS, phase, "begin of phase %s".formatted(phase + 1), null);
 
-            List<Robot> objectsWithPriority = stepRevealProgrammes(phase);
-            stepRobotsMove(phase, objectsWithPriority);
+            List<Robot> robots = stepRevealProgrammes(phase);
+            stepRobotsMove(phase, robots);
             stepCourseElementsMove(phase);
             stepResolveBeamsAndLaserFire(phase);
             winner = setTouchCheckpoints(phase);
@@ -429,7 +432,7 @@ public class Game {
                 player.getRobot().setMayChooseDirection(false);
                 handleDestroyedRobots(player);
 
-                if (player.hasWon()) {
+                if (goal == Goal.FINISH && player.hasWon()) {
                     winner = player;
                 } else if (player.hasLost()) {
                     players.remove(player);
@@ -441,6 +444,14 @@ public class Game {
                         }
                     }
                 }
+            }
+        }
+        if (goal == Goal.KILL_ALL) {
+            if (players.isEmpty()) {
+                gameAborted = true;
+                winner = null;
+            } else if (players.size() == 1) {
+                winner = players.getFirst();
             }
         }
         return winner;
@@ -523,7 +534,7 @@ public class Game {
                     if (phase == 4 && f2.getFloortype() == Floortype.PIT_STOP) {
                         player.arriveAtPitStop();
                     }
-                    if (player.hasWon()) {
+                    if (goal == Goal.FINISH && player.hasWon()) {
                         winner = player;
                     }
                 } else if (o instanceof CourseObject co) {
