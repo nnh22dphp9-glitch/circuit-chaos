@@ -28,7 +28,7 @@ import java.util.Set;
 @Slf4j
 public class ComputerPlayer extends Player {
 
-    private       Checkpoint nextCP;
+    private Checkpoint nextCP;
 
     private boolean turnFinished;
 
