@@ -44,7 +44,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -213,9 +213,6 @@ public class Game {
         if (numberOfTargetCheckpoint < 2) {
             throw new CircuitChaosException("Not enough checkpoints set.");
         }
-        Position startPosition = course.getCheckpoints().stream()
-                                       .min(Comparator.comparingInt(Checkpoint::getNumber))
-                                       .orElseThrow().getPosition();
         goal = gameOptions.getGoal();
         notStartedYet = false;
         GlobalServerAttributes.setGameRunning(this.getGameId(), this);
@@ -232,7 +229,7 @@ public class Game {
             } else {
                 RobotType robotType = availableRobotTypes.getFirst();
                 availableRobotTypes.remove(robotType);
-                Robot         robot         = createRobot(robotType, startPosition);
+                Robot         robot         = createRobot(robotType);
                 NetworkPlayer networkPlayer = new NetworkPlayer(robot, gameId, reg, goal);
                 players.addLast(networkPlayer);
                 CourseHandler.add(course, robot);
@@ -241,7 +238,7 @@ public class Game {
         for (int i = 0; !availableRobotTypes.isEmpty() && i < gameOptions.getMaxNumberOfComputerPlayers(); i++) {
             RobotType robotType = availableRobotTypes.getFirst();
             availableRobotTypes.remove(robotType);
-            Robot robot = createRobot(robotType, startPosition);
+            Robot robot = createRobot(robotType);
             players.addLast(new ComputerPlayer(robot, gameId, goal));
             CourseHandler.add(course, robot);
         }
@@ -251,11 +248,29 @@ public class Game {
                 players.getFirst().getRobot().setVirtual(false);
             }
             provideRobotsWithDefaultModules(gameOptions.getDefaultModules());
+            if (goal == Goal.KILL_ALL) {
+                course.getCheckpoints().forEach(cp -> cp.setNumber(0));
+            }
+            determineStartPositions();
             loopThread = new LoopThread(getGameId());
             loopThread.start();
         } else {
             gameAborted = true;
             end(null);
+        }
+    }
+
+    private void determineStartPositions() {
+        Iterator<Checkpoint> cp = course.getCheckpoints().stream().filter(c -> c.getNumber() == 0).iterator();
+        for (Player pl : players) {
+            if (!cp.hasNext()) {
+                cp = course.getCheckpoints().stream().filter(c -> c.getNumber() == 0).iterator();
+            }
+            Position position = cp.next().getPosition();
+            pl.getRobot().setPosition(position);
+            pl.getRobot().setPrevPosition(position);
+            pl.getRobot().setArchivePosition(position);
+            pl.getRobot().setLevel(CourseHandler.getFloor(course, position).getLevel());
         }
     }
 
@@ -272,14 +287,10 @@ public class Game {
         }
     }
 
-    private Robot createRobot(RobotType robotType, Position startPosition) {
+    private Robot createRobot(RobotType robotType) {
         Robot robot = new Robot();
         robot.setName(robotType.getRobotName());
         robot.setId(UUID.randomUUID().toString());
-        robot.setPosition(startPosition);
-        robot.setPrevPosition(startPosition);
-        robot.setArchivePosition(startPosition);
-        robot.setLevel(CourseHandler.getFloor(course, startPosition).getLevel());
         return robot;
     }
 

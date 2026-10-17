@@ -256,7 +256,7 @@ public class CourseHandler {
             }
         }
         for (Checkpoint checkpoint : course.getCheckpoints()) {
-            elements.add(new CourseElementStub(String.valueOf(checkpoint.getNumber()), null, null));
+            elements.add(new CourseElementStub(String.valueOf(checkpoint.getNumber()), checkpoint.getPosition(), Direction.NORTH));
         }
         for (Robot robot : course.getRobotsFallingIntoAbyss()) {
             elements.add(new CourseElementStub(robot.getName(), robot.getPosition(), robot.getDirection()));

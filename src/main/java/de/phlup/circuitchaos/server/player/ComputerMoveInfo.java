@@ -461,7 +461,7 @@ public class ComputerMoveInfo {
                             if (!player2.getRobot().isVirtual()) {
                                 boolean willCheck = true;
                                 if (player2 instanceof ComputerPlayer) {
-                                    willCheck = ((ComputerPlayer) player2).getGoal() == Goal.FINISH;
+                                    willCheck = player2.getGoal() == Goal.FINISH;
                                 }
                                 if (willCheck) {
                                     int maxDist = 4;
@@ -522,41 +522,43 @@ public class ComputerMoveInfo {
                     reachesPitStop = phase == 4;
                     copiesArchive = true;
                 }
-                if (reachesCheckpoint == 5 && nextCP.getPosition().x() == x && nextCP.getPosition().y() == y) {
-                    reachesCheckpoint = phase;
+                if (nextCP != null) { // case Goal = KILL_ALL
+                    if (reachesCheckpoint == 5 && nextCP.getPosition().x() == x && nextCP.getPosition().y() == y) {
+                        reachesCheckpoint = phase;
+                        if (phase == 4) {
+                            reachesPitStop = true;
+                        }
+                        copiesArchive = true;
+                    }
                     if (phase == 4) {
-                        reachesPitStop = true;
-                    }
-                    copiesArchive = true;
-                }
-                if (phase == 4) {
-                    keepsStaying = x == player.getRobot().getPosition().x() && y == player.getRobot().getPosition().y();
-                    switch (endingDirection) {
-                        case NORTH:
-                            facesTowardsCheckpoint = nextCP.getPosition().y() <= y;
-                            break;
-                        case EAST:
-                            facesTowardsCheckpoint = nextCP.getPosition().x() >= x;
-                            break;
-                        case SOUTH:
-                            facesTowardsCheckpoint = nextCP.getPosition().y() >= y;
-                            break;
-                        case WEST:
-                            facesTowardsCheckpoint = nextCP.getPosition().x() <= x;
-                            break;
-                    }
-                    int minx = course.getRange().minX();
-                    int miny = course.getRange().minY();
-                    if ((y - miny) - (nextCP.getPosition().y() - miny) == 0) {
-                        distance2 = (x - minx) - (nextCP.getPosition().x() - minx);
-                    } else if ((x - minx) - (nextCP.getPosition().x() - minx) == 0) {
-                        distance2 = (y - miny) - (nextCP.getPosition().y() - miny);
-                    } else {
-                        distance2 = Math.abs(((y - miny) - (nextCP.getPosition().y() - miny)) / Math
-                                .sin(Math.atan(((y - miny) - (nextCP.getPosition().y() - miny)) / (double) ((x - minx) - (nextCP.getPosition().x() - minx)))));
-                    }
-                    if (distance2 < 0) {
-                        distance2 = -distance2;
+                        keepsStaying = x == player.getRobot().getPosition().x() && y == player.getRobot().getPosition().y();
+                        switch (endingDirection) {
+                            case NORTH:
+                                facesTowardsCheckpoint = nextCP.getPosition().y() <= y;
+                                break;
+                            case EAST:
+                                facesTowardsCheckpoint = nextCP.getPosition().x() >= x;
+                                break;
+                            case SOUTH:
+                                facesTowardsCheckpoint = nextCP.getPosition().y() >= y;
+                                break;
+                            case WEST:
+                                facesTowardsCheckpoint = nextCP.getPosition().x() <= x;
+                                break;
+                        }
+                        int minx = course.getRange().minX();
+                        int miny = course.getRange().minY();
+                        if ((y - miny) - (nextCP.getPosition().y() - miny) == 0) {
+                            distance2 = (x - minx) - (nextCP.getPosition().x() - minx);
+                        } else if ((x - minx) - (nextCP.getPosition().x() - minx) == 0) {
+                            distance2 = (y - miny) - (nextCP.getPosition().y() - miny);
+                        } else {
+                            distance2 = Math.abs(((y - miny) - (nextCP.getPosition().y() - miny)) / Math
+                                    .sin(Math.atan(((y - miny) - (nextCP.getPosition().y() - miny)) / (double) ((x - minx) - (nextCP.getPosition().x() - minx)))));
+                        }
+                        if (distance2 < 0) {
+                            distance2 = -distance2;
+                        }
                     }
                 }
             }
