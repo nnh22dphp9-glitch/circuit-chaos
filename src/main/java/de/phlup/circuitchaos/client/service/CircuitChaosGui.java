@@ -2,7 +2,7 @@ package de.phlup.circuitchaos.client.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.phlup.circuitchaos.client.ClientToServerConnection;
-import de.phlup.circuitchaos.client.gui.ClientCourseArranger;
+import de.phlup.circuitchaos.client.gui.CourseArranger;
 import de.phlup.circuitchaos.client.gui.EditorGui;
 import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.client.gui.GuiHelper;
@@ -209,7 +209,7 @@ public class CircuitChaosGui implements GuiHelper {
 
             GameGui gui = new GameGui(resourceLoader, audioSupplier, clientToServerConnection, gameAttributes, clientSettings);
             gameAttributes.setGameGui(gui);
-            gui.setCourseArranger(new ClientCourseArranger(gui, gameSettings, courseLoader, objectMapper, clientSettings));
+            gui.setCourseArranger(new CourseArranger(gui, gameSettings, courseLoader, objectMapper, clientSettings));
         } catch (Exception exc) {
             log.error("Exception occurred - shutting game down", exc);
             if (gameAttributes != null) {

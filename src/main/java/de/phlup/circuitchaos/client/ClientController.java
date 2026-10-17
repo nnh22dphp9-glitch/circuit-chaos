@@ -1,6 +1,6 @@
 package de.phlup.circuitchaos.client;
 
-import de.phlup.circuitchaos.client.gui.ClientCourseArranger;
+import de.phlup.circuitchaos.client.gui.CourseArranger;
 import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.client.service.AsyncService;
 import de.phlup.circuitchaos.common.CircuitChaosException;
@@ -105,7 +105,7 @@ public class ClientController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         log.debug("Received numberOfPlayersChanged request");
-        ClientCourseArranger courseArranger = determineGame(registrationId).getCourseArranger();
+        CourseArranger courseArranger = determineGame(registrationId).getCourseArranger();
         if (courseArranger != null) {
             courseArranger.updatePlayersAndWatchers(numberOfPlayers, numberOfWatchers);
         }

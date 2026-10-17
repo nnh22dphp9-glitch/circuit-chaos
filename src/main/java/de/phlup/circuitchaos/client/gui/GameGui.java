@@ -56,7 +56,7 @@ public class GameGui extends BaseGui {
     private final JCheckBoxMenuItem soundMenuItem   = new JCheckBoxMenuItem("Sound", true);
 
     @Setter
-    private ClientCourseArranger courseArranger = null;
+    private CourseArranger courseArranger = null;
 
     public GameGui(@NotNull ResourceLoader resourceLoader,
                    @NotNull AudioSupplier audioSupplier,

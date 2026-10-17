@@ -1,7 +1,7 @@
 package de.phlup.circuitchaos.server.scheduler;
 
 import de.phlup.circuitchaos.client.ClientToServerConnection;
-import de.phlup.circuitchaos.client.gui.ClientCourseArranger;
+import de.phlup.circuitchaos.client.gui.CourseArranger;
 import de.phlup.circuitchaos.client.gui.GameGui;
 import de.phlup.circuitchaos.client.service.AsyncService;
 import de.phlup.circuitchaos.common.enums.CourseState;
@@ -54,7 +54,7 @@ public class PollingScheduler {
                 asyncService.perform(gameGui, answerUrl, data.getRequest());
             }
             case NUMBER_OF_PLAYERS_CHANGE -> {
-                ClientCourseArranger courseArranger = gameGui.getCourseArranger();
+                CourseArranger courseArranger = gameGui.getCourseArranger();
                 if (courseArranger != null) {
                     courseArranger.updatePlayersAndWatchers(data.getNumberOfPlayers(), data.getNumberOfWatchers());
                 }

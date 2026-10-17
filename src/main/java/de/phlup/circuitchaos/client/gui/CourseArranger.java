@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage;
 import java.util.Collection;
 
 @Slf4j
-public class ClientCourseArranger implements GuiHelper {
+public class CourseArranger implements GuiHelper {
 
     private static final int GLOBAL_MAX_COMPUTER_PLAYERS = 8;
 
@@ -53,12 +53,11 @@ public class ClientCourseArranger implements GuiHelper {
     private final ClientSettings         clientSettings;
 
 
-    public ClientCourseArranger(GameGui game, GameSettings gameSettings, CourseLoader courseLoader, ObjectMapper objectMapper, ClientSettings clientSettings) {
+    public CourseArranger(GameGui game, GameSettings gameSettings, CourseLoader courseLoader, ObjectMapper objectMapper, ClientSettings clientSettings) {
         imageSupplier = game.getImageSupplier();
         courseInfos = courseLoader.loadCourses();
         this.objectMapper = objectMapper;
         this.clientSettings = clientSettings;
-        maxComputerPlayers.setSelectedItem(gameSettings.getMaxNumberOfComputerPlayers());
 
         JPanel borderPanel = new JPanel(new BorderLayout());
         JPanel mainPanel   = new JPanel(new BorderLayout());
@@ -66,7 +65,7 @@ public class ClientCourseArranger implements GuiHelper {
         JPanel centerPanel = new JPanel(new BorderLayout());
         mainPanel.add(centerPanel);
         centerPanel.add(createGoalChooser(), BorderLayout.NORTH);
-        centerPanel.add(createComputerPlayerChooser(), BorderLayout.SOUTH);
+        centerPanel.add(createComputerPlayerChooser(gameSettings.getMaxNumberOfComputerPlayers()), BorderLayout.SOUTH);
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         mainPanel.add(createPlayersDisplay(), BorderLayout.SOUTH);
         borderPanel.add(mainPanel, BorderLayout.CENTER);
@@ -104,12 +103,13 @@ public class ClientCourseArranger implements GuiHelper {
         return panel;
     }
 
-    private JPanel createComputerPlayerChooser() {
+    private JPanel createComputerPlayerChooser(int maxNumberOfComputerPlayers) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JLabel("Max. number of computer players:"), BorderLayout.CENTER);
         for (int i = 0; i < GLOBAL_MAX_COMPUTER_PLAYERS; i++) {
             maxComputerPlayers.addItem(i);
         }
+        maxComputerPlayers.setSelectedItem(maxNumberOfComputerPlayers);
         panel.add(maxComputerPlayers, BorderLayout.SOUTH);
         return panel;
     }
