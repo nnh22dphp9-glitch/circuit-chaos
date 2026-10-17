@@ -6,7 +6,7 @@ public record Position(int x, int y) {
 
     public boolean inRange(Range range) {
         return x >= range.minX()
-                && x <= range.maxY()
+                && x <= range.maxX()
                 && y >= range.minY()
                 && y <= range.maxY();
     }
