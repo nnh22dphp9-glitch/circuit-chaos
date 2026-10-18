@@ -60,7 +60,7 @@ Ziel: Tatsächliches Engine-Verhalten, beabsichtigte Spielregeln und spätere KI
 ### Schutz / Reparatur
 
 - `SHIELD`: blockiert einen passenden gerichteten Treffer, verbraucht dabei seine Aktivierung für die Phase.
-- `POWER_DOWN_SHIELD`: schützt einen heruntergefahrenen Roboter zumindest vor Laser-Strahl-Schaden. Ein Power-Down wird während der Programmierung angekündigt; der Roboter setzt eine Runde aus und verliert seine bisherigen Schadenspunkte, bleibt aber auf dem Spielfeld und kann erneut Schaden erhalten. Der Schild bedeutet daher keine allgemeine Unverwundbarkeit.
+- `POWER_DOWN_SHIELD`: schützt einen heruntergefahrenen Roboter zumindest vor Laser-Strahl-Schaden. Ein Power-Down wird während der Programmierung angekündigt, aber das aktuelle Programm wird zunächst noch vollständig ausgeführt. Erst in der darauffolgenden Runde setzt der Roboter aus und verliert seine bisherigen Schadenspunkte. Er bleibt auf dem Spielfeld und kann erneut Schaden erhalten. Der Schild bedeutet daher keine allgemeine Unverwundbarkeit.
 - `LAYERED_ARMOR`: verbraucht Munition, um Schaden bei einem entsprechend geschützten Treffer zu verhindern.
 - Pit-Stop: heilt einen Schadenspunkt und vergibt ein neues Modul. Die zufällige Modulauswahl und der Nutzen des erhaltenen Moduls sind für eine spätere Strategie zu bewerten.
 - `SUPERIOR_ARCHIVE_COPY`: wird bei der Wiederherstellung am Archiv berücksichtigt; die Engine setzt den Schaden dabei auf 0 statt auf 2.
