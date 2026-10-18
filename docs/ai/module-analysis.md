@@ -37,7 +37,7 @@ Ziel: Tatsächliches Engine-Verhalten, beabsichtigte Spielregeln und spätere KI
 | `EXCHANGE_BEAM` | Tauscht Position und Level des Schützen und des getroffenen Roboters. | Kann sowohl den eigenen Weg verbessern als auch den eigenen Roboter gefährden; danach Position/Level neu bewerten. |
 | `SPIN_LEFT_BEAM` | Dreht den getroffenen Roboter nach links. | Verändert dessen spätere Bewegungsrichtung und potenziell dessen Schussrichtung. |
 | `SPIN_RIGHT_BEAM` | Dreht den getroffenen Roboter nach rechts. | Wie Spin Left in Gegenrichtung. |
-| `RAMMING_ARMOR` (vom Spieleigner als Ramming Gears bezeichnet) | Permanente Verbesserung: Bei einem Zusammenstoß verursacht sie zusätzlichen Schaden. Sie darf durch den Zusammenstoß nicht deaktiviert werden. | **Codefehler gefunden:** `Game.move(...)` setzt `activeInPhase[phase]` beim Kollisionsfall auf `false`. Die Bewegungslogik in `stepRobotsMove(...)`, `robotsMove(...)` und `reactivateRammingArmor(...)` enthält zusätzlich phasenbezogene De-/Reaktivierung. Diese Logik muss gegen die Regel einer permanenten Verbesserung korrigiert werden. Noch nicht geändert. |
+| `RAMMING_ARMOR` (vom Spieleigner als Ramming Gears bezeichnet) | Dauerhafte Verbesserung, deren Schadenseffekt pro Phase höchstens einmal pro schiebendem Roboter ausgelöst werden soll. Bei einer Bewegung mit Stärke 2–4 darf derselbe Roboter nicht für jedes geschobene Feld erneut Schaden erhalten. | Die Deaktivierung von `activeInPhase[phase]` nach dem ersten Zusammenstoß ist beabsichtigt und gilt nur für diese Phase. Die phasenbezogene Logik in `stepRobotsMove(...)`, `robotsMove(...)` und `reactivateRammingArmor(...)` dient dazu, den Effekt für die nächste Phase wieder verfügbar zu machen. Kein Fehler allein aufgrund dieser Deaktivierung; bei Änderungen muss die Reaktivierung in späteren Phasen erhalten bleiben. |
 
 ### Gemeinsame Details der Strahlwaffen
 
@@ -114,3 +114,7 @@ Die folgenden vom Spieleigner bestätigten Regeln sind die maßgebliche Grundlag
 - Zielermittlung und Strahlblockierung sollten von der Engine zentral bereitgestellt bzw. wiederverwendet werden, damit die KI keine abweichende zweite Beam-Logik entwickelt.
 
 Diese Regeln sind fachliche Vorgaben. Nach Codeänderungen müssen sie anhand gezielter Spielsituationen regressionsgetestet werden.
+
+### Ramming Armor: einmaliger Effekt pro Phase
+
+Der Spieleigner hat klargestellt, dass die Deaktivierung während einer Phase beabsichtigt ist: Wenn ein Roboter einen anderen um mehrere Felder schiebt, darf der geschobene Roboter nicht für jedes Feld erneut Ramming-Schaden erhalten. Die Deaktivierung verhindert weitere Auslösungen in derselben Phase. Entscheidend ist, dass das Modul in einer späteren Phase wieder aktiviert werden kann. Die bestehende Deaktivierung in `Game.move(...)` ist daher nicht als Fehler zu behandeln, solange diese phasenbegrenzte Semantik und die spätere Reaktivierung korrekt funktionieren.
