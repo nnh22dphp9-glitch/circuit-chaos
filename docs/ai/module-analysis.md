@@ -85,3 +85,16 @@ Ziel: Tatsächliches Engine-Verhalten, beabsichtigte Spielregeln und spätere KI
 2. Danach Geräte/Fallen einzeln prüfen (Auslösezeitpunkt, Aktivierungsdauer, Munition, Auswirkungen auf andere Roboter).
 3. Anschließend defensive und Bewegungsmodule mit der Simulation vergleichen.
 4. Erst nach dem Regelabgleich die KI-Bewertung ändern. Keine Änderungen an Spielregeln allein aufgrund dieser Dokumentation.
+
+
+## 7. Wichtige Auffälligkeit: Schadensquelle wird offenbar herausgefiltert
+
+Bei der Detailprüfung ist eine mögliche Inkonsistenz aufgefallen:
+
+- `Game.robotMountedBeamsAndLasersShoot` ruft für Laserziele `playerOfTargetRobot.takeDamage(phase, player, dir, true)` auf. Dabei ist `source` der angreifende Spieler.
+- `Player.takeDamage(Integer phase, Player source, Direction direction, boolean considerShields)` führt die Schadensbehandlung aktuell aber nur innerhalb von `if (robot.isOnCourse() && source == null)` aus.
+- Auch der Ramming-Armor-Pfad ruft `takeDamage(phase, player, null, false)` mit einer nicht-null Quelle auf.
+
+Nach dem gelesenen Code würden diese Aufrufe daher keine Schadenspunkte verursachen. Das könnte ein Fehler sein, oder die Bedeutung von `source` ist an anderer Stelle anders gedacht als der Methodenname vermuten lässt. **Vor jeder KI-Bewertung muss der Spieleigner diese Stelle prüfen und das beabsichtigte Verhalten bestätigen.** Ich habe den Spielcode nicht geändert.
+
+Das ist besonders wichtig, weil wir sonst die KI auf eine angenommene Waffenwirkung trainieren, die von der Engine möglicherweise gar nicht ausgeführt wird.
