@@ -54,7 +54,7 @@ public abstract class Player {
 
     public void takeDamage(Integer phase, Player source, Direction direction, boolean considerShields) {
         Game game = getGame(gameId);
-        if (robot.isOnCourse() && source == null) {
+        if (robot.isOnCourse()) {
             boolean takesDamage = true;
             if (considerShields) {
                 if (uses(POWER_DOWN_SHIELD, phase)) {

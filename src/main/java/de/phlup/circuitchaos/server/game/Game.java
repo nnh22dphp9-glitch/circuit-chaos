@@ -1379,10 +1379,10 @@ public class Game {
         Robot target = null;
         if (firstFloorGetsHit) {
             for (Robot ps : CourseHandler.getRobots(course, position)) {
-                if (ps.getLevel() == level && isCourseMounted && !highPowerLaser) {
+                if (ps.getLevel() == level && !highPowerLaser) {
                     target = ps;
                     break;
-                } else if (ps.getLevel() == level && isCourseMounted) {
+                } else if (ps.getLevel() == level) {
                     highPowerLaser = false;
                 }
             }
