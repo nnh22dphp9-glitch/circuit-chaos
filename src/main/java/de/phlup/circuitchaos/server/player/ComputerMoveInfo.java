@@ -3,7 +3,6 @@ package de.phlup.circuitchaos.server.player;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
-import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.ProgramType;
@@ -95,18 +94,10 @@ public class ComputerMoveInfo {
                                 movement = 2 + movement;
                             }
                             switch (endingDirection) {
-                                case NORTH:
-                                    y = y - movement;
-                                    break;
-                                case EAST:
-                                    x = x + movement;
-                                    break;
-                                case SOUTH:
-                                    y = y + movement;
-                                    break;
-                                case WEST:
-                                    x = x - movement;
-                                    break;
+                                case NORTH -> y = y - movement;
+                                case EAST -> x = x + movement;
+                                case SOUTH -> y = y + movement;
+                                case WEST -> x = x - movement;
                             }
                             movement = 0;
                             checkForAbyss(phase);
@@ -118,18 +109,10 @@ public class ComputerMoveInfo {
                     while (movement < 0) {
                         if (notBlocked(course, true)) {
                             switch (endingDirection) {
-                                case NORTH:
-                                    y++;
-                                    break;
-                                case EAST:
-                                    x--;
-                                    break;
-                                case SOUTH:
-                                    y--;
-                                    break;
-                                case WEST:
-                                    x++;
-                                    break;
+                                case NORTH -> y++;
+                                case EAST -> x--;
+                                case SOUTH -> y--;
+                                case WEST -> x++;
                             }
                         }
                         tf = CourseHandler.getFloor(course, new Position(x, y));
@@ -146,18 +129,10 @@ public class ComputerMoveInfo {
                     }
                     while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                         switch (endingDirection) {
-                            case NORTH:
-                                y++;
-                                break;
-                            case EAST:
-                                x--;
-                                break;
-                            case SOUTH:
-                                y--;
-                                break;
-                            case WEST:
-                                x++;
-                                break;
+                            case NORTH -> y++;
+                            case EAST -> x--;
+                            case SOUTH -> y--;
+                            case WEST -> x++;
                         }
                         tf = CourseHandler.getFloor(course, new Position(x, y));
                         checkForAbyss(phase);
@@ -174,18 +149,10 @@ public class ComputerMoveInfo {
                     while (movement > 0) {
                         if (notBlocked(course, false)) {
                             switch (endingDirection) {
-                                case NORTH:
-                                    y--;
-                                    break;
-                                case EAST:
-                                    x++;
-                                    break;
-                                case SOUTH:
-                                    y++;
-                                    break;
-                                case WEST:
-                                    x--;
-                                    break;
+                                case NORTH -> y--;
+                                case EAST -> x++;
+                                case SOUTH -> y++;
+                                case WEST -> x--;
                             }
                         }
                         tf = CourseHandler.getFloor(course, new Position(x, y));
@@ -202,18 +169,10 @@ public class ComputerMoveInfo {
                     }
                     while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                         switch (endingDirection) {
-                            case NORTH:
-                                y--;
-                                break;
-                            case EAST:
-                                x++;
-                                break;
-                            case SOUTH:
-                                y++;
-                                break;
-                            case WEST:
-                                x--;
-                                break;
+                            case NORTH -> y--;
+                            case EAST -> x++;
+                            case SOUTH -> y++;
+                            case WEST -> x--;
                         }
                         tf = CourseHandler.getFloor(course, new Position(x, y));
                         checkForAbyss(phase);
@@ -233,18 +192,10 @@ public class ComputerMoveInfo {
             if (tf.getFloortype().isExpressConveyorBelt()) {
                 lastDirection = tf.getFacingDirection();
                 switch (tf.getFacingDirection()) {
-                    case NORTH:
-                        y--;
-                        break;
-                    case EAST:
-                        x++;
-                        break;
-                    case SOUTH:
-                        y++;
-                        break;
-                    case WEST:
-                        x--;
-                        break;
+                    case NORTH -> y--;
+                    case EAST -> x++;
+                    case SOUTH -> y++;
+                    case WEST -> x--;
                 }
                 tf = CourseHandler.getFloor(course, new Position(x, y));
                 if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW ||
@@ -272,18 +223,10 @@ public class ComputerMoveInfo {
             checkForAbyss(phase);
             while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                 switch (lastDirection) {
-                    case NORTH:
-                        y--;
-                        break;
-                    case EAST:
-                        x++;
-                        break;
-                    case SOUTH:
-                        y++;
-                        break;
-                    case WEST:
-                        x--;
-                        break;
+                    case NORTH -> y--;
+                    case EAST -> x++;
+                    case SOUTH -> y++;
+                    case WEST -> x--;
                 }
                 tf = CourseHandler.getFloor(course, new Position(x, y));
                 checkForAbyss(phase);
@@ -300,18 +243,10 @@ public class ComputerMoveInfo {
             if (tf.getFloortype().isConveyorBelt() && !tf.isWater()) {
                 lastDirection = tf.getFacingDirection();
                 switch (tf.getFacingDirection()) {
-                    case NORTH:
-                        y--;
-                        break;
-                    case EAST:
-                        x++;
-                        break;
-                    case SOUTH:
-                        y++;
-                        break;
-                    case WEST:
-                        x--;
-                        break;
+                    case NORTH -> y--;
+                    case EAST -> x++;
+                    case SOUTH -> y++;
+                    case WEST -> x--;
                 }
                 tf = CourseHandler.getFloor(course, new Position(x, y));
                 if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW ||
@@ -339,18 +274,10 @@ public class ComputerMoveInfo {
             checkForAbyss(phase);
             while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                 switch (lastDirection) {
-                    case NORTH:
-                        y--;
-                        break;
-                    case EAST:
-                        x++;
-                        break;
-                    case SOUTH:
-                        y++;
-                        break;
-                    case WEST:
-                        x--;
-                        break;
+                    case NORTH -> y--;
+                    case EAST -> x++;
+                    case SOUTH -> y++;
+                    case WEST -> x--;
                 }
                 tf = CourseHandler.getFloor(course, new Position(x, y));
                 checkForAbyss(phase);
@@ -366,18 +293,10 @@ public class ComputerMoveInfo {
             checkForAbyss(phase);
             while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                 switch (lastDirection) {
-                    case NORTH:
-                        y--;
-                        break;
-                    case EAST:
-                        x++;
-                        break;
-                    case SOUTH:
-                        y++;
-                        break;
-                    case WEST:
-                        x--;
-                        break;
+                    case NORTH -> y--;
+                    case EAST -> x++;
+                    case SOUTH -> y++;
+                    case WEST -> x--;
                 }
                 tf = CourseHandler.getFloor(course, new Position(x, y));
                 checkForAbyss(phase);
@@ -394,18 +313,10 @@ public class ComputerMoveInfo {
             if (tf.isHasPusher() && tf.getActiveInPhase()[phase]) {
                 lastDirection = tf.getPusherDirection();
                 switch (lastDirection) {
-                    case NORTH:
-                        y--;
-                        break;
-                    case EAST:
-                        x++;
-                        break;
-                    case SOUTH:
-                        y++;
-                        break;
-                    case WEST:
-                        x--;
-                        break;
+                    case NORTH -> y--;
+                    case EAST -> x++;
+                    case SOUTH -> y++;
+                    case WEST -> x--;
                 }
                 tf = CourseHandler.getFloor(course, new Position(x, y));
                 checkForAbyss(phase);
@@ -420,18 +331,10 @@ public class ComputerMoveInfo {
                 //noinspection WhileCanBeDoWhile
                 while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                     switch (lastDirection) {
-                        case NORTH:
-                            y--;
-                            break;
-                        case EAST:
-                            x++;
-                            break;
-                        case SOUTH:
-                            y++;
-                            break;
-                        case WEST:
-                            x--;
-                            break;
+                        case NORTH -> y--;
+                        case EAST -> x++;
+                        case SOUTH -> y++;
+                        case WEST -> x--;
                     }
                     tf = CourseHandler.getFloor(course, new Position(x, y));
                     checkForAbyss(phase);
@@ -454,55 +357,45 @@ public class ComputerMoveInfo {
             // course mounted lasers (resolve laser fire)
             damage = damage + tf.getLasers()[0] + tf.getLasers()[1] + tf.getLasers()[2] + tf.getLasers()[3];
             // probableTargets (resolve laser fire)
-            if (!player.getRobot().isVirtual()) {
-                for (Player player2 : game.getPlayers()) {
-                    if (player2.getRobot().isOnCourse()) {
-                        if (!player2.getRobot().equals(player.getRobot())) {
-                            if (!player2.getRobot().isVirtual()) {
-                                boolean willCheck = true;
-                                if (player2 instanceof ComputerPlayer) {
-                                    willCheck = player2.getGoal() == Goal.FINISH;
+            for (Player player2 : game.getPlayers()) {
+                if (player2.getRobot().isOnCourse()) {
+                    if (!player2.getRobot().equals(player.getRobot())) {
+                        int maxDist = 4;
+                        switch (endingDirection) {
+                            case NORTH -> {
+                                if (player2.getRobot().getPosition().y() < y && Math.abs(player2.getRobot().getPosition().y() - y) <= maxDist && Math.abs(
+                                        player2.getRobot().getPosition().x() - x) <= Math
+                                        .abs(player2.getRobot()
+                                                    .getPosition()
+                                                    .y() - y)) {
+                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x)) * player2.getRobot().getNextCheckpoint();
                                 }
-                                if (willCheck) {
-                                    int maxDist = 4;
-                                    switch (endingDirection) {
-                                        case NORTH:
-                                            if (player2.getRobot().getPosition().y() < y && Math.abs(player2.getRobot().getPosition().y() - y) <= maxDist && Math.abs(
-                                                    player2.getRobot().getPosition().x() - x) <= Math
-                                                    .abs(player2.getRobot()
-                                                                .getPosition()
-                                                                .y() - y)) {
-                                                probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x)) * player2.getRobot().getNextCheckpoint();
-                                            }
-                                            break;
-                                        case EAST:
-                                            if (player2.getRobot().getPosition().x() > x && Math.abs(player2.getRobot().getPosition().x() - x) <= maxDist && Math.abs(
-                                                    player2.getRobot().getPosition().x() - x) >= Math
-                                                    .abs(player2.getRobot()
-                                                                .getPosition()
-                                                                .y() - y)) {
-                                                probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y)) * player2.getRobot().getNextCheckpoint();
-                                            }
-                                            break;
-                                        case SOUTH:
-                                            if (player2.getRobot().getPosition().y() > y && Math.abs(player2.getRobot().getPosition().y() - y) <= maxDist && Math.abs(
-                                                    player2.getRobot().getPosition().x() - x) <= Math
-                                                    .abs(player2.getRobot()
-                                                                .getPosition()
-                                                                .y() - y)) {
-                                                probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x)) * player2.getRobot().getNextCheckpoint();
-                                            }
-                                            break;
-                                        case WEST:
-                                            if (player2.getRobot().getPosition().x() < x && Math.abs(player2.getRobot().getPosition().x() - x) <= maxDist && Math.abs(
-                                                    player2.getRobot().getPosition().x() - x) >= Math
-                                                    .abs(player2.getRobot()
-                                                                .getPosition()
-                                                                .y() - y)) {
-                                                probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y)) * player2.getRobot().getNextCheckpoint();
-                                            }
-                                            break;
-                                    }
+                            }
+                            case EAST -> {
+                                if (player2.getRobot().getPosition().x() > x && Math.abs(player2.getRobot().getPosition().x() - x) <= maxDist && Math.abs(
+                                        player2.getRobot().getPosition().x() - x) >= Math
+                                        .abs(player2.getRobot()
+                                                    .getPosition()
+                                                    .y() - y)) {
+                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y)) * player2.getRobot().getNextCheckpoint();
+                                }
+                            }
+                            case SOUTH -> {
+                                if (player2.getRobot().getPosition().y() > y && Math.abs(player2.getRobot().getPosition().y() - y) <= maxDist && Math.abs(
+                                        player2.getRobot().getPosition().x() - x) <= Math
+                                        .abs(player2.getRobot()
+                                                    .getPosition()
+                                                    .y() - y)) {
+                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x)) * player2.getRobot().getNextCheckpoint();
+                                }
+                            }
+                            case WEST -> {
+                                if (player2.getRobot().getPosition().x() < x && Math.abs(player2.getRobot().getPosition().x() - x) <= maxDist && Math.abs(
+                                        player2.getRobot().getPosition().x() - x) >= Math
+                                        .abs(player2.getRobot()
+                                                    .getPosition()
+                                                    .y() - y)) {
+                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y)) * player2.getRobot().getNextCheckpoint();
                                 }
                             }
                         }
@@ -533,18 +426,10 @@ public class ComputerMoveInfo {
                     if (phase == 4) {
                         keepsStaying = x == player.getRobot().getPosition().x() && y == player.getRobot().getPosition().y();
                         switch (endingDirection) {
-                            case NORTH:
-                                facesTowardsCheckpoint = nextCP.getPosition().y() <= y;
-                                break;
-                            case EAST:
-                                facesTowardsCheckpoint = nextCP.getPosition().x() >= x;
-                                break;
-                            case SOUTH:
-                                facesTowardsCheckpoint = nextCP.getPosition().y() >= y;
-                                break;
-                            case WEST:
-                                facesTowardsCheckpoint = nextCP.getPosition().x() <= x;
-                                break;
+                            case NORTH -> facesTowardsCheckpoint = nextCP.getPosition().y() <= y;
+                            case EAST -> facesTowardsCheckpoint = nextCP.getPosition().x() >= x;
+                            case SOUTH -> facesTowardsCheckpoint = nextCP.getPosition().y() >= y;
+                            case WEST -> facesTowardsCheckpoint = nextCP.getPosition().x() <= x;
                         }
                         int minx = course.getRange().minX();
                         int miny = course.getRange().minY();
