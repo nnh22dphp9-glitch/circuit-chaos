@@ -1,35 +1,31 @@
 
-# Empfohlene Reihenfolge der weiteren Arbeit
+# KI für Circuit Chaos
 
-## Schadensbehandlung korrigieren
-Alle Aufrufstellen prüfen und sicherstellen, dass sowohl verursachter Schaden als auch Umweltschaden korrekt funktionieren. Dabei Schutzmodule und Ausscheiden bei KILL_ALL berücksichtigen.
+-[ ] **Code-Inventur abschließen:** ComputerPlayer, ComputerMoveInfo und die tatsächliche Spielausführung systematisch gegenüberstellen.
+-[ ] **Simulationszustand kopierbar machen:** Einen Zustand erzeugen, in dem Bewegungen und Effekte ausprobiert werden können, ohne den echten Spielzustand zu verändern.
+-[ ] **Simulation gegen die echte Engine validieren:** Prüfen, ob beide bei denselben Programmen zu denselben Ergebnissen kommen.
+-[ ] **Bewertungsfunktion entwickeln:** Checkpoints und Ziel, Route, Ausrichtung, Gefahren, Schaden, Gegner und Pit Stops berücksichtigen.
+-[ ] **Fünf Programmplätze gemeinsam optimieren:** Nicht nur den nächsten Zug betrachten, sondern sinnvolle Kombinationen der fünf Karten bewerten.
+-[ ] **Gegner simulieren:** Auch die Roboter der anderen Spieler und deren mögliche Programme berücksichtigen, soweit deren geheime Informationen nicht bekannt sind.
+-[ ] **Module systematisch integrieren:** Die tatsächlichen Effekte und Aktivierungsbedingungen aus dem Code abbilden.
+-[ ] **Mehrere Runden vorausplanen:** Beispielsweise mit einer Beam Search über zwei bis drei Runden.
+-[ ] Regressionstests, Laufzeitmessung und Entscheidungslogging ergänzen.
 
-## Strahl-Zielermittlung korrigieren
-Roboterziele, One-Way-Wände, Level und Repulsor-Felder nach deinen Regeln behandeln.
+Dabei bleibt die Vorgabe bestehen: keine zusätzliche KI-Bibliothek und keine laufenden Lizenzkosten. Wir wollen das mit Java und den vorhandenen Spielmechaniken umsetzen.
 
-## High Power Laser gesondert prüfen
-Ersten Treffer und Durchschuss zum zweiten Ziel sauber trennen.
-
-## Waffenauswahl für den ComputerPlayer ergänzen
-Eine feste Auswahl pro Phase, die vor der Programmausführung getroffen wird.
-
-## Erst danach die KI-Angriffsstrategie entwickeln
-Dabei dieselbe Zielermittlung wie die Spiel-Engine verwenden, statt eine zweite, abweichende Simulation zu bauen.
+# Konkrete Spielmechanik-Tests
+Diese Punkte würde ich zusätzlich aufnehmen, weil wir die Mechanik zuletzt genauer besprochen haben:
+- [ ] **Ramming Armor:** Ein Roboter schiebt einen anderen zwei bis vier Felder weit. Der geschobene Roboter darf durch diesen Schiebevorgang nur einen Schadenspunkt durch den Ramm-Effekt erhalten.
+- [ ] **Ramming Armor in späteren Phasen:** Sicherstellen, dass der Effekt in der nächsten Phase wieder verfügbar ist. Im Code-Review war kein offensichtlicher Reaktivierungsfehler erkennbar; der Test steht noch aus.
+- [ ] **Power-Down:** Prüfen, dass der Roboter sein aktuelles Programm noch vollständig ausführt und erst in der darauffolgenden Runde aussetzt und seine bisherigen Schadenspunkte verliert.
+- [ ] **Power-Down Shield:** Prüfen, dass der Schild während des Power-Downs den vorgesehenen Schaden durch Laserstrahlen verhindert.
+- [ ] **Teleporter und Minen:** Die beabsichtigte Regel absichern, dass ein Teleporter nicht auf eine mit einer Mine belegte Position teleportiert; die Prüfung benachbarter Felder bleibt davon unberührt.
+- [ ] **Laser-Zielermittlung:** Insbesondere den High Power Laser, Roboter als Hindernisse, Höhenunterschiede, Einbahnwände und Repulsoren testen.
+Das sind zunächst Testaufgaben, keine Behauptung, dass die genannten Funktionen aktuell fehlerhaft sind.
 
 # Weitere TODOs
 
-## Minen-Darstellung fehlerhaft
-- Explodiert eine Mine auf einem Conveyor-Belt, so erzeugt sie einen zusätzlichen Conveyor-Belt-Animationsschritt (ohne dass sich wirklich was ändert), und der Explosions-Sound wird nicht abgespielt.
-
-## Test Ramming-Armor
-- Ein Roboter schiebt einen anderen über vier Felder: genau ein Ramming-Schadenspunkt.
-- Derselbe Roboter verursacht in der nächsten Phase erneut einen Zusammenstoß: der Ramming-Effekt funktioniert wieder.
-
-## Board-Design: Mehrere Start-Fehler
-
-## Board-Design: Mehrere Finish- und CP-Felder
-
-## Schalter-Course-Element
-- Kann Faltüren öffnen/schließen
-- Kann Repulsors (de-)aktivieren
-
+- [ ] **Minen-Darstellung fehlerhaft:** Explodiert eine Mine auf einem Conveyor-Belt, so erzeugt sie einen zusätzlichen Conveyor-Belt-Animationsschritt (ohne dass sich wirklich was ändert), und der Explosions-Sound wird nicht abgespielt.
+- [ ] **Board-Design:** Mehrere Start-Fehler
+- [ ] **Board-Design:** Mehrere Finish- und CP-Felder
+- [ ] **Schalter-Course-Element:** kann Falltüren öffnen/schließen oder Repulsors (de-)aktivieren
