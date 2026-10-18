@@ -303,14 +303,6 @@ public class ComputerPlayer extends Player {
             // "old move reaches pit stop";
         } else if (mi.isReachesPitStop() && !chosenMove.isReachesPitStop()) {
             // "new move reaches pit stop";
-        } else if (chosenMove.getDistance2() < mi.getDistance2() - 2) {
-            newMove = false;
-            // "old move has by far better distance (" + chosenMove.getDistance2() + " <-> " + mi.getDistance2() + ")";
-        } else if (chosenMove.getDistance2() > mi.getDistance2() + 2) {
-            // "new move has by far better distance (" + chosenMove.getDistance2() + " <-> " + mi.getDistance2() + ")";
-        } else if (chosenMove.isCopiesArchive() && !mi.isCopiesArchive()) {
-            newMove = false;
-            // "old move reaches archive point";
         } else if (mi.isCopiesArchive() && !chosenMove.isCopiesArchive()) {
             // "new move reaches archive point";
         } else if (chosenMove.getDamage() < mi.getDamage()) {

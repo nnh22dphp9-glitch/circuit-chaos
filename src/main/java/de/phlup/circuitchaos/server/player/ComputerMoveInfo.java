@@ -3,6 +3,7 @@ package de.phlup.circuitchaos.server.player;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
+import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.ProgramType;
@@ -368,7 +369,8 @@ public class ComputerMoveInfo {
                                         .abs(player2.getRobot()
                                                     .getPosition()
                                                     .y() - y)) {
-                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x)) * player2.getRobot().getNextCheckpoint();
+                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x))
+                                            * (player.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
                                 }
                             }
                             case EAST -> {
@@ -377,7 +379,8 @@ public class ComputerMoveInfo {
                                         .abs(player2.getRobot()
                                                     .getPosition()
                                                     .y() - y)) {
-                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y)) * player2.getRobot().getNextCheckpoint();
+                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y))
+                                            * (player.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
                                 }
                             }
                             case SOUTH -> {
@@ -386,7 +389,8 @@ public class ComputerMoveInfo {
                                         .abs(player2.getRobot()
                                                     .getPosition()
                                                     .y() - y)) {
-                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x)) * player2.getRobot().getNextCheckpoint();
+                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x))
+                                            * (player.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
                                 }
                             }
                             case WEST -> {
@@ -395,7 +399,8 @@ public class ComputerMoveInfo {
                                         .abs(player2.getRobot()
                                                     .getPosition()
                                                     .y() - y)) {
-                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y)) * player2.getRobot().getNextCheckpoint();
+                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y))
+                                            * (player.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
                                 }
                             }
                         }
