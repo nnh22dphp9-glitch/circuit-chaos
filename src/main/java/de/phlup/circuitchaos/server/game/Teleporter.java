@@ -42,6 +42,7 @@ public class Teleporter {
                     game.setPosition(ce, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.ROBOTS_AND_OBJECTS_MOVE, phase, null, false);
                     game.notifyCourseMayHaveChanged(Step.ROBOTS_AND_OBJECTS_MOVE, phase, "%s was teleported".formatted(ce.getName()), null);
                     hasBeenTeleported = true;
+                    break;
                 }
             }
         }
