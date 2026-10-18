@@ -19,7 +19,7 @@ Ziel: Tatsächliches Engine-Verhalten, beabsichtigte Spielregeln und spätere KI
 
 - Ein Roboter hat nicht automatisch einen Laser. Eine Waffe ist nur verfügbar, wenn das entsprechende Modul vorhanden und in der betrachteten Phase aktiv ist.
 - Die Engine behandelt Aktivierung pro Phase (`activeInPhase[0..4]`). `Player.uses(type, phase)` prüft Modulbesitz und dieses Aktivierungsfeld.
-- Mehrere Waffen sind alternative Module. `Shooter` wählt bei Laserfeuer in dieser Reihenfolge: Main Laser, High Power Laser, Double Barrel Laser, Rear Laser. Das bedeutet: Wenn mehrere davon vorhanden und aktiv sind, wird in diesem Schritt nur die erste passende Waffe gewählt.
+- Die Waffe wird vor der Programmausführung für die jeweilige Phase ausgewählt; während der Ausführung kann die Auswahl nicht mehr geändert werden. Die Reihenfolge der Prüfungen in `Shooter` ist deshalb keine strategische Auswahl zwischen mehreren Waffen: Ein `Shooter` sollte nur die für diese Phase ausgewählte Waffe erhalten bzw. eindeutig daraus ableiten. Die Schnittstelle sollte diese Vorentscheidung möglichst explizit machen.
 - Pit-Stop: In Phase 4 ruft die Engine `Player.arriveAtPitStop()` auf. Das vergibt ein neues Modul und repariert einen Schadenspunkt, falls Schaden vorhanden ist. Das ist ein eigenständiger taktischer Vorteil und darf nicht entfernt werden, nur weil ein anderes Spielziel gewählt ist.
 - Für `Goal.KILL_ALL` bedeutet Tod Ausscheiden: `Player.hasLost()` prüft `dieCounter > 0`; `takeDamage` erhöht den Schaden und entfernt den Roboter bei 10 Schaden.
 - `ComputerMoveInfo` simuliert derzeit primär den eigenen Roboter. Die Gegnersuche `probableTargets` ist eine geometrische Näherung (Richtung und Entfernung bis 4 Felder), keine Simulation tatsächlicher Schüsse. Sie prüft aktuell nicht, ob eine passende Waffe vorhanden/aktiv ist und ignoriert Waffentyp, Schutz, Hindernisse und gegnerische Bewegungsvorhersagen. Daher ist sie keine belastbare Trefferwahrscheinlichkeit.
@@ -30,18 +30,18 @@ Ziel: Tatsächliches Engine-Verhalten, beabsichtigte Spielregeln und spätere KI
 |---|---|---|
 | `MAIN_LASER` | Trifft das erste gültige Ziel in Roboterrichtung und verursacht einen Schadenspunkt, sofern das Ziel nicht geschützt ist. | Modul muss vorhanden und aktiv sein; Sichtlinie, Höhe, Wände und Schutz zählen. |
 | `DOUBLE_BARREL_LASER` | Wie Main Laser, verursacht beim getroffenen Ziel zwei Schadensaufrufe. | Schutz kann die Schadenswirkung beeinflussen; Details der Schadensreduktion berücksichtigen. |
-| `HIGH_POWER_LASER` | Ermittelt ein Ziel im normalen Strahl und ein weiteres Ziel mit High-Power-Abfrage. Kann zwei Roboter treffen. | Reichweite/Sichtlinie und Höhenregeln in `Game.getLaserTarget` genau abbilden. |
+| `HIGH_POWER_LASER` | Trifft einen Roboter und durchdringt ihn, um einen dahinterliegenden Roboter ebenfalls treffen zu können. | Wie bei allen Beams müssen Reichweite, Sichtlinie, Höhenunterschiede und blockierende Objekte korrekt berücksichtigt werden; zusätzlich gilt die Durchdringung des ersten Roboters. |
 | `REAR_LASER` | Schießt entgegen der Roboterrichtung. | KI muss hinter dem Roboter nach Zielen suchen; die derzeitige `probableTargets`-Heuristik schaut nur nach vorn. |
 | `PRESSURE_BEAM` | Trifft das erste gültige Ziel vor dem Roboter und schiebt es ein Feld in Schussrichtung. | Push kann Kollisionen, Fallen, Abgründe und Kettenbewegungen auslösen. |
 | `TRACTOR_BEAM` | Zieht das erste gültige Ziel ein Feld entgegen der Schussrichtung zum Schützen. | Wie Push: Folgewirkungen der Bewegung sind entscheidend. |
 | `EXCHANGE_BEAM` | Tauscht Position und Level des Schützen und des getroffenen Roboters. | Kann sowohl den eigenen Weg verbessern als auch den eigenen Roboter gefährden; danach Position/Level neu bewerten. |
 | `SPIN_LEFT_BEAM` | Dreht den getroffenen Roboter nach links. | Verändert dessen spätere Bewegungsrichtung und potenziell dessen Schussrichtung. |
 | `SPIN_RIGHT_BEAM` | Dreht den getroffenen Roboter nach rechts. | Wie Spin Left in Gegenrichtung. |
-| `RAMMING_ARMOR` | Sonderbehandlung bei Bewegungskonflikten: wird beim Zusammenstoß deaktiviert; der kollidierende Roboter kann Schaden erleiden. | Muss in der Kollisions-/Bewegungssimulation berücksichtigt werden; nicht wie eine Fernkampfwaffe bewerten. |
+| `RAMMING_GEARS` | Permanente Verbesserung: Bei einem Zusammenstoß verursacht sie zusätzlichen Schaden. Sie wird durch den Zusammenstoß nicht deaktiviert. | Als dauerhaft vorhandenen Effekt bei der Kollisions- und Bewegungssimulation berücksichtigen, nicht wie eine Fernkampfwaffe bewerten. Eine Deaktivierung im Code wäre ein Fehler. |
 
 ### Gemeinsame Details der Strahlwaffen
 
-- `Shooter` ruft für Strahlen `Game.getLaserTarget(...)` auf. Die Zielermittlung berücksichtigt unter anderem Kursgrenzen, Level und bestimmte Wandtypen.
+- Die Zielermittlung für Beams muss für alle Strahlmodule Reichweite, Sichtlinie, Level/Höhe und blockierende Objekte nach denselben Grundregeln behandeln. Die besonderen Wirkungen einzelner Beams (z. B. Schieben, Ziehen, Drehen, Tauschen oder Durchdringen) kommen zusätzlich dazu.
 - Robotermontierte Strahlen werden in fester Reihenfolge aufgelöst: Tractor, Pressure, Spin Left, Spin Right, Exchange, Laser. Danach folgen Kurs-Strahlen.
 - Schutz wird bei Laserschaden über `Player.takeDamage(..., considerShields=true)` berücksichtigt. Das umfasst Power-Down Shield, Shield und Layered Armor, sofern die Bedingungen passen.
 - Die tatsächliche Engine arbeitet mit dem Zustand zum Zeitpunkt der jeweiligen Auflösungsphase. Eine korrekte KI muss später die Phasenreihenfolge und Änderungen durch frühere Strahlen berücksichtigen.
@@ -55,12 +55,12 @@ Ziel: Tatsächliches Engine-Verhalten, beabsichtigte Spielregeln und spätere KI
 - `BRAKES`: reduziert eine positive oder negative Bewegung um ein Feld in Richtung null.
 - `OVERDRIVE`, `REVERSE_DRIVE`: werden bei der Erzeugung der verfügbaren Programm-Karten berücksichtigt.
 - `EXTRA_PROGRAM`: zusätzliche verfügbare Programm-Karten entsprechend der Munition.
-- `GYROSCOPIC_STABILIZER`: verhindert die automatische Drehung auf Zahnrädern.
+- `GYROSCOPIC_STABILIZER`: verhindert die automatische Drehung sowohl auf Zahnrädern (*Gears*) als auch auf Förderbändern (*Conveyor Belts*).
 
 ### Schutz / Reparatur
 
 - `SHIELD`: blockiert einen passenden gerichteten Treffer, verbraucht dabei seine Aktivierung für die Phase.
-- `POWER_DOWN_SHIELD`: blockiert gerichtete Treffer über noch verfügbare Schutzseiten; Aktivierung hängt vom Power-Down-Zustand ab.
+- `POWER_DOWN_SHIELD`: schützt einen heruntergefahrenen Roboter zumindest vor Laser-Strahl-Schaden. Ein Power-Down wird während der Programmierung angekündigt; der Roboter setzt eine Runde aus und verliert seine bisherigen Schadenspunkte, bleibt aber auf dem Spielfeld und kann erneut Schaden erhalten. Der Schild bedeutet daher keine allgemeine Unverwundbarkeit.
 - `LAYERED_ARMOR`: verbraucht Munition, um Schaden bei einem entsprechend geschützten Treffer zu verhindern.
 - Pit-Stop: heilt einen Schadenspunkt und vergibt ein neues Modul. Die zufällige Modulauswahl und der Nutzen des erhaltenen Moduls sind für eine spätere Strategie zu bewerten.
 - `SUPERIOR_ARCHIVE_COPY`: wird bei der Wiederherstellung am Archiv berücksichtigt; die Engine setzt den Schaden dabei auf 0 statt auf 2.
@@ -87,17 +87,9 @@ Ziel: Tatsächliches Engine-Verhalten, beabsichtigte Spielregeln und spätere KI
 4. Erst nach dem Regelabgleich die KI-Bewertung ändern. Keine Änderungen an Spielregeln allein aufgrund dieser Dokumentation.
 
 
-## 7. Wichtige Auffälligkeit: Schadensquelle wird offenbar herausgefiltert
+## 7. Erledigte Auffälligkeit: Schadensquelle
 
-Bei der Detailprüfung ist eine mögliche Inkonsistenz aufgefallen:
-
-- `Game.robotMountedBeamsAndLasersShoot` ruft für Laserziele `playerOfTargetRobot.takeDamage(phase, player, dir, true)` auf. Dabei ist `source` der angreifende Spieler.
-- `Player.takeDamage(Integer phase, Player source, Direction direction, boolean considerShields)` führt die Schadensbehandlung aktuell aber nur innerhalb von `if (robot.isOnCourse() && source == null)` aus.
-- Auch der Ramming-Armor-Pfad ruft `takeDamage(phase, player, null, false)` mit einer nicht-null Quelle auf.
-
-Nach dem gelesenen Code würden diese Aufrufe daher keine Schadenspunkte verursachen. Das könnte ein Fehler sein, oder die Bedeutung von `source` ist an anderer Stelle anders gedacht als der Methodenname vermuten lässt. **Vor jeder KI-Bewertung muss der Spieleigner diese Stelle prüfen und das beabsichtigte Verhalten bestätigen.** Ich habe den Spielcode nicht geändert.
-
-Das ist besonders wichtig, weil wir sonst die KI auf eine angenommene Waffenwirkung trainieren, die von der Engine möglicherweise gar nicht ausgeführt wird.
+Die frühere Auffälligkeit in `Player.takeDamage`, bei der Schaden offenbar nur mit `source == null` verarbeitet wurde, wurde vom Spieleigner korrigiert. Sie ist daher kein offener Befund mehr. Bei späteren Änderungen sollte die Schadensbehandlung weiterhin für Angriffe mit einer nicht-null Quelle geprüft werden.
 
 
 ## 8. Ergänzungen nach Regelabgleich mit dem Spieleigner
@@ -109,16 +101,16 @@ Das ist besonders wichtig, weil wir sonst die KI auf eine angenommene Waffenwirk
 - Spieler kennen weder die Programme noch die Module anderer Spieler. Sichtbar sind nur Module, die ein Spieler tatsächlich aktiv einsetzt, sowie die Module, die andere Spieler standardmäßig zu Spielbeginn besitzen. Die KI darf daher nicht auf geheime gegnerische Module oder Programme zugreifen, wenn sie eine Entscheidung aus Spielersicht bewertet.
 - High Power Laser: Der Strahl trifft einen Roboter und geht durch diesen hindurch, um einen dahinterliegenden Roboter ebenfalls zu treffen.
 - Gewünschte Strahlblockierung: Roboter blockieren Strahlen, außer beim zweiten Treffer eines High Power Lasers; solide Wände, Repulsor-Felder, One-Way-Wände in Rot-nach-Grün-Richtung sowie ein höheres Level blockieren. Ein niedrigeres Level blockiert nicht; Roboter auf darunterliegenden Levels sollen nicht getroffen werden.
-- Die Prüfung von `source == null` in `Player.takeDamage` ist nach Rückmeldung des Spieleigners vermutlich ein unbeabsichtigter Fehler aus einer früheren Refaktorisierung.
+- Die frühere fehlerhafte Einschränkung auf `source == null` in `Player.takeDamage` wurde laut Spieleigner behoben; sie soll nicht mehr als aktueller Codebefund geführt werden.
 
-### Kritischer Codebefund bei `Game.getLaserTarget`
+### Regeln für die Strahl-Zielermittlung
 
-Die aktuelle Methode scheint die bestätigten Regeln für robotermontierte Waffen nicht vollständig umzusetzen:
+Die folgenden vom Spieleigner bestätigten Regeln sind die maßgebliche Grundlage für Engine und KI:
 
-1. Im Schleifenblock, der Roboter auf der aktuellen Position untersucht, wird ein Ziel nur gesetzt, wenn `isCourseMounted` wahr ist. Bei robotermontierten Waffen ist dieser Parameter falsch. Dadurch werden dort keine Roboter als Ziel ausgewählt.
-2. Die Wandprüfung blockiert `ONE_WAY_RED` auf der Quellseite, lässt `ONE_WAY_GREEN` dort aber passieren. Die Rückseite der Zielwand wird auf `SOLID` und `REPULSOR_FIELD` geprüft, nicht sichtbar auf beide One-Way-Farben. Das ist nicht ohne Weiteres mit der bestätigten Regel „Rot nach Grün blockiert, Grün nach Rot nicht“ gleichzusetzen.
-3. `level` wird beim rekursiven Durchlaufen unverändert weitergegeben. Die aktuelle Methode findet bei robotermontierten Waffen kein Ziel anhand eines Levelvergleichs, weil die Zielerkennung dort nicht greift. Die gewünschte Regel, dass höhere Levels blockieren und niedrigere Levels weder blockieren noch getroffen werden, ist daher noch nicht sauber abgebildet.
-4. Die Sonderbehandlung für High Power Laser greift bei einer blockierenden Wand, indem die Rekursion mit `highPowerLaser=false` fortgesetzt wird. Das allein beweist noch nicht, dass der Laser bei einem ersten Roboter korrekt hindurchgeht und einen zweiten trifft. Zielermittlung und Strahlblockierung sollten anhand der bestätigten Regel separat geprüft werden.
-5. Die Schadensquelle wird bei `Player.takeDamage` aktuell nur akzeptiert, wenn `source == null`. Der Spieleigner bestätigt, dass dies vermutlich ein Refaktorisierungsfehler ist.
+- Alle Beams müssen Reichweite, Sichtlinie, Höhenunterschiede und blockierende Objekte korrekt berücksichtigen; das ist keine Besonderheit des High-Power-Lasers.
+- Roboter blockieren Strahlen grundsätzlich. Ausnahme: Der High-Power-Laser kann den ersten Roboter durchdringen und einen dahinterliegenden Roboter treffen.
+- Solide Wände und Repulsor-Felder blockieren Strahlen. One-Way-Wände blockieren in Rot-nach-Grün-Richtung, nicht in Grün-nach-Rot-Richtung.
+- Ein höheres Level blockiert den Strahl. Ein niedrigeres Level blockiert ihn nicht; Roboter auf darunterliegenden Levels werden nicht getroffen.
+- Zielermittlung und Strahlblockierung sollten von der Engine zentral bereitgestellt bzw. wiederverwendet werden, damit die KI keine abweichende zweite Beam-Logik entwickelt.
 
-Diese Punkte sind Befunde zur vorhandenen Implementierung, keine bereits vorgenommenen Korrekturen. Vor dem Fix sollten die Regeln in einer zentralen Beschreibung festgehalten und anschließend die Engine-Zielermittlung korrigiert werden. Die KI sollte danach dieselbe Zielermittlung verwenden, statt eine zweite, abweichende Laserlogik zu implementieren.
+Diese Regeln sind fachliche Vorgaben. Nach Codeänderungen müssen sie anhand gezielter Spielsituationen regressionsgetestet werden.
