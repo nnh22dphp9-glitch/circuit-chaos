@@ -80,9 +80,6 @@ public class ToolTipTexts {
                 .append(INCREMENT).append(NEW_LINE)
                 .append("<strong>").append(r.getName()).append("</strong>, Damage: ")
                 .append(r.getDamage()).append(", next CP: ").append(r.getNextCheckpoint());
-        if (r.isVirtual()) {
-            ttt.append(" - VIRTUAL");
-        }
         if (r.isPoweredDown()) {
             ttt.append(" - POWERED DOWN");
         }

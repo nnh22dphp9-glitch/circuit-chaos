@@ -23,7 +23,6 @@ public class Robot extends CourseElement {
     private List<Module>    modules                = new ArrayList<>();
     private boolean[]       blocked                = new boolean[]{false, false, false, false, false};
     private boolean         giveUp                 = false;
-    private boolean         virtual                = true;
     private boolean         poweredDown            = false;
     private boolean         powerDownAnnounced     = false;
     private boolean         mayChooseDirection     = true;
@@ -78,7 +77,6 @@ public class Robot extends CourseElement {
         }
 
         giveUp = networkRobot.isGiveUp();
-        virtual = networkRobot.isVirtual();
         poweredDown = networkRobot.isPoweredDown();
         powerDownAnnounced = networkRobot.isPowerDownAnnounced();
         mayChooseDirection = networkRobot.isMayChooseDirection();

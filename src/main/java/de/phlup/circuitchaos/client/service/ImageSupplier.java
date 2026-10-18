@@ -109,7 +109,6 @@ import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRAPDOOR_6;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_WALL_TYPE;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_WATER;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.ROBOT_POSTFIX_FLYING;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.ROBOT_POSTFIX_VIRTUAL;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.getGfxOfModuleType;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.getGfxOfObjectType;
 import static de.phlup.circuitchaos.common.enums.Direction.EAST;
@@ -334,7 +333,7 @@ public class ImageSupplier {
         String picture = getRobotImagePathAndName(robot);
         drawCourseElement(robot, gr, subPhase, leaving, picture, animationSteps);
         if (robot.isOnCourse() && !leaving
-                && ((!robot.isVirtual() && step == ROBOT_MOUNTED_LASER_FIRE && (floor.isBeamsNS() || floor.isBeamsWE()))
+                && ((step == ROBOT_MOUNTED_LASER_FIRE && (floor.isBeamsNS() || floor.isBeamsWE()))
                 || (step == COURSE_MOUNTED_LASER_FIRE && (floor.getCourseMountedLaserBeamsNS() > 0 || floor.getCourseMountedLaserBeamsWE() > 0)))
                 || (step == OPEN_TRAPDOORS && floor.getFloortype() == Floortype.TRAPDOOR && phase != null && floor.getActiveInPhase()[phase])) {
             drawExplosion(1, gr, subPhase, animationSteps, floor.getVariant());
@@ -445,9 +444,6 @@ public class ImageSupplier {
         }
         if (robot.isFlying()) {
             picture = picture + ROBOT_POSTFIX_FLYING;
-        }
-        if (robot.isVirtual()) {
-            picture = picture + ROBOT_POSTFIX_VIRTUAL;
         }
         return FOLDER_ROBOTS + picture;
     }

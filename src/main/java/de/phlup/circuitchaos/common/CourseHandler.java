@@ -74,6 +74,13 @@ public class CourseHandler {
         return list;
     }
 
+    public static List<CourseElement> getObjectsAndRobots(Course course, Position position) {
+        List<CourseElement> list = new ArrayList<>();
+        list.addAll(getRobots(course, position));
+        list.addAll(getObjects(course, position));
+        return list;
+    }
+
     public static List<Robot> getRobots(Course course) {
         return course.getRobots();
     }

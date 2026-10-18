@@ -144,8 +144,7 @@ public interface PictureConstants {
     String GFX_PROGRAMME_SLOT_SUFFIX    = "-slot";
     String GFX_PROGRAMME_BLOCKED_SUFFIX = "-blocked";
 
-    String ROBOT_POSTFIX_VIRTUAL = "-virtual";
-    String ROBOT_POSTFIX_FLYING  = "-flying";
+    String ROBOT_POSTFIX_FLYING = "-flying";
 
     String GFX_LOGO       = FOLDER_PICTURES + "logo";
     String GFX_LOGO_SMALL = FOLDER_PICTURES + "logo-small";

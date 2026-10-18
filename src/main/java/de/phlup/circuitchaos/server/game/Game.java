@@ -244,9 +244,6 @@ public class Game {
         }
         int playersSize = players.size();
         if (playersSize > 0) {
-            if (playersSize == 1) {
-                players.getFirst().getRobot().setVirtual(false);
-            }
             provideRobotsWithDefaultModules(gameOptions.getDefaultModules());
             if (goal == Goal.KILL_ALL) {
                 course.getCheckpoints().forEach(cp -> cp.setNumber(0));
@@ -340,7 +337,6 @@ public class Game {
             stepCourseElementsMove(phase);
             stepResolveBeamsAndLaserFire(phase);
             winner = setTouchCheckpoints(phase);
-            discardVirtualStateWhenPossible();
             if (goal == Goal.KILL_ALL) {
                 List.copyOf(players).stream().filter(Player::hasLost).forEach(this::removeLostPlayer);
                 winner = checkKillAllWinner();
@@ -417,23 +413,6 @@ public class Game {
         return null;
     }
 
-    private void discardVirtualStateWhenPossible() {
-        for (Player player : players) {
-            if (!gameAborted) {
-                if (player.getRobot().isOnCourse() && player.getRobot().isVirtual()) {
-                    player.getRobot().setVirtual(false);
-                    for (Robot ce : CourseHandler.getRobots(course, player.getRobot().getPosition())) {
-                        if (ce != player.getRobot()) {
-                            player.getRobot().setVirtual(true);
-                            break;
-                        }
-                    }
-                    notifyCourseMayHaveChanged(Step.END_OF_TURN_COURSE_EFFECTS, null, "discard virtual state", null);
-                }
-            }
-        }
-    }
-
     private Player endOfTurnCourseEffects(Player winner) {
         for (Player player : players) {
             if (winner == null && !gameAborted) {
@@ -487,7 +466,6 @@ public class Game {
                     robot.setPrevPosition(robot.getArchivePosition());
                     robot.setLevel(robot.getArchiveLevel());
                     robot.setMayChooseDirection(true);
-                    robot.setVirtual(true);
                     notifyCourseMayHaveChanged(Step.END_OF_TURN_COURSE_EFFECTS, null, "%s was destroyed".formatted(robot.getName()), null);
                     CourseHandler.add(course, robot);
                     for (int phase = 0; phase < 5; phase++) {
@@ -563,16 +541,16 @@ public class Game {
                     co.setActive(true);
                     switch (co.getType()) {
                         case MINE -> {
-                            if (hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y())) {
+                            if (!CourseHandler.getRobots(course, new Position(co.getPosition().x(), co.getPosition().y())).isEmpty()) {
                                 goOff(Step.TOUCH_CHECKPOINTS, phase, co);
                             }
                         }
                         case PROXIMITY_MINE -> {
-                            if (hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y())
-                                    || hasNonVirtualRobot(co.getPosition().x() + 1, co.getPosition().y())
-                                    || hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y() + 1)
-                                    || hasNonVirtualRobot(co.getPosition().x() - 1, co.getPosition().y())
-                                    || hasNonVirtualRobot(co.getPosition().x(), co.getPosition().y() - 1)) {
+                            if (!(CourseHandler.getRobots(course, new Position(co.getPosition().x(), co.getPosition().y())).isEmpty()
+                                    && CourseHandler.getRobots(course, new Position(co.getPosition().x() + 1, co.getPosition().y())).isEmpty()
+                                    && CourseHandler.getRobots(course, new Position(co.getPosition().x(), co.getPosition().y() + 1)).isEmpty()
+                                    && CourseHandler.getRobots(course, new Position(co.getPosition().x() - 1, co.getPosition().y())).isEmpty()
+                                    && CourseHandler.getRobots(course, new Position(co.getPosition().x(), co.getPosition().y() - 1)).isEmpty())) {
                                 goOff(Step.TOUCH_CHECKPOINTS, phase, co);
                             }
                         }
@@ -581,15 +559,6 @@ public class Game {
             }
         }
         return winner;
-    }
-
-    private boolean hasNonVirtualRobot(int posx, int posy) {
-        for (Robot r : course.getRobots()) {
-            if (r.getPosition().x() == posx && r.getPosition().y() == posy && !r.isVirtual()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void stepResolveBeamsAndLaserFire(int phase) {
@@ -651,7 +620,7 @@ public class Game {
             Robot     targetRobot  = shooter.getTarget();
             Robot     targetRobot2 = shooter.getTarget2();
             Module    weapon       = shooter.getWeapon();
-            if (!robot.isVirtual() && weapon != null) {
+            if (weapon != null) {
                 ModuleType weaponType = weapon.getType();
                 if (targetRobot != null && targetRobot.isOnCourse()) {
                     if (step == Step.ROBOT_MOUNTED_LASER_FIRE
@@ -952,49 +921,49 @@ public class Game {
     private void releaseDevices(int phase, Player player) {
         Robot robot      = player.getRobot();
         Floor standingOn = CourseHandler.getFloor(course, robot.getPosition());
-        if (!robot.isVirtual() && player.uses(ModuleType.MOBILE_TELEPORTER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+        if (player.uses(ModuleType.MOBILE_TELEPORTER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
             Module module = player.getRobot().getModule(ModuleType.MOBILE_TELEPORTER);
             if (module.getAmmunition() > 0) {
                 CourseHandler.createCircuitChaosObject(course, ObjectType.TELEPORTER, player);
                 module.setAmmunition(module.getAmmunition() - 1);
             }
         }
-        if (!robot.isVirtual() && player.uses(ModuleType.MOBILE_RANDOMIZER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+        if (player.uses(ModuleType.MOBILE_RANDOMIZER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
             Module module = player.getRobot().getModule(ModuleType.MOBILE_RANDOMIZER);
             if (module.getAmmunition() > 0) {
                 CourseHandler.createCircuitChaosObject(course, ObjectType.RANDOMIZER, player);
                 module.setAmmunition(module.getAmmunition() - 1);
             }
         }
-        if (!robot.isVirtual() && player.uses(ModuleType.GLUE_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+        if (player.uses(ModuleType.GLUE_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
             Module glueDispenser = player.getRobot().getModule(ModuleType.GLUE_DISPENSER);
             if (glueDispenser.getAmmunition() > 0) {
                 CourseHandler.createGlue(course, player.getRobot().getPosition());
                 glueDispenser.setAmmunition(glueDispenser.getAmmunition() - 1);
             }
         }
-        if (!robot.isVirtual() && player.uses(ModuleType.OIL_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+        if (player.uses(ModuleType.OIL_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
             Module oilDispenser = player.getRobot().getModule(ModuleType.OIL_DISPENSER);
             if (oilDispenser.getAmmunition() > 0) {
                 CourseHandler.createOil(course, player.getRobot().getPosition());
                 oilDispenser.setAmmunition(oilDispenser.getAmmunition() - 1);
             }
         }
-        if (!robot.isVirtual() && player.uses(ModuleType.MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+        if (player.uses(ModuleType.MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
             Module mineLayer = player.getRobot().getModule(ModuleType.MINE_LAYER);
             if (mineLayer.getAmmunition() > 0) {
                 CourseHandler.createCircuitChaosObject(course, ObjectType.MINE, player);
                 mineLayer.setAmmunition(mineLayer.getAmmunition() - 1);
             }
         }
-        if (!robot.isVirtual() && player.uses(ModuleType.PROXIMITY_MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+        if (player.uses(ModuleType.PROXIMITY_MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
             Module mineLayer = player.getRobot().getModule(ModuleType.PROXIMITY_MINE_LAYER);
             if (mineLayer.getAmmunition() > 0) {
                 CourseHandler.createCircuitChaosObject(course, ObjectType.PROXIMITY_MINE, player);
                 mineLayer.setAmmunition(mineLayer.getAmmunition() - 1);
             }
         }
-        if (!robot.isVirtual() && player.uses(ModuleType.BRIDGE_PROJECTOR, phase)) {
+        if (player.uses(ModuleType.BRIDGE_PROJECTOR, phase)) {
             Module bridgeProjector = player.getRobot().getModule(ModuleType.BRIDGE_PROJECTOR);
             if (bridgeProjector.getAmmunition() > 0) {
                 Floor f2 = switch (robot.getDirection()) {
@@ -1258,77 +1227,66 @@ public class Game {
         }
         Floor floor3 = CourseHandler.getFloor(course, ce.getPosition());
         if (player != null && !ce.isFlying()) {
-            if (!player.getRobot().isVirtual()) {
-                for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, floor3.getPosition()))) {
-                    if ((co.getType() == ObjectType.MINE || co.getType() == ObjectType.PROXIMITY_MINE)
-                            && co.isActive()) {
-                        goOff(step, phase, co);
-                    }
+            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, floor3.getPosition()))) {
+                if ((co.getType() == ObjectType.MINE || co.getType() == ObjectType.PROXIMITY_MINE)
+                        && co.isActive()) {
+                    goOff(step, phase, co);
                 }
-                for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() - 1, floor3.getPosition().y())))) {
-                    if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                        goOff(step, phase, co);
-                    }
+            }
+            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() - 1, floor3.getPosition().y())))) {
+                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                    goOff(step, phase, co);
                 }
-                for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() + 1, floor3.getPosition().y())))) {
-                    if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                        goOff(step, phase, co);
-                    }
+            }
+            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() + 1, floor3.getPosition().y())))) {
+                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                    goOff(step, phase, co);
                 }
-                for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() - 1)))) {
-                    if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                        goOff(step, phase, co);
-                    }
+            }
+            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() - 1)))) {
+                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                    goOff(step, phase, co);
                 }
-                for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() + 1)))) {
-                    if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                        goOff(step, phase, co);
-                    }
+            }
+            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() + 1)))) {
+                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                    goOff(step, phase, co);
                 }
             }
             CourseObject portal = CourseHandler.getPortal(course, floor3.getPosition());
             if (portal != null) {
                 if (portal.getTargetPosition() != null) {
-                    boolean noConflict = true;
-                    for (Robot courseRobot : CourseHandler.getRobots(course, portal.getTargetPosition())) {
-                        if (!courseRobot.isVirtual()) {
-                            noConflict = false;
-                            break;
-                        }
-                    }
-                    if (noConflict) {
+                    if (CourseHandler.getObjectsAndRobots(course, portal.getTargetPosition()).isEmpty()) {
                         floor3 = CourseHandler.getFloor(course, portal.getTargetPosition());
                         ce.setPosition(portal.getTargetPosition());
                         ce.setLevel(floor3.getLevel());
                         if (wait) {
                             notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
                         }
-                        if (!player.getRobot().isVirtual()) {
-                            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, floor3.getPosition()))) {
-                                if ((co.getType() == ObjectType.MINE || co.getType() == ObjectType.PROXIMITY_MINE)
-                                        && co.isActive()) {
-                                    goOff(step, phase, co);
-                                }
+                        for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, floor3.getPosition()))) {
+                            if ((co.getType() == ObjectType.MINE || co.getType() == ObjectType.PROXIMITY_MINE)
+                                    && co.isActive()) {
+                                goOff(step, phase, co);
                             }
-                            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() - 1, floor3.getPosition().y())))) {
-                                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                                    goOff(step, phase, co);
-                                }
+                        }
+                        for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() - 1, floor3.getPosition().y())))) {
+                            if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                                goOff(step, phase, co);
                             }
-                            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() + 1, floor3.getPosition().y())))) {
-                                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                                    goOff(step, phase, co);
-                                }
+                        }
+                        for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() + 1, floor3.getPosition().y())))) {
+                            if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                                goOff(step, phase, co);
                             }
-                            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() - 1)))) {
-                                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                                    goOff(step, phase, co);
-                                }
+                        }
+                        for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() - 1)))) {
+                            if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                                goOff(step, phase, co);
                             }
-                            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() + 1)))) {
-                                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                                    goOff(step, phase, co);
-                                }
+                        }
+                        for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() + 1)))) {
+                            if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
+                                goOff(step, phase, co);
                             }
                         }
                     }
@@ -1366,7 +1324,7 @@ public class Game {
     private void land(Player player, Step step, int phase) {
         Robot robot = player.getRobot();
         Floor f     = CourseHandler.getFloor(course, robot.getPosition());
-        while (isRobotConflict(robot) && !player.getRobot().isVirtual()) {
+        while (isRobotConflict(robot)) {
             moveInit(robot, robot.getDirection(), 0, 1, step, phase, true, true, null);
         }
         robot.setFlying(false);
@@ -1384,7 +1342,7 @@ public class Game {
 
     private boolean isRobotConflict(Robot r) {
         for (Robot r2 : CourseHandler.getRobots(course, r.getPosition())) {
-            if (!r2.isVirtual() && !r2.equals(r)) {
+            if (!r2.equals(r)) {
                 return true;
             }
         }
@@ -1392,14 +1350,12 @@ public class Game {
     }
 
     private CourseElement getConflictingElement(CourseElement courseElement, Direction direction) {
-        if (!courseElement.isOnCourse()
-                || (courseElement instanceof Robot && ((Robot) courseElement).isVirtual())
-                || courseElement.isFlying()) {
+        if (!courseElement.isOnCourse() || courseElement.isFlying()) {
             return null;
         }
         Position targetPosition = courseElement.getPosition().neighbour(direction);
         for (Robot ce : CourseHandler.getRobots(course, targetPosition)) {
-            if (!ce.isVirtual() && !ce.equals(courseElement) && !ce.isFlying()) {
+            if (!ce.equals(courseElement) && !ce.isFlying()) {
                 return ce;
             }
         }
@@ -1423,10 +1379,10 @@ public class Game {
         Robot target = null;
         if (firstFloorGetsHit) {
             for (Robot ps : CourseHandler.getRobots(course, position)) {
-                if (ps.getLevel() == level && (isCourseMounted || !ps.isVirtual()) && !highPowerLaser) {
+                if (ps.getLevel() == level && isCourseMounted && !highPowerLaser) {
                     target = ps;
                     break;
-                } else if (ps.getLevel() == level && (isCourseMounted || !ps.isVirtual())) {
+                } else if (ps.getLevel() == level && isCourseMounted) {
                     highPowerLaser = false;
                 }
             }
