@@ -37,7 +37,7 @@ Ziel: Tatsächliches Engine-Verhalten, beabsichtigte Spielregeln und spätere KI
 | `EXCHANGE_BEAM` | Tauscht Position und Level des Schützen und des getroffenen Roboters. | Kann sowohl den eigenen Weg verbessern als auch den eigenen Roboter gefährden; danach Position/Level neu bewerten. |
 | `SPIN_LEFT_BEAM` | Dreht den getroffenen Roboter nach links. | Verändert dessen spätere Bewegungsrichtung und potenziell dessen Schussrichtung. |
 | `SPIN_RIGHT_BEAM` | Dreht den getroffenen Roboter nach rechts. | Wie Spin Left in Gegenrichtung. |
-| `RAMMING_GEARS` | Permanente Verbesserung: Bei einem Zusammenstoß verursacht sie zusätzlichen Schaden. Sie wird durch den Zusammenstoß nicht deaktiviert. | Als dauerhaft vorhandenen Effekt bei der Kollisions- und Bewegungssimulation berücksichtigen, nicht wie eine Fernkampfwaffe bewerten. Eine Deaktivierung im Code wäre ein Fehler. |
+| `RAMMING_ARMOR` (vom Spieleigner als Ramming Gears bezeichnet) | Permanente Verbesserung: Bei einem Zusammenstoß verursacht sie zusätzlichen Schaden. Sie darf durch den Zusammenstoß nicht deaktiviert werden. | **Codefehler gefunden:** `Game.move(...)` setzt `activeInPhase[phase]` beim Kollisionsfall auf `false`. Die Bewegungslogik in `stepRobotsMove(...)`, `robotsMove(...)` und `reactivateRammingArmor(...)` enthält zusätzlich phasenbezogene De-/Reaktivierung. Diese Logik muss gegen die Regel einer permanenten Verbesserung korrigiert werden. Noch nicht geändert. |
 
 ### Gemeinsame Details der Strahlwaffen
 
