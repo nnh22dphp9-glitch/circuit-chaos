@@ -98,3 +98,27 @@ Bei der Detailprüfung ist eine mögliche Inkonsistenz aufgefallen:
 Nach dem gelesenen Code würden diese Aufrufe daher keine Schadenspunkte verursachen. Das könnte ein Fehler sein, oder die Bedeutung von `source` ist an anderer Stelle anders gedacht als der Methodenname vermuten lässt. **Vor jeder KI-Bewertung muss der Spieleigner diese Stelle prüfen und das beabsichtigte Verhalten bestätigen.** Ich habe den Spielcode nicht geändert.
 
 Das ist besonders wichtig, weil wir sonst die KI auf eine angenommene Waffenwirkung trainieren, die von der Engine möglicherweise gar nicht ausgeführt wird.
+
+
+## 8. Ergänzungen nach Regelabgleich mit dem Spieleigner
+
+### Bestätigte Regeln
+
+- Pro Phase ist höchstens eine robotermontierte Waffe aktiv. Der NetworkPlayer wählt die Waffe pro Phase vor der Programmausführung; diese Auswahl kann während der laufenden Programmausführung nicht mehr geändert werden. Die Computer-KI muss ihre Waffenwahl ebenfalls vorab je Phase festlegen.
+- Wenn der Roboter mindestens eine Waffe besitzt, darf er nicht absichtlich „keine Waffe“ wählen. Besitzt er beispielsweise nur den Exchange Beam, muss er ihn verwenden, auch wenn ein Treffer taktisch nachteilig wäre. Die KI darf die Waffe nicht nach Kenntnis des tatsächlichen Ziels nachträglich wechseln.
+- Spieler kennen weder die Programme noch die Module anderer Spieler. Sichtbar sind nur Module, die ein Spieler tatsächlich aktiv einsetzt, sowie die Module, die andere Spieler standardmäßig zu Spielbeginn besitzen. Die KI darf daher nicht auf geheime gegnerische Module oder Programme zugreifen, wenn sie eine Entscheidung aus Spielersicht bewertet.
+- High Power Laser: Der Strahl trifft einen Roboter und geht durch diesen hindurch, um einen dahinterliegenden Roboter ebenfalls zu treffen.
+- Gewünschte Strahlblockierung: Roboter blockieren Strahlen, außer beim zweiten Treffer eines High Power Lasers; solide Wände, Repulsor-Felder, One-Way-Wände in Rot-nach-Grün-Richtung sowie ein höheres Level blockieren. Ein niedrigeres Level blockiert nicht; Roboter auf darunterliegenden Levels sollen nicht getroffen werden.
+- Die Prüfung von `source == null` in `Player.takeDamage` ist nach Rückmeldung des Spieleigners vermutlich ein unbeabsichtigter Fehler aus einer früheren Refaktorisierung.
+
+### Kritischer Codebefund bei `Game.getLaserTarget`
+
+Die aktuelle Methode scheint die bestätigten Regeln für robotermontierte Waffen nicht vollständig umzusetzen:
+
+1. Im Schleifenblock, der Roboter auf der aktuellen Position untersucht, wird ein Ziel nur gesetzt, wenn `isCourseMounted` wahr ist. Bei robotermontierten Waffen ist dieser Parameter falsch. Dadurch werden dort keine Roboter als Ziel ausgewählt.
+2. Die Wandprüfung blockiert `ONE_WAY_RED` auf der Quellseite, lässt `ONE_WAY_GREEN` dort aber passieren. Die Rückseite der Zielwand wird auf `SOLID` und `REPULSOR_FIELD` geprüft, nicht sichtbar auf beide One-Way-Farben. Das ist nicht ohne Weiteres mit der bestätigten Regel „Rot nach Grün blockiert, Grün nach Rot nicht“ gleichzusetzen.
+3. `level` wird beim rekursiven Durchlaufen unverändert weitergegeben. Die aktuelle Methode findet bei robotermontierten Waffen kein Ziel anhand eines Levelvergleichs, weil die Zielerkennung dort nicht greift. Die gewünschte Regel, dass höhere Levels blockieren und niedrigere Levels weder blockieren noch getroffen werden, ist daher noch nicht sauber abgebildet.
+4. Die Sonderbehandlung für High Power Laser greift bei einer blockierenden Wand, indem die Rekursion mit `highPowerLaser=false` fortgesetzt wird. Das allein beweist noch nicht, dass der Laser bei einem ersten Roboter korrekt hindurchgeht und einen zweiten trifft. Zielermittlung und Strahlblockierung sollten anhand der bestätigten Regel separat geprüft werden.
+5. Die Schadensquelle wird bei `Player.takeDamage` aktuell nur akzeptiert, wenn `source == null`. Der Spieleigner bestätigt, dass dies vermutlich ein Refaktorisierungsfehler ist.
+
+Diese Punkte sind Befunde zur vorhandenen Implementierung, keine bereits vorgenommenen Korrekturen. Vor dem Fix sollten die Regeln in einer zentralen Beschreibung festgehalten und anschließend die Engine-Zielermittlung korrigiert werden. Die KI sollte danach dieselbe Zielermittlung verwenden, statt eine zweite, abweichende Laserlogik zu implementieren.
