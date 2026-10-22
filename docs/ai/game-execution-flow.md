@@ -2,7 +2,7 @@
 
 Stand: `develop`, geprüft am 2026-10-22.
 
-Zweck dieses Dokuments ist, den tatsächlichen Ablauf der Engine zu beschreiben, bevor `ComputerPlayer` und `ComputerMoveInfo` überarbeitet werden. Die bestehende Computerlogik stammt aus einer älteren RoboRally-Regelbasis und wurde nicht vollständig an Circuit Chaos angepasst. Unterschiede zwischen ihr und der Engine sind deshalb zunächst erwartbare Lücken der KI-Simulation und nicht automatisch Fehler der eigentlichen Spielmechanik.
+Zweck dieses Dokuments ist, den tatsächlichen Ablauf der Engine zu beschreiben, bevor `ComputerPlayer` und `ComputerMoveInfo` überarbeitet werden. Die bestehende Computerlogik stammt aus einer älteren Regelbasis und wurde nicht vollständig an Circuit Chaos angepasst. Unterschiede zwischen ihr und der Engine sind deshalb zunächst erwartbare Lücken der KI-Simulation und nicht automatisch Fehler der eigentlichen Spielmechanik.
 
 ## Zentrale Implementierungsstellen
 
@@ -47,10 +47,10 @@ Die Programmierung – inklusive der Auswahl von Programm und Modulen/Waffen dur
    - Die eigentliche Bewegung wird ausgeführt; anschließend wird der Programm-Schritt gegebenenfalls als Drehung angewendet.
    - Nach der Bewegungsauflösung wird die phasenbezogene Ramming-Armor-Behandlung abgeschlossen.
 4. **Spielfeldelemente bewegen:** `stepCourseElementsMove(phase)`, in dieser Reihenfolge:
-   1. Express-Förderbänder
-   2. normale Förderbänder
+   1. Express-Förderbänder (1 Feld, ggf. mit Drehung)
+   2. normale und Express-Förderbänder (1 (weiteres) Feld, ggf. mit Drehung)
    3. Pusher
-   4. Zahnräder
+   4. Zahnräder (Drehung)
 5. **Strahlen und Laser auflösen:** `stepResolveBeamsAndLaserFire(phase)`
    - Roboterwaffen werden in dieser Reihenfolge abgewickelt: Tractor Beam, Pressure Beam, Spin Left Beam, Spin Right Beam, Exchange Beam, Laser.
    - Danach folgen die entsprechenden kursmontierten Effekte: Tractor Beam, Pressure Beam, Laser.
