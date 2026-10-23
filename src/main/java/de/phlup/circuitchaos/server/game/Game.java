@@ -156,6 +156,7 @@ public class Game {
                 resetPreviousPositionsAndDirections();
             }
         }
+        course.getFloor().forEach(f -> f.setExplosiveDamage(0));
         // 2nd Phase for falling down robots/objects
         if (!course.getRobotsFallingIntoAbyss().isEmpty() || !course.getObjectsFallingIntoAbyss().isEmpty()) {
             randomlySetFloorOrientationForDisplay();
@@ -168,10 +169,6 @@ public class Game {
             course.getRobotsFallingIntoAbyss().clear();
             course.getObjectsFallingIntoAbyss().clear();
         }
-        elementStubs = stubList;
-    }
-
-    private void synchronizeElementStubs() {
         elementStubs = CourseHandler.createCourseElementStubList(course);
     }
 
@@ -1481,7 +1478,6 @@ public class Game {
         if (courseObject.getType() == ObjectType.MINE || courseObject.getType() == ObjectType.PROXIMITY_MINE) {
             CourseHandler.remove(course, courseObject);
             explode(step, phase, courseObject.getPosition(), MINE_INITIAL_DAMAGE);
-            synchronizeElementStubs();
         }
     }
 
@@ -1492,14 +1488,12 @@ public class Game {
     public void explode(Step step, Integer phase, Position position, int initialDamage) {
         if (initialDamage > 0) {
             DistanceCalculator.calculateDistance(course, position, 7);
-            List<Floor> markers = new ArrayList<>();
             for (Floor f : new ArrayList<>(course.getFloor())) {
                 if (f.getDistanceCounter() < 7) {
                     int damage = calculateEffectiveDamage(initialDamage, f.getDistanceCounter());
                     if (damage > 0) {
                         Floor floor = CourseHandler.getFloor(course, f.getPosition());
                         floor.setExplosiveDamage(damage);
-                        markers.add(floor);
                     }
                 }
             }
@@ -1511,9 +1505,6 @@ public class Game {
                 }
             }
             notifyCourseMayHaveChanged(step, phase, "explosion", null);
-            for (Floor marker : markers) {
-                marker.setExplosiveDamage(0);
-            }
         }
     }
 

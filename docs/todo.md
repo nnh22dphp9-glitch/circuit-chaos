@@ -27,7 +27,7 @@ Das sind zunächst Testaufgaben, keine Behauptung, dass die genannten Funktionen
 
 # Weitere TODOs
 
-- [ ] **Minen-Darstellung fehlerhaft:** Explodiert eine Mine auf einem Conveyor-Belt, so erzeugt sie einen zusätzlichen Conveyor-Belt-Animationsschritt (ohne dass sich wirklich was ändert), und der Explosions-Sound wird nicht abgespielt.
+- [ ] **Minen-Darstellung fehlerhaft:** Explodiert eine Mine auf einem Conveyor-Belt, so wird dieses in einem separaten Schritt angezeigt: 1) Roboter/Mine bewegen sich aufeinander zu, Explosion ist zu sehen, andere Roboter bleiben scheinbar stehen, 2) Conveyor Belts bewegen die anderen Roboter, der Roboter, der die Explosion ausgelöst hat, bleibt scheinbar stehen.
 - [ ] **Board-Design:** Mehrere Start-Fehler
 - [ ] **Board-Design:** Mehrere Finish- und CP-Felder
 - [ ] **Schalter-Course-Element:** kann Falltüren öffnen/schließen oder Repulsors (de-)aktivieren
