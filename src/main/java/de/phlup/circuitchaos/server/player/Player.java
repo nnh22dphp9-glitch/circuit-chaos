@@ -1,0 +1,151 @@
+package de.phlup.circuitchaos.server.player;
+
+import de.phlup.circuitchaos.common.CourseHandler;
+import de.phlup.circuitchaos.common.enums.Direction;
+import de.phlup.circuitchaos.common.enums.Goal;
+import de.phlup.circuitchaos.common.enums.ModuleType;
+import de.phlup.circuitchaos.common.model.Course;
+import de.phlup.circuitchaos.common.model.Module;
+import de.phlup.circuitchaos.common.model.Robot;
+import de.phlup.circuitchaos.server.game.Game;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+import static de.phlup.circuitchaos.common.enums.ModuleType.LAYERED_ARMOR;
+import static de.phlup.circuitchaos.common.enums.ModuleType.POWER_DOWN_SHIELD;
+import static de.phlup.circuitchaos.common.enums.ModuleType.SHIELD;
+import static de.phlup.circuitchaos.server.GlobalServerAttributes.getGame;
+
+@Data
+public abstract class Player {
+
+    protected final Robot  robot;
+    protected final String gameId;
+    protected final Goal   goal;
+    protected       int    dieCounter;
+
+    protected Player(@NotNull Robot robot, @NotNull String gameId, @NotNull Goal goal) {
+        this.robot = robot;
+        this.gameId = gameId;
+        this.goal = goal;
+    }
+
+    public boolean hasLost() {
+        return robot.isGiveUp() || (goal == Goal.KILL_ALL && dieCounter > 0);
+    }
+
+    public boolean hasWon() {
+        return !hasLost() && (goal == Goal.FINISH && robot.getNextCheckpoint() > getGame(gameId).getCourse().getCheckpoints().size() - 1);
+    }
+
+    protected void initTurn() {
+        for (Module module : robot.getModules()) {
+            module.setPowerDownShield(new boolean[][]{{true, true, true, true}, {true, true, true, true}, {true, true, true, true}, {true, true, true, true}, {true, true, true, true}});
+            module.setAlreadyUsed(false);
+            for (int cnt = 0; cnt < 5; cnt++) {
+                if (module.getType() == POWER_DOWN_SHIELD) {
+                    module.getActiveInPhase()[cnt] = robot.isPoweredDown();
+                } else {
+                    module.getActiveInPhase()[cnt] = module.getType().isDefaultActiveInPhase();
+                }
+            }
+        }
+    }
+
+    public void takeDamage(Integer phase, Player source, Direction direction, boolean considerShields) {
+        Game game = getGame(gameId);
+        if (robot.isOnCourse()) {
+            boolean takesDamage = true;
+            if (considerShields) {
+                if (uses(POWER_DOWN_SHIELD, phase)) {
+                    Module module = robot.getModule(POWER_DOWN_SHIELD);
+                    if (module.getActiveInPhase()[phase] && (module.getPowerDownShield()[phase][0]
+                            || module.getPowerDownShield()[phase][1]
+                            || module.getPowerDownShield()[phase][2]
+                            || module.getPowerDownShield()[phase][3])) {
+                        if (direction != null) {
+                            if (module.getPowerDownShield()[phase][direction.reverse().ordinal()]) {
+                                module.getPowerDownShield()[phase][direction.reverse().ordinal()] = false;
+                                takesDamage = false;
+                            }
+                        }
+                    }
+                }
+                if (direction != null) {
+                    if (uses(SHIELD, phase)) {
+                        Module module = robot.getModule(SHIELD);
+                        if (module.getActiveInPhase()[phase] && module.getDirection() == direction.reverse()) {
+                            module.getActiveInPhase()[phase] = false;
+                            takesDamage = false;
+                        }
+                    }
+                }
+                Module module = robot.getModule(LAYERED_ARMOR);
+                if (module != null && module.getAmmunition() > 0) {
+                    module.setAmmunition(module.getAmmunition() - 1);
+                    takesDamage = false;
+                }
+            }
+            if (takesDamage) {
+                takeDamage(game.getCourse());
+            }
+        }
+    }
+
+    public void takeDamage(Course course) {
+        if (robot.isOnCourse()) {
+            robot.setDamage(robot.getDamage() + 1);
+            if (robot.getDamage() - countBlockedRegisters() > 4) {
+                blockRegister();
+            }
+            if (robot.isOnCourse() && robot.getDamage() >= 10) {
+                CourseHandler.remove(course, this.robot);
+                dieCounter++;
+            }
+        }
+    }
+
+    public boolean uses(ModuleType moduleType, Integer phase) {
+        if (phase == null || phase < 0) {
+            return false;
+        }
+        boolean erg    = false;
+        Module  module = robot.getModule(moduleType);
+        if (module != null) {
+            erg = module.getActiveInPhase()[phase];
+        }
+        return erg;
+    }
+
+    protected int countBlockedRegisters() {
+        int erg = 0;
+        for (int i = 0; i < 5; i++) {
+            if (robot.getBlocked()[i]) {
+                erg++;
+            }
+        }
+        return erg;
+    }
+
+    private void blockRegister() {
+        int index = 4;
+        while (robot.getBlocked()[index]) {
+            index--;
+            if (index == -1) {
+                break;
+            }
+        }
+        if (index > -1) {
+            robot.getBlocked()[index] = true;
+        }
+    }
+
+    public void arriveAtPitStop() {
+        Game game = getGame(gameId);
+        game.addNewModuleToRobot(robot);
+        if (robot.getDamage() > 0) {
+            robot.setDamage(robot.getDamage() - 1);
+        }
+    }
+
+}
