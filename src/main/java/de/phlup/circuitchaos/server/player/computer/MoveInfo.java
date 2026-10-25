@@ -201,7 +201,7 @@ public class MoveInfo {
             }
             Direction lastDirection = Direction.NORTH;
             // express conveyor belts
-            if (tf.getFloortype().isExpressConveyorBelt()) {
+            if (!flyingDuringMovement && tf.getFloortype().isExpressConveyorBelt()) {
                 lastDirection = tf.getFacingDirection();
                 if (moveForcedOneTile(lastDirection, flyingDuringMovement, phase)) {
                     if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
@@ -219,12 +219,12 @@ public class MoveInfo {
                             || (tf.getFacingDirection() == Direction.NORTH && lastDirection == Direction.WEST))) {
                         endingDirection = endingDirection.add(Direction.EAST);
                     }
+                    slideOnOil(lastDirection, flyingDuringMovement, phase);
                 }
             }
-            slideOnOil(lastDirection, flyingDuringMovement, phase);
 
             // conveyor belts
-            if (tf.getFloortype().isConveyorBelt() && !tf.isWater()) {
+            if (!flyingDuringMovement && tf.getFloortype().isConveyorBelt() && !tf.isWater()) {
                 lastDirection = tf.getFacingDirection();
                 if (moveForcedOneTile(lastDirection, flyingDuringMovement, phase)) {
                     if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
@@ -242,10 +242,9 @@ public class MoveInfo {
                             || (tf.getFacingDirection() == Direction.NORTH && lastDirection == Direction.WEST))) {
                         endingDirection = endingDirection.add(Direction.EAST);
                     }
+                    slideOnOil(lastDirection, flyingDuringMovement, phase);
                 }
             }
-            slideOnOil(lastDirection, flyingDuringMovement, phase);
-            slideOnOil(lastDirection, flyingDuringMovement, phase);
 
             // pushers
             if (tf.isHasPusher() && tf.getActiveInPhase()[phase]) {
