@@ -1163,8 +1163,8 @@ public class Game {
         if (amount > 0) {
             WallType sourceWall = floor1.wall(direction);
             WallType targetWall = floor2.wall(direction2);
-            boolean rampPassage = (sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN)
-                    && (targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN);
+            boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
+                    || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
             boolean uphill = floor2.getLevel() > floor1.getLevel() && !rampPassage;
             boolean downhill = floor2.getLevel() < floor1.getLevel() && !rampPassage;
             boolean wallPassage = ((sourceWall == WallType.NONE
