@@ -1,4 +1,4 @@
-package de.phlup.circuitchaos.server.player;
+package de.phlup.circuitchaos.server.player.computer;
 
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
@@ -15,10 +15,11 @@ import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.Programme;
 import de.phlup.circuitchaos.server.game.Game;
+import de.phlup.circuitchaos.server.player.Player;
 import lombok.Data;
 
 @Data
-public class ComputerMoveInfo {
+public class MoveInfo {
 
     private final Game       game;
     private final Course     course;
@@ -44,7 +45,7 @@ public class ComputerMoveInfo {
 
     private Floor tf;
 
-    public ComputerMoveInfo(Game game, Checkpoint nextCP, Player player) {
+    public MoveInfo(Game game, Checkpoint nextCP, Player player) {
         this.game = game;
         course = game.getCourse();
         this.nextCP = nextCP;
