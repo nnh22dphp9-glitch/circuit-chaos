@@ -202,7 +202,6 @@ public class MoveInfo {
             Direction lastDirection = Direction.NORTH;
             // express conveyor belts
             if (tf.getFloortype().isExpressConveyorBelt()) {
-                Floor sourceFloor = tf;
                 lastDirection = tf.getFacingDirection();
                 if (moveForcedOneTile(lastDirection, flyingDuringMovement, phase)) {
                     if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
@@ -415,7 +414,7 @@ public class MoveInfo {
                 || targetWall == WallType.ONE_WAY_GREEN
                 || targetWall == WallType.RAMP_UP
                 || targetWall == WallType.RAMP_DOWN
-                || (targetWall == WallType.LEDGE && targetFloor.getLevel() < sourceFloor.getLevel())))
+                || targetWall == WallType.LEDGE))
                 || (sourceWall == WallType.ONE_WAY_GREEN && targetWall == WallType.ONE_WAY_RED);
     }
 
