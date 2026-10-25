@@ -109,6 +109,9 @@ public class MoveInfo {
                         }
                     }
                 }
+                int movementStartX = x;
+                int movementStartY = y;
+                Direction movementDirection = movement < 0 ? endingDirection.reverse() : endingDirection;
                 if (movement < 0) {
                     while (movement < 0) {
                         Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
@@ -133,7 +136,6 @@ public class MoveInfo {
                         }
                         movement++;
                     }
-                    slideOnOil(endingDirection.reverse(), flyingDuringMovement, phase);
                 } else if (movement > 0) {
                     while (movement > 0) {
                         Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
@@ -158,7 +160,9 @@ public class MoveInfo {
                         }
                         movement--;
                     }
-                    slideOnOil(endingDirection, flyingDuringMovement, phase);
+                }
+                if (x != movementStartX || y != movementStartY) {
+                    slideOnOil(movementDirection, flyingDuringMovement, phase);
                 }
             }
             Direction lastDirection = Direction.NORTH;
