@@ -67,7 +67,7 @@ public class MoveInfo {
         tf = CourseHandler.getFloor(course, player.getRobot().getPosition());
         for (int phase = 0; phase < 5; phase++) {
             checkForAbyss(phase);
-            boolean flying = false;
+            boolean flyingDuringMovement = false;
             if (program[phase].getType() == ProgramType.ROTATE_LEFT) {
                 endingDirection = endingDirection.add(Direction.WEST);
             } else if (program[phase].getType() == ProgramType.ROTATE_RIGHT) {
@@ -80,8 +80,8 @@ public class MoveInfo {
                     movement = movement > 0 ? movement - 1 : movement + 1;
                 }
                 // Hovercraft flight starts before water/oil effects are applied.
-                flying = player.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
-                if (!flying && (tf.isWater() || CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
+                flyingDuringMovement = player.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
+                if (!flyingDuringMovement && (tf.isWater() || CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
                     if (movement > 0) {
                         movement--;
                     }
@@ -91,7 +91,7 @@ public class MoveInfo {
                 }
                 if (movement != 0 && !CourseHandler.getObjects(course, new Position(x, y)).isEmpty()) {
                     for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                        if (co.getType() == ObjectType.TELEPORTER && !flying) {
+                        if (co.getType() == ObjectType.TELEPORTER && !flyingDuringMovement) {
                             if (movement < 0) {
                                 movement = 1 - movement;
                             } else {
@@ -122,7 +122,7 @@ public class MoveInfo {
                         tf = CourseHandler.getFloor(course, new Position(x, y));
                         checkForAbyss(phase);
                         for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                            if (co.getType().isPortal() && !flying) {
+                            if (co.getType().isPortal() && !flyingDuringMovement) {
                                 x = co.getTargetPosition().x();
                                 y = co.getTargetPosition().y();
                                 tf = CourseHandler.getFloor(course, co.getTargetPosition());
@@ -131,7 +131,7 @@ public class MoveInfo {
                         }
                         movement++;
                     }
-                    while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+                    while (!flyingDuringMovement && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                         switch (endingDirection) {
                             case NORTH -> y++;
                             case EAST -> x--;
@@ -141,7 +141,7 @@ public class MoveInfo {
                         tf = CourseHandler.getFloor(course, new Position(x, y));
                         checkForAbyss(phase);
                         for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                            if (co.getType().isPortal() && !flying) {
+                            if (co.getType().isPortal() && !flyingDuringMovement) {
                                 x = co.getTargetPosition().x();
                                 y = co.getTargetPosition().y();
                                 tf = CourseHandler.getFloor(course, co.getTargetPosition());
@@ -162,7 +162,7 @@ public class MoveInfo {
                         tf = CourseHandler.getFloor(course, new Position(x, y));
                         checkForAbyss(phase);
                         for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                            if (co.getType().isPortal() && !flying) {
+                            if (co.getType().isPortal() && !flyingDuringMovement) {
                                 x = co.getTargetPosition().x();
                                 y = co.getTargetPosition().y();
                                 tf = CourseHandler.getFloor(course, co.getTargetPosition());
@@ -171,7 +171,7 @@ public class MoveInfo {
                         }
                         movement--;
                     }
-                    while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+                    while (!flyingDuringMovement && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                         switch (endingDirection) {
                             case NORTH -> y--;
                             case EAST -> x++;
@@ -181,7 +181,7 @@ public class MoveInfo {
                         tf = CourseHandler.getFloor(course, new Position(x, y));
                         checkForAbyss(phase);
                         for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                            if (co.getType().isPortal() && !flying) {
+                            if (co.getType().isPortal() && !flyingDuringMovement) {
                                 x = co.getTargetPosition().x();
                                 y = co.getTargetPosition().y();
                                 tf = CourseHandler.getFloor(course, co.getTargetPosition());
@@ -216,7 +216,7 @@ public class MoveInfo {
                     endingDirection = endingDirection.add(Direction.EAST);
                 }
                 for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                    if (co.getType().isPortal() && !flying) {
+                    if (co.getType().isPortal()) {
                         x = co.getTargetPosition().x();
                         y = co.getTargetPosition().y();
                         tf = CourseHandler.getFloor(course, co.getTargetPosition());
@@ -225,7 +225,7 @@ public class MoveInfo {
                 }
             }
             checkForAbyss(phase);
-            while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+            while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                 switch (lastDirection) {
                     case NORTH -> y--;
                     case EAST -> x++;
@@ -235,7 +235,7 @@ public class MoveInfo {
                 tf = CourseHandler.getFloor(course, new Position(x, y));
                 checkForAbyss(phase);
                 for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                    if (co.getType().isPortal() && !flying) {
+                    if (co.getType().isPortal()) {
                         x = co.getTargetPosition().x();
                         y = co.getTargetPosition().y();
                         tf = CourseHandler.getFloor(course, co.getTargetPosition());
@@ -267,7 +267,7 @@ public class MoveInfo {
                     endingDirection = endingDirection.add(Direction.EAST);
                 }
                 for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                    if (co.getType().isPortal() && !flying) {
+                    if (co.getType().isPortal()) {
                         x = co.getTargetPosition().x();
                         y = co.getTargetPosition().y();
                         tf = CourseHandler.getFloor(course, co.getTargetPosition());
@@ -276,7 +276,7 @@ public class MoveInfo {
                 }
             }
             checkForAbyss(phase);
-            while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+            while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                 switch (lastDirection) {
                     case NORTH -> y--;
                     case EAST -> x++;
@@ -286,7 +286,7 @@ public class MoveInfo {
                 tf = CourseHandler.getFloor(course, new Position(x, y));
                 checkForAbyss(phase);
                 for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                    if (co.getType().isPortal() && !flying) {
+                    if (co.getType().isPortal()) {
                         x = co.getTargetPosition().x();
                         y = co.getTargetPosition().y();
                         tf = CourseHandler.getFloor(course, co.getTargetPosition());
@@ -295,7 +295,7 @@ public class MoveInfo {
                 }
             }
             checkForAbyss(phase);
-            while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+            while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                 switch (lastDirection) {
                     case NORTH -> y--;
                     case EAST -> x++;
@@ -305,7 +305,7 @@ public class MoveInfo {
                 tf = CourseHandler.getFloor(course, new Position(x, y));
                 checkForAbyss(phase);
                 for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                    if (co.getType().isPortal() && !flying) {
+                    if (co.getType().isPortal()) {
                         x = co.getTargetPosition().x();
                         y = co.getTargetPosition().y();
                         tf = CourseHandler.getFloor(course, co.getTargetPosition());
@@ -325,7 +325,7 @@ public class MoveInfo {
                 tf = CourseHandler.getFloor(course, new Position(x, y));
                 checkForAbyss(phase);
                 for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                    if (co.getType().isPortal() && !flying) {
+                    if (co.getType().isPortal()) {
                         x = co.getTargetPosition().x();
                         y = co.getTargetPosition().y();
                         tf = CourseHandler.getFloor(course, co.getTargetPosition());
@@ -333,7 +333,7 @@ public class MoveInfo {
                     }
                 }
                 //noinspection WhileCanBeDoWhile
-                while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+                while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                     switch (lastDirection) {
                         case NORTH -> y--;
                         case EAST -> x++;
@@ -343,7 +343,7 @@ public class MoveInfo {
                     tf = CourseHandler.getFloor(course, new Position(x, y));
                     checkForAbyss(phase);
                     for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                        if (co.getType().isPortal() && !flying) {
+                        if (co.getType().isPortal()) {
                             x = co.getTargetPosition().x();
                             y = co.getTargetPosition().y();
                             tf = CourseHandler.getFloor(course, co.getTargetPosition());
