@@ -110,6 +110,7 @@ public class MoveInfo {
                 }
                 if (movement < 0) {
                     while (movement < 0) {
+                        Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
                         if (notBlocked(course, true, flyingDuringMovement)) {
                             switch (endingDirection) {
                                 case NORTH -> y++;
@@ -119,6 +120,7 @@ public class MoveInfo {
                             }
                         }
                         tf = CourseHandler.getFloor(course, new Position(x, y));
+                        applyHeightDamage(previousFloor, tf, flyingDuringMovement, endingDirection.reverse());
                         checkForAbyss(phase);
                         for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
                             if (co.getType().isPortal() && !flyingDuringMovement) {
@@ -138,6 +140,7 @@ public class MoveInfo {
                             case WEST -> x++;
                         }
                         tf = CourseHandler.getFloor(course, new Position(x, y));
+                        applyHeightDamage(previousFloor, tf, flyingDuringMovement, endingDirection);
                         checkForAbyss(phase);
                         for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
                             if (co.getType().isPortal()) {
@@ -150,6 +153,7 @@ public class MoveInfo {
                     }
                 } else if (movement > 0) {
                     while (movement > 0) {
+                        Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
                         if (notBlocked(course, false, flyingDuringMovement)) {
                             switch (endingDirection) {
                                 case NORTH -> y--;
@@ -454,6 +458,19 @@ public class MoveInfo {
                     }
                 }
             }
+        }
+    }
+
+    private void applyHeightDamage(Floor previousFloor, Floor currentFloor, boolean flying, Direction direction) {
+        if (flying || currentFloor.getLevel() >= previousFloor.getLevel()) {
+            return;
+        }
+        WallType sourceWall = previousFloor.wall(direction);
+        WallType targetWall = currentFloor.wall(direction.reverse());
+        boolean rampPassage = (sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN)
+                && (targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN);
+        if (!rampPassage) {
+            damage++;
         }
     }
 
