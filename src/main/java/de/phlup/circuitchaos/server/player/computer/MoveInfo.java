@@ -167,9 +167,9 @@ public class MoveInfo {
             }
             Direction lastDirection = Direction.NORTH;
             // express conveyor belts
-            if (!flyingDuringMovement && tf.getFloortype().isExpressConveyorBelt()) {
+            if (tf.getFloortype().isExpressConveyorBelt()) {
                 lastDirection = tf.getFacingDirection();
-                if (moveForcedOneTile(lastDirection, flyingDuringMovement, phase)) {
+                if (moveForcedOneTile(lastDirection, false, phase)) {
                     if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
                             || tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
                             || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW
@@ -185,14 +185,14 @@ public class MoveInfo {
                             || (tf.getFacingDirection() == Direction.NORTH && lastDirection == Direction.WEST))) {
                         endingDirection = endingDirection.add(Direction.EAST);
                     }
-                    slideOnOil(lastDirection, flyingDuringMovement, phase);
+                    slideOnOil(lastDirection, false, phase);
                 }
             }
 
             // conveyor belts
-            if (!flyingDuringMovement && tf.getFloortype().isConveyorBelt() && !tf.isWater()) {
+            if (tf.getFloortype().isConveyorBelt() && !tf.isWater()) {
                 lastDirection = tf.getFacingDirection();
-                if (moveForcedOneTile(lastDirection, flyingDuringMovement, phase)) {
+                if (moveForcedOneTile(lastDirection, false, phase)) {
                     if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
                             || tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
                             || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW
@@ -208,15 +208,15 @@ public class MoveInfo {
                             || (tf.getFacingDirection() == Direction.NORTH && lastDirection == Direction.WEST))) {
                         endingDirection = endingDirection.add(Direction.EAST);
                     }
-                    slideOnOil(lastDirection, flyingDuringMovement, phase);
+                    slideOnOil(lastDirection, false, phase);
                 }
             }
 
             // pushers
             if (tf.isHasPusher() && tf.getActiveInPhase()[phase]) {
                 lastDirection = tf.getPusherDirection();
-                if (moveForcedOneTile(lastDirection, flyingDuringMovement, phase)) {
-                    slideOnOil(lastDirection, flyingDuringMovement, phase);
+                if (moveForcedOneTile(lastDirection, false, phase)) {
+                    slideOnOil(lastDirection, false, phase);
                 }
             }
             // gears
