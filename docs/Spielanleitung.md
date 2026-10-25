@@ -131,13 +131,24 @@ Portale verbinden Positionen miteinander und können einen Roboter beim Betreten
 
 Minen verursachen bei ihrer Auslösung Schaden. Annäherungsminen reagieren auf die Nähe eines Roboters. Roboter können Minen mit entsprechenden Modulen legen. Die genaue Auslösebedingung und der Schaden der einzelnen Minentypen müssen in der endgültigen Anleitung noch vollständig präzisiert werden.
 
-### Kleber und weitere Felder
+### Kleber
 
-Kleber kann die Bewegung beeinflussen. Weitere bekannte Kurselemente beziehungsweise Objekte sind unter anderem Randomizer, Gruben, Laser, Strahlungsfelder, Crusher und Drohnen. Ihre vollständigen Spielerregeln sind in diesem Entwurf noch nicht ausreichend beschrieben und werden deshalb nicht als abschließend dokumentiert ausgegeben.
+Kleber kann die Bewegung beeinflussen. Seine genauen Wirkungen und Wechselwirkungen mit anderen Kurselementen müssen für die endgültige Anleitung noch vollständig beschrieben werden.
+
+### Randomizer
+
+Steht ein Roboter auf einem Randomizer, wird sein nächster Programmschritt durch einen zufällig ausgewählten anderen Programmschritt ersetzt.
+
+### Kursmontierte Laser und Drehstrahlen
+
+Kursmontierte Laser- und Drehstrahlen funktionieren grundsätzlich wie die entsprechenden Waffenmodule der Roboter, sind aber fest an der Wand montiert und feuern zu einem anderen Zeitpunkt im Phasenablauf. Einen kursmontierten Exchange Beam gibt es nicht, da dessen Ausgangspunkt dafür bewegt werden müsste. Stattdessen gibt es einen **Triple Laser**, der drei Schüsse absetzt.
 
 ## 6. Schaden, Zerstörung und Reparatur
 
-Roboter sammeln Schaden durch Gefahren und Angriffe. Ein Roboter, der zerstört wird, scheidet aus dem Spiel aus. In **Kill All** ist das Ausschalten der gegnerischen Roboter das Spielziel.
+Roboter sammeln Schaden durch Gefahren und Angriffe. Was bei einer Zerstörung passiert, hängt vom Spielmodus ab:
+
+- **Finish:** Der Roboter scheidet nur für den Rest der laufenden Runde aus. Zu Beginn der nächsten Runde kehrt er an seine Archivposition zurück – dem zuletzt erreichten Kontrollpunkt oder Pit Stop – und bleibt im Spiel. Bei der Rückkehr hat er normalerweise zwei Schadenspunkte. Das Modul **Superior Archive Copy** kann diesen Schaden auf null reduzieren.
+- **Kill All:** Ein zerstörter Roboter scheidet dauerhaft aus dem Spiel aus.
 
 ### Power-Down
 
@@ -149,7 +160,7 @@ Der Power-Down Shield ist ein Modul, das im Zusammenhang mit dem Power-Down Schu
 
 ### Pit Stop
 
-Der Pit Stop ist eine Reparaturstation. Die früher getrennten Funktionen für einfache und doppelte Reparatur wurden zu einem gemeinsamen Pit-Stop-Konzept zusammengeführt. Die genaue Reparaturmenge und die vollständigen Bedingungen sollten vor Veröffentlichung noch einmal verbindlich festgehalten werden.
+Ein Pit Stop repariert maximal **einen Schadenspunkt** und teilt dem Roboter zusätzlich ein zufällig ausgewähltes neues Modul aus.
 
 ## 7. Module und Waffen
 
@@ -166,8 +177,8 @@ Die folgenden Namen sind im Spiel vorgesehen; nicht alle Effekte sind in diesem 
 - **Ramming Armor:** beeinflusst das Rammen und dessen Schadenswirkung.
 - **Power-Down Shield:** schützt im Zusammenhang mit einem Power-Down; genaue Schutzwirkung noch zu bestätigen.
 - **Brakes:** beeinflussen die Bewegung durch Abbremsen.
-- **Reverse Drive:** unterstützt Rückwärtsbewegungen.
-- **Overdrive:** verändert die Bewegungsmöglichkeiten.
+- **Reverse Drive:** ermöglicht, dass die Programmkarte **Back-Up 2** ausgeteilt wird.
+- **Overdrive:** ermöglicht, dass die Programmkarte **Move 4** ausgeteilt wird.
 - **Layered Armor:** dient der Schadensabwehr.
 - **Shield:** dient dem Schutz vor Schaden.
 - **Extra Program:** erweitert die Programmiermöglichkeiten.
@@ -187,18 +198,18 @@ Die genauen Reichweiten, Schadenswerte, Munitionsregeln und Wechselwirkungen all
 
 Im normalen Rennmodus müssen Kontrollpunkte in der vorgegebenen Reihenfolge erreicht werden. Wer das Finish zuerst erreicht, gewinnt. Der Pit Stop kann im Verlauf des Rennens zur Reparatur genutzt werden.
 
-Im Modus **Kill All** gewinnt man, wenn alle anderen Roboter ausgeschaltet wurden. Für diesen Modus sind mehrere Startpositionen vorgesehen, damit Roboter nicht zwingend alle auf demselben Startfeld beginnen müssen.
+Im Modus **Kill All** gewinnt man, wenn alle anderen Roboter ausgeschaltet wurden. In diesem Modus werden alle Kontrollpunkte zu Startpositionen, auf die die Roboter gleichmäßig verteilt werden. **Auch im normalen Finish-Modus können mehrere Startpositionen verwendet werden.**
 
 ## 9. Vor Veröffentlichung noch zu klären
 
 Die folgenden Punkte sind bewusst nicht als abschließend geklärte Regeln formuliert:
 
 - Vollständige Kollisions- und Schieberegeln, insbesondere mehrere Roboter und gleichzeitige Bewegungen.
-- Exakte Effekte und Schadenswerte für Minen, Annäherungsminen, Laser, Strahlenwaffen, Strahlung, Crusher und Drohnen.
+- Exakte Effekte und Schadenswerte für Minen, Annäherungsminen und die einzelnen Laser- und Strahlenwaffen.
 - Vollständige Wasser-, Öl- und Kleberregeln sowie ihre Wechselwirkungen.
 - Genaue Funktion der Abstoßfelder und sämtliche Einbahnwand-Sonderfälle.
 - Exakte Wirkung der Schalter auf Wände, Falltüren und andere dynamische Kurselemente.
-- Genaue Reparaturmenge und Bedingungen am Pit Stop.
+- Exakte Reparatur- und Modulausgabe-Details des Pit Stops.
 - Exakte Schutzwirkung von Power-Down Shield, Shield und Layered Armor.
 - Munitionsregeln und vollständige Waffenwerte.
 - Behandlung mehrerer oder überlappender Teleporter, insbesondere in Kombination mit mobilen Teleportern.
