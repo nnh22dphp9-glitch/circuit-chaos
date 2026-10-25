@@ -67,7 +67,7 @@ public class MoveInfo {
         tf = CourseHandler.getFloor(course, player.getRobot().getPosition());
         for (int phase = 0; phase < 5; phase++) {
             checkForAbyss(phase);
-            boolean flying = player.getRobot().isFlying();
+            boolean flying = false;
             if (program[phase].getType() == ProgramType.ROTATE_LEFT) {
                 endingDirection = endingDirection.add(Direction.WEST);
             } else if (program[phase].getType() == ProgramType.ROTATE_RIGHT) {
@@ -79,7 +79,9 @@ public class MoveInfo {
                 if (movement != 0 && player.uses(ModuleType.BRAKES, phase)) {
                     movement = movement > 0 ? movement - 1 : movement + 1;
                 }
-                if ((tf.isWater() && !flying) || CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+                // Hovercraft flight starts before water/oil effects are applied.
+                flying = player.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
+                if (!flying && (tf.isWater() || CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
                     if (movement > 0) {
                         movement--;
                     }
@@ -129,7 +131,7 @@ public class MoveInfo {
                         }
                         movement++;
                     }
-                    while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+                    while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                         switch (endingDirection) {
                             case NORTH -> y++;
                             case EAST -> x--;
@@ -169,7 +171,7 @@ public class MoveInfo {
                         }
                         movement--;
                     }
-                    while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+                    while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                         switch (endingDirection) {
                             case NORTH -> y--;
                             case EAST -> x++;
@@ -223,7 +225,7 @@ public class MoveInfo {
                 }
             }
             checkForAbyss(phase);
-            while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+            while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                 switch (lastDirection) {
                     case NORTH -> y--;
                     case EAST -> x++;
@@ -274,7 +276,7 @@ public class MoveInfo {
                 }
             }
             checkForAbyss(phase);
-            while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+            while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                 switch (lastDirection) {
                     case NORTH -> y--;
                     case EAST -> x++;
@@ -293,7 +295,7 @@ public class MoveInfo {
                 }
             }
             checkForAbyss(phase);
-            while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+            while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                 switch (lastDirection) {
                     case NORTH -> y--;
                     case EAST -> x++;
@@ -331,7 +333,7 @@ public class MoveInfo {
                     }
                 }
                 //noinspection WhileCanBeDoWhile
-                while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+                while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                     switch (lastDirection) {
                         case NORTH -> y--;
                         case EAST -> x++;
