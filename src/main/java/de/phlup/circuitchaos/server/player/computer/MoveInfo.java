@@ -110,7 +110,7 @@ public class MoveInfo {
                 }
                 if (movement < 0) {
                     while (movement < 0) {
-                        if (notBlocked(course, true)) {
+                        if (notBlocked(course, true, flyingDuringMovement)) {
                             switch (endingDirection) {
                                 case NORTH -> y++;
                                 case EAST -> x--;
@@ -150,7 +150,7 @@ public class MoveInfo {
                     }
                 } else if (movement > 0) {
                     while (movement > 0) {
-                        if (notBlocked(course, false)) {
+                        if (notBlocked(course, false, flyingDuringMovement)) {
                             switch (endingDirection) {
                                 case NORTH -> y--;
                                 case EAST -> x++;
@@ -463,9 +463,9 @@ public class MoveInfo {
         }
     }
 
-    private boolean notBlocked(Course course, boolean backup) {
+    private boolean notBlocked(Course course, boolean backup, boolean flying) {
         Floor f = CourseHandler.getFloor(course, new Position(x, y));
-        Floor tf = switch (endingDirection) {
+        Floor targetFloor = switch (endingDirection) {
             case NORTH -> CourseHandler.getFloor(course, new Position(x, backup ? y + 1 : y - 1));
             case EAST -> CourseHandler.getFloor(course, new Position(backup ? x - 1 : x + 1, y));
             case SOUTH -> CourseHandler.getFloor(course, new Position(x, backup ? y - 1 : y + 1));
@@ -477,18 +477,30 @@ public class MoveInfo {
                 yield t;
             }
         };
-        Direction dir1 = backup ? endingDirection.reverse() : endingDirection;
-        Direction dir2 = endingDirection.reverse();
-        return ((f.wall(dir1) == WallType.NONE
-                || f.wall(dir1) == WallType.ONE_WAY_GREEN
-                || f.wall(dir1) == WallType.RAMP_UP
-                || f.wall(dir1) == WallType.RAMP_DOWN)
-                && (tf.wall(dir2) == WallType.NONE
-                || tf.wall(dir2) == WallType.ONE_WAY_GREEN
-                || tf.wall(dir2) == WallType.RAMP_UP
-                || tf.wall(dir2) == WallType.RAMP_DOWN))
-                || (f.wall(dir1) == WallType.ONE_WAY_GREEN
-                && tf.wall(dir2) == WallType.ONE_WAY_RED);
+        if (flying) {
+            return true;
+        }
+
+        Direction direction = backup ? endingDirection.reverse() : endingDirection;
+        Direction oppositeDirection = direction.reverse();
+        WallType sourceWall = f.wall(direction);
+        WallType targetWall = targetFloor.wall(oppositeDirection);
+        boolean rampPassage = (sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN)
+                && (targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN);
+        if (targetFloor.getLevel() > f.getLevel() && !rampPassage) {
+            return false;
+        }
+
+        return ((sourceWall == WallType.NONE
+                || sourceWall == WallType.ONE_WAY_GREEN
+                || sourceWall == WallType.RAMP_UP
+                || sourceWall == WallType.RAMP_DOWN)
+                && (targetWall == WallType.NONE
+                || targetWall == WallType.ONE_WAY_GREEN
+                || targetWall == WallType.RAMP_UP
+                || targetWall == WallType.RAMP_DOWN
+                || (targetWall == WallType.LEDGE && targetFloor.getLevel() < f.getLevel())))
+                || (sourceWall == WallType.ONE_WAY_GREEN && targetWall == WallType.ONE_WAY_RED);
     }
 
 }
