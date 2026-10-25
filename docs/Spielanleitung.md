@@ -12,8 +12,8 @@ Je nach Spielziel gewinnt man, indem man das Ziel beziehungsweise die Kontrollpu
 
 ### Spielziele
 
-- **Finish:** Die Kontrollpunkte müssen in der vorgegebenen Reihenfolge erreicht werden. Wer das Finish zuerst erreicht, gewinnt.
-- **Kill All:** Ziel ist es, alle anderen Roboter auszuschalten. In diesem Modus werden Kontrollpunkte nicht als normale Rennreihenfolge verwendet; die Startpositionen können über mehrere Startfelder verteilt werden.
+- **Finish:** Die Kontrollpunkte müssen in der vorgegebenen Reihenfolge erreicht werden. Wer das Ziel (Finish) zuerst erreicht, gewinnt.
+- **Kill All:** Ziel ist es, alle anderen Roboter auszuschalten. In diesem Modus werden alle Kontrollpunkte zu Startpositionen, auf die die Roboter gleichmäßig verteilt werden.
 
 ## 2. Programmieren und Ausführen
 
