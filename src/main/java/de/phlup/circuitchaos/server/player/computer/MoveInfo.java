@@ -133,26 +133,7 @@ public class MoveInfo {
                         }
                         movement++;
                     }
-                    while (!flyingDuringMovement && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
-                        Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
-                        switch (endingDirection) {
-                            case NORTH -> y++;
-                            case EAST -> x--;
-                            case SOUTH -> y--;
-                            case WEST -> x++;
-                        }
-                        tf = CourseHandler.getFloor(course, new Position(x, y));
-                        applyHeightDamage(previousFloor, tf, flyingDuringMovement, endingDirection.reverse());
-                        checkForAbyss(phase);
-                        for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                            if (co.getType().isPortal()) {
-                                x = co.getTargetPosition().x();
-                                y = co.getTargetPosition().y();
-                                tf = CourseHandler.getFloor(course, co.getTargetPosition());
-                                break;
-                            }
-                        }
-                    }
+                    slideOnOil(endingDirection.reverse(), flyingDuringMovement, phase);
                 } else if (movement > 0) {
                     while (movement > 0) {
                         Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
@@ -177,26 +158,7 @@ public class MoveInfo {
                         }
                         movement--;
                     }
-                    while (!flyingDuringMovement && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
-                        Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
-                        switch (endingDirection) {
-                            case NORTH -> y--;
-                            case EAST -> x++;
-                            case SOUTH -> y++;
-                            case WEST -> x--;
-                        }
-                        tf = CourseHandler.getFloor(course, new Position(x, y));
-                        applyHeightDamage(previousFloor, tf, flyingDuringMovement, endingDirection);
-                        checkForAbyss(phase);
-                        for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                            if (co.getType().isPortal()) {
-                                x = co.getTargetPosition().x();
-                                y = co.getTargetPosition().y();
-                                tf = CourseHandler.getFloor(course, co.getTargetPosition());
-                                break;
-                            }
-                        }
-                    }
+                    slideOnOil(endingDirection, flyingDuringMovement, phase);
                 }
             }
             Direction lastDirection = Direction.NORTH;
