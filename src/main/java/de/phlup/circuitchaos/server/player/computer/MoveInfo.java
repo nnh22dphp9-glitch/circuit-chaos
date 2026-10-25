@@ -133,6 +133,7 @@ public class MoveInfo {
                         movement++;
                     }
                     while (!flyingDuringMovement && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+                        Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
                         switch (endingDirection) {
                             case NORTH -> y++;
                             case EAST -> x--;
@@ -140,7 +141,7 @@ public class MoveInfo {
                             case WEST -> x++;
                         }
                         tf = CourseHandler.getFloor(course, new Position(x, y));
-                        applyHeightDamage(previousFloor, tf, flyingDuringMovement, endingDirection);
+                        applyHeightDamage(previousFloor, tf, flyingDuringMovement, endingDirection.reverse());
                         checkForAbyss(phase);
                         for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
                             if (co.getType().isPortal()) {
@@ -163,6 +164,7 @@ public class MoveInfo {
                             }
                         }
                         tf = CourseHandler.getFloor(course, new Position(x, y));
+                        applyHeightDamage(previousFloor, tf, flyingDuringMovement, endingDirection);
                         checkForAbyss(phase);
                         for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
                             if (co.getType().isPortal() && !flyingDuringMovement) {
@@ -175,6 +177,7 @@ public class MoveInfo {
                         movement--;
                     }
                     while (!flyingDuringMovement && CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
+                        Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
                         switch (endingDirection) {
                             case NORTH -> y--;
                             case EAST -> x++;
@@ -182,6 +185,7 @@ public class MoveInfo {
                             case WEST -> x--;
                         }
                         tf = CourseHandler.getFloor(course, new Position(x, y));
+                        applyHeightDamage(previousFloor, tf, flyingDuringMovement, endingDirection);
                         checkForAbyss(phase);
                         for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
                             if (co.getType().isPortal()) {
