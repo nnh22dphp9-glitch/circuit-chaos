@@ -1427,11 +1427,12 @@ public class Game {
         if (!ce.isFlying()) {
             ce.setLevel(floor3.getLevel());
             Player player = getPlayerOf(ce);
-            boolean rampPassage = previousFloor.wall(direction == null ? NORTH : direction) == WallType.RAMP_UP
-                    || previousFloor.wall(direction == null ? NORTH : direction) == WallType.RAMP_DOWN;
+            boolean rampPassage = false;
             if (direction != null) {
+                WallType sourceWall = previousFloor.wall(direction);
                 WallType targetWall = floor3.wall(direction.reverse());
-                rampPassage = rampPassage || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
+                rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
+                        || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
             }
             if (player != null && floor3.getLevel() < previousFloor.getLevel() && !rampPassage) {
                 player.takeDamage(phase, null, null, false);
