@@ -1154,9 +1154,6 @@ public class Game {
             }
         }
         Direction direction2 = direction.reverse();
-        if (floor1.wall(direction) == WallType.RAMP_UP && floor2.wall(direction2) == WallType.RAMP_DOWN && !ce.isFlying()) {
-            amount--;
-        }
         if (!ce.getPosition().inRange(course.getRange())) {
             amount = 0;
             die(ce, step, phase);
@@ -1164,21 +1161,30 @@ public class Game {
         wait = wait && (movingRobotName == null || movingRobotName.equals(ce.getName()));
         Player player = getPlayerOf(ce);
         if (amount > 0) {
-            if (((floor1.wall(direction) == WallType.NONE
-                    || floor1.wall(direction) == WallType.ONE_WAY_GREEN
-                    || floor1.wall(direction) == WallType.RAMP_DOWN
-                    || floor1.wall(direction) == WallType.RAMP_UP)
-                    && (floor2.wall(direction2) == WallType.NONE
-                    || floor2.wall(direction2) == WallType.ONE_WAY_GREEN
-                    || floor2.wall(direction2) == WallType.RAMP_UP
-                    || floor2.wall(direction2) == WallType.RAMP_DOWN))
-                    || (floor1.wall(direction) == WallType.ONE_WAY_GREEN
-                    && floor2.wall(direction2) == WallType.ONE_WAY_RED)) {
+            WallType sourceWall = floor1.wall(direction);
+            WallType targetWall = floor2.wall(direction2);
+            boolean rampPassage = (sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN)
+                    && (targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN);
+            boolean uphill = floor2.getLevel() > floor1.getLevel() && !rampPassage;
+            boolean downhill = floor2.getLevel() < floor1.getLevel() && !rampPassage;
+            boolean wallPassage = ((sourceWall == WallType.NONE
+                    || sourceWall == WallType.ONE_WAY_GREEN
+                    || sourceWall == WallType.RAMP_DOWN
+                    || sourceWall == WallType.RAMP_UP)
+                    && (targetWall == WallType.NONE
+                    || targetWall == WallType.ONE_WAY_GREEN
+                    || targetWall == WallType.RAMP_UP
+                    || targetWall == WallType.RAMP_DOWN))
+                    || (sourceWall == WallType.ONE_WAY_GREEN && targetWall == WallType.ONE_WAY_RED);
+            if (ce.isFlying() || (!uphill && wallPassage)) {
                 CourseElement conflictingElement = getConflictingElement(ce, direction);
                 if (conflictingElement == null) {
                     ce.setPosition(targetPosition);
                     if (!ce.isFlying()) {
-                        ce.setLevel(CourseHandler.getFloor(course, ce.getPosition()).getLevel());
+                        ce.setLevel(floor2.getLevel());
+                        if (downhill && player != null) {
+                            player.takeDamage(phase, null, null, false);
+                        }
                     }
                 } else if (notBlockedByMovableRobot) {
                     if (player != null && player.uses(ModuleType.RAMMING_ARMOR, phase)) {
@@ -1190,28 +1196,14 @@ public class Game {
                     if (move(conflictingElement, direction, strength, 1, step, phase, true, wait, movingRobotName)) {
                         ce.setPosition(targetPosition);
                         if (!ce.isFlying()) {
-                            ce.setLevel(CourseHandler.getFloor(course, ce.getPosition()).getLevel());
+                            ce.setLevel(floor2.getLevel());
+                            if (downhill && player != null) {
+                                player.takeDamage(phase, null, null, false);
+                            }
                         }
                     }
                 }
-            } else if ((floor1.wall(direction) == WallType.NONE || floor1.wall(direction) == WallType.ONE_WAY_GREEN)
-                    && (floor2.wall(direction2) == WallType.LEDGE)) {
-                if (!ce.isFlying() && player != null) {
-                    player.takeDamage(phase, null, null, false);
-                    player.takeDamage(phase, null, null, false);
-                }
-                CourseElement conflictingElement = getConflictingElement(ce, direction);
-                if (conflictingElement == null) {
-                    ce.setPosition(targetPosition);
-                    if (!ce.isFlying()) {
-                        ce.setLevel(CourseHandler.getFloor(course, ce.getPosition()).getLevel());
-                    }
-                } else if (notBlockedByMovableRobot) {
-                    if (move(conflictingElement, direction, strength, 1, step, phase, true, wait, movingRobotName)) {
-                        move(ce, direction, strength, amount, step, phase, true, wait, movingRobotName);
-                    }
-                }
-            } else if (floor1.wall(direction) == WallType.REPULSOR_FIELD
+            } else if (sourceWall == WallType.REPULSOR_FIELD
                     || ((floor1.wall(direction) == WallType.NONE
                     || floor1.wall(direction) == WallType.ONE_WAY_GREEN
                     || floor1.wall(direction) == WallType.RAMP_DOWN)
