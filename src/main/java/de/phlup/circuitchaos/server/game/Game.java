@@ -1174,7 +1174,8 @@ public class Game {
                     && (targetWall == WallType.NONE
                     || targetWall == WallType.ONE_WAY_GREEN
                     || targetWall == WallType.RAMP_UP
-                    || targetWall == WallType.RAMP_DOWN))
+                    || targetWall == WallType.RAMP_DOWN
+                    || targetWall == WallType.LEDGE))
                     || (sourceWall == WallType.ONE_WAY_GREEN && targetWall == WallType.ONE_WAY_RED);
             if (ce.isFlying() || (!uphill && wallPassage)) {
                 CourseElement conflictingElement = getConflictingElement(ce, direction);
