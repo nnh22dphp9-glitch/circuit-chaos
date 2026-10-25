@@ -761,7 +761,6 @@ public class Game {
                 if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
                     Floor     f                = CourseHandler.getFloor(course, obj.getPosition());
                     Floor     targetFloor      = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    Direction counterDirection = f.getFacingDirection().reverse();
                     if (!canMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
                             || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
                         obj.setConflictingMark(-1);
@@ -816,7 +815,6 @@ public class Game {
                 if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
                     Floor     f                = CourseHandler.getFloor(course, obj.getPosition());
                     Floor     targetFloor      = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    Direction counterDirection = f.getFacingDirection().reverse();
                     if (!canMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
                             || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
                         obj.setConflictingMark(-1);
