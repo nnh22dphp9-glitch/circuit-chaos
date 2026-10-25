@@ -471,8 +471,8 @@ public class MoveInfo {
         }
         WallType sourceWall = previousFloor.wall(direction);
         WallType targetWall = currentFloor.wall(direction.reverse());
-        boolean rampPassage = (sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN)
-                && (targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN);
+        boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
+                || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
         if (!rampPassage) {
             damage++;
         }
@@ -506,8 +506,8 @@ public class MoveInfo {
         Direction oppositeDirection = direction.reverse();
         WallType sourceWall = f.wall(direction);
         WallType targetWall = targetFloor.wall(oppositeDirection);
-        boolean rampPassage = (sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN)
-                && (targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN);
+        boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
+                || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
         if (targetFloor.getLevel() > f.getLevel() && !rampPassage) {
             return false;
         }
