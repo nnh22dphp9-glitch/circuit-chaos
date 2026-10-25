@@ -67,7 +67,6 @@ public class MoveInfo {
         tf = CourseHandler.getFloor(course, player.getRobot().getPosition());
         for (int phase = 0; phase < 5; phase++) {
             checkForAbyss(phase);
-            boolean flyingDuringMovement = false;
             if (program[phase].getType() == ProgramType.ROTATE_LEFT) {
                 endingDirection = endingDirection.add(Direction.WEST);
             } else if (program[phase].getType() == ProgramType.ROTATE_RIGHT) {
@@ -80,7 +79,7 @@ public class MoveInfo {
                     movement = movement > 0 ? movement - 1 : movement + 1;
                 }
                 // Hovercraft flight starts before water/oil effects are applied.
-                flyingDuringMovement = player.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
+                boolean flyingDuringMovement = player.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
                 if (!flyingDuringMovement && (tf.isWater() || CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
                     if (movement > 0) {
                         movement--;
@@ -141,7 +140,7 @@ public class MoveInfo {
                         tf = CourseHandler.getFloor(course, new Position(x, y));
                         checkForAbyss(phase);
                         for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                            if (co.getType().isPortal() && !flyingDuringMovement) {
+                            if (co.getType().isPortal()) {
                                 x = co.getTargetPosition().x();
                                 y = co.getTargetPosition().y();
                                 tf = CourseHandler.getFloor(course, co.getTargetPosition());
@@ -181,7 +180,7 @@ public class MoveInfo {
                         tf = CourseHandler.getFloor(course, new Position(x, y));
                         checkForAbyss(phase);
                         for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                            if (co.getType().isPortal() && !flyingDuringMovement) {
+                            if (co.getType().isPortal()) {
                                 x = co.getTargetPosition().x();
                                 y = co.getTargetPosition().y();
                                 tf = CourseHandler.getFloor(course, co.getTargetPosition());
@@ -480,16 +479,16 @@ public class MoveInfo {
         };
         Direction dir1 = backup ? endingDirection.reverse() : endingDirection;
         Direction dir2 = endingDirection.reverse();
-        return (f.wall(dir1) == WallType.NONE
+        return ((f.wall(dir1) == WallType.NONE
                 || f.wall(dir1) == WallType.ONE_WAY_GREEN
                 || f.wall(dir1) == WallType.RAMP_UP
                 || f.wall(dir1) == WallType.RAMP_DOWN)
                 && (tf.wall(dir2) == WallType.NONE
                 || tf.wall(dir2) == WallType.ONE_WAY_GREEN
-                || tf.wall(dir2) == WallType.ONE_WAY_RED
-                || tf.wall(dir2) == WallType.LEDGE
                 || tf.wall(dir2) == WallType.RAMP_UP
-                || tf.wall(dir2) == WallType.RAMP_DOWN);
+                || tf.wall(dir2) == WallType.RAMP_DOWN))
+                || (f.wall(dir1) == WallType.ONE_WAY_GREEN
+                && tf.wall(dir2) == WallType.ONE_WAY_RED);
     }
 
 }
