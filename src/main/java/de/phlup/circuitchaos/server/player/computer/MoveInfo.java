@@ -66,6 +66,7 @@ public class MoveInfo {
 
         tf = CourseHandler.getFloor(course, player.getRobot().getPosition());
         for (int phase = 0; phase < 5; phase++) {
+            boolean flyingDuringMovement = false;
             checkForAbyss(phase);
             if (program[phase].getType() == ProgramType.ROTATE_LEFT) {
                 endingDirection = endingDirection.add(Direction.WEST);
@@ -79,7 +80,7 @@ public class MoveInfo {
                     movement = movement > 0 ? movement - 1 : movement + 1;
                 }
                 // Hovercraft flight starts before water/oil effects are applied.
-                boolean flyingDuringMovement = player.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
+                flyingDuringMovement = player.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
                 if (!flyingDuringMovement && (tf.isWater() || CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
                     if (movement > 0) {
                         movement--;
@@ -201,162 +202,57 @@ public class MoveInfo {
             Direction lastDirection = Direction.NORTH;
             // express conveyor belts
             if (tf.getFloortype().isExpressConveyorBelt()) {
+                Floor sourceFloor = tf;
                 lastDirection = tf.getFacingDirection();
-                switch (tf.getFacingDirection()) {
-                    case NORTH -> y--;
-                    case EAST -> x++;
-                    case SOUTH -> y++;
-                    case WEST -> x--;
-                }
-                tf = CourseHandler.getFloor(course, new Position(x, y));
-                if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW ||
-                        tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW ||
-                        tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW ||
-                        tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW) &&
-                        (tf.getFacingDirection() == lastDirection.add(Direction.WEST) || (tf.getFacingDirection() == Direction.WEST && lastDirection == Direction.NORTH))) {
-                    endingDirection = endingDirection.add(Direction.WEST);
-                } else if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW ||
-                        tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW ||
-                        tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW ||
-                        tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW) &&
-                        (tf.getFacingDirection() == lastDirection.add(Direction.EAST) || (tf.getFacingDirection() == Direction.NORTH && lastDirection == Direction.WEST))) {
-                    endingDirection = endingDirection.add(Direction.EAST);
-                }
-                for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                    if (co.getType().isPortal()) {
-                        x = co.getTargetPosition().x();
-                        y = co.getTargetPosition().y();
-                        tf = CourseHandler.getFloor(course, co.getTargetPosition());
-                        break;
+                if (moveForcedOneTile(lastDirection, flyingDuringMovement, phase)) {
+                    if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
+                            || tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
+                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW
+                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW)
+                            && (tf.getFacingDirection() == lastDirection.add(Direction.WEST)
+                            || (tf.getFacingDirection() == Direction.WEST && lastDirection == Direction.NORTH))) {
+                        endingDirection = endingDirection.add(Direction.WEST);
+                    } else if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW
+                            || tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
+                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW
+                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW)
+                            && (tf.getFacingDirection() == lastDirection.add(Direction.EAST)
+                            || (tf.getFacingDirection() == Direction.NORTH && lastDirection == Direction.WEST))) {
+                        endingDirection = endingDirection.add(Direction.EAST);
                     }
                 }
             }
-            checkForAbyss(phase);
-            while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
-                switch (lastDirection) {
-                    case NORTH -> y--;
-                    case EAST -> x++;
-                    case SOUTH -> y++;
-                    case WEST -> x--;
-                }
-                tf = CourseHandler.getFloor(course, new Position(x, y));
-                checkForAbyss(phase);
-                for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                    if (co.getType().isPortal()) {
-                        x = co.getTargetPosition().x();
-                        y = co.getTargetPosition().y();
-                        tf = CourseHandler.getFloor(course, co.getTargetPosition());
-                        break;
-                    }
-                }
-            }
+            slideOnOil(lastDirection, flyingDuringMovement, phase);
+
             // conveyor belts
             if (tf.getFloortype().isConveyorBelt() && !tf.isWater()) {
                 lastDirection = tf.getFacingDirection();
-                switch (tf.getFacingDirection()) {
-                    case NORTH -> y--;
-                    case EAST -> x++;
-                    case SOUTH -> y++;
-                    case WEST -> x--;
-                }
-                tf = CourseHandler.getFloor(course, new Position(x, y));
-                if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW ||
-                        tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW ||
-                        tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW ||
-                        tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW) &&
-                        (tf.getFacingDirection() == lastDirection.add(Direction.WEST) || (tf.getFacingDirection() == Direction.WEST && lastDirection == Direction.NORTH))) {
-                    endingDirection = endingDirection.add(Direction.WEST);
-                } else if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW ||
-                        tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW ||
-                        tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW ||
-                        tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW) &&
-                        (tf.getFacingDirection() == lastDirection.add(Direction.EAST) || (tf.getFacingDirection() == Direction.NORTH && lastDirection == Direction.WEST))) {
-                    endingDirection = endingDirection.add(Direction.EAST);
-                }
-                for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                    if (co.getType().isPortal()) {
-                        x = co.getTargetPosition().x();
-                        y = co.getTargetPosition().y();
-                        tf = CourseHandler.getFloor(course, co.getTargetPosition());
-                        break;
+                if (moveForcedOneTile(lastDirection, flyingDuringMovement, phase)) {
+                    if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
+                            || tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
+                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW
+                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW)
+                            && (tf.getFacingDirection() == lastDirection.add(Direction.WEST)
+                            || (tf.getFacingDirection() == Direction.WEST && lastDirection == Direction.NORTH))) {
+                        endingDirection = endingDirection.add(Direction.WEST);
+                    } else if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW
+                            || tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
+                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW
+                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW)
+                            && (tf.getFacingDirection() == lastDirection.add(Direction.EAST)
+                            || (tf.getFacingDirection() == Direction.NORTH && lastDirection == Direction.WEST))) {
+                        endingDirection = endingDirection.add(Direction.EAST);
                     }
                 }
             }
-            checkForAbyss(phase);
-            while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
-                switch (lastDirection) {
-                    case NORTH -> y--;
-                    case EAST -> x++;
-                    case SOUTH -> y++;
-                    case WEST -> x--;
-                }
-                tf = CourseHandler.getFloor(course, new Position(x, y));
-                checkForAbyss(phase);
-                for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                    if (co.getType().isPortal()) {
-                        x = co.getTargetPosition().x();
-                        y = co.getTargetPosition().y();
-                        tf = CourseHandler.getFloor(course, co.getTargetPosition());
-                        break;
-                    }
-                }
-            }
-            checkForAbyss(phase);
-            while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
-                switch (lastDirection) {
-                    case NORTH -> y--;
-                    case EAST -> x++;
-                    case SOUTH -> y++;
-                    case WEST -> x--;
-                }
-                tf = CourseHandler.getFloor(course, new Position(x, y));
-                checkForAbyss(phase);
-                for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                    if (co.getType().isPortal()) {
-                        x = co.getTargetPosition().x();
-                        y = co.getTargetPosition().y();
-                        tf = CourseHandler.getFloor(course, co.getTargetPosition());
-                        break;
-                    }
-                }
-            }
+            slideOnOil(lastDirection, flyingDuringMovement, phase);
+            slideOnOil(lastDirection, flyingDuringMovement, phase);
+
             // pushers
             if (tf.isHasPusher() && tf.getActiveInPhase()[phase]) {
                 lastDirection = tf.getPusherDirection();
-                switch (lastDirection) {
-                    case NORTH -> y--;
-                    case EAST -> x++;
-                    case SOUTH -> y++;
-                    case WEST -> x--;
-                }
-                tf = CourseHandler.getFloor(course, new Position(x, y));
-                checkForAbyss(phase);
-                for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                    if (co.getType().isPortal()) {
-                        x = co.getTargetPosition().x();
-                        y = co.getTargetPosition().y();
-                        tf = CourseHandler.getFloor(course, co.getTargetPosition());
-                        break;
-                    }
-                }
-                //noinspection WhileCanBeDoWhile
-                while (CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
-                    switch (lastDirection) {
-                        case NORTH -> y--;
-                        case EAST -> x++;
-                        case SOUTH -> y++;
-                        case WEST -> x--;
-                    }
-                    tf = CourseHandler.getFloor(course, new Position(x, y));
-                    checkForAbyss(phase);
-                    for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                        if (co.getType().isPortal()) {
-                            x = co.getTargetPosition().x();
-                            y = co.getTargetPosition().y();
-                            tf = CourseHandler.getFloor(course, co.getTargetPosition());
-                            break;
-                        }
-                    }
+                if (moveForcedOneTile(lastDirection, flyingDuringMovement, phase)) {
+                    slideOnOil(lastDirection, flyingDuringMovement, phase);
                 }
             }
             // gears
@@ -465,6 +361,64 @@ public class MoveInfo {
         }
     }
 
+    private boolean moveForcedOneTile(Direction direction, boolean flying, int phase) {
+        Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
+        Position targetPosition = previousFloor.getPosition().neighbour(direction);
+        Floor targetFloor = CourseHandler.getFloor(course, targetPosition);
+        if (!canMoveAcross(previousFloor, targetFloor, direction, flying)) {
+            return false;
+        }
+        x = targetPosition.x();
+        y = targetPosition.y();
+        tf = targetFloor;
+        applyHeightDamage(previousFloor, targetFloor, flying, direction);
+        checkForAbyss(phase);
+        if (!flying) {
+            for (CourseObject co : CourseHandler.getObjects(course, targetPosition)) {
+                if (co.getType().isPortal() && co.getTargetPosition() != null) {
+                    x = co.getTargetPosition().x();
+                    y = co.getTargetPosition().y();
+                    tf = CourseHandler.getFloor(course, co.getTargetPosition());
+                    checkForAbyss(phase);
+                    break;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void slideOnOil(Direction direction, boolean flying, int phase) {
+        while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream()
+                .anyMatch(co -> co.getType() == ObjectType.OIL)) {
+            if (!moveForcedOneTile(direction, false, phase)) {
+                break;
+            }
+        }
+    }
+
+    private boolean canMoveAcross(Floor sourceFloor, Floor targetFloor, Direction direction, boolean flying) {
+        if (flying) {
+            return true;
+        }
+        WallType sourceWall = sourceFloor.wall(direction);
+        WallType targetWall = targetFloor.wall(direction.reverse());
+        boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
+                || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
+        if (targetFloor.getLevel() > sourceFloor.getLevel() && !rampPassage) {
+            return false;
+        }
+        return ((sourceWall == WallType.NONE
+                || sourceWall == WallType.ONE_WAY_GREEN
+                || sourceWall == WallType.RAMP_UP
+                || sourceWall == WallType.RAMP_DOWN)
+                && (targetWall == WallType.NONE
+                || targetWall == WallType.ONE_WAY_GREEN
+                || targetWall == WallType.RAMP_UP
+                || targetWall == WallType.RAMP_DOWN
+                || (targetWall == WallType.LEDGE && targetFloor.getLevel() < sourceFloor.getLevel())))
+                || (sourceWall == WallType.ONE_WAY_GREEN && targetWall == WallType.ONE_WAY_RED);
+    }
+
     private void applyHeightDamage(Floor previousFloor, Floor currentFloor, boolean flying, Direction direction) {
         if (flying || currentFloor.getLevel() >= previousFloor.getLevel()) {
             return;
@@ -498,30 +452,8 @@ public class MoveInfo {
                 yield t;
             }
         };
-        if (flying) {
-            return true;
-        }
-
         Direction direction = backup ? endingDirection.reverse() : endingDirection;
-        Direction oppositeDirection = direction.reverse();
-        WallType sourceWall = f.wall(direction);
-        WallType targetWall = targetFloor.wall(oppositeDirection);
-        boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
-                || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
-        if (targetFloor.getLevel() > f.getLevel() && !rampPassage) {
-            return false;
-        }
-
-        return ((sourceWall == WallType.NONE
-                || sourceWall == WallType.ONE_WAY_GREEN
-                || sourceWall == WallType.RAMP_UP
-                || sourceWall == WallType.RAMP_DOWN)
-                && (targetWall == WallType.NONE
-                || targetWall == WallType.ONE_WAY_GREEN
-                || targetWall == WallType.RAMP_UP
-                || targetWall == WallType.RAMP_DOWN
-                || (targetWall == WallType.LEDGE && targetFloor.getLevel() < f.getLevel())))
-                || (sourceWall == WallType.ONE_WAY_GREEN && targetWall == WallType.ONE_WAY_RED);
+        return canMoveAcross(f, targetFloor, direction, flying);
     }
 
 }
