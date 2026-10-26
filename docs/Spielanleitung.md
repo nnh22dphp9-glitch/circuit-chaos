@@ -30,17 +30,30 @@ Bekannte Karten:
 
 Die Programme werden anhand ihrer Prioritäten abgearbeitet; eine höhere Priorität wird zuerst ausgeführt. Bewegungen können durch Hindernisse, andere Roboter oder Kurseffekte beeinflusst werden.
 
-### Ablauf einer Phase
+### Geheimhaltung und gleichzeitige Programmierung
 
-Der grobe Ablauf ist:
+Alle Spieler programmieren gleichzeitig mit den ihnen zugeteilten Programmkarten und ihren verfügbaren Modulen. Sie kennen weder die noch nicht ausgeführten Programmschritte noch die Module der anderen Spieler, solange diese nicht eingesetzt wurden oder keinen sichtbaren Effekt ausgelöst haben. Aus früheren Runden und sichtbaren Auswirkungen können sie Rückschlüsse ziehen. Manche Module, etwa **Layered Armor**, können aktiv sein, ohne einen sichtbaren Hinweis darauf zu geben.
 
-1. Die Programme werden für die Phase aufgedeckt.
-2. Die programmierten Roboterbewegungen werden ausgeführt.
-3. Anschließend wirken die Kurselemente, beispielsweise Förderbänder, Pushers und Zahnräder.
-4. Danach werden Laser und andere Strahlen beziehungsweise Waffen abgewickelt.
-5. Es wird geprüft, ob Kontrollpunkte erreicht wurden und ob ein Spielziel erfüllt ist.
+### Ablauf einer Runde
 
-Dieser Ablauf wiederholt sich für die Programmphasen der Runde. Bestimmte Kurselemente wie Zahnräder und Förderbänder wirken in ihrer jeweiligen Phase unabhängig davon, ob ein Roboter sie bewusst ansteuert.
+Nach der Programmierung aller Spieler wird das Programm in **fünf Phasen** abgearbeitet. Die folgenden Schritte werden in jeder dieser Phasen in der angegebenen Reihenfolge ausgeführt:
+
+1. **Programmschritt aufdecken und Reihenfolge festlegen:** Der Programmschritt der Phase wird sichtbar gemacht. Die Roboter werden nach Kartenpriorität sortiert, höchste Priorität zuerst. Randomizer können den aktuellen Programmschritt eines Roboters durch einen zufällig ausgewählten anderen Programmschritt ersetzen. Die drei Turn-Karten haben keine Priorität mehr; sie werden am Ende und untereinander in zufälliger Reihenfolge ausgeführt.
+2. **Falltüren öffnen:** Falltüren, die in dieser Phase aktiv sind, öffnen sich. Roboter können dadurch bereits an dieser Stelle in den Abgrund stürzen und zerstört werden.
+3. **Programmschritte ausführen:** Die Roboter führen ihren jeweiligen Programmschritt in der festgelegten Prioritätsreihenfolge aus. Zu Beginn des Programmschritts setzt ein Roboter gegebenenfalls durch aktivierte Module Geräte ab, beispielsweise Minen oder Brücken. Neu abgelegte Minen sind zunächst inaktiv. In dieser Phase bewegt sich der Roboter gemäß seinem Programmschritt.
+4. **Express-Förderbänder bewegen:** Express-Förderbänder bewegen die Roboter und andere darauf befindliche Dinge; je nach Förderband kann dabei auch die Ausrichtung geändert werden.
+5. **Förderbänder bewegen:** Nun bewegen sich sowohl normale als auch Express-Förderbänder und transportieren die darauf befindlichen Roboter und Dinge; dabei kann sich ebenfalls die Ausrichtung ändern.
+6. **Pusher:** Aktive Pusher drücken Roboter gegebenenfalls ein Feld in die vorgegebene Richtung.
+7. **Zahnräder:** Zahnräder drehen Roboter und andere Dinge auf ihnen.
+8. **Strahlen und Laser feuern:** Zuerst feuern die Waffen der Roboter, danach die kursmontierten Strahlen und Laser. Die Reihenfolge der Schützen richtet sich nach derselben Prioritätsreihenfolge wie bei den Programmschritten.
+9. **Kontrollpunkte und Minen prüfen:** Es wird geprüft, ob Roboter Kontrollpunkte oder das Finish erreicht haben. Dabei aktivieren sich Minen und explodieren unmittelbar, wenn ein Roboter auf einer Mine steht. Annäherungsminen können auch auslösen, wenn ein Roboter auf einem benachbarten Feld steht. Erreicht ein Roboter das Finish, wird er als Gewinner festgelegt. Mehrere gleichzeitige Gewinner werden derzeit nicht geprüft; das ist ein offener Punkt für eine mögliche Unterstützung mehrerer Finish-Felder.
+10. **Kill-All-Sieg prüfen:** Im Kill-All-Modus wird der Gewinner anhand der Kill-All-Regeln neu bestimmt; dadurch kann der zuvor festgelegte Finish-Gewinner überschrieben oder auf keinen Gewinner gesetzt werden.
+
+### Rundenende
+
+Nach den fünf Programmphasen werden die Effekte am Rundenende abgewickelt. Zerstörte Roboter werden wieder auf das Spielfeld gesetzt, und der Schaden sowie der Power-Down werden entsprechend den jeweiligen Regeln verarbeitet. Danach erhalten die Spieler neue Programmkarten und die nächste Runde beginnt.
+
+Die fünf Programmphasen wiederholen sich also nicht nur als einfache Roboterbewegungen: In jeder Phase wirken in festgelegter Reihenfolge auch Falltüren, Förderbänder, Pusher, Zahnräder, Waffen und Minen.
 
 ## 3. Bewegung, Wände und Höhenunterschiede
 
