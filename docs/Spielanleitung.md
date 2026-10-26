@@ -19,7 +19,7 @@ Je nach Spielziel gewinnt man, indem man das Ziel beziehungsweise die Kontrollpu
 
 ### Programmregister und Karten
 
-Ein Roboter besitzt fünf Programmregister. Für die Register werden Bewegungskarten mit Prioritäten programmiert. Die Karten bestimmen, welche Bewegung beziehungsweise Drehung der Roboter in der jeweiligen Phase ausführt.
+Ein Roboter hat fünf Programmregister, eines für jede Phase. Alle fünf Register müssen belegt werden. Die Spieler dürfen ihre verfügbaren Programmschritte frei auf diese fünf Phasen verteilen.
 
 Bekannte Karten:
 
@@ -28,7 +28,23 @@ Bekannte Karten:
 - **Rotate Left / Rotate Right:** Drehung um 90 Grad nach links beziehungsweise rechts.
 - **U-Turn:** Drehung um 180 Grad.
 
-Die Programme werden anhand ihrer Prioritäten abgearbeitet; eine höhere Priorität wird zuerst ausgeführt. Bewegungen können durch Hindernisse, andere Roboter oder Kurseffekte beeinflusst werden.
+Die Anzahl der zugeteilten Programmschritte beträgt grundsätzlich **neun minus den erlittenen Schaden**, zuzüglich des Werts des Moduls **Extra Program**, falls der Roboter es besitzt. Das Extra-Program-Modul beginnt mit einem Wert (*amount*) von 1. Jedes weitere Extra-Program-Modul, das der Roboter zufällig an einem Pit Stop erhält, erhöht diesen Wert um 1.
+
+Nicht auf die fünf Register verteilte Programmschritte verfallen am Ende der Runde. Nur blockierte Programmschritte werden in der nächsten Runde wiederverwendet.
+
+Die Programme werden anhand ihrer Kartenprioritäten abgearbeitet; eine höhere Priorität wird zuerst ausgeführt. Bewegungen können durch Hindernisse, andere Roboter oder Kurseffekte beeinflusst werden.
+
+### Blockierte Programmschritte und Zerstörung
+
+Hat ein Roboter mehr als vier Schadenspunkte, werden Programmregister von hinten nach vorne blockiert: zuerst Phase 5, danach Phase 4 und so weiter. Ein blockierter Programmschritt bleibt im Register und kann nicht durch eine andere Karte ersetzt werden. Die blockierten Programmschritte werden wiederverwendet; dadurch bleibt das Programm auch dann vollständig, wenn dem Roboter nur noch vier oder weniger neue Programmschritte zugeteilt werden.
+
+Das Extra-Program-Modul verändert weder die Schadensgrenze für das Blockieren von Registern noch die Schadensgrenze für die Zerstörung.
+
+Bei **zehn oder mehr Schadenspunkten** wird der Roboter zerstört. Die Regeln für seine Rückkehr hängen vom Spielmodus ab: Im Finish-Modus erscheint er beim nächsten Zug an seiner Archivposition wieder, normalerweise mit zwei Schadenspunkten. Mit **Superior Archive Copy** kehrt er ohne Schaden zurück. Im Kill-All-Modus scheidet er dauerhaft aus.
+
+### Power-Down und Programmkarten
+
+Ein Power-Down setzt den Roboter für die folgende Runde aus. In dieser Runde kann er Schaden abbauen und anschließend wieder neun oder mehr Programmschritte erhalten. Der Power-Down hat darüber hinaus keinen eigenen Einfluss auf die Anzahl der zugeteilten Programmschritte.
 
 ### Geheimhaltung und gleichzeitige Programmierung
 
