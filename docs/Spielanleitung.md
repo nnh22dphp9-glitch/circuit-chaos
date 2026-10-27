@@ -186,7 +186,13 @@ Noch zu prüfen ist, ob Wände die Auslösung beziehungsweise den Schaden einer 
 
 ### Kleber
 
-Kleber kann die Bewegung beeinflussen. Seine genauen Wirkungen und Wechselwirkungen mit anderen Kurselementen müssen für die endgültige Anleitung noch vollständig beschrieben werden.
+Ein Kleber hält einen Roboter fest und besitzt anfangs **3 Kleber-Punkte**. Solange der Roboter festklebt, wird jeder vorgesehene Bewegungsschritt stattdessen dazu verwendet, einen Kleber-Punkt abzubauen. Der Roboter muss also insgesamt mindestens drei Bewegungsschritte aufwenden, um sich zu lösen.
+
+Dabei ist unerheblich, ob die Schritte in einem Zug (z. B. mit Move-3) oder über mehrere Programmschritte erfolgen. Auch Rückwärtsbewegung baut Kleber-Punkte ab. Ebenso spielt es keine Rolle, ob der Kleber durch einen Glue Dispenser auf den Kurs gebracht wurde oder bereits Teil des Kurses war.
+
+Ein Hovercraft kann einfach vom Kleber wegfliegen; in diesem Fall greift der Kleber nicht.
+
+Noch zu prüfen ist, wie Kleber beim Verschieben eines Roboters reagiert. Außerdem ist noch nicht geklärt, ob neu ausgelegte Kleber- und Öl-Devices – wie Minen – zunächst inaktiv sind.
 
 ### Randomizer
 
@@ -319,7 +325,7 @@ Die folgenden Punkte sind bewusst nicht als abschließend geklärte Regeln formu
 
 - Vollständige Kollisions- und Schieberegeln, insbesondere mehrere Roboter und gleichzeitige Bewegungen.
 - Ob Einbahnwände in Grün-Rot-Richtung Schüsse durchlassen.
-- Vollständige Wasser-, Öl- und Kleberregeln sowie ihre Wechselwirkungen.
+- Vollständige Wasser- und Ölregeln sowie ihre Wechselwirkungen.
 - Genaue Funktion der Abstoßfelder und sämtliche Einbahnwand-Sonderfälle.
 - Exakte Wirkung der Schalter auf Wände, Falltüren und andere dynamische Kurselemente.
 - Exakte Reparatur- und Modulausgabe-Details des Pit Stops.
