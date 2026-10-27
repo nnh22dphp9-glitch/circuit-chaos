@@ -158,7 +158,25 @@ Portale verbinden Positionen miteinander und können einen Roboter beim Betreten
 
 ### Minen und Annäherungsminen
 
-Minen verursachen bei ihrer Auslösung Schaden. Annäherungsminen reagieren auf die Nähe eines Roboters. Roboter können Minen mit entsprechenden Modulen legen. Die genaue Auslösebedingung und der Schaden der einzelnen Minentypen müssen in der endgültigen Anleitung noch vollständig präzisiert werden.
+**Mine Layer** und **Proximity Mine Layer** legen Minen auf dem Feld ab, auf dem der Roboter steht. Beide Minentypen verursachen denselben Schaden und haben denselben Schadensradius. Die Proximity Mine kann zusätzlich durch einen Roboter auf einem angrenzenden Feld ausgelöst werden.
+
+Der Schaden nimmt mit der Entfernung vom Explosionszentrum ab:
+
+|  |  |  |  |  |
+|---:|---:|---:|---:|---:|
+| 0 | 0 | 1 | 0 | 0 |
+| 0 | 1 | 2 | 1 | 0 |
+| 1 | 2 | **4** | 2 | 1 |
+| 0 | 1 | 2 | 1 | 0 |
+| 0 | 0 | 1 | 0 | 0 |
+
+Die Mine verursacht auf ihrem eigenen Feld 4 Schadenspunkte, auf den orthogonal angrenzenden Feldern 2 und auf den diagonal angrenzenden Feldern 1. Außerhalb dieses 5×5-Bereichs entsteht kein Schaden.
+
+Eine Mine wird ausgelöst, wenn ein Roboter auf ihr Feld tritt beziehungsweise auf ihr landet. Eine Proximity Mine wird außerdem ausgelöst, wenn ein Roboter auf einem unmittelbar angrenzenden Feld steht. Neu abgelegte Minen sind zunächst **inaktiv** und werden erst nach dem ROBOTS_MOVE-Schritt aktiviert. Dreht sich ein Roboter während seines Programmschritts lediglich auf einer Mine, kann er diese anschließend selbst auslösen.
+
+Minen können auch den Roboter treffen, der sie gelegt hat. Wird ein Roboter durch eine Bewegung, einen Pusher oder einen anderen Effekt auf eine Mine geschoben oder landet dort, kann er sie auslösen. Wenn mehrere Minen gleichzeitig explodieren, werden die verursachten Schadenspunkte addiert.
+
+Noch zu prüfen ist, ob Wände die Auslösung beziehungsweise den Schaden einer Proximity Mine blockieren. Ebenfalls zu prüfen ist, ob Minen durch eine andere Minenexplosion zur Detonation gebracht werden, sobald sie selbst mindestens einen Schadenspunkt abbekommen (Kettenreaktion).
 
 ### Kleber
 
