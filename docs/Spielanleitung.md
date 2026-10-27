@@ -229,13 +229,7 @@ Laser und Beams schießen grundsätzlich in die Richtung, in die der Roboter aus
 
 Der erste Trefferpunkt ist bei einer Robotermodul-Waffe das nächste Feld vor dem Roboter, bei einer kursmontierten Waffe dagegen das Feld, auf dem die Waffe selbst montiert ist. Der Schuss läuft anschließend bis zum Spielfeldrand.
 
-Ein Schuss wird aufgehalten von:
-- einem anderen Roboter, der getroffen wird (Ausnahme: **High Power Laser**),
-- soliden Wänden,
-- Repulsors,
-- Einbahnwänden in Rot-Grün-Richtung.
-
-Ob Einbahnwände in Grün-Rot-Richtung Schüsse durchlassen, muss noch geprüft werden. Höhenunterschiede werden beim Schießen absichtlich ignoriert: Eine LEDGE hält einen Schuss nicht auf. Ein Roboter auf einer anderen Höhe kann jedoch getroffen werden und den Schuss aufhalten.
+Ein Schuss wird von einem getroffenen Roboter aufgehalten (Ausnahme: **High Power Laser**). Die aktuelle Codeprüfung ergibt außerdem: Schüsse werden blockiert, wenn sich auf der Schützenseite eine SOLID-Wand, ONE_WAY_RED, ein Repulsor, eine LEDGE oder eine RAMP_UP befindet, oder auf der Zielseite eine SOLID-Wand beziehungsweise ein Repulsor. Eine ONE_WAY_GREEN-Wand auf der Schützenseite blockiert den Schuss nicht. Der High Power Laser hat eine Sonderbehandlung und kann den Strahl auch über ein Hindernis hinweg zum zweiten Ziel fortsetzen. Höhenunterschiede werden beim Schießen absichtlich ignoriert: Eine LEDGE hält einen Schuss nicht auf. Ein Roboter auf einer anderen Höhe kann jedoch getroffen werden und den Schuss aufhalten.
 
 Die Waffen haben folgende Wirkungen:
 
@@ -267,7 +261,7 @@ Bei einem Power-Down wird das bereits programmierte Programm noch vollständig a
 
 ### Power-Down Shield
 
-Der Power-Down Shield ist ein Modul, das im Zusammenhang mit dem Power-Down Schutz bieten soll. Welche Schadensarten er im Detail verhindert, muss noch abschließend bestätigt werden.
+Der Power-Down Shield ist während eines Power-Downs aktiv und blockiert direkte Lasertreffer. Der Schutz wird richtungsweise verbraucht: In jeder Phase stehen vier Richtungs-Schutzpunkte zur Verfügung, und ein Treffer verbraucht den Schutz aus der entsprechenden Richtung. Er schützt nicht vor Schub- oder Fallschaden.
 
 ### Pit Stop
 
@@ -277,7 +271,7 @@ Ein Pit Stop repariert maximal **einen Schadenspunkt** und teilt dem Roboter zus
 
 Module sind entweder von Beginn an vorhanden oder werden nach Erreichen eines Pit Stops am Ende der Runde (nach Phase 5) vergeben. Je nach Modul ist es direkt aktiv oder wird während der Programmierung berücksichtigt.
 
-Einige Module besitzen **Ammunition** (auch *amount* genannt). Diese Module können mehrfach erworben werden; bei einem weiteren Erwerb erhöht sich die Ammunition jeweils um den Standardwert (*default amount*) des Modultyps. Module ohne Ammunition sind entweder vorhanden oder nicht vorhanden. Ein solches Modul kann am Pit Stop nicht erneut vergeben werden.
+Einige Module besitzen **Ammunition** (auch *amount* genannt). Diese Module können mehrfach erworben werden; bei einem weiteren Erwerb erhöht sich die Ammunition jeweils um den Standardwert (*default amount*) des Modultyps. Die aktuellen Standardwerte im Code sind: Bridge Projector 3, Glue Dispenser 2, Mine Layer 2, Mobile Teleporter 1, Mobile Randomizer 1, Oil Dispenser 2, Proximity Mine Layer 3, Layered Armor 4 und Extra Program 1. Module ohne Ammunition sind entweder vorhanden oder nicht vorhanden. Ein solches Modul kann am Pit Stop nicht erneut vergeben werden.
 
 ### Schusswaffen
 
@@ -326,9 +320,9 @@ Diese Module besitzen keine Ammunition:
 
 ### Schutzmodule
 
-- **Layered Armor:** passiver Schutz mit Ammunition. Der Standardwert beträgt 4; die Armor kann damit vier Schadenspunkte aufnehmen.
-- **Shield:** schützt vor einem direkten Laserschuss. Die frühere Spielversion erlaubte, den Schutz pro Phase in eine Richtung auszurichten (vorne, hinten oder seitlich). Ob diese Richtungswahl noch Teil der aktuellen Implementierung ist, muss geprüft werden.
-- **Power-Down Shield:** schützt den Roboter während des Power-Down-Modus vor Schaden. Er schützt nicht davor, durch Schieben in einen Abgrund gestoßen zu werden.
+- **Layered Armor:** besitzt standardmäßig 4 Ammunition und absorbiert damit bis zu vier direkte Schadensereignisse, die durch das Schutzsystem laufen (z. B. Laser). Andere Schadensarten wie Minenexplosionen oder Fallschaden umgehen diesen Schutz.
+- **Shield:** schützt vor einem direkten Lasertreffer aus der eingestellten Richtung. Ein erfolgreicher Schutz blockiert den Treffer und verbraucht den Shield für diese Phase.
+- **Power-Down Shield:** ist während eines Power-Downs aktiv und blockiert direkte Lasertreffer. Der Schutz wird richtungsweise verbraucht: In jeder Phase stehen vier Richtungs-Schutzpunkte zur Verfügung, und ein Treffer verbraucht den Schutz aus der entsprechenden Richtung. Er schützt nicht vor Schub- oder Fallschaden.
 
 ### Mechanical Arm
 
@@ -348,17 +342,10 @@ Im Modus **Kill All** gewinnt man, wenn alle anderen Roboter ausgeschaltet wurde
 
 Die folgenden Punkte sind bewusst nicht als abschließend geklärte Regeln formuliert:
 
-- Vollständige Kollisions- und Schieberegeln, insbesondere mehrere Roboter und gleichzeitige Bewegungen.
-- Ob Einbahnwände in Grün-Rot-Richtung Schüsse durchlassen.
-- Kombination von Wasser und BRAKES (insbesondere Move-2 mit BRAKES).\n- Verhalten, wenn sich mehrere Öl-Felder auf einem Förderband aufstapeln.
-- Genaue Funktion der Abstoßfelder und sämtliche Einbahnwand-Sonderfälle.
-- Ob eine Mine explodiert, wenn sie durch ein Förderband in den Abyss geschoben wird.
-- Exakte Reparatur- und Modulausgabe-Details des Pit Stops.
-- Exakte Schutzwirkung von Power-Down Shield, Shield und Layered Armor.
-- Munitionsregeln und vollständige Waffenwerte.
-- Behandlung mehrerer oder überlappender Teleporter, insbesondere in Kombination mit mobilen Teleportern.
+- Vollständige Kollisions- und Schieberegeln, insbesondere das Verhalten mehrerer Roboter bei gleichzeitig möglichen Bewegungen. Der Code löst Bewegungen sequenziell und rekursiv auf; die genaue beabsichtigte Spielregel bei komplexen Blockaden sollte noch bestätigt werden.
+- Genaue Funktion der Repulsor-Felder und sämtliche Einbahnwand-Sonderfälle bei Bewegung. Die Implementierung ist vorhanden, aber die gewünschte Regelbeschreibung sollte noch bestätigt werden.
+- Behandlung mehrerer oder überlappender Teleporter: Die Codeprüfung zeigt, dass Portale nur teleportieren, wenn das Zielfeld frei von **allen** Robotern und Kursobjekten ist (nicht nur von Robotern). Bei Portalen wird außerdem der Mineneffekt am Ziel ausgelöst; die mobilen Teleporter-Module umgehen Minen. Bitte gegen die beabsichtigten Regeln abgleichen.
 - Exakte Regeln für die Bewertung und das Spielende in allen Sonderfällen von Kill All.
-- Ob und wie einzelne Module in jeder Phase aktivierbar sind und welche Wirkungen dauerhaft gelten.
 
 ---
 
