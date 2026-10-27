@@ -345,6 +345,7 @@ Die folgenden Punkte sind bewusst nicht als abschließend geklärte Regeln formu
 - Vollständige Kollisions- und Schieberegeln, insbesondere das Verhalten mehrerer Roboter bei gleichzeitig möglichen Bewegungen. Der Code löst Bewegungen sequenziell und rekursiv auf; die genaue beabsichtigte Spielregel bei komplexen Blockaden sollte noch bestätigt werden.
 - Genaue Funktion der Repulsor-Felder und sämtliche Einbahnwand-Sonderfälle bei Bewegung. Die Implementierung ist vorhanden, aber die gewünschte Regelbeschreibung sollte noch bestätigt werden.
 - Behandlung mehrerer oder überlappender Teleporter: Die Codeprüfung zeigt, dass Portale nur teleportieren, wenn das Zielfeld frei von **allen** Robotern und Kursobjekten ist (nicht nur von Robotern). Bei Portalen wird außerdem der Mineneffekt am Ziel ausgelöst; die mobilen Teleporter-Module umgehen Minen. Bitte gegen die beabsichtigten Regeln abgleichen.
+- High Power Laser: Die Codeimplementierung scheint neben dem ersten Roboter auch einen blockierenden Wand-/Hindernisfall zu durchdringen. Zu bestätigen ist, ob das beabsichtigt ist oder ob der Laser ausschließlich den ersten Roboter durchdringen soll.
 - Exakte Regeln für die Bewertung und das Spielende in allen Sonderfällen von Kill All.
 
 ---
