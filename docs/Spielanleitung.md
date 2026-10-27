@@ -193,35 +193,68 @@ Ein Pit Stop repariert maximal **einen Schadenspunkt** und teilt dem Roboter zus
 
 ## 7. Module und Waffen
 
-Module verbessern Roboter oder geben ihnen zusätzliche Fähigkeiten. Waffen sind nicht grundsätzlich bei jedem Roboter aktiv; sie können im Spiel aufgenommen werden. Es kann jeweils nur **eine Waffe gleichzeitig aktiv** sein.
+Module sind entweder von Beginn an vorhanden oder werden nach Erreichen eines Pit Stops am Ende der Runde (nach Phase 5) vergeben. Je nach Modul ist es direkt aktiv oder wird während der Programmierung berücksichtigt.
 
-Die Waffe wird für eine Phase zusammen mit dem Programm ausgewählt. Sobald die Programmausführung begonnen hat, kann die Waffe für diese Ausführung nicht mehr gewechselt werden.
+Einige Module besitzen **Ammunition** (auch *amount* genannt). Diese Module können mehrfach erworben werden; bei einem weiteren Erwerb erhöht sich die Ammunition jeweils um den Standardwert (*default amount*) des Modultyps. Module ohne Ammunition sind entweder vorhanden oder nicht vorhanden. Ein solches Modul kann am Pit Stop nicht erneut vergeben werden.
 
-### Bekannte Module
+### Schusswaffen
 
-Die folgenden Namen sind im Spiel vorgesehen; nicht alle Effekte sind in diesem Dokument bereits vollständig beschrieben:
+Die Schusswaffen werden im Rahmen der Programmierung ausgewählt. Es kann jeweils nur eine Waffe gleichzeitig aktiv sein. Die folgenden Waffen haben keine Ammunition:
+
+- **Main Laser**
+- **Double Barrel Laser**
+- **High Power Laser**
+- **Rear Laser**
+- **Exchange Beam**
+- **Pressure Beam**
+- **Spin Left Beam**
+- **Spin Right Beam**
+- **Tractor Beam**
+
+Der **High Power Laser** kann durch den zuerst getroffenen Roboter hindurchschießen und einen weiteren Roboter dahinter treffen.
+
+### Bewegungswaffe: Ramming Armor
+
+Die **Ramming Armor** fügt in jeder Phase dem ersten Roboter, mit dem ihr Träger kollidiert beziehungsweise den er anfährt, einen Schadenspunkt zu. Das gilt auch dann, wenn der angefahrene Roboter wegen einer Wand oder eines anderen Hindernisses nicht verschoben werden kann. Die Ramming Armor besitzt keine Ammunition.
+
+### Dispenser
+
+Dispenser hinterlassen auf dem Feld, auf dem der Roboter steht, ein Device beziehungsweise Objekt. Der **Bridge Projector** platziert seine Brücke stattdessen auf dem Feld vor dem Roboter. Dispenser besitzen Ammunition, deren Wert zwischen 1 und 3 liegen kann.
+
+Zu den Dispensern gehören:
+
+- **Bridge Projector**
+- **Glue Dispenser**
+- **Oil Dispenser**
+- **Mine Layer**
+- **Proximity Mine Layer**
+- **Mobile Teleporter**
+- **Mobile Randomizer**
+
+### Bewegungsverändernde Module
+
+Diese Module besitzen keine Ammunition:
 
 - **Hovercraft:** ermöglicht Flugbewegungen.
-- **Gyroscopic Stabilizer:** verhindert Drehungen durch Zahnräder und Förderbänder.
-- **Ramming Armor:** beeinflusst das Rammen und dessen Schadenswirkung.
-- **Power-Down Shield:** schützt im Zusammenhang mit einem Power-Down; genaue Schutzwirkung noch zu bestätigen.
-- **Brakes:** beeinflussen die Bewegung durch Abbremsen.
-- **Reverse Drive:** ermöglicht, dass die Programmkarte **Back-Up 2** ausgeteilt wird.
+- **Extra Program:** erhöht die Anzahl der zugeteilten Programmschritte. Details stehen im Abschnitt zur Programmierung.
 - **Overdrive:** ermöglicht, dass die Programmkarte **Move 4** ausgeteilt wird.
-- **Layered Armor:** dient der Schadensabwehr.
-- **Shield:** dient dem Schutz vor Schaden.
-- **Extra Program:** erweitert die Programmiermöglichkeiten.
-- **Superior Archive Copy:** verbessert die Archivkopie.
-- **Main Laser, Double Barrel Laser, High Power Laser, Rear Laser:** unterschiedliche Laserwaffen.
-- **Exchange Beam, Pressure Beam, Spin Left Beam, Spin Right Beam, Tractor Beam:** weitere Strahlenwaffen.
-- **Mine Layer, Proximity Mine Layer, Oil Dispenser, Glue Dispenser:** legen beziehungsweise verteilen Objekte auf dem Kurs.
-- **Mobile Teleporter, Mobile Randomizer, Bridge Projector:** verändern den Kurs beziehungsweise dessen Effekte.
+- **Reverse Drive:** ermöglicht, dass die Programmkarte **Back-Up 2** ausgeteilt wird.
+- **Brakes:** erlaubt, einen Programmschritt um eine Bewegungseinheit zu verkürzen, bis hin zum vollständigen Anhalten.
+- **Gyroscopic Stabilizer:** verhindert, dass der Roboter durch Zahnräder oder Förderbänder gedreht wird.
 
-### High Power Laser
+### Schutzmodule
 
-Der High Power Laser kann durch den zuerst getroffenen Roboter hindurchschießen und einen weiteren Roboter dahinter treffen.
+- **Layered Armor:** passiver Schutz mit Ammunition. Der Standardwert beträgt 4; die Armor kann damit vier Schadenspunkte aufnehmen.
+- **Shield:** schützt vor einem direkten Laserschuss. Die frühere Spielversion erlaubte, den Schutz pro Phase in eine Richtung auszurichten (vorne, hinten oder seitlich). Ob diese Richtungswahl noch Teil der aktuellen Implementierung ist, muss geprüft werden.
+- **Power-Down Shield:** schützt den Roboter während des Power-Down-Modus vor Schaden. Er schützt nicht davor, durch Schieben in einen Abgrund gestoßen zu werden.
 
-Die genauen Reichweiten, Schadenswerte, Munitionsregeln und Wechselwirkungen aller Waffen und Module müssen für eine vollständige Anleitung noch ergänzt werden.
+### Mechanical Arm
+
+Der **Mechanical Arm** ermöglicht es, einen Checkpoint auch von einem benachbarten Feld aus zu erreichen. Er besitzt keine Ammunition.
+
+### Weitere Module
+
+- **Superior Archive Copy:** reduziert den Schaden bei der Rückkehr an die Archivposition auf null.
 
 ## 8. Kontrollpunkte und Sieg
 
