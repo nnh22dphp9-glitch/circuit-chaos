@@ -154,7 +154,13 @@ Wasser beeinflusst die Bewegung und kann Bewegungen verlangsamen. Die genaue Kom
 
 ### Portale
 
-Portale verbinden Positionen miteinander und können einen Roboter beim Betreten eines Portalfelds an eine andere Position versetzen. Die verschiedenen Portaltypen sind farblich gekennzeichnet. Sie sind von den Teleportern zu unterscheiden.
+Alle Portale funktionieren nach demselben Prinzip. Die Farben dienen der optischen Unterscheidung, insbesondere im Editor: Dort markiert ein Fadenkreuz in derselben Farbe das Zielportal beziehungsweise Zielfeld. Im eigentlichen Spiel ist das Ziel nicht sichtbar. Spieler können es daher nur aus früheren Spielen kennen oder im Editor nachsehen; die Computer-KI kennt das Ziel.
+
+Portale können frei auf ein Ziel verweisen. Das Zielfeld muss nicht selbst ein Portal enthalten. Es können auch mehrere Portale derselben Farbe angelegt werden, etwa mehrere Portalpaare. Eine Einschränkung auf ein einzelnes gleichfarbiges Paar wie im Brettspiel besteht nicht; die Kursdesigner können die Portalverbindungen frei festlegen.
+
+Ein Roboter wird beim Betreten eines Portalfelds sofort zum Ziel versetzt, sofern dort kein anderer Roboter steht. Ist das Zielfeld durch einen Roboter blockiert, findet keine Versetzung statt. Ein Roboter, der auf dem Portalfeld steht oder darauf landet, wird ebenfalls nicht teleportiert. Pro Spielphase kann ein Roboter nur einmal durch ein Portal versetzt werden; eine Portalversetzung löst keine weitere Versetzung aus. So werden Kettenreaktionen und Endlosschleifen verhindert.
+
+Das Zielportal beziehungsweise Zielfeld wird unabhängig von dortigen Gefahren betrachtet. Ein Kursdesigner kann beispielsweise ein Portal auf einen Abgrund zeigen lassen. Der Roboter wird dorthin versetzt und stürzt dann in den Abgrund.
 
 ### Minen und Annäherungsminen
 
