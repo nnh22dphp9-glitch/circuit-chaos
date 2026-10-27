@@ -131,7 +131,7 @@ Höhenunterschiede, Wände und Rampen beeinflussen, ob der Transport möglich is
 
 Zahnräder drehen einen darauf stehenden Roboter um **90°**. Je nach Typ des Zahnrads erfolgt die Drehung im Uhrzeigersinn (CW) oder gegen den Uhrzeigersinn (CCW).
 
-Der **Gyroscopic Stabilizer** verhindert, dass der Roboter durch Zahnräder oder Förderbänder gedreht wird.
+Der **Gyroscopic Stabilizer** verhindert, dass der Roboter durch Zahnräder oder durch drehende Förderbänder gedreht wird.
 
 ### Pusher
 
