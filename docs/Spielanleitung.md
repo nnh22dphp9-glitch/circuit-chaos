@@ -150,9 +150,17 @@ Noch zu testen ist die Kombination von Wasser und **BRAKES**: Es ist zu prüfen,
 
 ### Falltüren und Abgründe
 
-- Ein Abgrund ist tödlich.
-- Eine aktive Falltür lässt den Roboter in den Abgrund fallen und ist ebenfalls tödlich.
-- Schalter können Kurselemente wie Falltüren oder Wände beeinflussen; die konkrete Wirkung hängt von der jeweiligen Kurskonfiguration ab.
+Ein **Abgrund (Abyss)** ist ein Feld ohne Boden. Fällt ein Roboter hinein, stürzt er ab und stirbt. Hovercraft können Abgründe überfliegen; auch Teleporter können einen Roboter über einen Abgrund hinweg oder in einen Abgrund teleportieren.
+
+Eine **Falltür** ist abhängig von der Phase geöffnet oder geschlossen:
+- In offenen Phasen verhält sich das Feld wie ein Abyss.
+- In geschlossenen Phasen verhält es sich wie OPEN_FLOOR.
+
+Die Phasen, in denen eine Falltür geöffnet ist, werden im Tooltip des Feldes angezeigt und sind damit für alle Spieler sichtbar.
+
+Minen, Kleber und Öl können ebenfalls in einen Abgrund fallen, wenn sie auf einem Förderband dorthin geschoben werden. In diesem Fall werden sie vom Spielfeld entfernt. Ob eine Mine dabei explodiert, ist noch zu prüfen.
+
+Ein Schalter zum Öffnen und Schließen von Falltüren ist als mögliche zukünftige Erweiterung angedacht; aktuell werden Falltüren phasenabhängig gesteuert.
 
 ### Teleporter
 
@@ -337,7 +345,7 @@ Die folgenden Punkte sind bewusst nicht als abschließend geklärte Regeln formu
 - Ob Einbahnwände in Grün-Rot-Richtung Schüsse durchlassen.
 - Kombination von Wasser und BRAKES (insbesondere Move-2 mit BRAKES).\n- Verhalten, wenn sich mehrere Öl-Felder auf einem Förderband aufstapeln.
 - Genaue Funktion der Abstoßfelder und sämtliche Einbahnwand-Sonderfälle.
-- Exakte Wirkung der Schalter auf Wände, Falltüren und andere dynamische Kurselemente.
+- Ob eine Mine explodiert, wenn sie durch ein Förderband in den Abyss geschoben wird.
 - Exakte Reparatur- und Modulausgabe-Details des Pit Stops.
 - Exakte Schutzwirkung von Power-Down Shield, Shield und Layered Armor.
 - Munitionsregeln und vollständige Waffenwerte.
