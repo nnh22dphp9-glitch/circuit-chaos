@@ -113,12 +113,19 @@ Die genaue Abwicklung komplexer Kollisionen und mehrerer gleichzeitig schiebende
 
 ### Förderbänder
 
-- Normale Förderbänder transportieren darauf stehende Roboter und Objekte in Pfeilrichtung.
-- Express-Förderbänder können zusätzliche Bewegungsschritte ausführen.
-- Drehende Förderbänder ändern beim Transport gegebenenfalls auch die Ausrichtung des Roboters.
-- Förderbänder können hintereinander wirken, wenn ein transportierter Roboter auf einem weiteren Förderband landet.
-- Wasserfelder mit Förderbanddarstellung werden bei der normalen Förderbandbewegung gesondert behandelt.
-- Höhenunterschiede, Wände und Rampen beeinflussen, ob der Transport möglich ist. Ein Abstieg ohne Rampe verursacht einen Schadenspunkt; ein nicht erlaubter Aufstieg wird blockiert.
+Förderbänder schieben darauf stehende Roboter in Pfeilrichtung weiter:
+- Normale Förderbänder schieben einen Roboter um ein Feld.
+- Express-Förderbänder schieben ihn um zwei Felder. Sie werden in zwei Schritten ausgeführt: Zuerst bewegen sich nur die Roboter auf Express-Bändern; danach werden Express- und normale Förderbänder gemeinsam ausgeführt. Diese Reihenfolge ist wichtig, wenn Bewegungen durch andere Roboter blockiert werden.
+- Ein Roboter kann dadurch von einem Förderband auf ein weiteres geschoben werden, das anschließend ebenfalls wirken kann.
+
+Es gibt außerdem drei Varianten, die beim Übergang von einem Förderband auf ein anderes die Ausrichtung des Roboters beeinflussen:
+- **CW (clockwise):** Drehung im Uhrzeigersinn.
+- **CCW (counter-clockwise):** Drehung gegen den Uhrzeigersinn.
+- **CW/CCW:** Die Drehrichtung hängt davon ab, aus welcher Richtung der Roboter auf das Band gelangt.
+
+Wenn die Richtung beider Förderbänder übereinstimmt, wird der Roboter nicht gedreht.
+
+Höhenunterschiede, Wände und Rampen beeinflussen, ob der Transport möglich ist. Ein Abstieg ohne Rampe verursacht einen Schadenspunkt; ein nicht erlaubter Aufstieg wird blockiert.
 
 ### Zahnräder
 
@@ -128,7 +135,7 @@ Der **Gyroscopic Stabilizer** verhindert, dass der Roboter durch Zahnräder oder
 
 ### Pusher
 
-Aktive Pusher stoßen Roboter in ihre vorgegebene Richtung. Ein Pusher fährt hydraulisch aus und zieht sich unmittelbar danach wieder zurück. Für die erzwungene Bewegung gelten die relevanten Wand- und Höhenregeln.
+Pusher sind phasenabhängig aktiv; ihre aktiven Phasen sind im Tooltip des Feldes angegeben. Sind sie aktiv, werden sie im Step PUSHERS_PUSH ausgefahren und unmittelbar danach wieder eingefahren. Sie drücken den Roboter auf ihrem Feld um ein Feld weiter, sofern das Zielfeld nicht blockiert ist.
 
 ### Öl
 
