@@ -132,7 +132,13 @@ Aktive Pusher stoßen Roboter in ihre vorgegebene Richtung. Ein Pusher fährt hy
 
 ### Öl
 
-Öl kann dazu führen, dass ein Roboter nach einer Bewegung weiter rutscht. Die Rutschbewegung folgt der Bewegungsrichtung. Wände und unüberwindbare Höhenunterschiede stoppen die Rutschbewegung; ein Abstieg ohne Rampe verursacht einen Schadenspunkt. Portale können während der Rutschbewegung weiterhin wirksam werden.
+Öl kann entweder bereits auf dem Kurs liegen oder von einem Roboter mit einem Oil Dispenser abgelassen werden. Anders als Kleber verbraucht sich Öl nicht: Einmal auf dem Kurs, bleibt es dort dauerhaft – außer es liegt auf einem Förderband und wird damit auf ein Abyss-Feld geschoben.
+
+Betritt ein Roboter ein Ölfeld, rutscht er in Bewegungsrichtung weiter, bis er ein Feld ohne Öl erreicht oder seine Bewegung anderweitig blockiert wird. Das Rutschen verbraucht keine zusätzlichen Programmschritte. Beispiel: Führt ein Roboter einen Move-2-Schritt aus und betritt dabei im ersten Schritt ein Ölfeld, kann er insgesamt drei Felder zurücklegen: ein Feld durch den Move-Schritt und zwei weitere durch das Rutschen.
+
+Bleibt ein Roboter tatsächlich auf einem Ölfeld stehen, benötigt er einen zusätzlichen Bewegungsschritt zum Anfahren; seine Räder drehen zunächst durch. Ein Hovercraft kann sich ohne diesen Anfahrschritt bewegen.
+
+Noch zu prüfen ist, was passiert, wenn sich mehrere Öl-Felder auf einem Förderband aufstapeln, bevor sie in den Abyss geschoben werden. Vermutlich ändert sich dadurch nichts am Effekt, dies ist aber nicht bestätigt.
 
 ### Wasser
 
@@ -325,7 +331,7 @@ Die folgenden Punkte sind bewusst nicht als abschließend geklärte Regeln formu
 
 - Vollständige Kollisions- und Schieberegeln, insbesondere mehrere Roboter und gleichzeitige Bewegungen.
 - Ob Einbahnwände in Grün-Rot-Richtung Schüsse durchlassen.
-- Vollständige Wasser- und Ölregeln sowie ihre Wechselwirkungen.
+- Vollständige Wasserregeln sowie ihre Wechselwirkungen.\n- Verhalten, wenn sich mehrere Öl-Felder auf einem Förderband aufstapeln.
 - Genaue Funktion der Abstoßfelder und sämtliche Einbahnwand-Sonderfälle.
 - Exakte Wirkung der Schalter auf Wände, Falltüren und andere dynamische Kurselemente.
 - Exakte Reparatur- und Modulausgabe-Details des Pit Stops.
