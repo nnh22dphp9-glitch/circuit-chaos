@@ -168,9 +168,36 @@ Kleber kann die Bewegung beeinflussen. Seine genauen Wirkungen und Wechselwirkun
 
 Steht ein Roboter auf einem Randomizer, wird sein nächster Programmschritt durch einen zufällig ausgewählten anderen Programmschritt ersetzt.
 
-### Kursmontierte Laser und Drehstrahlen
+### Laser und Strahlen
 
-Kursmontierte Laser- und Drehstrahlen funktionieren grundsätzlich wie die entsprechenden Waffenmodule der Roboter, sind aber fest an der Wand montiert und feuern zu einem anderen Zeitpunkt im Phasenablauf. Einen kursmontierten Exchange Beam gibt es nicht, da dessen Ausgangspunkt dafür bewegt werden müsste. Stattdessen gibt es einen **Triple Laser**, der drei Schüsse absetzt.
+Laser und Beams schießen grundsätzlich in die Richtung, in die der Roboter ausgerichtet ist. Die Ausnahme ist der **Rear Laser**, der nach hinten schießt. Kursmontierte Laser und Beams schießen in die Richtung, in die sie auf dem Kurs zeigen.
+
+Der erste Trefferpunkt ist bei einer Robotermodul-Waffe das nächste Feld vor dem Roboter, bei einer kursmontierten Waffe dagegen das Feld, auf dem die Waffe selbst montiert ist. Der Schuss läuft anschließend bis zum Spielfeldrand.
+
+Ein Schuss wird aufgehalten von:
+- einem anderen Roboter, der getroffen wird (Ausnahme: **High Power Laser**),
+- soliden Wänden,
+- Repulsors,
+- Einbahnwänden in Rot-Grün-Richtung.
+
+Ob Einbahnwände in Grün-Rot-Richtung Schüsse durchlassen, muss noch geprüft werden. Höhenunterschiede werden beim Schießen absichtlich ignoriert: Eine LEDGE hält einen Schuss nicht auf. Ein Roboter auf einer anderen Höhe kann jedoch getroffen werden und den Schuss aufhalten.
+
+Die Waffen haben folgende Wirkungen:
+
+| Waffe | Wirkung |
+|---|---|
+| **Main Laser** / **Single Course-Mounted Laser** | Verursacht bei einem Treffer 1 Schadenspunkt. |
+| **Double Barrel Laser** / **Double Course-Mounted Laser** | Verursacht bei einem Treffer 2 Schadenspunkte. |
+| **Triple Course-Mounted Laser** | Verursacht bei einem Treffer 3 Schadenspunkte. |
+| **High Power Laser** | Verursacht beim ersten getroffenen Ziel 1 Schadenspunkt. Der Schuss geht durch dieses Ziel hindurch und kann ein zweites Ziel treffen, das ebenfalls 1 Schadenspunkt erhält. |
+| **Rear Laser** | Schießt nach hinten und verursacht bei einem Treffer 1 Schadenspunkt, wie der Main Laser. |
+| **Exchange Beam** | Tauscht die Position des schießenden Roboters mit der Position des Ziels. Verursacht keinen Schaden. |
+| **Pressure Beam** / **Course-Mounted Pressure Beam** | Drückt das Ziel ein Feld weiter. Verursacht keinen Schaden. |
+| **Tractor Beam** / **Course-Mounted Tractor Beam** | Zieht das Ziel ein Feld zum Schützen heran. Verursacht keinen Schaden. |
+| **Spin Left Beam** / **Course-Mounted Spin-Left Beam** | Dreht das Ziel um 90 Grad gegen den Uhrzeigersinn. Verursacht keinen Schaden. |
+| **Spin Right Beam** / **Course-Mounted Spin-Right Beam** | Dreht das Ziel um 90 Grad im Uhrzeigersinn. Verursacht keinen Schaden. |
+
+Die kursmontierten Waffen sind fest auf dem Kurs angebracht und feuern im Ablauf einer Phase nach den Waffen der Roboter. Einen kursmontierten Exchange Beam gibt es nicht, da dessen Ausgangspunkt dafür bewegt werden müsste.
 
 ## 6. Schaden, Zerstörung und Reparatur
 
@@ -267,7 +294,7 @@ Im Modus **Kill All** gewinnt man, wenn alle anderen Roboter ausgeschaltet wurde
 Die folgenden Punkte sind bewusst nicht als abschließend geklärte Regeln formuliert:
 
 - Vollständige Kollisions- und Schieberegeln, insbesondere mehrere Roboter und gleichzeitige Bewegungen.
-- Exakte Effekte und Schadenswerte für Minen, Annäherungsminen und die einzelnen Laser- und Strahlenwaffen.
+- Ob Einbahnwände in Grün-Rot-Richtung Schüsse durchlassen.
 - Vollständige Wasser-, Öl- und Kleberregeln sowie ihre Wechselwirkungen.
 - Genaue Funktion der Abstoßfelder und sämtliche Einbahnwand-Sonderfälle.
 - Exakte Wirkung der Schalter auf Wände, Falltüren und andere dynamische Kurselemente.
