@@ -142,7 +142,11 @@ Noch zu prüfen ist, was passiert, wenn sich mehrere Öl-Felder auf einem Förde
 
 ### Wasser
 
-Wasser beeinflusst die Bewegung und kann Bewegungen verlangsamen. Die genaue Kombination aus Wasser, Öl und einzelnen Kurselementen sollte vor der Veröffentlichung noch einmal abschließend festgehalten werden.
+Wasser reduziert die Bewegung eines Roboters um einen Bewegungsschritt. Bei Move-1 und Back-Up-1 bleibt der Roboter im Wasser daher stehen. Hovercraft sind von diesem Effekt nicht betroffen.
+
+Förderbänder funktionieren unter Wasser wie gewohnt und werden durch die Verlangsamung nicht eingeschränkt.
+
+Noch zu testen ist die Kombination von Wasser und **BRAKES**: Es ist zu prüfen, ob ein Move-2-Programmschritt bei zusätzlicher Verwendung von BRAKES ebenfalls zum Stillstand führt.
 
 ### Falltüren und Abgründe
 
@@ -331,7 +335,7 @@ Die folgenden Punkte sind bewusst nicht als abschließend geklärte Regeln formu
 
 - Vollständige Kollisions- und Schieberegeln, insbesondere mehrere Roboter und gleichzeitige Bewegungen.
 - Ob Einbahnwände in Grün-Rot-Richtung Schüsse durchlassen.
-- Vollständige Wasserregeln sowie ihre Wechselwirkungen.\n- Verhalten, wenn sich mehrere Öl-Felder auf einem Förderband aufstapeln.
+- Kombination von Wasser und BRAKES (insbesondere Move-2 mit BRAKES).\n- Verhalten, wenn sich mehrere Öl-Felder auf einem Förderband aufstapeln.
 - Genaue Funktion der Abstoßfelder und sämtliche Einbahnwand-Sonderfälle.
 - Exakte Wirkung der Schalter auf Wände, Falltüren und andere dynamische Kurselemente.
 - Exakte Reparatur- und Modulausgabe-Details des Pit Stops.
