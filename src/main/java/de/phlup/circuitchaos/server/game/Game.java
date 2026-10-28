@@ -376,7 +376,7 @@ public class Game {
                     movement = applyWaterAndOilSlick(robot, f, movement);
                     singleRobotMove(phase, robot, program, movement);
                     if (robot.isFlying()) {
-                        land(getPlayerOf(robot), Step.ROBOTS_AND_OBJECTS_MOVE, phase);
+                        land(robot, Step.ROBOTS_AND_OBJECTS_MOVE, phase);
                     }
                     program = null;
                 }
@@ -413,12 +413,13 @@ public class Game {
     private Player endOfTurnCourseEffects(Player winner) {
         for (Player player : players) {
             if (winner == null && !gameAborted) {
-                if (player.getRobot().isFlying()) {
-                    land(player, Step.END_OF_TURN_COURSE_EFFECTS, 4);
+                Robot robot = player.getRobot();
+                if (robot.isFlying()) {
+                    land(robot, Step.END_OF_TURN_COURSE_EFFECTS, 4);
                 }
 
                 resetPoweredDownForDestroyedRobot(player);
-                player.getRobot().setMayChooseDirection(false);
+                robot.setMayChooseDirection(false);
                 handleDestroyedRobots(player);
 
                 if (goal == Goal.FINISH && player.hasWon()) {
@@ -1294,22 +1295,16 @@ public class Game {
         return !oldPosition.equals(ce.getPosition());
     }
 
-    private void land(Player player, Step step, int phase) {
-        Robot robot = player.getRobot();
-        Floor f     = CourseHandler.getFloor(course, robot.getPosition());
+    private void land(Robot robot, Step step, int phase) {
+        Floor f = CourseHandler.getFloor(course, robot.getPosition());
         while (isRobotConflict(robot)) {
             moveInit(robot, robot.getDirection(), 0, 1, step, phase, true, true, null);
         }
         robot.setFlying(false);
+        robot.setLevel(f.getLevel());
         if (f.getFloortype() == Floortype.ABYSS || (f.getFloortype() == Floortype.TRAPDOOR && f.getActiveInPhase()[phase])) {
             die(robot, step, phase);
             course.getRobotsFallingIntoAbyss().add(robot);
-        } else {
-            while (f.getLevel() < player.getRobot().getLevel()) {
-                player.getRobot().setLevel(player.getRobot().getLevel() - 1);
-                player.takeDamage(phase, null, null, false);
-                player.takeDamage(phase, null, null, false);
-            }
         }
     }
 
