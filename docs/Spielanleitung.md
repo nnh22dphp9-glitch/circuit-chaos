@@ -171,9 +171,10 @@ Ein Schalter zum Öffnen und Schließen von Falltüren ist als mögliche zukünf
 
 ### Teleporter
 
-- Ein Teleporter versetzt einen Roboter entlang seiner aktuellen Ausrichtung.
-- Die Entfernung des Teleports hängt von der ursprünglichen Bewegungsrichtung beziehungsweise dem Bewegungsbefehl ab.
-- Teleportieren löst **keine Mine** auf dem Zielfeld aus.
+- Ein Teleporter wird aktiviert, wenn ein Roboter auf ihm steht und anschließend einen Bewegungs-Programmschritt ausführt.
+- Das Betreten des Teleporterfelds löst den Teleport nicht aus. Ebenso wird ein Teleporter nicht durch eine fließende Bewegung aktiviert, etwa wenn ein Förderband den Roboter darüber bewegt.
+- Der Teleporter versetzt den Roboter entlang seiner aktuellen Ausrichtung. Die Entfernung hängt von der ursprünglichen Bewegungsrichtung beziehungsweise dem Bewegungsbefehl ab.
+- Eine Mine auf dem Zielfeld wird durch den teleportierten Roboter ausgelöst und explodiert.
 - Das Teleportieren in ein Feld ohne Boden beziehungsweise in den Abgrund ist erlaubt. Ein Roboter kann dadurch absichtlich in den Abgrund geschickt werden.
 - Mobile Teleporter können im Spiel vorkommen. Deshalb lässt sich nicht pauschal davon ausgehen, dass es auf einem Kurs immer nur eine feste Teleporter-Konfiguration gibt.
 
@@ -344,7 +345,7 @@ Die folgenden Punkte sind bewusst nicht als abschließend geklärte Regeln formu
 
 - Vollständige Kollisions- und Schieberegeln, insbesondere das Verhalten mehrerer Roboter bei gleichzeitig möglichen Bewegungen. Der Code löst Bewegungen sequenziell und rekursiv auf; die genaue beabsichtigte Spielregel bei komplexen Blockaden sollte noch bestätigt werden.
 - Genaue Funktion der Repulsor-Felder und sämtliche Einbahnwand-Sonderfälle bei Bewegung. Die Implementierung ist vorhanden, aber die gewünschte Regelbeschreibung sollte noch bestätigt werden.
-- Behandlung mehrerer oder überlappender Teleporter: Die Codeprüfung zeigt, dass Portale nur teleportieren, wenn das Zielfeld frei von **allen** Robotern und Kursobjekten ist (nicht nur von Robotern). Bei Portalen wird außerdem der Mineneffekt am Ziel ausgelöst; die mobilen Teleporter-Module umgehen Minen. Bitte gegen die beabsichtigten Regeln abgleichen.
+- Behandlung mehrerer oder überlappender Teleporter beziehungsweise Portale sowie die genaue Belegungskontrolle des Portal-Zielfelds.
 - High Power Laser: Die Codeimplementierung scheint neben dem ersten Roboter auch einen blockierenden Wand-/Hindernisfall zu durchdringen. Zu bestätigen ist, ob das beabsichtigt ist oder ob der Laser ausschließlich den ersten Roboter durchdringen soll.
 - Exakte Regeln für die Bewertung und das Spielende in allen Sonderfällen von Kill All.
 
