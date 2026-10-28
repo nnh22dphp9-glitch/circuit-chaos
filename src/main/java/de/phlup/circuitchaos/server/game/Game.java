@@ -29,9 +29,9 @@ import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
 import de.phlup.circuitchaos.common.model.Robot;
 import de.phlup.circuitchaos.common.settings.TimeSettings;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
-import de.phlup.circuitchaos.server.player.computer.ComputerPlayer;
 import de.phlup.circuitchaos.server.player.NetworkPlayer;
 import de.phlup.circuitchaos.server.player.Player;
+import de.phlup.circuitchaos.server.player.computer.ComputerPlayer;
 import de.phlup.circuitchaos.server.service.PollOrPushSwitchService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -445,7 +445,8 @@ public class Game {
     }
 
     private Player checkKillAllWinner() {
-        if (players.isEmpty()) {
+        if (players.isEmpty() && !gameAborted) {
+            showMessage(THIS_GAME_IS_A_TIE);
             gameAborted = true;
         } else if (players.size() == 1) {
             return players.getFirst();
@@ -759,9 +760,9 @@ public class Game {
             iteration++;
             for (CourseElement obj : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
                 if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
-                    Floor     f                = CourseHandler.getFloor(course, obj.getPosition());
-                    Floor     targetFloor      = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    if (!canMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
+                    Floor f           = CourseHandler.getFloor(course, obj.getPosition());
+                    Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
+                    if (cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
                             || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
                         obj.setConflictingMark(-1);
                     } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
@@ -813,9 +814,9 @@ public class Game {
                     break;
                 }
                 if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
-                    Floor     f                = CourseHandler.getFloor(course, obj.getPosition());
-                    Floor     targetFloor      = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    if (!canMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
+                    Floor f           = CourseHandler.getFloor(course, obj.getPosition());
+                    Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
+                    if (cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
                             || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
                         obj.setConflictingMark(-1);
                     } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
@@ -1147,7 +1148,7 @@ public class Game {
             WallType targetWall = floor2.wall(direction2);
             boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
                     || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
-            boolean uphill = floor2.getLevel() > floor1.getLevel() && !rampPassage;
+            boolean uphill   = floor2.getLevel() > floor1.getLevel() && !rampPassage;
             boolean downhill = floor2.getLevel() < floor1.getLevel() && !rampPassage;
             boolean wallPassage = ((sourceWall == WallType.NONE
                     || sourceWall == WallType.ONE_WAY_GREEN
@@ -1334,27 +1335,27 @@ public class Game {
         return null;
     }
 
-    private boolean canMoveAcross(Floor sourceFloor, Floor targetFloor, Direction direction, boolean flying) {
+    private boolean cannotMoveAcross(Floor sourceFloor, Floor targetFloor, Direction direction, boolean flying) {
         if (flying) {
-            return true;
+            return false;
         }
         WallType sourceWall = sourceFloor.wall(direction);
         WallType targetWall = targetFloor.wall(direction.reverse());
         boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
                 || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
         if (targetFloor.getLevel() > sourceFloor.getLevel() && !rampPassage) {
-            return false;
+            return true;
         }
-        return ((sourceWall == WallType.NONE
-                || sourceWall == WallType.ONE_WAY_GREEN
-                || sourceWall == WallType.RAMP_UP
-                || sourceWall == WallType.RAMP_DOWN)
-                && (targetWall == WallType.NONE
-                || targetWall == WallType.ONE_WAY_GREEN
-                || targetWall == WallType.RAMP_UP
-                || targetWall == WallType.RAMP_DOWN
-                || targetWall == WallType.LEDGE))
-                || (sourceWall == WallType.ONE_WAY_GREEN && targetWall == WallType.ONE_WAY_RED);
+        return ((sourceWall != WallType.NONE
+                && sourceWall != WallType.ONE_WAY_GREEN
+                && sourceWall != WallType.RAMP_UP
+                && sourceWall != WallType.RAMP_DOWN)
+                || (targetWall != WallType.NONE
+                && targetWall != WallType.ONE_WAY_GREEN
+                && targetWall != WallType.RAMP_UP
+                && targetWall != WallType.RAMP_DOWN
+                && targetWall != WallType.LEDGE))
+                && (sourceWall != WallType.ONE_WAY_GREEN || targetWall != WallType.ONE_WAY_RED);
     }
 
     private int getCBConflictingElementMark(CourseElement be2, Direction direction) {
@@ -1391,19 +1392,12 @@ public class Game {
                 if (!(sourceFloor.wall(direction) == WallType.SOLID
                         || sourceFloor.wall(direction) == WallType.ONE_WAY_RED
                         || sourceFloor.wall(direction) == WallType.REPULSOR_FIELD
-                        || sourceFloor.wall(direction) == WallType.LEDGE
-                        || sourceFloor.wall(direction) == WallType.RAMP_UP
                         || targetFloor.wall(direction2) == WallType.SOLID
                         || targetFloor.wall(direction2) == WallType.REPULSOR_FIELD)) {
                     if (!isCourseMounted) {
                         CourseHandler.setBeam(course, targetPosition, direction, step);
                     }
                     return getLaserTarget(targetPosition, direction, level, highPowerLaser, isCourseMounted, true, step);
-                } else if (step == Step.ROBOT_MOUNTED_LASER_FIRE && highPowerLaser) {
-                    if (!isCourseMounted) {
-                        CourseHandler.setBeam(course, targetPosition, direction, step);
-                    }
-                    return getLaserTarget(targetPosition, direction, level, false, isCourseMounted, true, step);
                 }
             }
         }
@@ -1424,7 +1418,7 @@ public class Game {
         Floor floor3 = CourseHandler.getFloor(course, ce.getPosition());
         if (!ce.isFlying()) {
             ce.setLevel(floor3.getLevel());
-            Player player = getPlayerOf(ce);
+            Player  player      = getPlayerOf(ce);
             boolean rampPassage = false;
             if (direction != null) {
                 WallType sourceWall = previousFloor.wall(direction);
