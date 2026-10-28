@@ -95,7 +95,7 @@ Es gibt Einbahnwände mit grüner und roter Kennzeichnung sowie Abstoßfelder. D
 
 ### Fliegen und Hovercraft
 
-Das Hovercraft-Modul ermöglicht Flugbewegungen während der Ausführung eines Bewegungs-Programms (Move oder Back-Up). Während dieses Bewegungsschritts blockieren Wände und Höhenunterschiede die Flugbewegung nicht wie eine normale Fahrt. Nach Ende des Bewegungsschritts gilt der Roboter als gelandet, auch wenn weitere Programmschritte derselben Phase folgen. Eine Landung auf einem niedrigeren Level verursacht keinen Schaden. Eine Landung in einem Abgrund oder auf einer aktiven Falltür ist tödlich.
+Das Hovercraft-Modul ermöglicht Flugbewegungen während der Ausführung einer Bewegungs-Karte (Move oder Back-Up). Während der gesamten Bewegung – auch bei mehrschrittigen Karten wie Move-2 – blockieren Wände und Höhenunterschiede die Flugbewegung nicht wie eine normale Fahrt. Nach Abschluss der Bewegungskarte gilt der Roboter als gelandet. Bei den anschließenden Abläufen derselben Phase, etwa den Bewegungen anderer Roboter oder der Förderbänder, gilt er als gelandet. Eine Landung auf einem niedrigeren Level verursacht keinen Schaden. Eine Landung in einem Abgrund oder auf einer aktiven Falltür ist tödlich.
 
 ## 4. Roboter schieben und Rammen
 
