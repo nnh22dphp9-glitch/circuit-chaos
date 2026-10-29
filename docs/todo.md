@@ -34,3 +34,4 @@ Das sind zunächst Testaufgaben, keine Behauptung, dass die genannten Funktionen
 - [ ] **Board-Design:** Mehrere Finish- und CP-Felder
 - [ ] **Schalter-Course-Element:** kann Falltüren öffnen/schließen oder Repulsors (de-)aktivieren
 - [ ] **Öl auf Förderbändern:** Öl soll mit dem Förderband genau ein Feld weiterbewegt werden und nicht anschließend auf weitere Ölfelder weiterrutschen. Aktuell verschwindet Öl auf einem Förderband stattdessen (Log: "Oil died").
+- [ ] **Portale:** Die Liste der blockierenden Objekte muss überprüft werden. Zurzeit scheinen da noch die Portale selbst drinzustehen.
