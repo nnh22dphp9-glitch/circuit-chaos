@@ -172,7 +172,7 @@ Ein Schalter zum Öffnen und Schließen von Falltüren ist als mögliche zukünf
 - Ein Teleporter wird aktiviert, wenn ein Roboter auf ihm steht und anschließend einen Bewegungs-Programmschritt ausführt.
 - Das Betreten des Teleporterfelds löst den Teleport nicht aus. Ebenso wird ein Teleporter nicht durch eine fließende Bewegung aktiviert, etwa wenn ein Förderband den Roboter darüber bewegt.
 - Der Teleporter versetzt den Roboter entlang seiner aktuellen Ausrichtung. Die Entfernung hängt von der ursprünglichen Bewegungsrichtung beziehungsweise dem Bewegungsbefehl ab.
-- Eine Mine auf dem Zielfeld wird durch den teleportierten Roboter ausgelöst und explodiert.
+- Der Teleport wird nur ausgeführt, wenn das Zielfeld frei von Robotern und Objekten ist. Eine Mine auf dem Zielfeld blockiert den Teleport daher; sie wird nicht ausgelöst.
 - Das Teleportieren in ein Feld ohne Boden beziehungsweise in den Abgrund ist erlaubt. Ein Roboter kann dadurch absichtlich in den Abgrund geschickt werden.
 - Mobile Teleporter können im Spiel vorkommen. Deshalb lässt sich nicht pauschal davon ausgehen, dass es auf einem Kurs immer nur eine feste Teleporter-Konfiguration gibt.
 
