@@ -750,8 +750,8 @@ public class Game {
             }
             if (obj.isOnCourse()) {
                 Floor f = CourseHandler.getFloor(course, obj.getPosition());
-                obj.setConflictingMark((f.getFloortype().isConveyorBelt() && (!f.isWater()) && !obj.isFlying()) ? 0 : -1);
-                if (f.getFloortype().isConveyorBelt() && !f.isWater()) {
+                obj.setConflictingMark((f.getFloortype().isConveyorBelt() && !obj.isFlying()) ? 0 : -1);
+                if (f.getFloortype().isConveyorBelt()) {
                     needToGoAgain = true;
                 }
             }
