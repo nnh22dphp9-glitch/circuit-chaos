@@ -103,9 +103,7 @@ Roboter können andere Roboter schieben. Schieben kann mehrere Felder umfassen u
 
 ### Ramming Armor
 
-- Die Ramming Armor schützt beziehungsweise unterstützt beim Rammen.
-- Ihre Schutzwirkung ist während der jeweiligen Phase nur vorübergehend deaktiviert und steht in der nächsten Phase wieder zur Verfügung.
-- Wird ein Roboter über zwei bis vier Felder geschoben, erhält der geschobene Roboter insgesamt höchstens **einen** Ramming-Schadenspunkt, nicht einen pro Feld.
+Die Ramming Armor verursacht beim ersten Zusammenstoß eines Roboters in einer Phase einen Schadenspunkt beim getroffenen Roboter. Der Schaden wird auch dann verursacht, wenn der getroffene Roboter aufgrund eines Hindernisses nicht verschoben werden kann. Bei einer Schiebekette wird nicht jeder geschobene Roboter automatisch durch die Ramming Armor beschädigt.
 
 Die genaue Abwicklung komplexer Kollisionen und mehrerer gleichzeitig schiebender Roboter ist noch als offener Prüfpunkt vermerkt.
 
