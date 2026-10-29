@@ -216,7 +216,7 @@ Dabei ist unerheblich, ob die Schritte in einem Zug (z. B. mit Move-3) oder übe
 
 Ein Hovercraft kann einfach vom Kleber wegfliegen; in diesem Fall greift der Kleber nicht.
 
-Noch zu prüfen ist, wie Kleber beim Verschieben eines Roboters reagiert. Außerdem ist noch nicht geklärt, ob neu ausgelegte Kleber- und Öl-Devices – wie Minen – zunächst inaktiv sind.
+Auch Bewegungen durch andere Effekte, etwa Pusher oder Förderbänder, bauen Kleber-Punkte ab. Neu ausgelegter Kleber ist zunächst inaktiv und wird erst im TOUCH_CHECKPOINTS-Schritt aktiviert.
 
 ### Randomizer
 
