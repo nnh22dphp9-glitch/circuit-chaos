@@ -62,7 +62,7 @@ Nach der Programmierung aller Spieler wird das Programm in **fünf Phasen** abge
 6. **Pusher:** Aktive Pusher drücken Roboter gegebenenfalls ein Feld in die vorgegebene Richtung.
 7. **Zahnräder:** Zahnräder drehen Roboter und andere Dinge auf ihnen.
 8. **Strahlen und Laser feuern:** Zuerst feuern die Waffen der Roboter, danach die kursmontierten Strahlen und Laser. Die Reihenfolge der Schützen richtet sich nach derselben Prioritätsreihenfolge wie bei den Programmschritten.
-9. **Kontrollpunkte und Minen prüfen:** Es wird geprüft, ob Roboter Kontrollpunkte oder das Finish erreicht haben. Dabei aktivieren sich Minen und explodieren unmittelbar, wenn ein Roboter auf einer Mine steht. Annäherungsminen können auch auslösen, wenn ein Roboter auf einem benachbarten Feld steht. Erreicht ein Roboter das Finish, wird er als Gewinner festgelegt. Mehrere gleichzeitige Gewinner werden derzeit nicht geprüft; das ist ein offener Punkt für eine mögliche Unterstützung mehrerer Finish-Felder.
+9. **Kontrollpunkte und Minen prüfen:** Es wird geprüft, ob Roboter Kontrollpunkte oder das Finish erreicht haben. Dabei aktivieren sich Minen und explodieren unmittelbar, wenn ein Roboter auf einer Mine steht. Annäherungsminen können auch auslösen, wenn ein Roboter auf einem benachbarten Feld steht. Erreicht ein Roboter das Finish, wird er als Gewinner festgelegt. Erreichen mehrere Roboter das Finish gleichzeitig, wird eine Tie-Meldung ausgegeben.
 10. **Kill-All-Sieg prüfen:** Im Kill-All-Modus wird der Gewinner anhand der Kill-All-Regeln neu bestimmt; dadurch kann der zuvor festgelegte Finish-Gewinner überschrieben oder auf keinen Gewinner gesetzt werden.
 
 ### Rundenende
@@ -91,7 +91,7 @@ Wände und andere Hindernisse können eine Bewegung verhindern. Roboter können 
 
 ### Einbahnwände und Abstoßfelder
 
-Es gibt Einbahnwände mit grüner und roter Kennzeichnung sowie Abstoßfelder. Die genaue Wirkung eines Abstoßfelds und die vollständigen Sonderfälle der Einbahnwände müssen vor der endgültigen Anleitung noch einmal gegen die Spielregeln geprüft werden. Einbahnwände werden im Kurs als zusammengehörige Paare angelegt.
+Einbahnwände mit grüner und roter Kennzeichnung werden als zusammengehörige Paare angelegt. Die grüne Seite lässt die Bewegung in Richtung der roten Seite zu; die rote Seite blockiert die Bewegung in Gegenrichtung. Abstoßfelder reflektieren eine versuchte Bewegung in die entgegengesetzte Richtung.
 
 ### Fliegen und Hovercraft
 
@@ -105,7 +105,7 @@ Roboter können andere Roboter schieben. Schieben kann mehrere Felder umfassen u
 
 Die Ramming Armor verursacht beim ersten Zusammenstoß eines Roboters in einer Phase einen Schadenspunkt beim getroffenen Roboter. Der Schaden wird auch dann verursacht, wenn der getroffene Roboter aufgrund eines Hindernisses nicht verschoben werden kann. Bei einer Schiebekette wird nicht jeder geschobene Roboter automatisch durch die Ramming Armor beschädigt.
 
-Die genaue Abwicklung komplexer Kollisionen und mehrerer gleichzeitig schiebender Roboter ist noch als offener Prüfpunkt vermerkt.
+Bei komplexen Kollisionen werden Bewegungen sequenziell abgewickelt; mehrere Roboter können dabei in Schiebeketten geraten.
 
 ## 5. Kurselemente und Gefahren
 
@@ -143,7 +143,7 @@ Betritt ein Roboter ein Ölfeld, rutscht er in Bewegungsrichtung weiter, bis er 
 
 Bleibt ein Roboter tatsächlich auf einem Ölfeld stehen, benötigt er einen zusätzlichen Bewegungsschritt zum Anfahren; seine Räder drehen zunächst durch. Ein Hovercraft kann sich ohne diesen Anfahrschritt bewegen.
 
-Noch zu prüfen ist, was passiert, wenn sich mehrere Öl-Felder auf einem Förderband aufstapeln, bevor sie in den Abyss geschoben werden. Vermutlich ändert sich dadurch nichts am Effekt, dies ist aber nicht bestätigt.
+Mehrere Ölobjekte auf demselben Feld verstärken den Rutscheffekt nicht.
 
 ### Wasser
 
@@ -151,7 +151,7 @@ Wasser reduziert die Bewegung eines Roboters um einen Bewegungsschritt. Bei Move
 
 Förderbänder funktionieren unter Wasser wie gewohnt und werden durch die Verlangsamung nicht eingeschränkt.
 
-Noch zu testen ist die Kombination von Wasser und **BRAKES**: Es ist zu prüfen, ob ein Move-2-Programmschritt bei zusätzlicher Verwendung von BRAKES ebenfalls zum Stillstand führt.
+Wasser und **BRAKES** wirken zusammen: BRAKES reduziert Move-2 auf einen Bewegungsschritt, Wasser reduziert diesen verbleibenden Schritt auf null.
 
 ### Falltüren und Abgründe
 
@@ -163,7 +163,7 @@ Eine **Falltür** ist abhängig von der Phase geöffnet oder geschlossen:
 
 Die Phasen, in denen eine Falltür geöffnet ist, werden im Tooltip des Feldes angezeigt und sind damit für alle Spieler sichtbar.
 
-Minen, Kleber und Öl können ebenfalls in einen Abgrund fallen, wenn sie auf einem Förderband dorthin geschoben werden. In diesem Fall werden sie vom Spielfeld entfernt. Ob eine Mine dabei explodiert, ist noch zu prüfen.
+Minen, Kleber und Öl können ebenfalls in einen Abgrund fallen, wenn sie auf einem Förderband dorthin geschoben werden. Sie werden dann vom Spielfeld entfernt. Eine Mine explodiert dabei nicht.
 
 Ein Schalter zum Öffnen und Schließen von Falltüren ist als mögliche zukünftige Erweiterung angedacht; aktuell werden Falltüren phasenabhängig gesteuert.
 
@@ -341,11 +341,11 @@ Im Modus **Kill All** gewinnt man, wenn alle anderen Roboter ausgeschaltet wurde
 
 Die folgenden Punkte sind bewusst nicht als abschließend geklärte Regeln formuliert:
 
-- Vollständige Kollisions- und Schieberegeln, insbesondere das Verhalten mehrerer Roboter bei gleichzeitig möglichen Bewegungen. Der Code löst Bewegungen sequenziell und rekursiv auf; die genaue beabsichtigte Spielregel bei komplexen Blockaden sollte noch bestätigt werden.
-- Genaue Funktion der Repulsor-Felder und sämtliche Einbahnwand-Sonderfälle bei Bewegung. Die Implementierung ist vorhanden, aber die gewünschte Regelbeschreibung sollte noch bestätigt werden.
-- Behandlung mehrerer oder überlappender Teleporter beziehungsweise Portale sowie die genaue Belegungskontrolle des Portal-Zielfelds.
-- High Power Laser: Die Codeimplementierung scheint neben dem ersten Roboter auch einen blockierenden Wand-/Hindernisfall zu durchdringen. Zu bestätigen ist, ob das beabsichtigt ist oder ob der Laser ausschließlich den ersten Roboter durchdringen soll.
-- Exakte Regeln für die Bewertung und das Spielende in allen Sonderfällen von Kill All.
+
+
+- Portal-Zielfeldbelegung: Portale blockieren sich derzeit möglicherweise gegenseitig. Das ist ein bekannter Bug, der noch behoben werden soll.
+
+
 
 ---
 
