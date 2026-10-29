@@ -206,7 +206,7 @@ Eine Mine wird ausgelöst, wenn ein Roboter auf ihr Feld tritt beziehungsweise a
 
 Minen können auch den Roboter treffen, der sie gelegt hat. Wird ein Roboter durch eine Bewegung, einen Pusher oder einen anderen Effekt auf eine Mine geschoben oder landet dort, kann er sie auslösen. Wenn mehrere Minen gleichzeitig explodieren, werden die verursachten Schadenspunkte addiert.
 
-Noch zu prüfen ist, ob Wände die Auslösung beziehungsweise den Schaden einer Proximity Mine blockieren. Ebenfalls zu prüfen ist, ob Minen durch eine andere Minenexplosion zur Detonation gebracht werden, sobald sie selbst mindestens einen Schadenspunkt abbekommen (Kettenreaktion).
+Wände blockieren die Auslösung von Proximity Mines, wenn sie zwischen Mine und Roboter liegen. Minen lösen durch den Schaden einer anderen Minenexplosion keine Kettenreaktion aus.
 
 ### Kleber
 
