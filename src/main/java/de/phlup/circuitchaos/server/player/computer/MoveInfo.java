@@ -15,6 +15,7 @@ import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.Programme;
 import de.phlup.circuitchaos.server.game.Game;
+import de.phlup.circuitchaos.server.game.GameLogic;
 import de.phlup.circuitchaos.server.player.Player;
 import lombok.Data;
 
@@ -66,7 +67,7 @@ public class MoveInfo {
 
         tf = CourseHandler.getFloor(course, player.getRobot().getPosition());
         for (int phase = 0; phase < 5; phase++) {
-            boolean flyingDuringMovement = false;
+            boolean flyingDuringMovement;
             checkForAbyss(phase);
             if (program[phase].getType() == ProgramType.ROTATE_LEFT) {
                 endingDirection = endingDirection.add(Direction.WEST);
@@ -75,10 +76,7 @@ public class MoveInfo {
             } else if (program[phase].getType() == ProgramType.U_TURN) {
                 endingDirection = endingDirection.add(Direction.SOUTH);
             } else {
-                int movement = program[phase].getType().getMovement();
-                if (movement != 0 && player.uses(ModuleType.BRAKES, phase)) {
-                    movement = movement > 0 ? movement - 1 : movement + 1;
-                }
+                int movement = GameLogic.determineMovementAmount(program[phase], player.uses(ModuleType.BRAKES, phase));
                 // Hovercraft flight starts before water/oil effects are applied.
                 flyingDuringMovement = player.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
                 if (!flyingDuringMovement && (tf.isWater() || CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
@@ -165,11 +163,11 @@ public class MoveInfo {
                     slideOnOil(movementDirection, flyingDuringMovement, phase);
                 }
             }
-            Direction lastDirection = Direction.NORTH;
+            Direction lastDirection;
             // express conveyor belts
             if (tf.getFloortype().isExpressConveyorBelt()) {
                 lastDirection = tf.getFacingDirection();
-                if (moveForcedOneTile(lastDirection, false, phase)) {
+                if (moveForcedOneTile(lastDirection, phase)) {
                     if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
                             || tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
                             || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW
@@ -192,7 +190,7 @@ public class MoveInfo {
             // conveyor belts
             if (tf.getFloortype().isConveyorBelt() && !tf.isWater()) {
                 lastDirection = tf.getFacingDirection();
-                if (moveForcedOneTile(lastDirection, false, phase)) {
+                if (moveForcedOneTile(lastDirection, phase)) {
                     if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
                             || tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
                             || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW
@@ -215,7 +213,7 @@ public class MoveInfo {
             // pushers
             if (tf.isHasPusher() && tf.getActiveInPhase()[phase]) {
                 lastDirection = tf.getPusherDirection();
-                if (moveForcedOneTile(lastDirection, false, phase)) {
+                if (moveForcedOneTile(lastDirection, phase)) {
                     slideOnOil(lastDirection, false, phase);
                 }
             }
@@ -325,27 +323,25 @@ public class MoveInfo {
         }
     }
 
-    private boolean moveForcedOneTile(Direction direction, boolean flying, int phase) {
+    private boolean moveForcedOneTile(Direction direction, int phase) {
         Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
         Position targetPosition = previousFloor.getPosition().neighbour(direction);
         Floor targetFloor = CourseHandler.getFloor(course, targetPosition);
-        if (!canMoveAcross(previousFloor, targetFloor, direction, flying)) {
+        if (!GameLogic.cannotMoveAcross(previousFloor, targetFloor, direction, false)) {
             return false;
         }
         x = targetPosition.x();
         y = targetPosition.y();
         tf = targetFloor;
-        applyHeightDamage(previousFloor, targetFloor, flying, direction);
+        applyHeightDamage(previousFloor, targetFloor, false, direction);
         checkForAbyss(phase);
-        if (!flying) {
-            for (CourseObject co : CourseHandler.getObjects(course, targetPosition)) {
-                if (co.getType().isPortal() && co.getTargetPosition() != null) {
-                    x = co.getTargetPosition().x();
-                    y = co.getTargetPosition().y();
-                    tf = CourseHandler.getFloor(course, co.getTargetPosition());
-                    checkForAbyss(phase);
-                    break;
-                }
+        for (CourseObject co : CourseHandler.getObjects(course, targetPosition)) {
+            if (co.getType().isPortal() && co.getTargetPosition() != null) {
+                x = co.getTargetPosition().x();
+                y = co.getTargetPosition().y();
+                tf = CourseHandler.getFloor(course, co.getTargetPosition());
+                checkForAbyss(phase);
+                break;
             }
         }
         return true;
@@ -354,33 +350,10 @@ public class MoveInfo {
     private void slideOnOil(Direction direction, boolean flying, int phase) {
         while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream()
                 .anyMatch(co -> co.getType() == ObjectType.OIL)) {
-            if (!moveForcedOneTile(direction, false, phase)) {
+            if (!moveForcedOneTile(direction, phase)) {
                 break;
             }
         }
-    }
-
-    private boolean canMoveAcross(Floor sourceFloor, Floor targetFloor, Direction direction, boolean flying) {
-        if (flying) {
-            return true;
-        }
-        WallType sourceWall = sourceFloor.wall(direction);
-        WallType targetWall = targetFloor.wall(direction.reverse());
-        boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
-                || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
-        if (targetFloor.getLevel() > sourceFloor.getLevel() && !rampPassage) {
-            return false;
-        }
-        return ((sourceWall == WallType.NONE
-                || sourceWall == WallType.ONE_WAY_GREEN
-                || sourceWall == WallType.RAMP_UP
-                || sourceWall == WallType.RAMP_DOWN)
-                && (targetWall == WallType.NONE
-                || targetWall == WallType.ONE_WAY_GREEN
-                || targetWall == WallType.RAMP_UP
-                || targetWall == WallType.RAMP_DOWN
-                || targetWall == WallType.LEDGE))
-                || (sourceWall == WallType.ONE_WAY_GREEN && targetWall == WallType.ONE_WAY_RED);
     }
 
     private void applyHeightDamage(Floor previousFloor, Floor currentFloor, boolean flying, Direction direction) {
@@ -417,7 +390,7 @@ public class MoveInfo {
             }
         };
         Direction direction = backup ? endingDirection.reverse() : endingDirection;
-        return canMoveAcross(f, targetFloor, direction, flying);
+        return !GameLogic.cannotMoveAcross(f, targetFloor, direction, flying);
     }
 
 }

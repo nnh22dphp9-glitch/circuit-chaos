@@ -361,7 +361,7 @@ public class Game {
             if (player != null) {
                 releaseDevices(phase, player);
                 while (!gameAborted && program != null) {
-                    int movement = determineMovementAmount(phase, robot, program);
+                    int movement = GameLogic.determineMovementAmount(program, player.uses(ModuleType.BRAKES, phase));
                     if (player.uses(ModuleType.HOVERCRAFT, phase)) {
                         robot.setFlying(movement != 0);
                     }
@@ -763,7 +763,7 @@ public class Game {
                 if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
                     Floor f           = CourseHandler.getFloor(course, obj.getPosition());
                     Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    if (cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
+                    if (GameLogic.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
                             || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
                         obj.setConflictingMark(-1);
                     } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
@@ -817,7 +817,7 @@ public class Game {
                 if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
                     Floor f           = CourseHandler.getFloor(course, obj.getPosition());
                     Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    if (cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
+                    if (GameLogic.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
                             || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
                         obj.setConflictingMark(-1);
                     } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
@@ -882,19 +882,6 @@ public class Game {
             if (movement < 0) {
                 movement++;
             }
-        }
-        return movement;
-    }
-
-    private int determineMovementAmount(int phase, CourseElement ce, Programme pc) {
-        int movement;
-        if (ce instanceof Robot) {
-            movement = pc.getType().getMovement();
-            if (movement != 0 && getPlayerOf(ce).uses(ModuleType.BRAKES, phase)) {
-                movement = movement > 0 ? movement - 1 : movement + 1;
-            }
-        } else {
-            movement = pc.getType().getMovement();
         }
         return movement;
     }
@@ -1328,29 +1315,6 @@ public class Game {
             }
         }
         return null;
-    }
-
-    private boolean cannotMoveAcross(Floor sourceFloor, Floor targetFloor, Direction direction, boolean flying) {
-        if (flying) {
-            return false;
-        }
-        WallType sourceWall = sourceFloor.wall(direction);
-        WallType targetWall = targetFloor.wall(direction.reverse());
-        boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
-                || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
-        if (targetFloor.getLevel() > sourceFloor.getLevel() && !rampPassage) {
-            return true;
-        }
-        return ((sourceWall != WallType.NONE
-                && sourceWall != WallType.ONE_WAY_GREEN
-                && sourceWall != WallType.RAMP_UP
-                && sourceWall != WallType.RAMP_DOWN)
-                || (targetWall != WallType.NONE
-                && targetWall != WallType.ONE_WAY_GREEN
-                && targetWall != WallType.RAMP_UP
-                && targetWall != WallType.RAMP_DOWN
-                && targetWall != WallType.LEDGE))
-                && (sourceWall != WallType.ONE_WAY_GREEN || targetWall != WallType.ONE_WAY_RED);
     }
 
     private int getCBConflictingElementMark(CourseElement be2, Direction direction) {
