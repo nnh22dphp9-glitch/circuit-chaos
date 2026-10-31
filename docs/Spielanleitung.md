@@ -337,14 +337,6 @@ Im normalen Rennmodus müssen Kontrollpunkte in der vorgegebenen Reihenfolge err
 
 Im Modus **Kill All** gewinnt man, wenn alle anderen Roboter ausgeschaltet wurden. In diesem Modus werden alle Kontrollpunkte zu Startpositionen, auf die die Roboter gleichmäßig verteilt werden. **Auch im normalen Finish-Modus können mehrere Startpositionen verwendet werden.**
 
-## 9. Vor Veröffentlichung noch zu klären
-
-Die folgenden Punkte sind bewusst nicht als abschließend geklärte Regeln formuliert:
-
-
-
-- Portal-Zielfeldbelegung: Portale blockieren sich derzeit möglicherweise gegenseitig. Das ist ein bekannter Bug, der noch behoben werden soll.
-
 
 
 ---

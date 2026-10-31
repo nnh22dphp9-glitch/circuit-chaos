@@ -1217,7 +1217,7 @@ public class Game {
             CourseObject portal = CourseHandler.getPortal(course, floor3.getPosition());
             if (portal != null) {
                 if (portal.getTargetPosition() != null) {
-                    if (CourseHandler.getObjectsAndRobots(course, portal.getTargetPosition()).isEmpty()) {
+                    if (CourseHandler.getRobots(course, portal.getTargetPosition()).isEmpty()) {
                         floor3 = CourseHandler.getFloor(course, portal.getTargetPosition());
                         ce.setPosition(portal.getTargetPosition());
                         ce.setLevel(floor3.getLevel());
