@@ -227,7 +227,7 @@ public class Game {
                 RobotType robotType = availableRobotTypes.getFirst();
                 availableRobotTypes.remove(robotType);
                 Robot         robot         = createRobot(robotType);
-                NetworkPlayer networkPlayer = new NetworkPlayer(robot, gameId, reg, goal);
+                NetworkPlayer networkPlayer = new NetworkPlayer(robot, gameId, reg);
                 players.addLast(networkPlayer);
                 CourseHandler.add(course, robot);
             }
@@ -335,7 +335,7 @@ public class Game {
             stepResolveBeamsAndLaserFire(phase);
             winner = setTouchCheckpoints(phase);
             if (goal == Goal.KILL_ALL) {
-                List.copyOf(players).stream().filter(Player::hasLost).forEach(this::removeLostPlayer);
+                List.copyOf(players).stream().filter(p -> p.getRobot().hasLost(goal)).forEach(this::removeLostPlayer);
                 winner = checkKillAllWinner();
             }
         }
@@ -357,29 +357,26 @@ public class Game {
             Programme program = robot.getProgram()[phase];
             Floor     f       = CourseHandler.getFloor(course, robot.getPosition());
             reactivateRammingArmor(phase, robot);
-            Player player = getPlayerOf(robot);
-            if (player != null) {
-                releaseDevices(phase, player);
-                while (!gameAborted && program != null) {
-                    int movement = GameLogic.determineMovementAmount(program, player.uses(ModuleType.BRAKES, phase));
-                    if (player.uses(ModuleType.HOVERCRAFT, phase)) {
-                        robot.setFlying(movement != 0);
-                    }
-
-                    Teleporter teleportResult = Teleporter.teleport(robot, movement, this, phase);
-                    if (teleportResult.isHasBeenTeleported()) {
-                        break;
-                    } else {
-                        movement = teleportResult.getOldMovement();
-                    }
-
-                    movement = applyWaterAndOilSlick(robot, f, movement);
-                    singleRobotMove(phase, robot, program, movement);
-                    if (robot.isFlying()) {
-                        land(robot, Step.ROBOTS_AND_OBJECTS_MOVE, phase);
-                    }
-                    program = null;
+            releaseDevices(phase, robot);
+            while (!gameAborted && program != null) {
+                int movement = GameLogic.determineMovementAmount(program, robot.uses(ModuleType.BRAKES, phase));
+                if (robot.uses(ModuleType.HOVERCRAFT, phase)) {
+                    robot.setFlying(movement != 0);
                 }
+
+                Teleporter teleportResult = Teleporter.teleport(robot, movement, this, phase);
+                if (teleportResult.isHasBeenTeleported()) {
+                    break;
+                } else {
+                    movement = teleportResult.getOldMovement();
+                }
+
+                movement = applyWaterAndOilSlick(robot, f, movement);
+                singleRobotMove(phase, robot, program, movement);
+                if (robot.isFlying()) {
+                    land(robot, Step.ROBOTS_AND_OBJECTS_MOVE, phase);
+                }
+                program = null;
             }
         }
     }
@@ -399,12 +396,10 @@ public class Game {
         }
     }
 
-    private Player getPlayerOf(CourseElement ce) {
-        if (ce instanceof Robot) {
-            for (Player player : players) {
-                if (player.getRobot().equals(ce)) {
-                    return player;
-                }
+    private Player getPlayerOf(Robot robot) {
+        for (Player player : players) {
+            if (player.getRobot().equals(robot)) {
+                return player;
             }
         }
         return null;
@@ -418,16 +413,16 @@ public class Game {
                     land(robot, Step.END_OF_TURN_COURSE_EFFECTS, 4);
                 }
 
-                resetPoweredDownForDestroyedRobot(player);
+                resetPoweredDownForDestroyedRobot(robot);
                 robot.setMayChooseDirection(false);
-                handleDestroyedRobots(player);
+                handleDestroyedRobots(robot);
 
-                if (goal == Goal.FINISH && player.hasWon()) {
+                if (goal == Goal.FINISH && robot.hasWon(goal, course.getCheckpoints().size())) {
                     winner = player;
                 }
             }
         }
-        List.copyOf(players).stream().filter(Player::hasLost).forEach(this::removeLostPlayer);
+        List.copyOf(players).stream().filter(p -> p.getRobot().hasLost(goal)).forEach(this::removeLostPlayer);
         if (goal == Goal.KILL_ALL) {
             winner = checkKillAllWinner();
         }
@@ -455,12 +450,11 @@ public class Game {
         return null;
     }
 
-    private void handleDestroyedRobots(Player player) {
-        Robot robot = player.getRobot();
+    private void handleDestroyedRobots(Robot robot) {
         if (robot.getDamage() >= 10 && !gameAborted) {
             if (goal == Goal.FINISH) {
-                robot.setDamage((player.getRobot().hasModule(ModuleType.SUPERIOR_ARCHIVE_COPY) ? 0 : 2));
-                if (!player.hasLost()) {
+                robot.setDamage((robot.hasModule(ModuleType.SUPERIOR_ARCHIVE_COPY) ? 0 : 2));
+                if (!robot.hasLost(goal)) {
                     robot.setPosition(robot.getArchivePosition());
                     robot.setPrevPosition(robot.getArchivePosition());
                     robot.setLevel(robot.getArchiveLevel());
@@ -488,8 +482,7 @@ public class Game {
         }
     }
 
-    private void resetPoweredDownForDestroyedRobot(Player player) {
-        Robot robot = player.getRobot();
+    private void resetPoweredDownForDestroyedRobot(Robot robot) {
         if (robot.isPoweredDown() || robot.getDamage() >= 10) {
             robot.setPoweredDown(false);
         }
@@ -499,13 +492,11 @@ public class Game {
         Player winner = null;
         for (CourseElement o : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
             if (!gameAborted && o.isOnCourse()) {
-                Player player = getPlayerOf(o);
-                if (player != null) {
-                    Robot      robot = player.getRobot();
-                    Checkpoint cp    = CourseHandler.getCheckpoint(course, robot.getPosition());
-                    Floor      f     = CourseHandler.getFloor(course, robot.getPosition());
-                    Floor      f2    = f;
-                    if (player.uses(ModuleType.MECHANICAL_ARM, phase)) {
+                if (o instanceof Robot robot) {
+                    Checkpoint cp = CourseHandler.getCheckpoint(course, robot.getPosition());
+                    Floor      f  = CourseHandler.getFloor(course, robot.getPosition());
+                    Floor      f2 = f;
+                    if (robot.uses(ModuleType.MECHANICAL_ARM, phase)) {
                         if (!(cp != null || f.getFloortype() == Floortype.PIT_STOP)) {
                             f = CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
                             cp = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
@@ -531,10 +522,13 @@ public class Game {
                         }
                     }
                     if (phase == 4 && f2.getFloortype() == Floortype.PIT_STOP) {
-                        player.arriveAtPitStop();
+                        Player player = getPlayerOf(robot);
+                        if (player != null) {
+                            player.arriveAtPitStop();
+                        }
                     }
-                    if (goal == Goal.FINISH && player.hasWon()) {
-                        winner = player;
+                    if (goal == Goal.FINISH && robot.hasWon(goal, course.getCheckpoints().size())) {
+                        winner = getPlayerOf(robot);
                     }
                 } else if (o instanceof CourseObject co) {
                     co.setActive(true);
@@ -589,10 +583,7 @@ public class Game {
                     Robot target = getLaserTarget(f.getPosition(), dir, f.getLevel(), false, true, true, step);
                     if (target != null) {
                         if (step == Step.COURSE_MOUNTED_LASER_FIRE) {
-                            Player playerOfRobot = getPlayerOf(target);
-                            if (playerOfRobot != null) {
-                                playerOfRobot.takeDamage(phase, null, dir2, true);
-                            }
+                            target.takeDamage(course, phase, dir2, true);
                         } else if (step == Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE) {
                             moveInit(target, dir, 0, 1, Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE, phase, true, false, null);
                         } else if (step == Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE) {
@@ -613,12 +604,11 @@ public class Game {
             if (gameAborted) {
                 break;
             }
-            Player    player       = shooter.getPlayer();
-            Robot     robot        = player.getRobot();
-            Direction dir          = robot.getDirection();
-            Robot     targetRobot  = shooter.getTarget();
-            Robot     targetRobot2 = shooter.getTarget2();
-            Module    weapon       = shooter.getWeapon();
+            Robot     robot           = shooter.getRobot();
+            Direction dir             = robot.getDirection();
+            Robot     targetRobot     = shooter.getTarget();
+            Robot     highPowerTarget = shooter.getTarget2();
+            Module    weapon          = shooter.getWeapon();
             if (weapon != null) {
                 ModuleType weaponType = weapon.getType();
                 if (targetRobot != null && targetRobot.isOnCourse()) {
@@ -626,13 +616,10 @@ public class Game {
                             && (weaponType == MAIN_LASER
                             || weaponType == ModuleType.DOUBLE_BARREL_LASER
                             || weaponType == ModuleType.HIGH_POWER_LASER
-                            || weaponType == ModuleType.REAR_LASER)) {    // main laser
-                        Player playerOfTargetRobot = getPlayerOf(targetRobot);
-                        if (playerOfTargetRobot != null) {
-                            playerOfTargetRobot.takeDamage(phase, player, dir, true);
-                            if (weaponType == ModuleType.DOUBLE_BARREL_LASER) {
-                                playerOfTargetRobot.takeDamage(phase, player, dir, true);
-                            }
+                            || weaponType == ModuleType.REAR_LASER)) {
+                        targetRobot.takeDamage(course, phase, dir, true);
+                        if (weaponType == ModuleType.DOUBLE_BARREL_LASER) {
+                            targetRobot.takeDamage(course, phase, dir, true);
                         }
                     } else if (step == Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE && weaponType == ModuleType.PRESSURE_BEAM) {
                         moveInit(targetRobot, dir, 0, 1, step, phase, true, false, null);
@@ -652,11 +639,8 @@ public class Game {
                         targetRobot.setDirection(targetRobot.getDirection().add(EAST));
                     }
                 }
-                if (targetRobot2 != null && step == Step.ROBOT_MOUNTED_LASER_FIRE && targetRobot2.isOnCourse()) { // kann nur bei High Power Laser der Fall sein
-                    Player playerOfTargetRobot = getPlayerOf(targetRobot2);
-                    if (playerOfTargetRobot != null) {
-                        playerOfTargetRobot.takeDamage(phase, player, dir, true);
-                    }
+                if (highPowerTarget != null && step == Step.ROBOT_MOUNTED_LASER_FIRE && highPowerTarget.isOnCourse()) {
+                    highPowerTarget.takeDamage(course, phase, dir, true);
                 }
             }
         }
@@ -673,7 +657,7 @@ public class Game {
                 break;
             }
             if (player.getRobot().isOnCourse()) {
-                shooters.add(new Shooter(phase, player, this, step));
+                shooters.add(new Shooter(phase, player.getRobot(), this, step));
             }
         }
         return shooters;
@@ -696,7 +680,7 @@ public class Game {
                     if (ce.isOnCourse()
                             && ce.getPosition().equals(f.getPosition())
                             && !ce.isFlying()
-                            && !(ce instanceof Robot && getPlayerOf(ce).uses(ModuleType.GYROSCOPIC_STABILIZER, phase))) {
+                            && !(ce instanceof Robot r && r.uses(ModuleType.GYROSCOPIC_STABILIZER, phase))) {
                         rotate(ce, f.getFloortype() == Floortype.GEARS_CCW ? WEST : EAST, Step.GEARS_ROTATE, phase, false);
                     }
                 }
@@ -849,7 +833,7 @@ public class Game {
     }
 
     private void rotateObjectsOnConveyorBelts(Step step, int phase, CourseElement obj, Floor targetFloor, Floor sourceFloor) {
-        if (!(obj instanceof Robot && getPlayerOf(obj).uses(ModuleType.GYROSCOPIC_STABILIZER, phase))) {
+        if (!(obj instanceof Robot r && r.uses(ModuleType.GYROSCOPIC_STABILIZER, phase))) {
             if ((targetFloor.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
                     || targetFloor.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW)
                     && (targetFloor.getFacingDirection() == sourceFloor.getFacingDirection().add(WEST)
@@ -886,64 +870,54 @@ public class Game {
         return movement;
     }
 
-    private void releaseDevices(int phase, Player player) {
-        Robot robot      = player.getRobot();
+    private void releaseDevices(int phase, Robot robot) {
         Floor standingOn = CourseHandler.getFloor(course, robot.getPosition());
-        if (player.uses(ModuleType.MOBILE_TELEPORTER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-            Module module = player.getRobot().getModule(ModuleType.MOBILE_TELEPORTER);
+        if (robot.uses(ModuleType.MOBILE_TELEPORTER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            Module module = robot.getModule(ModuleType.MOBILE_TELEPORTER);
             if (module.getAmmunition() > 0) {
-                CourseHandler.createCircuitChaosObject(course, ObjectType.TELEPORTER, player);
+                CourseHandler.createCircuitChaosObject(course, ObjectType.TELEPORTER, robot);
                 module.setAmmunition(module.getAmmunition() - 1);
             }
         }
-        if (player.uses(ModuleType.MOBILE_RANDOMIZER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-            Module module = player.getRobot().getModule(ModuleType.MOBILE_RANDOMIZER);
+        if (robot.uses(ModuleType.MOBILE_RANDOMIZER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            Module module = robot.getModule(ModuleType.MOBILE_RANDOMIZER);
             if (module.getAmmunition() > 0) {
-                CourseHandler.createCircuitChaosObject(course, ObjectType.RANDOMIZER, player);
+                CourseHandler.createCircuitChaosObject(course, ObjectType.RANDOMIZER, robot);
                 module.setAmmunition(module.getAmmunition() - 1);
             }
         }
-        if (player.uses(ModuleType.GLUE_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-            Module glueDispenser = player.getRobot().getModule(ModuleType.GLUE_DISPENSER);
+        if (robot.uses(ModuleType.GLUE_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            Module glueDispenser = robot.getModule(ModuleType.GLUE_DISPENSER);
             if (glueDispenser.getAmmunition() > 0) {
-                CourseHandler.createGlue(course, player.getRobot().getPosition());
+                CourseHandler.createGlue(course, robot.getPosition());
                 glueDispenser.setAmmunition(glueDispenser.getAmmunition() - 1);
             }
         }
-        if (player.uses(ModuleType.OIL_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-            Module oilDispenser = player.getRobot().getModule(ModuleType.OIL_DISPENSER);
+        if (robot.uses(ModuleType.OIL_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            Module oilDispenser = robot.getModule(ModuleType.OIL_DISPENSER);
             if (oilDispenser.getAmmunition() > 0) {
-                CourseHandler.createOil(course, player.getRobot().getPosition());
+                CourseHandler.createOil(course, robot.getPosition());
                 oilDispenser.setAmmunition(oilDispenser.getAmmunition() - 1);
             }
         }
-        if (player.uses(ModuleType.MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-            Module mineLayer = player.getRobot().getModule(ModuleType.MINE_LAYER);
+        if (robot.uses(ModuleType.MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            Module mineLayer = robot.getModule(ModuleType.MINE_LAYER);
             if (mineLayer.getAmmunition() > 0) {
-                CourseHandler.createCircuitChaosObject(course, ObjectType.MINE, player);
+                CourseHandler.createCircuitChaosObject(course, ObjectType.MINE, robot);
                 mineLayer.setAmmunition(mineLayer.getAmmunition() - 1);
             }
         }
-        if (player.uses(ModuleType.PROXIMITY_MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-            Module mineLayer = player.getRobot().getModule(ModuleType.PROXIMITY_MINE_LAYER);
+        if (robot.uses(ModuleType.PROXIMITY_MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            Module mineLayer = robot.getModule(ModuleType.PROXIMITY_MINE_LAYER);
             if (mineLayer.getAmmunition() > 0) {
-                CourseHandler.createCircuitChaosObject(course, ObjectType.PROXIMITY_MINE, player);
+                CourseHandler.createCircuitChaosObject(course, ObjectType.PROXIMITY_MINE, robot);
                 mineLayer.setAmmunition(mineLayer.getAmmunition() - 1);
             }
         }
-        if (player.uses(ModuleType.BRIDGE_PROJECTOR, phase)) {
-            Module bridgeProjector = player.getRobot().getModule(ModuleType.BRIDGE_PROJECTOR);
+        if (robot.uses(ModuleType.BRIDGE_PROJECTOR, phase)) {
+            Module bridgeProjector = robot.getModule(ModuleType.BRIDGE_PROJECTOR);
             if (bridgeProjector.getAmmunition() > 0) {
-                Floor f2 = switch (robot.getDirection()) {
-                    case NORTH ->
-                            CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
-                    case EAST ->
-                            CourseHandler.getFloor(course, new Position(robot.getPosition().x() + 1, robot.getPosition().y()));
-                    case SOUTH ->
-                            CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() + 1));
-                    case WEST ->
-                            CourseHandler.getFloor(course, new Position(robot.getPosition().x() - 1, robot.getPosition().y()));
-                };
+                Floor f2 = CourseHandler.getFloor(course, robot.getPosition().neighbour(robot.getDirection()));
                 if (f2.getFloortype() == Floortype.ABYSS || f2.getFloortype() == Floortype.TRAPDOOR) {
                     bridgeProjector.setAmmunition(bridgeProjector.getAmmunition() - 1);
                     f2.setFloortype(Floortype.OPEN_FLOOR);
@@ -955,20 +929,16 @@ public class Game {
         }
     }
 
-    private void reactivateRammingArmor(int phase, CourseElement ce) {
-        if (ce instanceof Robot robot) {
-            Player player = getPlayerOf(ce);
-            if (robot.isReactivateRammingArmor() && player.getRobot().getModule(ModuleType.RAMMING_ARMOR) != null) {
-                robot.setReactivateRammingArmor(false);
-                player.getRobot().getModule(ModuleType.RAMMING_ARMOR).getActiveInPhase()[phase] = true;
-            }
+    private void reactivateRammingArmor(int phase, Robot robot) {
+        if (robot.isReactivateRammingArmor() && robot.getModule(ModuleType.RAMMING_ARMOR) != null) {
+            robot.setReactivateRammingArmor(false);
+            robot.getModule(ModuleType.RAMMING_ARMOR).getActiveInPhase()[phase] = true;
         }
     }
 
     private void deactivateRammingArmor(int phase, boolean reactivate) {
-        for (Player player : players) {
-            Robot robot = player.getRobot();
-            if (player.uses(ModuleType.RAMMING_ARMOR, phase)) {
+        for (Robot robot : course.getRobots()) {
+            if (robot.uses(ModuleType.RAMMING_ARMOR, phase)) {
                 robot.setReactivateRammingArmor(reactivate);
                 robot.getModule(ModuleType.RAMMING_ARMOR).getActiveInPhase()[phase] = false;
             }
@@ -1039,14 +1009,14 @@ public class Game {
         // +++ computer players perform
         for (Player player : playersToInteractWith) {
             if (player instanceof ComputerPlayer computerPlayer
-                    && !(computerPlayer.getRobot().isPoweredDown() || gameAborted || player.hasLost())) {
-                computerPlayer.perform();
+                    && !(computerPlayer.getRobot().isPoweredDown() || gameAborted || player.getRobot().hasLost(goal))) {
+                computerPlayer.perform(course.getCheckpoints().size());
             }
         }
         if (!requestedAnswers.isEmpty()) {
             waitForAllAnswers(requestedAnswers);
             for (Player player : playersToInteractWith) {
-                if (player instanceof NetworkPlayer networkPlayer && !gameAborted && !player.hasLost()) {
+                if (player instanceof NetworkPlayer networkPlayer && !gameAborted && !player.getRobot().hasLost(goal)) {
                     NetworkResponse networkResponse = requestedAnswers.get(networkPlayer.getId());
                     networkPlayer.handleResponse(networkResponse);
                 }
@@ -1059,7 +1029,7 @@ public class Game {
         Map<String, NetworkResponse> requestedAnswers = new ConcurrentHashMap<>();
         awaitingResponses.put(purposeId, requestedAnswers);
         for (Player player : playersToInteractWith) {
-            if (player instanceof NetworkPlayer networkPlayer && !gameAborted && !player.hasLost()) {
+            if (player instanceof NetworkPlayer networkPlayer && !gameAborted && !player.getRobot().hasLost(goal)) {
                 NetworkRequest networkRequest = networkPlayer.createRequest(null);
                 if (networkRequest != null) {
                     requestedAnswers.put(networkPlayer.getId(), new NetworkResponse());
@@ -1130,7 +1100,6 @@ public class Game {
             die(ce, step, phase);
         }
         wait = wait && (movingRobotName == null || movingRobotName.equals(ce.getName()));
-        Player player = getPlayerOf(ce);
         if (amount > 0) {
             WallType sourceWall = floor1.wall(direction);
             WallType targetWall = floor2.wall(direction2);
@@ -1152,25 +1121,25 @@ public class Game {
                 CourseElement conflictingElement = getConflictingElement(ce, direction);
                 if (conflictingElement == null) {
                     ce.setPosition(targetPosition);
-                    if (!ce.isFlying()) {
+                    if (ce instanceof Robot r && !r.isFlying()) {
                         ce.setLevel(floor2.getLevel());
-                        if (downhill && player != null) {
-                            player.takeDamage(phase, null, null, false);
+                        if (downhill) {
+                            r.takeDamage(course, phase, null, false);
                         }
                     }
                 } else if (notBlockedByMovableRobot) {
-                    if (player != null && player.uses(ModuleType.RAMMING_ARMOR, phase)) {
-                        player.getRobot().getModule(ModuleType.RAMMING_ARMOR).getActiveInPhase()[phase] = false;
-                        if (conflictingElement instanceof Robot) {
-                            getPlayerOf(conflictingElement).takeDamage(phase, player, null, false);
+                    if (ce instanceof Robot r && r.uses(ModuleType.RAMMING_ARMOR, phase)) {
+                        r.getModule(ModuleType.RAMMING_ARMOR).getActiveInPhase()[phase] = false;
+                        if (conflictingElement instanceof Robot rob) {
+                            rob.takeDamage(course, phase, null, false);
                         }
                     }
                     if (move(conflictingElement, direction, strength, 1, step, phase, true, wait, movingRobotName)) {
                         ce.setPosition(targetPosition);
                         if (!ce.isFlying()) {
                             ce.setLevel(floor2.getLevel());
-                            if (downhill && player != null) {
-                                player.takeDamage(phase, null, null, false);
+                            if (downhill && ce instanceof Robot r) {
+                                r.takeDamage(course, phase, null, false);
                             }
                         }
                     }
@@ -1187,7 +1156,7 @@ public class Game {
             notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
         }
         Floor floor3 = CourseHandler.getFloor(course, ce.getPosition());
-        if (player != null && !ce.isFlying()) {
+        if (ce instanceof Robot r && !r.isFlying()) {
             minesGoOff(step, phase, floor3);
             CourseObject portal = CourseHandler.getPortal(course, floor3.getPosition());
             if (portal != null) {
@@ -1303,12 +1272,14 @@ public class Game {
     private Robot getLaserTarget(Position position, Direction direction, int level, boolean highPowerLaser, boolean isCourseMounted, boolean firstFloorGetsHit, Step step) {
         Robot target = null;
         if (firstFloorGetsHit) {
-            for (Robot ps : CourseHandler.getRobots(course, position)) {
-                if (ps.getLevel() == level && !highPowerLaser) {
-                    target = ps;
-                    break;
-                } else if (ps.getLevel() == level) {
-                    highPowerLaser = false;
+            for (Robot r : CourseHandler.getRobots(course, position)) {
+                if (r.isOnCourse()) {
+                    if (r.getLevel() == level && !highPowerLaser) {
+                        target = r;
+                        break;
+                    } else if (r.getLevel() == level) {
+                        highPowerLaser = false;
+                    }
                 }
             }
         }
@@ -1347,7 +1318,6 @@ public class Game {
         Floor floor3 = CourseHandler.getFloor(course, ce.getPosition());
         if (!ce.isFlying()) {
             ce.setLevel(floor3.getLevel());
-            Player  player      = getPlayerOf(ce);
             boolean rampPassage = false;
             if (direction != null) {
                 WallType sourceWall = previousFloor.wall(direction);
@@ -1355,8 +1325,8 @@ public class Game {
                 rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
                         || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
             }
-            if (player != null && floor3.getLevel() < previousFloor.getLevel() && !rampPassage) {
-                player.takeDamage(phase, null, null, false);
+            if (ce instanceof Robot r && floor3.getLevel() < previousFloor.getLevel() && !rampPassage) {
+                r.takeDamage(course, phase, null, false);
             }
         }
         if (floor3.getFloortype() == Floortype.ABYSS || (floor3.getFloortype() == Floortype.TRAPDOOR && floor3.getActiveInPhase()[phase])) {
@@ -1376,10 +1346,9 @@ public class Game {
     }
 
     public void die(CourseElement ce, Step reason, Integer phase) {
-        Player player = getPlayerOf(ce);
-        if (player != null) {
-            player.getRobot().setDamage(10);
-            player.takeDamage(course);
+        if (ce instanceof Robot r) {
+            r.setDamage(10);
+            r.takeDamage(course);
         } else {
             CourseHandler.remove(course, ce);
             notifyCourseMayHaveChanged(reason, phase, "%s died".formatted(ce.getName()), null);
@@ -1433,11 +1402,11 @@ public class Game {
                     }
                 }
             }
-            for (Robot obj : new ArrayList<>(course.getRobots())) {
-                Floor f      = CourseHandler.getFloor(course, obj.getPosition());
+            for (Robot robot : new ArrayList<>(course.getRobots())) {
+                Floor f      = CourseHandler.getFloor(course, robot.getPosition());
                 int   damage = calculateEffectiveDamage(initialDamage, f.getDistanceCounter());
                 for (int damagePoints = 0; damagePoints < damage; damagePoints++) {
-                    this.getPlayerOf(obj).takeDamage(course);
+                    robot.takeDamage(course);
                 }
             }
             notifyCourseMayHaveChanged(step, phase, "explosion", null);
@@ -1470,10 +1439,6 @@ public class Game {
             case 0 -> initialDamage;
             case 1 -> initialDamage / 2;
             case 2 -> initialDamage / 4;
-            case 3 -> initialDamage / 8;
-            case 4 -> initialDamage / 16;
-            case 5 -> initialDamage / 32;
-            case 6 -> initialDamage / 64;
             default -> 0;
         };
     }

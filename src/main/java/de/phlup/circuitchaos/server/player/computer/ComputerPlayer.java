@@ -29,20 +29,22 @@ import java.util.Set;
 @Slf4j
 public class ComputerPlayer extends Player {
 
-    private Checkpoint nextCP;
+    private final Goal goal;
 
+    private Checkpoint nextCP;
     private boolean turnFinished;
 
     public ComputerPlayer(@NotNull Robot robot, @NotNull String gameId, @NotNull Goal goal) {
-        super(robot, gameId, goal);
+        super(robot, gameId);
+        this.goal = goal;
     }
 
-    public void perform() {
+    public void perform(int numberOfCheckpoints) {
         if (robot.isPoweredDown()) {
             return;
         }
         Game game = GlobalServerAttributes.getGame(gameId);
-        if (!(this.hasWon() || this.hasLost() || robot.isPoweredDown())) {
+        if (!(robot.hasWon(goal, numberOfCheckpoints) || robot.hasLost(goal) || robot.isPoweredDown())) {
             if (!game.isGameAborted()) {
                 this.nextTurn();
             }

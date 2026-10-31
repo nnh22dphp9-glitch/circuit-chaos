@@ -12,7 +12,6 @@ import de.phlup.circuitchaos.common.model.CourseObject;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.Robot;
-import de.phlup.circuitchaos.server.player.Player;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
@@ -181,10 +180,10 @@ public class CourseHandler {
         return null;
     }
 
-    public static void createCircuitChaosObject(Course course, ObjectType objectType, Player creator) {
-        CourseObject newRRO = createCircuitChaosObject(course, objectType, creator.getRobot().getPosition());
-        newRRO.setLevel(creator.getRobot().getLevel());
-        newRRO.setDirection(creator.getRobot().getDirection());
+    public static void createCircuitChaosObject(Course course, ObjectType objectType, Robot robot) {
+        CourseObject newRRO = createCircuitChaosObject(course, objectType, robot.getPosition());
+        newRRO.setLevel(robot.getLevel());
+        newRRO.setDirection(robot.getDirection());
         newRRO.setPrevDirection(newRRO.getDirection());
     }
 

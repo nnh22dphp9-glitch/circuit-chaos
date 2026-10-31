@@ -14,6 +14,7 @@ import de.phlup.circuitchaos.common.model.CourseObject;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.Programme;
+import de.phlup.circuitchaos.common.model.Robot;
 import de.phlup.circuitchaos.server.game.Game;
 import de.phlup.circuitchaos.server.game.GameLogic;
 import de.phlup.circuitchaos.server.player.Player;
@@ -24,7 +25,7 @@ public class MoveInfo {
 
     private final Game       game;
     private final Course     course;
-    private final Player     player;
+    private final Robot      robot;
     private final Checkpoint nextCP;
 
     private Programme[] program;
@@ -50,9 +51,9 @@ public class MoveInfo {
         this.game = game;
         course = game.getCourse();
         this.nextCP = nextCP;
-        this.player = player;
-        x = player.getRobot().getPosition().x();
-        y = player.getRobot().getPosition().y();
+        this.robot = player.getRobot();
+        x = robot.getPosition().x();
+        y = robot.getPosition().y();
     }
 
     public void simulateCourse() {
@@ -65,7 +66,7 @@ public class MoveInfo {
         keepsStaying = false;
         probableTargets = 0;
 
-        tf = CourseHandler.getFloor(course, player.getRobot().getPosition());
+        tf = CourseHandler.getFloor(course, robot.getPosition());
         for (int phase = 0; phase < 5; phase++) {
             boolean flyingDuringMovement;
             checkForAbyss(phase);
@@ -76,9 +77,9 @@ public class MoveInfo {
             } else if (program[phase].getType() == ProgramType.U_TURN) {
                 endingDirection = endingDirection.add(Direction.SOUTH);
             } else {
-                int movement = GameLogic.determineMovementAmount(program[phase], player.uses(ModuleType.BRAKES, phase));
+                int movement = GameLogic.determineMovementAmount(program[phase], robot.uses(ModuleType.BRAKES, phase));
                 // Hovercraft flight starts before water/oil effects are applied.
-                flyingDuringMovement = player.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
+                flyingDuringMovement = robot.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
                 if (!flyingDuringMovement && (tf.isWater() || CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
                     if (movement > 0) {
                         movement--;
@@ -228,7 +229,7 @@ public class MoveInfo {
             // probableTargets (resolve laser fire)
             for (Player player2 : game.getPlayers()) {
                 if (player2.getRobot().isOnCourse()) {
-                    if (!player2.getRobot().equals(player.getRobot())) {
+                    if (!player2.getRobot().equals(robot)) {
                         int maxDist = 4;
                         switch (endingDirection) {
                             case NORTH -> {
@@ -238,7 +239,7 @@ public class MoveInfo {
                                                     .getPosition()
                                                     .y() - y)) {
                                     probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x))
-                                            * (player.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
+                                            * (game.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
                                 }
                             }
                             case EAST -> {
@@ -248,7 +249,7 @@ public class MoveInfo {
                                                     .getPosition()
                                                     .y() - y)) {
                                     probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y))
-                                            * (player.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
+                                            * (game.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
                                 }
                             }
                             case SOUTH -> {
@@ -258,7 +259,7 @@ public class MoveInfo {
                                                     .getPosition()
                                                     .y() - y)) {
                                     probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x))
-                                            * (player.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
+                                            * (game.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
                                 }
                             }
                             case WEST -> {
@@ -268,7 +269,7 @@ public class MoveInfo {
                                                     .getPosition()
                                                     .y() - y)) {
                                     probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y))
-                                            * (player.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
+                                            * (game.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
                                 }
                             }
                         }
@@ -297,7 +298,7 @@ public class MoveInfo {
                         copiesArchive = true;
                     }
                     if (phase == 4) {
-                        keepsStaying = x == player.getRobot().getPosition().x() && y == player.getRobot().getPosition().y();
+                        keepsStaying = x == robot.getPosition().x() && y == robot.getPosition().y();
                         switch (endingDirection) {
                             case NORTH -> facesTowardsCheckpoint = nextCP.getPosition().y() <= y;
                             case EAST -> facesTowardsCheckpoint = nextCP.getPosition().x() >= x;
