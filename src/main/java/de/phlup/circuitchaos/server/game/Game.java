@@ -1188,32 +1188,7 @@ public class Game {
         }
         Floor floor3 = CourseHandler.getFloor(course, ce.getPosition());
         if (player != null && !ce.isFlying()) {
-            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, floor3.getPosition()))) {
-                if ((co.getType() == ObjectType.MINE || co.getType() == ObjectType.PROXIMITY_MINE)
-                        && co.isActive()) {
-                    goOff(step, phase, co);
-                }
-            }
-            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() - 1, floor3.getPosition().y())))) {
-                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                    goOff(step, phase, co);
-                }
-            }
-            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() + 1, floor3.getPosition().y())))) {
-                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                    goOff(step, phase, co);
-                }
-            }
-            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() - 1)))) {
-                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                    goOff(step, phase, co);
-                }
-            }
-            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() + 1)))) {
-                if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                    goOff(step, phase, co);
-                }
-            }
+            minesGoOff(step, phase, floor3);
             CourseObject portal = CourseHandler.getPortal(course, floor3.getPosition());
             if (portal != null) {
                 if (portal.getTargetPosition() != null) {
@@ -1224,32 +1199,7 @@ public class Game {
                         if (wait) {
                             notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
                         }
-                        for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, floor3.getPosition()))) {
-                            if ((co.getType() == ObjectType.MINE || co.getType() == ObjectType.PROXIMITY_MINE)
-                                    && co.isActive()) {
-                                goOff(step, phase, co);
-                            }
-                        }
-                        for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() - 1, floor3.getPosition().y())))) {
-                            if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                                goOff(step, phase, co);
-                            }
-                        }
-                        for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x() + 1, floor3.getPosition().y())))) {
-                            if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                                goOff(step, phase, co);
-                            }
-                        }
-                        for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() - 1)))) {
-                            if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                                goOff(step, phase, co);
-                            }
-                        }
-                        for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, new Position(floor3.getPosition().x(), floor3.getPosition().y() + 1)))) {
-                            if (co.getType() == ObjectType.PROXIMITY_MINE && co.isActive()) {
-                                goOff(step, phase, co);
-                            }
-                        }
+                        minesGoOff(step, phase, floor3);
                     }
                 }
             }
@@ -1280,6 +1230,26 @@ public class Game {
             notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
         }
         return !oldPosition.equals(ce.getPosition());
+    }
+
+    private void minesGoOff(Step step, int phase, Floor floor3) {
+        minesGoesOff(floor3, null, step, phase);
+        minesGoesOff(floor3, NORTH, step, phase);
+        minesGoesOff(floor3, EAST, step, phase);
+        minesGoesOff(floor3, SOUTH, step, phase);
+        minesGoesOff(floor3, WEST, step, phase);
+    }
+
+    private void minesGoesOff(Floor floor, Direction dir, Step step, int phase) {
+        Position minePosition = dir == null ? floor.getPosition() : floor.getPosition().neighbour(dir);
+        if (dir == null || !GameLogic.cannotMoveAcross(CourseHandler.getFloor(course, minePosition), floor, dir.reverse(), false)) {
+            for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, minePosition))) {
+                if (co.isActive() && (co.getType() == ObjectType.PROXIMITY_MINE
+                        || (dir == null && co.getType() == ObjectType.MINE))) {
+                    goOff(step, phase, co);
+                }
+            }
+        }
     }
 
     private void land(Robot robot, Step step, int phase) {
