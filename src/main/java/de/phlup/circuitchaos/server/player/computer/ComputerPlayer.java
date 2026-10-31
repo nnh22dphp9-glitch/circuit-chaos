@@ -1,4 +1,4 @@
-package de.phlup.circuitchaos.server.player;
+package de.phlup.circuitchaos.server.player.computer;
 
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Goal;
@@ -11,6 +11,7 @@ import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.DistanceCalculator;
 import de.phlup.circuitchaos.server.game.Game;
 import de.phlup.circuitchaos.server.game.Sleep;
+import de.phlup.circuitchaos.server.player.Player;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -61,12 +62,12 @@ public class ComputerPlayer extends Player {
     }
 
     private void programRobot(Game game) {
-        Course           gameCourse  = game.getCourse();
-        ComputerMoveInfo bestProgram = evaluateAllPrograms(game, gameCourse);
+        Course   gameCourse  = game.getCourse();
+        MoveInfo bestProgram = evaluateAllPrograms(game, gameCourse);
         setBestProgram(bestProgram);
     }
 
-    private void setBestProgram(ComputerMoveInfo chosenMove) {
+    private void setBestProgram(MoveInfo chosenMove) {
         if (chosenMove != null) {
             robot.setDirection(chosenMove.getStartingDirection());
             robot.setPrevDirection(robot.getDirection());
@@ -92,19 +93,19 @@ public class ComputerPlayer extends Player {
         }
     }
 
-    private ComputerMoveInfo evaluateAllPrograms(Game game, Course gameCourse) {
-        List<ComputerMoveInfo> programList = generatePrograms(game);
-        programList.forEach(ComputerMoveInfo::simulateCourse);
-        ComputerMoveInfo bestProgram = null;
-        for (ComputerMoveInfo programme : programList) {
+    private MoveInfo evaluateAllPrograms(Game game, Course gameCourse) {
+        List<MoveInfo> programList = generatePrograms(game);
+        programList.forEach(MoveInfo::simulateCourse);
+        MoveInfo bestProgram = null;
+        for (MoveInfo programme : programList) {
             bestProgram = evaluateProgram(programme, bestProgram, gameCourse);
         }
         return bestProgram;
     }
 
-    private List<ComputerMoveInfo> generatePrograms(Game game) {
-        List<ComputerMoveInfo> programList = new ArrayList<>();
-        Programme[]            program     = new Programme[5];
+    private List<MoveInfo> generatePrograms(Game game) {
+        List<MoveInfo> programList = new ArrayList<>();
+        Programme[]    program     = new Programme[5];
         // use blocked registers
         for (int slot = 0; slot < program.length; slot++) {
             if (robot.getBlocked()[slot]) {
@@ -125,7 +126,7 @@ public class ComputerPlayer extends Player {
         return programList;
     }
 
-    private void generatePrograms(Game game, int slot, Programme[] program, Set<Programme> usedPrograms, List<ComputerMoveInfo> programList) {
+    private void generatePrograms(Game game, int slot, Programme[] program, Set<Programme> usedPrograms, List<MoveInfo> programList) {
         if (slot == program.length) {
             programList.addAll(createProgrammeForEveryPossibleStartingDirection(game, program));
             return;
@@ -145,8 +146,8 @@ public class ComputerPlayer extends Player {
         }
     }
 
-    private List<ComputerMoveInfo> createProgrammeForEveryPossibleStartingDirection(Game game, Programme[] program) {
-        List<ComputerMoveInfo> programList = new ArrayList<>();
+    private List<MoveInfo> createProgrammeForEveryPossibleStartingDirection(Game game, Programme[] program) {
+        List<MoveInfo> programList = new ArrayList<>();
         if (robot.isMayChooseDirection()) {
             for (Direction dir : Direction.values()) {
                 programList.add(createComputerMoveInfo(game, program, dir));
@@ -157,14 +158,14 @@ public class ComputerPlayer extends Player {
         return programList;
     }
 
-    private ComputerMoveInfo createComputerMoveInfo(Game game, Programme[] program, Direction dir) {
-        ComputerMoveInfo mi = new ComputerMoveInfo(game, nextCP, this);
+    private MoveInfo createComputerMoveInfo(Game game, Programme[] program, Direction dir) {
+        MoveInfo mi = new MoveInfo(game, nextCP, this);
         mi.setStartingDirection(dir);
         mi.setProgram(program.clone());
         return mi;
     }
 
-    private ComputerMoveInfo evaluateProgram(ComputerMoveInfo mi, ComputerMoveInfo chosenMove, Course gameCourse) {
+    private MoveInfo evaluateProgram(MoveInfo mi, MoveInfo chosenMove, Course gameCourse) {
         if (chosenMove == null) {
             chosenMove = mi;
         } else {
@@ -201,7 +202,7 @@ public class ComputerPlayer extends Player {
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
-    private boolean evaluateForFinishGoal(ComputerMoveInfo mi, ComputerMoveInfo chosenMove, Course gameCourse) {
+    private boolean evaluateForFinishGoal(MoveInfo mi, MoveInfo chosenMove, Course gameCourse) {
         boolean newMove = true;
         if (chosenMove.getReachesCheckpoint() < mi.getReachesCheckpoint()) {
             newMove = false;
@@ -282,7 +283,7 @@ public class ComputerPlayer extends Player {
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
-    private boolean evaluateForKillAllGoal(ComputerMoveInfo mi, ComputerMoveInfo chosenMove, @SuppressWarnings("unused") Course gameCourse) {
+    private boolean evaluateForKillAllGoal(MoveInfo mi, MoveInfo chosenMove, @SuppressWarnings("unused") Course gameCourse) {
         boolean newMove = true;
         if (mi.isWillDie() && !chosenMove.isWillDie()) {
             newMove = false; // "old move won't result in death";

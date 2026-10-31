@@ -1,4 +1,3 @@
-
 # KI für Circuit Chaos
 
 - [ ] **Code-Inventur abschließen:** ComputerPlayer, ComputerMoveInfo und die tatsächliche Spielausführung systematisch gegenüberstellen.
@@ -27,7 +26,11 @@ Das sind zunächst Testaufgaben, keine Behauptung, dass die genannten Funktionen
 
 # Weitere TODOs
 
+- [ ] **Repulsor-Bewegungen** gegen Endlosschleifen absichern, insbesondere bei zwei gegenüberliegenden Repulsors.
 - [ ] **Minen-Darstellung fehlerhaft:** Explodiert eine Mine auf einem Conveyor-Belt, so wird dieses in einem separaten Schritt angezeigt: 1) Roboter/Mine bewegen sich aufeinander zu, Explosion ist zu sehen, andere Roboter bleiben scheinbar stehen, 2) Conveyor Belts bewegen die anderen Roboter, der Roboter, der die Explosion ausgelöst hat, bleibt scheinbar stehen.
+- [ ] **Stapel-Schieben:** Am Anfang des Spiels und wenn mehrere Roboter kaputt gehen, sind sie "aufeinander gestapelt". Fährt man in diesen Stapel rein, werden aber zurzeit nicht alle Roboter in diesem Stapel verschoben.
+- [ ] **Landung bei Hovercraft:** Landet ein Roboter mit einem Hovercraft auf einem Feld, dass von einem anderen Roboter blockiert ist, soll er ein Feld weiter einen "Landeversuch" machen. Zurzeit scheint er den anderen Roboter zu verschieben.
 - [ ] **Board-Design:** Mehrere Start-Fehler
 - [ ] **Board-Design:** Mehrere Finish- und CP-Felder
 - [ ] **Schalter-Course-Element:** kann Falltüren öffnen/schließen oder Repulsors (de-)aktivieren
+- [ ] **Öl auf Förderbändern:** Öl soll mit dem Förderband genau ein Feld weiterbewegt werden und nicht anschließend auf weitere Ölfelder weiterrutschen. Aktuell verschwindet Öl auf einem Förderband stattdessen (Log: "Oil died").
