@@ -400,7 +400,9 @@ public class Game {
     }
 
     private String endOfTurnCourseEffects(String winner) {
-        for (Robot robot : course.getRobots()) {
+        // Important: don't use course.getRobots(), because it does not contain off-board robots
+        for (Player player : players) {
+            Robot robot = player.getRobot();
             if (winner == null && !gameAborted) {
                 if (robot.isFlying()) {
                     land(robot, Step.END_OF_TURN_COURSE_EFFECTS, 4);
