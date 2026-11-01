@@ -198,7 +198,7 @@ public class ProgramRobotGui implements GuiHelper {
             directionButton.setMinimumSize(new Dimension(60, 60));
             directionButton.setPreferredSize(new Dimension(60, 60));
             directionButton.setMaximumSize(new Dimension(60, 60));
-            directionButton.addActionListener(new DirectionListener(directionButton, null, imageSupplier));
+            directionButton.addActionListener(new DirectionListener(directionButton, imageSupplier));
             addComponentToPanel(directionButton, panel, layout, 2, y, 5, GridBagConstraints.WEST);
         }
 
@@ -338,14 +338,16 @@ public class ProgramRobotGui implements GuiHelper {
         Module shield = robot.getModule(ModuleType.SHIELD);
         if (shield != null) {
             y++;
+            shield.setShieldDirection(new Direction[]{Direction.NORTH, Direction.NORTH, Direction.NORTH, Direction.NORTH, Direction.NORTH});
             addComponentToPanel(new JLabel("Shield Direction: "), panel, layout, 1, y, 1, GridBagConstraints.EAST);
-            shield.setDirection(Direction.NORTH);
-            JButton directionButton = new JButton(imageSupplier.getImageIconPlain(PictureConstants.GFX_MOVE_NORTH_ARROW));
-            directionButton.setMinimumSize(new Dimension(60, 60));
-            directionButton.setPreferredSize(new Dimension(60, 60));
-            directionButton.setMaximumSize(new Dimension(60, 60));
-            directionButton.addActionListener(new DirectionListener(directionButton, shield, imageSupplier));
-            addComponentToPanel(directionButton, panel, layout, 2, y, 5, GridBagConstraints.CENTER);
+            for (int phase = 0; phase < 5; phase++) {
+                JButton directionButton = new JButton(imageSupplier.getImageIconPlain(PictureConstants.GFX_MOVE_NORTH_ARROW));
+                directionButton.setMinimumSize(new Dimension(60, 60));
+                directionButton.setPreferredSize(new Dimension(60, 60));
+                directionButton.setMaximumSize(new Dimension(60, 60));
+                directionButton.addActionListener(new ShieldDirectionListener(directionButton, shield, phase, imageSupplier));
+                addComponentToPanel(directionButton, panel, layout, 3 + phase, y, 1, GridBagConstraints.CENTER);
+            }
         }
 
         okButton.addActionListener(new OkButtonActionListener());
@@ -441,18 +443,11 @@ public class ProgramRobotGui implements GuiHelper {
     private class DirectionListener extends AbstractAction {
 
         private final JButton       button;
-        private final Module        module;
         private final ImageSupplier imageSupplier;
 
         @Override
         public void actionPerformed(ActionEvent ae) {
-            Direction newDirection;
-            if (module == null) {
-                newDirection = setDirectionOfRobot();
-            } else {
-                newDirection = setDirectionOfOption();
-            }
-            button.setIcon(imageSupplier.getImageIconPlain(newDirection));
+            button.setIcon(imageSupplier.getImageIconPlain(setDirectionOfRobot()));
         }
 
         private Direction setDirectionOfRobot() {
@@ -460,10 +455,24 @@ public class ProgramRobotGui implements GuiHelper {
             robot.setDirection(robot.getDirection().add(Direction.EAST));
             return robot.getDirection();
         }
+    }
 
-        private Direction setDirectionOfOption() {
-            module.setDirection(module.getDirection().add(Direction.EAST));
-            return module.getDirection();
+    @AllArgsConstructor
+    private static class ShieldDirectionListener extends AbstractAction {
+
+        private final JButton       button;
+        private final Module        module;
+        private final int           phase;
+        private final ImageSupplier imageSupplier;
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            button.setIcon(imageSupplier.getImageIconPlain(setShieldDirection()));
+        }
+
+        private Direction setShieldDirection() {
+            module.getShieldDirection()[phase] = module.getShieldDirection()[phase].add(Direction.EAST);
+            return module.getShieldDirection()[phase];
         }
     }
 

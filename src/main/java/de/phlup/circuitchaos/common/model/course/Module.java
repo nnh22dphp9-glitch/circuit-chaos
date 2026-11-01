@@ -15,18 +15,13 @@ public class Module {
     private ModuleType  type;
     private int         ammunition      = 0;
     private boolean[]   activeInPhase   = new boolean[]{false, false, false, false, false};
-    private Direction   direction       = null;   // in relation to robot!
+    private Direction[] shieldDirection = new Direction[]{Direction.NORTH, Direction.NORTH, Direction.NORTH, Direction.NORTH, Direction.NORTH}; // in relation to robot!
     private boolean[][] powerDownShield = new boolean[][]{{false, false, false, false}, {false, false, false, false}, {false, false, false, false}, {false, false, false, false}, {false, false, false, false}};
 
     public Module(@NonNull ModuleType type) {
         this.type = type;
         if (type == ModuleType.POWER_DOWN_SHIELD) {
             powerDownShield = new boolean[][]{{true, true, true, true}, {true, true, true, true}, {true, true, true, true}, {true, true, true, true}, {true, true, true, true}};
-        }
-        if (type == ModuleType.SHIELD) {
-            direction = Direction.NORTH;
-        } else if (type == ModuleType.REAR_LASER) {
-            direction = Direction.SOUTH;
         }
     }
 
@@ -36,7 +31,7 @@ public class Module {
         module.setType(type);
         module.setAmmunition(ammunition);
         System.arraycopy(activeInPhase, 0, module.getActiveInPhase(), 0, 5);
-        module.setDirection(direction);
+        System.arraycopy(shieldDirection, 0, module.getShieldDirection(), 0, 5);
         for (int i = 0; i < 5; i++) {
             System.arraycopy(powerDownShield[i], 0, module.getPowerDownShield()[i], 0, 4);
         }

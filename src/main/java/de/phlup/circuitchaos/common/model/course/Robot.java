@@ -64,7 +64,7 @@ public class Robot extends CourseElement {
             Module networkModule = networkRobot.getModule(serverModule.getType());
             if (networkModule != null) {
                 serverModule.setActiveInPhase(networkModule.getActiveInPhase());
-                serverModule.setDirection(networkModule.getDirection());
+                serverModule.setShieldDirection(networkModule.getShieldDirection());
             }
         }
 
@@ -129,7 +129,7 @@ public class Robot extends CourseElement {
                 if (direction != null) {
                     if (uses(SHIELD, phase)) {
                         Module module = getModule(SHIELD);
-                        if (module.getActiveInPhase()[phase] && module.getDirection() == direction.reverse()) {
+                        if (module.getActiveInPhase()[phase] && module.getShieldDirection()[phase] == direction.reverse()) {
                             module.getActiveInPhase()[phase] = false;
                             takesDamage = false;
                         }
