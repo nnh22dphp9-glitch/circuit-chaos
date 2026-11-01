@@ -2,12 +2,10 @@ package de.phlup.circuitchaos.server.player;
 
 import de.phlup.circuitchaos.common.model.Module;
 import de.phlup.circuitchaos.common.model.Robot;
-import de.phlup.circuitchaos.server.game.Game;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import static de.phlup.circuitchaos.common.enums.ModuleType.POWER_DOWN_SHIELD;
-import static de.phlup.circuitchaos.server.GlobalServerAttributes.getGame;
 
 @Data
 public abstract class Player {
