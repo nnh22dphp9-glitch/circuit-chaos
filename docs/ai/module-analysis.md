@@ -2,7 +2,7 @@
 
 Stand: erste Code-Inventur auf Branch `develop`.
 
-Ziel: Tatsächliches Engine-Verhalten, beabsichtigte Spielregeln und spätere KI-Bewertung getrennt dokumentieren. Ein in der Engine vorhandenes Verhalten ist nicht automatisch die beabsichtigte Regel.
+Ziel: Tatsächliches Engine-Verhalten und KI-relevante technische Konsequenzen dokumentieren. Die abgestimmte Spielanleitung ist maßgeblich für die beabsichtigten Spielregeln; diese Notiz soll geklärte Regeln nicht erneut infrage stellen.
 
 ## 1. Zentrale Quellen
 
@@ -92,7 +92,7 @@ Ziel: Tatsächliches Engine-Verhalten, beabsichtigte Spielregeln und spätere KI
 Die frühere Auffälligkeit in `Player.takeDamage`, bei der Schaden offenbar nur mit `source == null` verarbeitet wurde, wurde vom Spieleigner korrigiert. Sie ist daher kein offener Befund mehr. Bei späteren Änderungen sollte die Schadensbehandlung weiterhin für Angriffe mit einer nicht-null Quelle geprüft werden.
 
 
-## 8. Ergänzungen nach Regelabgleich mit dem Spieleigner
+## 8. Ergänzungen zum abgestimmten Regelstand
 
 ### Bestätigte Regeln
 
@@ -113,7 +113,7 @@ Die folgenden vom Spieleigner bestätigten Regeln sind die maßgebliche Grundlag
 - Ein höheres Level blockiert den Strahl. Ein niedrigeres Level blockiert ihn nicht; Roboter auf darunterliegenden Levels werden nicht getroffen.
 - Zielermittlung und Strahlblockierung sollten von der Engine zentral bereitgestellt bzw. wiederverwendet werden, damit die KI keine abweichende zweite Beam-Logik entwickelt.
 
-Diese Regeln sind fachliche Vorgaben. Nach Codeänderungen müssen sie anhand gezielter Spielsituationen regressionsgetestet werden.
+Diese Regeln sind fachliche Vorgaben und in der abgestimmten Spielanleitung dokumentiert.
 
 ### Ramming Armor: einmaliger Effekt pro Phase
 
