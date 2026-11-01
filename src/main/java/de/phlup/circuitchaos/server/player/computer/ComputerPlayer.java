@@ -2,11 +2,11 @@ package de.phlup.circuitchaos.server.player.computer;
 
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Goal;
-import de.phlup.circuitchaos.common.model.Checkpoint;
-import de.phlup.circuitchaos.common.model.Course;
-import de.phlup.circuitchaos.common.model.Position;
-import de.phlup.circuitchaos.common.model.Programme;
-import de.phlup.circuitchaos.common.model.Robot;
+import de.phlup.circuitchaos.common.model.course.Checkpoint;
+import de.phlup.circuitchaos.common.model.course.Course;
+import de.phlup.circuitchaos.common.model.course.Robot;
+import de.phlup.circuitchaos.common.records.Position;
+import de.phlup.circuitchaos.common.records.Programme;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.DistanceCalculator;
 import de.phlup.circuitchaos.server.game.Game;

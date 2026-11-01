@@ -3,7 +3,7 @@ package de.phlup.circuitchaos.server.player;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.NetworkResponse;
 import de.phlup.circuitchaos.common.model.Registration;
-import de.phlup.circuitchaos.common.model.Robot;
+import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.Game;
 import lombok.EqualsAndHashCode;

@@ -1,10 +1,12 @@
-package de.phlup.circuitchaos.common.model;
+package de.phlup.circuitchaos.common.model.course;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
+import de.phlup.circuitchaos.common.records.Position;
+import de.phlup.circuitchaos.common.records.Programme;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -194,5 +196,26 @@ public class Robot extends CourseElement {
         return !hasLost(goal) && (goal == Goal.FINISH && nextCheckpoint > numberOfCheckpoints - 1);
     }
 
+    @JsonIgnore
+    public Robot copy() {
+        Robot robot = new Robot();
+        robot.setId(id);
+        robot.setDamage(damage);
+        robot.setArchivePosition(archivePosition);
+        robot.setArchiveLevel(archiveLevel);
+        System.arraycopy(program, 0, robot.getProgram(), 0, 5);
+        // robot.getPotentialProgramme().addAll(potentialProgramme); // Computer player should not know this
+        robot.getModules().addAll(modules.stream().map(Module::copy).toList());
+        System.arraycopy(blocked, 0, robot.getBlocked(), 0, 5);
+        robot.setGiveUp(giveUp);
+        robot.setPoweredDown(poweredDown);
+        robot.setPowerDownAnnounced(powerDownAnnounced);
+        robot.setMayChooseDirection(mayChooseDirection);
+        robot.setNextCheckpoint(nextCheckpoint);
+        robot.setReactivateRammingArmor(reactivateRammingArmor);
+        robot.setFlying(flying);
+        robot.setDieCounter(dieCounter);
+        return robot;
+    }
 
 }

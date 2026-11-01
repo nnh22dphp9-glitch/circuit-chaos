@@ -1,5 +1,6 @@
 package de.phlup.circuitchaos.common.model;
 
+import de.phlup.circuitchaos.common.model.course.Course;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

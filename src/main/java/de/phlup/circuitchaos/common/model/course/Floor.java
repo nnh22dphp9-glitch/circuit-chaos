@@ -1,10 +1,11 @@
-package de.phlup.circuitchaos.common.model;
+package de.phlup.circuitchaos.common.model.course;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.enums.WallType;
+import de.phlup.circuitchaos.common.records.Position;
 import lombok.Data;
 
 import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
@@ -64,6 +65,28 @@ public class Floor {
                 tractorBeam[0] + tractorBeam[1] + tractorBeam[2] + tractorBeam[3] +
                 explosiveDamage + hasPusher + pusherDirection + level +
                 wallNorth + wallEast + wallWest + wallSouth;
+    }
+
+    @JsonIgnore
+    public Floor copy() {
+        Floor floor = new Floor();
+        floor.setPosition(position);
+        System.arraycopy(activeInPhase, 0, floor.getActiveInPhase(), 0, 5);
+        floor.setFacingDirection(facingDirection);
+        floor.setWater(water);
+        System.arraycopy(lasers, 0, floor.getLasers(), 0, 4);
+        System.arraycopy(pressureBeam, 0, floor.getPressureBeam(), 0, 4);
+        System.arraycopy(tractorBeam, 0, floor.getTractorBeam(), 0, 4);
+        floor.setHasPusher(hasPusher);
+        floor.setPusherDirection(pusherDirection);
+        floor.setLevel(level);
+        floor.setDistanceCounter(distanceCounter);
+        floor.setWallNorth(wallNorth);
+        floor.setWallEast(wallEast);
+        floor.setWallSouth(wallSouth);
+        floor.setWallWest(wallWest);
+        floor.setVariant(variant);
+        return floor;
     }
 
 }

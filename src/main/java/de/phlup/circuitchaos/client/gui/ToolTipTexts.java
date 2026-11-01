@@ -3,11 +3,11 @@ package de.phlup.circuitchaos.client.gui;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
-import de.phlup.circuitchaos.common.model.Course;
-import de.phlup.circuitchaos.common.model.CourseObject;
-import de.phlup.circuitchaos.common.model.Floor;
-import de.phlup.circuitchaos.common.model.Module;
-import de.phlup.circuitchaos.common.model.Robot;
+import de.phlup.circuitchaos.common.model.course.Course;
+import de.phlup.circuitchaos.common.model.course.CourseObject;
+import de.phlup.circuitchaos.common.model.course.Floor;
+import de.phlup.circuitchaos.common.model.course.Module;
+import de.phlup.circuitchaos.common.model.course.Robot;
 
 import java.util.List;
 

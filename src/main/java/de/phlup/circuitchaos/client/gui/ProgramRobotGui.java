@@ -4,11 +4,11 @@ import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.model.GameAttributes;
-import de.phlup.circuitchaos.common.model.Module;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.NetworkResponse;
-import de.phlup.circuitchaos.common.model.Programme;
-import de.phlup.circuitchaos.common.model.Robot;
+import de.phlup.circuitchaos.common.model.course.Module;
+import de.phlup.circuitchaos.common.model.course.Robot;
+import de.phlup.circuitchaos.common.records.Programme;
 import lombok.AllArgsConstructor;
 import org.springframework.util.StringUtils;
 

@@ -1,7 +1,7 @@
 package de.phlup.circuitchaos.server.player;
 
-import de.phlup.circuitchaos.common.model.Module;
-import de.phlup.circuitchaos.common.model.Robot;
+import de.phlup.circuitchaos.common.model.course.Module;
+import de.phlup.circuitchaos.common.model.course.Robot;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -21,7 +21,6 @@ public abstract class Player {
     protected void initTurn() {
         for (Module module : robot.getModules()) {
             module.setPowerDownShield(new boolean[][]{{true, true, true, true}, {true, true, true, true}, {true, true, true, true}, {true, true, true, true}, {true, true, true, true}});
-            module.setAlreadyUsed(false);
             for (int cnt = 0; cnt < 5; cnt++) {
                 if (module.getType() == POWER_DOWN_SHIELD) {
                     module.getActiveInPhase()[cnt] = robot.isPoweredDown();

@@ -1,4 +1,4 @@
-package de.phlup.circuitchaos.common.model;
+package de.phlup.circuitchaos.common.records;
 
 public record Range(int minX, int minY, int maxX, int maxY) {
 

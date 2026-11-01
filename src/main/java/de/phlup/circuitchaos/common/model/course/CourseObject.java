@@ -1,7 +1,8 @@
-package de.phlup.circuitchaos.common.model;
+package de.phlup.circuitchaos.common.model.course;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.phlup.circuitchaos.common.enums.ObjectType;
+import de.phlup.circuitchaos.common.records.Position;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -24,6 +25,17 @@ public class CourseObject extends CourseElement {
     public boolean isFlying() {
         // currently there are no flying objects
         return false;
+    }
+
+    @JsonIgnore
+    public CourseObject copy() {
+        CourseObject object = copy(new CourseObject());
+        object.setType(type);
+        object.setTargetPosition(targetPosition);
+        object.setGlue(glue);
+        object.setVariantSeed(variantSeed);
+        object.setActive(active);
+        return object;
     }
 
 }

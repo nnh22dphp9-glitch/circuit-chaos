@@ -1,4 +1,4 @@
-package de.phlup.circuitchaos.common.model;
+package de.phlup.circuitchaos.common.records;
 
 import de.phlup.circuitchaos.common.enums.Direction;
 
