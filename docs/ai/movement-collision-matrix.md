@@ -8,7 +8,7 @@ Die bestehende Computerlogik ist Legacy-Code und bildet nicht zuverlässig die h
 
 - **Abgedeckt (vereinfacht):** Es gibt eine entsprechende Simulation, die aber nicht notwendigerweise alle Engine-Fälle abbildet.
 - **Fehlt:** Die Mechanik wird nicht oder nicht ausreichend im Kandidatenzustand simuliert.
-- **Zu verifizieren:** Aus der ersten Code-Lektüre lässt sich keine sichere Gleichheit ableiten; ein gezielter Test oder genauerer Abgleich ist nötig.
+- **Codeanalyse:** Aus der ersten Code-Lektüre lässt sich keine sichere Gleichheit ableiten; bei Bedarf den konkreten Ablauf im Code nachverfolgen. Spielregeln sind in der abgestimmten Spielanleitung festgelegt.
 
 ## Mechanik-Matrix
 
@@ -38,9 +38,6 @@ Die bestehende Computerlogik ist Legacy-Code und bildet nicht zuverlässig die h
 4. **Spezialbewegungen sind dupliziert.** Teleporter, Portale, Öl, Förderbänder, Pusher und Zahnräder werden lokal nachgebildet statt durch eine gemeinsame, überprüfbare Simulationslogik abgebildet.
 5. **Die zeitliche Reihenfolge muss exakt bleiben.** Programmbewegungen inklusive Drehung → Express-Förderbänder → normale Förderbänder (die auch Express-Förderbänder bewegen können) → Pusher → Zahnräder → Strahlen/Laser → Checkpoints/Minen.
 
-## Empfohlene Tests
-
-Diese Tests sollten später gegen die echte Engine laufen und den resultierenden Zustand mit der Simulation vergleichen. Die Tests sind noch nicht implementiert.
 
 - [ ] Vorwärtsbewegung und Rückwärtsbewegung mit 1–3 Schritten, jeweils ohne Hindernis.
 - [ ] Drehung links/rechts und U-Turn nach einer Bewegung; Priorität/Programmreihenfolge berücksichtigen.
@@ -61,4 +58,4 @@ Diese Tests sollten später gegen die echte Engine laufen und den resultierenden
 
 Die vorhandene `ComputerMoveInfo`-Klasse ist als **Heuristik-Prototyp** weiterverwendbar, aber nicht als regelgetreuer Simulationskern. Die größte architektonische Lücke ist nicht ein einzelner fehlender Sonderfall, sondern das Fehlen eines unabhängigen, gemeinsamen Zustands und einer globalen Bewegungsauflösung.
 
-Vor dem Implementieren einer neuen Simulation sollten wir als Nächstes die Details von `Game.move()` und `Teleporter.teleport()` vollständig inventarisieren und daraus festlegen, welche Teile der Engine gefahrlos wiederverwendet werden können und welche eine nebenwirkungsfreie Simulationsvariante brauchen.
+Für die Weiterentwicklung der Simulation ist zu berücksichtigen, welche Teile von `Game.move()` und `Teleporter.teleport()` gefahrlos wiederverwendet werden können und welche eine nebenwirkungsfreie Simulationsvariante brauchen.
