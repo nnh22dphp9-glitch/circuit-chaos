@@ -155,6 +155,6 @@ Die Reihenfolge ist an den Ist-Zustand der Engine angelehnt. Eine Änderung des 
 
 ## Fazit
 
-Empfohlen ist eine **kleine gemeinsame Regelbasis plus unabhängiger Kandidatenzustand**, keine zweite Spiel-Engine und kein Aufruf der echten Engine auf mutierbaren Live-Objekten. Teleporter und Wasser/Öl/Hovercraft sind gute erste Extraktionsschritte. Konfliktauflösung und Schiebeketten folgen erst, wenn Snapshot und Teststruktur stehen.
+Empfohlen ist eine **kleine gemeinsame Regelbasis plus unabhängiger Kandidatenzustand**, keine zweite Spiel-Engine und kein Aufruf der echten Engine auf mutierbaren Live-Objekten. Teleporter und Wasser/Öl/Hovercraft sind gute erste Extraktionsschritte. Konfliktauflösung und Schiebeketten folgen, wenn Snapshot und Zustandsmodell stehen.
 
 Die Codeänderungen sollten schrittweise erfolgen und bestehendes Engine-Verhalten nicht unbeabsichtigt verändern.
