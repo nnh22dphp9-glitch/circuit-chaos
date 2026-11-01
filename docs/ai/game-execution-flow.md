@@ -2,7 +2,7 @@
 
 Stand: `develop`, geprüft am 2026-10-22.
 
-Zweck dieses Dokuments ist, den tatsächlichen Ablauf der Engine zu beschreiben, bevor `ComputerPlayer` und `ComputerMoveInfo` überarbeitet werden. Die bestehende Computerlogik stammt aus einer älteren Regelbasis und wurde nicht vollständig an Circuit Chaos angepasst. Unterschiede zwischen ihr und der Engine sind deshalb zunächst erwartbare Lücken der KI-Simulation und nicht automatisch Fehler der eigentlichen Spielmechanik.
+Zweck dieses Dokuments ist, den tatsächlichen Ablauf der Engine als technische Referenz für `ComputerPlayer` und `ComputerMoveInfo` zu beschreiben. Die abgestimmte Spielanleitung ist maßgeblich für die Regeln; diese Notiz ist keine Quelle für neue oder offene Regelfragen. Unterschiede zur KI-Simulation sind mögliche technische Abweichungen der Simulation, nicht automatisch Fehler der eigentlichen Spielmechanik.
 
 ## Zentrale Implementierungsstellen
 
@@ -87,8 +87,6 @@ Die KI sollte nicht einfach die bisherige `ComputerMoveInfo.simulateCourse()`-Lo
 - **Der Zustand ist veränderlich.** Die bestehende Simulation referenziert das echte `Game`, `Course` und `Player`-Objekt. Eine künftige Suche über viele Kandidaten braucht eine sichere, unabhängige Zustandsrepräsentation oder eine andere garantiert nebenwirkungsfreie Simulationsstrategie.
 - **Die Bewertung muss zielabhängig sein.** `FINISH` und `KILL_ALL` verfolgen unterschiedliche Ziele. Überleben, Fortschritt, Checkpoints, Schaden, Pit Stop, Module und offensive Möglichkeiten müssen je nach Spielmodus unterschiedlich gewichtet werden.
 
-## 5. Was diese Inventur noch nicht leistet
+## 5. Grenzen dieser Inventur
 
-Dieses Dokument ist eine Übersicht des Kontrollflusses, keine vollständige Spezifikation jeder Regel. Insbesondere müssen für die spätere KI-Arbeit noch die konkreten Details von `move(...)`, `getLaserTarget(...)`, `Player.takeDamage(...)`, den einzelnen Modulen und den dynamischen Spielfeldelementen gezielt abgeglichen werden. Ebenso ist noch nicht durch Tests nachgewiesen, dass die bestehende `ComputerMoveInfo`-Simulation in den von ihr abgebildeten Fällen mit der Engine übereinstimmt.
-
-Der nächste sinnvolle Schritt ist deshalb eine **Mechanik-für-Mechanik-Matrix**: tatsächlicher Engine-Ablauf, derzeitige Abdeckung in `ComputerMoveInfo`, Abweichung/Unsicherheit und benötigter Test. Erst auf dieser Grundlage sollten wir die Simulationsarchitektur festlegen.
+Dieses Dokument ist eine technische Übersicht des Kontrollflusses, keine vollständige Regelbeschreibung. Die abgestimmte Spielanleitung ist die Quelle für die Spielregeln. Die KI-Simulation bildet Teile des Engine-Ablaufs nur vereinfacht ab; diese Unterschiede sind bei der Weiterentwicklung der KI als Implementierungsdetails zu berücksichtigen, nicht als Anlass, abgestimmte Spielregeln erneut zu diskutieren.
