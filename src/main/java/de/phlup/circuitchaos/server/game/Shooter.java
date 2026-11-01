@@ -14,8 +14,8 @@ import lombok.Setter;
 @Setter(AccessLevel.PRIVATE)
 public class Shooter {
 
-    private Robot robot;
-    private Robot target;
+    private Robot  robot;
+    private Robot  target;
     private Robot  target2;
     private Module weapon;
 

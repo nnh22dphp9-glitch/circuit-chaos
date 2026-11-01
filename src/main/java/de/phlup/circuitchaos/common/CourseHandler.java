@@ -4,6 +4,7 @@ import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.Step;
+import de.phlup.circuitchaos.common.enums.WallType;
 import de.phlup.circuitchaos.common.model.Checkpoint;
 import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.CourseElement;
@@ -11,8 +12,11 @@ import de.phlup.circuitchaos.common.model.CourseElementStub;
 import de.phlup.circuitchaos.common.model.CourseObject;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Position;
+import de.phlup.circuitchaos.common.model.Programme;
 import de.phlup.circuitchaos.common.model.Robot;
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,6 +30,7 @@ import static de.phlup.circuitchaos.common.enums.ModuleType.SPIN_RIGHT_BEAM;
 import static de.phlup.circuitchaos.common.enums.ModuleType.TRACTOR_BEAM;
 import static de.phlup.circuitchaos.server.GlobalServerAttributes.RANDOM;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CourseHandler {
 
     public static void add(Course course, CourseElement ce) {
@@ -299,6 +304,37 @@ public class CourseHandler {
             f.setBeamsNS(false);
             f.setBeamsWE(false);
         }
+    }
+
+    public static int determineMovementAmount(Programme program, boolean usesBrakes) {
+        int movement = program.getType().getMovement();
+        if (movement != 0 && usesBrakes) {
+            movement = movement > 0 ? movement - 1 : movement + 1;
+        }
+        return movement;
+    }
+
+    public static boolean cannotMoveAcross(Floor sourceFloor, Floor targetFloor, Direction direction, boolean flying) {
+        if (flying) {
+            return false;
+        }
+        WallType sourceWall = sourceFloor.wall(direction);
+        WallType targetWall = targetFloor.wall(direction.reverse());
+        boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
+                || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
+        if (targetFloor.getLevel() > sourceFloor.getLevel() && !rampPassage) {
+            return true;
+        }
+        return ((sourceWall != WallType.NONE
+                && sourceWall != WallType.ONE_WAY_GREEN
+                && sourceWall != WallType.RAMP_UP
+                && sourceWall != WallType.RAMP_DOWN)
+                || (targetWall != WallType.NONE
+                && targetWall != WallType.ONE_WAY_GREEN
+                && targetWall != WallType.RAMP_UP
+                && targetWall != WallType.RAMP_DOWN
+                && targetWall != WallType.LEDGE))
+                && (sourceWall != WallType.ONE_WAY_GREEN || targetWall != WallType.ONE_WAY_RED);
     }
 
 }

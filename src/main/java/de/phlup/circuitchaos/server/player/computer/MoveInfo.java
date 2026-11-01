@@ -16,7 +16,6 @@ import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.Programme;
 import de.phlup.circuitchaos.common.model.Robot;
 import de.phlup.circuitchaos.server.game.Game;
-import de.phlup.circuitchaos.server.game.GameLogic;
 import de.phlup.circuitchaos.server.player.Player;
 import lombok.Data;
 
@@ -77,7 +76,7 @@ public class MoveInfo {
             } else if (program[phase].getType() == ProgramType.U_TURN) {
                 endingDirection = endingDirection.add(Direction.SOUTH);
             } else {
-                int movement = GameLogic.determineMovementAmount(program[phase], robot.uses(ModuleType.BRAKES, phase));
+                int movement = CourseHandler.determineMovementAmount(program[phase], robot.uses(ModuleType.BRAKES, phase));
                 // Hovercraft flight starts before water/oil effects are applied.
                 flyingDuringMovement = robot.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
                 if (!flyingDuringMovement && (tf.isWater() || CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
@@ -108,8 +107,8 @@ public class MoveInfo {
                         }
                     }
                 }
-                int movementStartX = x;
-                int movementStartY = y;
+                int       movementStartX    = x;
+                int       movementStartY    = y;
                 Direction movementDirection = movement < 0 ? endingDirection.reverse() : endingDirection;
                 if (movement < 0) {
                     while (movement < 0) {
@@ -325,10 +324,10 @@ public class MoveInfo {
     }
 
     private boolean moveForcedOneTile(Direction direction, int phase) {
-        Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
+        Floor    previousFloor  = CourseHandler.getFloor(course, new Position(x, y));
         Position targetPosition = previousFloor.getPosition().neighbour(direction);
-        Floor targetFloor = CourseHandler.getFloor(course, targetPosition);
-        if (!GameLogic.cannotMoveAcross(previousFloor, targetFloor, direction, false)) {
+        Floor    targetFloor    = CourseHandler.getFloor(course, targetPosition);
+        if (!CourseHandler.cannotMoveAcross(previousFloor, targetFloor, direction, false)) {
             return false;
         }
         x = targetPosition.x();
@@ -350,7 +349,7 @@ public class MoveInfo {
 
     private void slideOnOil(Direction direction, boolean flying, int phase) {
         while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream()
-                .anyMatch(co -> co.getType() == ObjectType.OIL)) {
+                                       .anyMatch(co -> co.getType() == ObjectType.OIL)) {
             if (!moveForcedOneTile(direction, phase)) {
                 break;
             }
@@ -391,7 +390,7 @@ public class MoveInfo {
             }
         };
         Direction direction = backup ? endingDirection.reverse() : endingDirection;
-        return !GameLogic.cannotMoveAcross(f, targetFloor, direction, flying);
+        return !CourseHandler.cannotMoveAcross(f, targetFloor, direction, flying);
     }
 
 }

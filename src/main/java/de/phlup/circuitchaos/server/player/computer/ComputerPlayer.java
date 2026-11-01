@@ -32,7 +32,7 @@ public class ComputerPlayer extends Player {
     private final Goal goal;
 
     private Checkpoint nextCP;
-    private boolean turnFinished;
+    private boolean    turnFinished;
 
     public ComputerPlayer(@NotNull Robot robot, @NotNull String gameId, @NotNull Goal goal) {
         super(robot, gameId);

@@ -17,6 +17,7 @@ import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.CourseElement;
 import de.phlup.circuitchaos.common.model.CourseElementStub;
 import de.phlup.circuitchaos.common.model.CourseObject;
+import de.phlup.circuitchaos.common.model.CourseProperties;
 import de.phlup.circuitchaos.common.model.Floor;
 import de.phlup.circuitchaos.common.model.Module;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
@@ -108,9 +109,10 @@ public class Game {
     public void notifyCourseMayHaveChanged(Step step, Integer phase, String detail, String movingRobotName) {
         String reason = (phase == null ? "" : (phase + 1) + ": ") + step.getName() + (StringUtils.hasText(detail) ? " - " + detail : "");
         log.debug("Course may have changed: {}: {}", step.name(), reason);
-        List<CourseElementStub> stubList = CourseHandler.createCourseElementStubList(course);
+        List<CourseElementStub> stubList    = CourseHandler.createCourseElementStubList(course);
+        CourseProperties        courseProps = course.getProperties();
         boolean wait = (elementStubs != null && !elementStubs.equals(stubList) && step != Step.SETUP)
-                || (step == Step.OPEN_TRAPDOORS && course.getProperties().isTrapdoor())
+                || (step == Step.OPEN_TRAPDOORS && courseProps.isTrapdoor())
                 || (step == Step.ROBOT_MOUNTED_LASER_FIRE && phase != null
                 && course.getRobots().stream().filter(CourseElement::isOnCourse).anyMatch(
                 r -> (r.hasModule(MAIN_LASER) && r.getModule(MAIN_LASER).getActiveInPhase()[phase])
@@ -132,13 +134,13 @@ public class Game {
                 || (step == Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE && phase != null
                 && course.getRobots().stream().filter(CourseElement::isOnCourse).anyMatch(
                 r -> r.hasModule(EXCHANGE_BEAM) && r.getModule(EXCHANGE_BEAM).getActiveInPhase()[phase]))
-                || (step == Step.COURSE_MOUNTED_LASER_FIRE && course.getProperties().isLasers())
-                || (step == Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE && course.getProperties().isPressureBeams())
-                || (step == Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE && course.getProperties().isTractorBeams())
-                || (step == Step.CONVEYOR_BELTS_MOVE && course.getProperties().isConveyorBelts())
-                || (step == Step.EXPRESS_CONVEYOR_BELTS_MOVE && course.getProperties().isExpressConveyorBelts())
-                || (step == Step.GEARS_ROTATE && course.getProperties().isGears())
-                || (step == Step.PUSHERS_PUSH && course.getProperties().isPushers());
+                || (step == Step.COURSE_MOUNTED_LASER_FIRE && courseProps.isLasers())
+                || (step == Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE && courseProps.isPressureBeams())
+                || (step == Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE && courseProps.isTractorBeams())
+                || (step == Step.CONVEYOR_BELTS_MOVE && courseProps.isConveyorBelts())
+                || (step == Step.EXPRESS_CONVEYOR_BELTS_MOVE && courseProps.isExpressConveyorBelts())
+                || (step == Step.GEARS_ROTATE && courseProps.isGears())
+                || (step == Step.PUSHERS_PUSH && courseProps.isPushers());
         if (elementStubs == null || wait) {
             if (step == Step.SETUP || !wait) {
                 for (Registration reg : watchers) {
@@ -360,7 +362,7 @@ public class Game {
             reactivateRammingArmor(phase, robot);
             releaseDevices(phase, robot);
             while (!gameAborted && program != null) {
-                int movement = GameLogic.determineMovementAmount(program, robot.uses(ModuleType.BRAKES, phase));
+                int movement = CourseHandler.determineMovementAmount(program, robot.uses(ModuleType.BRAKES, phase));
                 if (robot.uses(ModuleType.HOVERCRAFT, phase)) {
                     robot.setFlying(movement != 0);
                 }
@@ -742,7 +744,7 @@ public class Game {
                 if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
                     Floor f           = CourseHandler.getFloor(course, obj.getPosition());
                     Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    if (GameLogic.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
+                    if (CourseHandler.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
                             || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
                         obj.setConflictingMark(-1);
                     } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
@@ -796,7 +798,7 @@ public class Game {
                 if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
                     Floor f           = CourseHandler.getFloor(course, obj.getPosition());
                     Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    if (GameLogic.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
+                    if (CourseHandler.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
                             || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
                         obj.setConflictingMark(-1);
                     } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
@@ -1206,7 +1208,7 @@ public class Game {
 
     private void minesGoesOff(Floor floor, Direction dir, Step step, int phase) {
         Position minePosition = dir == null ? floor.getPosition() : floor.getPosition().neighbour(dir);
-        if (dir == null || !GameLogic.cannotMoveAcross(CourseHandler.getFloor(course, minePosition), floor, dir.reverse(), false)) {
+        if (dir == null || !CourseHandler.cannotMoveAcross(CourseHandler.getFloor(course, minePosition), floor, dir.reverse(), false)) {
             for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, minePosition))) {
                 if (co.isActive() && (co.getType() == ObjectType.PROXIMITY_MINE
                         || (dir == null && co.getType() == ObjectType.MINE))) {
