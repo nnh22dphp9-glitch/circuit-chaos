@@ -1,6 +1,6 @@
-# KI-Entscheidungen und offene Fragen
+# KI-Entscheidungen und Architekturhinweise
 
-Diese Datei hält bestätigte Spielregeln, Architekturentscheidungen und noch offene Fragen für die KI fest.
+Die abgestimmte Spielanleitung ist die maßgebliche Quelle für Spielregeln. Diese Notiz hält technische Entscheidungen und KI-relevante Konsequenzen fest; bereits in der Spielanleitung geklärte Regeln werden nicht erneut als offene Fragen behandelt.
 
 ## Bestätigte Rahmenbedingungen
 
@@ -21,11 +21,7 @@ Diese Datei hält bestätigte Spielregeln, Architekturentscheidungen und noch of
 - Ein Power-Down wird während der Programmierung angekündigt, aber das aktuelle Programm wird zunächst noch ausgeführt. Erst in der darauffolgenden Runde setzt der Roboter aus und verliert seine bisherigen Schadenspunkte. Er bleibt auf dem Spielfeld und kann erneut Schaden erhalten. `POWER_DOWN_SHIELD` schützt in diesem Zustand zumindest vor Laser-Strahl-Schaden; es ist keine allgemeine Unverwundbarkeit.
 - Die frühere fehlerhafte Einschränkung in `Player.takeDamage`, durch die Schaden nur mit `source == null` verarbeitet wurde, wurde laut Spieleigner behoben.
 
-## Offene Fragen
+## Technische Überlegungen
 
-1. **Shooter-Schnittstelle:** Sollte die ausgewählte Waffe explizit als Parameter übergeben werden, damit klar ist, dass die Auswahl bereits vor Programmausführung erfolgt? Das ist eine mögliche Klarstellung der Schnittstelle, kein bestätigtes Regelproblem.
-2. **Beam-Regressionsfälle:** Die bestätigten Regeln sollten durch gezielte Tests für Höhenunterschiede, One-Way-Wände in beiden Richtungen, Roboter als Hindernisse und den zweiten Treffer des High-Power-Lasers abgesichert werden.
-
-## Nächster Arbeitsschritt
-
-Die dokumentierten Regeln als Grundlage für gezielte Regressionstests der Engine verwenden. Erst danach die KI so erweitern, dass sie die zentralen Engine-Regeln wiederverwendet, statt Waffen- und Beam-Verhalten separat nachzubilden.
+- Die Shooter-Schnittstelle kann bei Gelegenheit expliziter machen, dass die Waffenauswahl bereits vor Programmausführung feststeht. Das ist eine mögliche Schnittstellenklarstellung, keine offene Regelfrage.
+- KI-Logik soll zentrale Engine-Regeln wiederverwenden, statt Waffen- und Beam-Verhalten unabhängig nachzubilden.
