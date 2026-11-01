@@ -20,12 +20,12 @@ public class GlobalServerAttributes {
     /**
      * WARNING: do not use on network stuff!
      */
-    public static Game getGame(String id) {
-        return determineGame(id, true, true, false);
+    public static Game getGame(String gameId) {
+        return determineGame(gameId, true, true, false);
     }
 
-    public static Game getGame(String id, boolean considerRunning, boolean considerPreparing) {
-        return determineGame(id, considerRunning, considerPreparing, true);
+    public static Game getGame(String gameId, boolean considerRunning, boolean considerPreparing) {
+        return determineGame(gameId, considerRunning, considerPreparing, true);
     }
 
     public static void setGameRunning(String gameId, Game game) {

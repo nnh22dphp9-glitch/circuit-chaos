@@ -34,12 +34,4 @@ public abstract class Player {
         }
     }
 
-    public void arriveAtPitStop() {
-        Game game = getGame(gameId);
-        game.addNewModuleToRobot(robot);
-        if (robot.getDamage() > 0) {
-            robot.setDamage(robot.getDamage() - 1);
-        }
-    }
-
 }

@@ -109,7 +109,7 @@ public class Game {
         String reason = (phase == null ? "" : (phase + 1) + ": ") + step.getName() + (StringUtils.hasText(detail) ? " - " + detail : "");
         log.debug("Course may have changed: {}: {}", step.name(), reason);
         List<CourseElementStub> stubList = CourseHandler.createCourseElementStubList(course);
-        boolean wait = (elementStubs != null && !elementStubs.equals(stubList))
+        boolean wait = (elementStubs != null && !elementStubs.equals(stubList) && step != Step.SETUP)
                 || (step == Step.OPEN_TRAPDOORS && course.getProperties().isTrapdoor())
                 || (step == Step.ROBOT_MOUNTED_LASER_FIRE && phase != null
                 && course.getRobots().stream().filter(CourseElement::isOnCourse).anyMatch(
@@ -191,9 +191,9 @@ public class Game {
         }
     }
 
-    private void end(Player winner) {
-        if (winner != null) {
-            showMessage(AND_THE_WINNER_IS + winner.getRobot().getName());
+    private void end(String name) {
+        if (name != null) {
+            showMessage(AND_THE_WINNER_IS + name);
         } else if (!gameAborted) {
             showMessage(THIS_GAME_IS_A_TIE);
         }
@@ -256,15 +256,15 @@ public class Game {
 
     private void determineStartPositions() {
         Iterator<Checkpoint> cp = course.getCheckpoints().stream().filter(c -> c.getNumber() == 0).iterator();
-        for (Player pl : players) {
+        for (Robot robot : course.getRobots()) {
             if (!cp.hasNext()) {
                 cp = course.getCheckpoints().stream().filter(c -> c.getNumber() == 0).iterator();
             }
             Position position = cp.next().getPosition();
-            pl.getRobot().setPosition(position);
-            pl.getRobot().setPrevPosition(position);
-            pl.getRobot().setArchivePosition(position);
-            pl.getRobot().setLevel(CourseHandler.getFloor(course, position).getLevel());
+            robot.setPosition(position);
+            robot.setPrevPosition(position);
+            robot.setArchivePosition(position);
+            robot.setLevel(CourseHandler.getFloor(course, position).getLevel());
         }
     }
 
@@ -272,8 +272,8 @@ public class Game {
         for (String defaultModule : defaultModules) {
             try {
                 ModuleType moduleType = ModuleType.valueOf(defaultModule);
-                for (Player player : players) {
-                    player.getRobot().getModules().add(new Module(moduleType));
+                for (Robot robot : course.getRobots()) {
+                    robot.getModules().add(new Module(moduleType));
                 }
             } catch (Exception e) {
                 log.warn("Could not find module {}.", defaultModule);
@@ -295,19 +295,20 @@ public class Game {
 
         public void run() {
             try {
-                Player winner = null;
+                String winner = null;
                 while (winner == null && !players.isEmpty() && !isGameAborted()) {
                     notifyCourseMayHaveChanged(Step.SETUP, null, "start of new turn", null);
 
                     deal();
-                    interactWithAllPlayers(players);
+                    letAllPlayersProgramTheRobots(players);
 
-                    if (!gameAborted) {
-                        for (Player player : players) {
-                            Robot       r = player.getRobot();
-                            Programme[] p = r.getProgram();
-                            log.debug("Received program for {}: {} - {} - {} - {} - {}", r.getName(), p[0].getType().name(),
-                                      p[1].getType().name(), p[2].getType().name(), p[3].getType().name(), p[4].getType().name());
+                    if (!gameAborted && log.isDebugEnabled()) {
+                        for (Robot r : course.getRobots()) {
+                            if (r.isOnCourse()) {
+                                Programme[] p = r.getProgram();
+                                log.debug("Received program for {}: {} - {} - {} - {} - {}", r.getName(), p[0].getType().name(),
+                                          p[1].getType().name(), p[2].getType().name(), p[3].getType().name(), p[4].getType().name());
+                            }
                         }
                     }
 
@@ -325,8 +326,8 @@ public class Game {
 
     }
 
-    private Player loopThroughPhases() {
-        Player winner = null;
+    private String loopThroughPhases() {
+        String winner = null;
         for (int phase = 0; phase < 5 && winner == null && !players.isEmpty() && !gameAborted; phase++) {
             notifyCourseMayHaveChanged(Step.START_OF_TURN_COURSE_EFFECTS, phase, "begin of phase %s".formatted(phase + 1), null);
             List<Robot> robots = stepRevealProgrammes(phase);
@@ -396,19 +397,9 @@ public class Game {
         }
     }
 
-    private Player getPlayerOf(Robot robot) {
-        for (Player player : players) {
-            if (player.getRobot().equals(robot)) {
-                return player;
-            }
-        }
-        return null;
-    }
-
-    private Player endOfTurnCourseEffects(Player winner) {
-        for (Player player : players) {
+    private String endOfTurnCourseEffects(String winner) {
+        for (Robot robot : course.getRobots()) {
             if (winner == null && !gameAborted) {
-                Robot robot = player.getRobot();
                 if (robot.isFlying()) {
                     land(robot, Step.END_OF_TURN_COURSE_EFFECTS, 4);
                 }
@@ -418,7 +409,7 @@ public class Game {
                 handleDestroyedRobots(robot);
 
                 if (goal == Goal.FINISH && robot.hasWon(goal, course.getCheckpoints().size())) {
-                    winner = player;
+                    winner = robot.getName();
                 }
             }
         }
@@ -440,12 +431,12 @@ public class Game {
         }
     }
 
-    private Player checkKillAllWinner() {
+    private String checkKillAllWinner() {
         if (players.isEmpty() && !gameAborted) {
             showMessage(THIS_GAME_IS_A_TIE);
             gameAborted = true;
         } else if (players.size() == 1) {
-            return players.getFirst();
+            return players.getFirst().getRobot().getName();
         }
         return null;
     }
@@ -488,8 +479,8 @@ public class Game {
         }
     }
 
-    private Player setTouchCheckpoints(int phase) {
-        Player winner = null;
+    private String setTouchCheckpoints(int phase) {
+        String winner = null;
         for (CourseElement o : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
             if (!gameAborted && o.isOnCourse()) {
                 if (o instanceof Robot robot) {
@@ -522,13 +513,10 @@ public class Game {
                         }
                     }
                     if (phase == 4 && f2.getFloortype() == Floortype.PIT_STOP) {
-                        Player player = getPlayerOf(robot);
-                        if (player != null) {
-                            player.arriveAtPitStop();
-                        }
+                        arriveAtPitStop(robot);
                     }
                     if (goal == Goal.FINISH && robot.hasWon(goal, course.getCheckpoints().size())) {
-                        winner = getPlayerOf(robot);
+                        winner = robot.getName();
                     }
                 } else if (o instanceof CourseObject co) {
                     co.setActive(true);
@@ -552,6 +540,13 @@ public class Game {
             }
         }
         return winner;
+    }
+
+    public void arriveAtPitStop(Robot robot) {
+        addNewModuleToRobot(robot);
+        if (robot.getDamage() > 0) {
+            robot.setDamage(robot.getDamage() - 1);
+        }
     }
 
     private void stepResolveBeamsAndLaserFire(int phase) {
@@ -1003,11 +998,11 @@ public class Game {
         }
     }
 
-    private void interactWithAllPlayers(List<Player> playersToInteractWith) {
+    private void letAllPlayersProgramTheRobots(List<Player> players) {
         String                       purposeId        = UUID.randomUUID().toString();
-        Map<String, NetworkResponse> requestedAnswers = askNetworkPlayersToProgramTheirRobots(purposeId, playersToInteractWith);
+        Map<String, NetworkResponse> requestedAnswers = askNetworkPlayersToProgramTheirRobots(purposeId, players);
         // +++ computer players perform
-        for (Player player : playersToInteractWith) {
+        for (Player player : players) {
             if (player instanceof ComputerPlayer computerPlayer
                     && !(computerPlayer.getRobot().isPoweredDown() || gameAborted || player.getRobot().hasLost(goal))) {
                 computerPlayer.perform(course.getCheckpoints().size());
@@ -1015,7 +1010,7 @@ public class Game {
         }
         if (!requestedAnswers.isEmpty()) {
             waitForAllAnswers(requestedAnswers);
-            for (Player player : playersToInteractWith) {
+            for (Player player : players) {
                 if (player instanceof NetworkPlayer networkPlayer && !gameAborted && !player.getRobot().hasLost(goal)) {
                     NetworkResponse networkResponse = requestedAnswers.get(networkPlayer.getId());
                     networkPlayer.handleResponse(networkResponse);
