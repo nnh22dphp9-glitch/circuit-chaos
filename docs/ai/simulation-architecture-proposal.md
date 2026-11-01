@@ -63,16 +63,16 @@ Die statische Spielfeldgeometrie muss nicht für jeden Kandidaten neu kopiert we
 
 Die Trennlinie sollte nicht „Engine-Code versus KI-Code“ lauten, sondern **Regelentscheidung versus Ausführung eines Ereignisses**.
 
-| Regelbereich | Gemeinsame, möglichst reine Berechnung | Ausführung mit Seiteneffekten |
-|---|---|---|
-| Programmbewegung | Programmtyp + Bremsen + relevante Module → Bewegungsstärke | Programm-/Registerzustand fortschreiben |
-| Hovercraft | Modulaktivität + Bewegungsstärke → Flugzustand für diesen Schritt | Flugstatus des echten Roboters setzen |
-| Wasser/Öl | Flugstatus + Ausgangsfeld + Bewegungsstärke → reduzierte Bewegungsstärke | Bewegung mit Ergebnis ausführen |
-| Wand/Rampe/Einbahnwand | Zustand + Richtung → Übergang erlaubt, blockiert oder Spezialübergang | Position/Level ändern, Benachrichtigung |
-| Konflikt/Schieben | Kandidatenzustand + Bewegungsabsicht → Konflikt-/Schiebeentscheidung | Positionen ändern, Ramming Armor und Schaden anwenden |
-| Öl-Rutschen | Flugstatus + Kachel + Blockadeprüfung → nächster Schritt/Stop | Position ändern und gegebenenfalls Fall auslösen |
-| Teleporter | Bewegung, Flugstatus, Richtung, Zielbelegung → nicht aktiv / blockiert / teleportiert + Ziel | Position setzen und Ereignis melden |
-| Tod/Fall | Spielfeldzustand + Position + Flugstatus → Fall-/Todesereignis | Roboter entfernen, Schaden/Die-Counter/Benachrichtigung ändern |
+| Regelbereich           | Gemeinsame, möglichst reine Berechnung                                                       | Ausführung mit Seiteneffekten                                  |
+|------------------------|----------------------------------------------------------------------------------------------|----------------------------------------------------------------|
+| Programmbewegung       | Programmtyp + Bremsen + relevante Module → Bewegungsstärke                                   | Programm-/Registerzustand fortschreiben                        |
+| Hovercraft             | Modulaktivität + Bewegungsstärke → Flugzustand für diesen Schritt                            | Flugstatus des echten Roboters setzen                          |
+| Wasser/Öl              | Flugstatus + Ausgangsfeld + Bewegungsstärke → reduzierte Bewegungsstärke                     | Bewegung mit Ergebnis ausführen                                |
+| Wand/Rampe/Einbahnwand | Zustand + Richtung → Übergang erlaubt, blockiert oder Spezialübergang                        | Position/Level ändern, Benachrichtigung                        |
+| Konflikt/Schieben      | Kandidatenzustand + Bewegungsabsicht → Konflikt-/Schiebeentscheidung                         | Positionen ändern, Ramming Armor und Schaden anwenden          |
+| Öl-Rutschen            | Flugstatus + Kachel + Blockadeprüfung → nächster Schritt/Stop                                | Position ändern und gegebenenfalls Fall auslösen               |
+| Teleporter             | Bewegung, Flugstatus, Richtung, Zielbelegung → nicht aktiv / blockiert / teleportiert + Ziel | Position setzen und Ereignis melden                            |
+| Tod/Fall               | Spielfeldzustand + Position + Flugstatus → Fall-/Todesereignis                               | Roboter entfernen, Schaden/Die-Counter/Benachrichtigung ändern |
 
 Eine reine Funktion darf keine Game- oder Player-Methoden aufrufen, keine echten Modelle mutieren, keine Benachrichtigungen auslösen und keinen Zufallszustand verändern. Zufällige Ergebnisse müssen als Eingabe explizit sein oder über einen kontrollierten Zufallsdienst kommen.
 
