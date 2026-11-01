@@ -69,11 +69,11 @@ public class MoveInfo {
         for (int phase = 0; phase < 5; phase++) {
             boolean flyingDuringMovement;
             checkForAbyss(phase);
-            if (program[phase].getType() == ProgramType.ROTATE_LEFT) {
+            if (program[phase].type() == ProgramType.ROTATE_LEFT) {
                 endingDirection = endingDirection.add(Direction.WEST);
-            } else if (program[phase].getType() == ProgramType.ROTATE_RIGHT) {
+            } else if (program[phase].type() == ProgramType.ROTATE_RIGHT) {
                 endingDirection = endingDirection.add(Direction.EAST);
-            } else if (program[phase].getType() == ProgramType.U_TURN) {
+            } else if (program[phase].type() == ProgramType.U_TURN) {
                 endingDirection = endingDirection.add(Direction.SOUTH);
             } else {
                 int movement = CourseHandler.determineMovementAmount(program[phase], robot.uses(ModuleType.BRAKES, phase));

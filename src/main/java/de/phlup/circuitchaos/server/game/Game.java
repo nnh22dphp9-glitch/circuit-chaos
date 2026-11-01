@@ -308,8 +308,8 @@ public class Game {
                         for (Robot r : course.getRobots()) {
                             if (r.isOnCourse()) {
                                 Programme[] p = r.getProgram();
-                                log.debug("Received program for {}: {} - {} - {} - {} - {}", r.getName(), p[0].getType().name(),
-                                          p[1].getType().name(), p[2].getType().name(), p[3].getType().name(), p[4].getType().name());
+                                log.debug("Received program for {}: {} - {} - {} - {} - {}", r.getName(), p[0].type().name(),
+                                          p[1].type().name(), p[2].type().name(), p[3].type().name(), p[4].type().name());
                             }
                         }
                     }
@@ -390,11 +390,11 @@ public class Game {
         } else if (movement < 0) {
             moveInit(robot, SOUTH.add(robot.getDirection()), movement, -movement, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true, true, robot.getName());
         }
-        if (pc.getType() == ProgramType.ROTATE_RIGHT) {
+        if (pc.type() == ProgramType.ROTATE_RIGHT) {
             rotate(robot, EAST, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
-        } else if (pc.getType() == ProgramType.ROTATE_LEFT) {
+        } else if (pc.type() == ProgramType.ROTATE_LEFT) {
             rotate(robot, WEST, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
-        } else if (pc.getType() == ProgramType.U_TURN) {
+        } else if (pc.type() == ProgramType.U_TURN) {
             rotate(robot, SOUTH, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true);
         }
     }
@@ -1384,7 +1384,7 @@ public class Game {
     }
 
     private int getPriority(Robot robot, int phase) {
-        return robot.getProgram()[phase] == null ? -1 : robot.getProgram()[phase].getPriority();
+        return robot.getProgram()[phase] == null ? -1 : robot.getProgram()[phase].priority();
     }
 
     public void explode(Step step, Integer phase, Position position, int initialDamage) {

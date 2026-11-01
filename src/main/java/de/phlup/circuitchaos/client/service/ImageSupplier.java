@@ -867,7 +867,7 @@ public class ImageSupplier {
     }
 
     public ImageIcon getImageIcon(Programme pc, boolean slot, boolean blocked) {
-        Image         front_i = getImageIconPlain(GFX_PROGRAMME.get(pc.getType()) + (slot ? (blocked ? GFX_PROGRAMME_BLOCKED_SUFFIX : GFX_PROGRAMME_SLOT_SUFFIX) : "")).getImage();
+        Image         front_i = getImageIconPlain(GFX_PROGRAMME.get(pc.type()) + (slot ? (blocked ? GFX_PROGRAMME_BLOCKED_SUFFIX : GFX_PROGRAMME_SLOT_SUFFIX) : "")).getImage();
         BufferedImage bi      = new BufferedImage(front_i.getWidth(null), front_i.getHeight(null), BufferedImage.TYPE_INT_ARGB);
         Graphics2D    gr      = bi.createGraphics();
         try {

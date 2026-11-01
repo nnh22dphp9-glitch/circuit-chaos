@@ -173,21 +173,21 @@ public class ComputerPlayer extends Player {
         } else {
             boolean newMove = true;
             if (chosenMove.getStartingDirection() == mi.getStartingDirection()
-                    && chosenMove.getProgram()[0].getType() == mi.getProgram()[0].getType()
-                    && chosenMove.getProgram()[1].getType() == mi.getProgram()[1].getType()
-                    && chosenMove.getProgram()[2].getType() == mi.getProgram()[2].getType()
-                    && chosenMove.getProgram()[3].getType() == mi.getProgram()[3].getType()
-                    && chosenMove.getProgram()[4].getType() == mi.getProgram()[4].getType()) {
+                    && chosenMove.getProgram()[0].type() == mi.getProgram()[0].type()
+                    && chosenMove.getProgram()[1].type() == mi.getProgram()[1].type()
+                    && chosenMove.getProgram()[2].type() == mi.getProgram()[2].type()
+                    && chosenMove.getProgram()[3].type() == mi.getProgram()[3].type()
+                    && chosenMove.getProgram()[4].type() == mi.getProgram()[4].type()) {
                 // all steps are identical but for the priority
-                if (chosenMove.getProgram()[0].getPriority() > mi.getProgram()[0].getPriority()) {
+                if (chosenMove.getProgram()[0].priority() > mi.getProgram()[0].priority()) {
                     newMove = false;
-                } else if (chosenMove.getProgram()[1].getPriority() > mi.getProgram()[1].getPriority()) {
+                } else if (chosenMove.getProgram()[1].priority() > mi.getProgram()[1].priority()) {
                     newMove = false;
-                } else if (chosenMove.getProgram()[2].getPriority() > mi.getProgram()[2].getPriority()) {
+                } else if (chosenMove.getProgram()[2].priority() > mi.getProgram()[2].priority()) {
                     newMove = false;
-                } else if (chosenMove.getProgram()[3].getPriority() > mi.getProgram()[3].getPriority()) {
+                } else if (chosenMove.getProgram()[3].priority() > mi.getProgram()[3].priority()) {
                     newMove = false;
-                } else if (chosenMove.getProgram()[4].getPriority() > mi.getProgram()[4].getPriority()) {
+                } else if (chosenMove.getProgram()[4].priority() > mi.getProgram()[4].priority()) {
                     newMove = false;
                 }
             } else if (goal == Goal.KILL_ALL) {

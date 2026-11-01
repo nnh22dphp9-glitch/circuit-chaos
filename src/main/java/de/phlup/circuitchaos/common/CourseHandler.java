@@ -307,7 +307,7 @@ public class CourseHandler {
     }
 
     public static int determineMovementAmount(Programme program, boolean usesBrakes) {
-        int movement = program.getType().getMovement();
+        int movement = program.type().getMovement();
         if (movement != 0 && usesBrakes) {
             movement = movement > 0 ? movement - 1 : movement + 1;
         }

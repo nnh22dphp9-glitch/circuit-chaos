@@ -105,7 +105,7 @@ public class ProgramRobotGui implements GuiHelper {
         imageSupplier = gameAttributes.getGameGui().getImageSupplier();
         robot.setPotentialProgramme(new ArrayList<>(robot.getPotentialProgramme()
                                                          .stream()
-                                                         .sorted((a, b) -> a == null || b == null ? 0 : Integer.compare(a.getPriority(), b.getPriority()))
+                                                         .sorted((a, b) -> a == null || b == null ? 0 : Integer.compare(a.priority(), b.priority()))
                                                          .toList()));
     }
 
