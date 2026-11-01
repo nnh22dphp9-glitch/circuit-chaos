@@ -36,6 +36,7 @@ public class Module {
         module.setType(type);
         module.setAmmunition(ammunition);
         System.arraycopy(activeInPhase, 0, module.getActiveInPhase(), 0, 5);
+        module.setDirection(direction);
         for (int i = 0; i < 5; i++) {
             System.arraycopy(powerDownShield[i], 0, module.getPowerDownShield()[i], 0, 4);
         }

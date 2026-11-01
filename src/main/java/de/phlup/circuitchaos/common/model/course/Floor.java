@@ -70,6 +70,7 @@ public class Floor {
     @JsonIgnore
     public Floor copy() {
         Floor floor = new Floor();
+        floor.setFloortype(floortype);
         floor.setPosition(position);
         System.arraycopy(activeInPhase, 0, floor.getActiveInPhase(), 0, 5);
         floor.setFacingDirection(facingDirection);

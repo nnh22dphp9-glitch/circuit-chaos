@@ -198,7 +198,7 @@ public class Robot extends CourseElement {
 
     @JsonIgnore
     public Robot copy() {
-        Robot robot = new Robot();
+        Robot robot = copy(new Robot());
         robot.setId(id);
         robot.setDamage(damage);
         robot.setArchivePosition(archivePosition);
