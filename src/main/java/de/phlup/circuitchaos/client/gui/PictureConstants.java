@@ -11,6 +11,7 @@ public interface PictureConstants {
 
     String PREFIX = "/gfx/";
 
+    String FOLDER_ADD_ONS   = PREFIX + "add-ons/";
     String FOLDER_ARROWS    = PREFIX + "arrows/";
     String FOLDER_BEAMS     = PREFIX + "beams/";
     String FOLDER_FLOOR     = PREFIX + "floor/";
@@ -94,6 +95,8 @@ public interface PictureConstants {
     String GFX_CONVEYOR_BELT_EXPRESS_CCW        = FOLDER_FLOOR_CONVEYOR_BELTS + "express-ccw";
     String GFX_CONVEYOR_BELT_EXPRESS_CW         = FOLDER_FLOOR_CONVEYOR_BELTS + "express-cw";
     String GFX_CONVEYOR_BELT_EXPRESS_CW_CCW     = FOLDER_FLOOR_CONVEYOR_BELTS + "express-cw-ccw";
+
+    String GFX_ADD_ON_SHIELD = FOLDER_ADD_ONS + "shield";
 
     Map<WallType, String> GFX_WALL_TYPE = Map.of(
             WallType.NONE, "",
