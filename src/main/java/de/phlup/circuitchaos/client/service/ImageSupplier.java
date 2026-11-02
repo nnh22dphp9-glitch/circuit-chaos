@@ -416,7 +416,7 @@ public class ImageSupplier {
     private Image drawShieldAddOn(CourseElement ce, Integer phase, Image pictureImage) {
         if (ce instanceof Robot r && phase != null && r.uses(SHIELD, phase)) {
             BufferedImage imageCopy = new BufferedImage(pictureImage.getWidth(null), pictureImage.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-            Graphics2D graphics = imageCopy.createGraphics();
+            Graphics2D    graphics  = imageCopy.createGraphics();
             try {
                 graphics.drawImage(pictureImage, 0, 0, null);
                 AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(ce.getPrevDirection().ordinal(), imageSize / 2.0, imageSize / 2.0);
@@ -434,12 +434,11 @@ public class ImageSupplier {
         if (subPhase == null) {
             return 0.0;
         }
-        float     target = calculateRotation(ce.getPrevDirection().minus(ce.getDirection()));
-        return target * subPhase * Math.PI / animationSteps;
+        return calculateRotation(ce.getPrevDirection().minus(ce.getDirection())) * subPhase / animationSteps;
     }
 
-    private static float calculateRotation(Direction direction) {
-        return switch (direction) {
+    private static double calculateRotation(Direction direction) {
+        return Math.PI * switch (direction) {
             case SOUTH -> 1.0f;
             case EAST -> -0.5f;
             case WEST -> 0.5f;
