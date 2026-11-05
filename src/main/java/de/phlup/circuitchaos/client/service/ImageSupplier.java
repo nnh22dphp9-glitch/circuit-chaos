@@ -61,6 +61,8 @@ import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_S_W;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W_N;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W_S;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_DISPENSER;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_LASER;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_POWER_DOWN_SHIELD;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_RAMMING_ARMOR;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_SHIELD;
@@ -118,11 +120,18 @@ import static de.phlup.circuitchaos.common.enums.Direction.EAST;
 import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
 import static de.phlup.circuitchaos.common.enums.Direction.SOUTH;
 import static de.phlup.circuitchaos.common.enums.Direction.WEST;
+import static de.phlup.circuitchaos.common.enums.ModuleType.DOUBLE_BARREL_LASER;
+import static de.phlup.circuitchaos.common.enums.ModuleType.EXCHANGE_BEAM;
+import static de.phlup.circuitchaos.common.enums.ModuleType.GLUE_DISPENSER;
+import static de.phlup.circuitchaos.common.enums.ModuleType.HIGH_POWER_LASER;
 import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
+import static de.phlup.circuitchaos.common.enums.ModuleType.OIL_DISPENSER;
 import static de.phlup.circuitchaos.common.enums.ModuleType.POWER_DOWN_SHIELD;
 import static de.phlup.circuitchaos.common.enums.ModuleType.PRESSURE_BEAM;
 import static de.phlup.circuitchaos.common.enums.ModuleType.RAMMING_ARMOR;
+import static de.phlup.circuitchaos.common.enums.ModuleType.REAR_LASER;
 import static de.phlup.circuitchaos.common.enums.ModuleType.SHIELD;
+import static de.phlup.circuitchaos.common.enums.ModuleType.SPIN_RIGHT_BEAM;
 import static de.phlup.circuitchaos.common.enums.ModuleType.TRACTOR_BEAM;
 import static de.phlup.circuitchaos.common.enums.Step.CONVEYOR_BELTS_MOVE;
 import static de.phlup.circuitchaos.common.enums.Step.COURSE_MOUNTED_LASER_FIRE;
@@ -426,6 +435,18 @@ public class ImageSupplier {
             graphics.drawImage(pictureImage, 0, 0, null);
             if (robot.hasModule(RAMMING_ARMOR)) {
                 graphics.drawImage(getImageIconPlain(GFX_ADD_ON_RAMMING_ARMOR).getImage(), 0, 0, null);
+            }
+            if (robot.hasModule(MAIN_LASER) || robot.hasModule(DOUBLE_BARREL_LASER) || robot.hasModule(HIGH_POWER_LASER)
+                    || robot.hasModule(EXCHANGE_BEAM) || robot.hasModule(SPIN_RIGHT_BEAM) || robot.hasModule(SPIN_RIGHT_BEAM)
+                    || robot.hasModule(PRESSURE_BEAM) || robot.hasModule(TRACTOR_BEAM)) {
+                graphics.drawImage(getImageIconPlain(GFX_ADD_ON_LASER).getImage(), 0, 0, null);
+            }
+            if (robot.hasModule(REAR_LASER)) {
+                AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(2, imageSize / 2.0, imageSize / 2.0);
+                graphics.drawImage(getImageIconPlain(GFX_ADD_ON_LASER).getImage(), affineTransform, null);
+            }
+            if (robot.hasModule(OIL_DISPENSER) || robot.hasModule(GLUE_DISPENSER)) {
+                graphics.drawImage(getImageIconPlain(GFX_ADD_ON_DISPENSER).getImage(), 0, 0, null);
             }
             if (phase != null && robot.uses(SHIELD, phase)) {
                 AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(robot.getModule(SHIELD).getShieldDirection()[phase].ordinal(), imageSize / 2.0, imageSize / 2.0);

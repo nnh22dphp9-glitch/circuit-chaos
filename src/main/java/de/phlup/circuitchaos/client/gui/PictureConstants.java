@@ -96,6 +96,8 @@ public interface PictureConstants {
     String GFX_CONVEYOR_BELT_EXPRESS_CW         = FOLDER_FLOOR_CONVEYOR_BELTS + "express-cw";
     String GFX_CONVEYOR_BELT_EXPRESS_CW_CCW     = FOLDER_FLOOR_CONVEYOR_BELTS + "express-cw-ccw";
 
+    String GFX_ADD_ON_DISPENSER         = FOLDER_ADD_ONS + "dispenser";
+    String GFX_ADD_ON_LASER             = FOLDER_ADD_ONS + "laser";
     String GFX_ADD_ON_POWER_DOWN_SHIELD = FOLDER_ADD_ONS + "power-down-shield";
     String GFX_ADD_ON_RAMMING_ARMOR     = FOLDER_ADD_ONS + "ramming-armor";
     String GFX_ADD_ON_SHIELD            = FOLDER_ADD_ONS + "shield";
