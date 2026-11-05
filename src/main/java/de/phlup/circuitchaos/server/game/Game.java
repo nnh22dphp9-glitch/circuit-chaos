@@ -141,7 +141,7 @@ public class Game {
                 || (step == Step.EXPRESS_CONVEYOR_BELTS_MOVE && courseProps.isExpressConveyorBelts())
                 || (step == Step.GEARS_ROTATE && courseProps.isGears())
                 || (step == Step.PUSHERS_PUSH && courseProps.isPushers());
-        if (elementStubs == null || wait) {
+        if (elementStubs == null || wait || step == Step.SETUP) {
             if (step == Step.SETUP || !wait) {
                 for (Registration reg : watchers) {
                     // Please note: "reason" will become part of the window title
