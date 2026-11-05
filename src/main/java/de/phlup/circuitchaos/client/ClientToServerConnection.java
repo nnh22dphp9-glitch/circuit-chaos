@@ -1,13 +1,13 @@
 package de.phlup.circuitchaos.client;
 
 import de.phlup.circuitchaos.common.CircuitChaosException;
-import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.GameItem;
 import de.phlup.circuitchaos.common.model.GameItemsWrapper;
 import de.phlup.circuitchaos.common.model.NetworkResponse;
-import de.phlup.circuitchaos.common.model.Position;
 import de.phlup.circuitchaos.common.model.PullingData;
 import de.phlup.circuitchaos.common.model.Registration;
+import de.phlup.circuitchaos.common.model.course.Course;
+import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.server.ServerController;
 import de.phlup.circuitchaos.server.game.GameOptions;
 import lombok.AllArgsConstructor;

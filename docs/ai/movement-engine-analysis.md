@@ -1,6 +1,6 @@
 # Bewegungsengine: Öl, Flug und Teleporter
 
-Stand: `develop`, geprüft am 2026-10-23. Diese Notiz dokumentiert den Abgleich von `Game`, `Teleporter` und `ComputerMoveInfo`. Sie beschreibt den vorhandenen Code und die bestätigten Regeln; sie ändert keine Spielmechanik.
+Stand: `develop`, geprüft am 2026-10-23. Diese Notiz dokumentiert die technische Analyse von `Game`, `Teleporter` und `ComputerMoveInfo`. Die abgestimmte Spielanleitung ist maßgeblich für die Regeln; diese Notiz ändert keine Spielmechanik.
 
 ## 1. Bestätigte Regel: Wasser, Öl und Hovercraft
 
@@ -92,6 +92,6 @@ Stattdessen sollten wir die Regeln nicht unabhängig ein zweites Mal nachbauen. 
 1. Einen eigenständigen Simulationszustand definieren, der mindestens Position, Blickrichtung, Höhe, Flugzustand, relevante Module, Spielfeldobjekte und die Positionen/Zustände aller Roboter enthält.
 2. Die Bewegungsregeln schrittweise so aufteilen, dass reine Entscheidungen (z. B. welche Wand-/Rampenübergänge zulässig sind, wie Wasser/Öl die Bewegungsstärke beeinflussen, wie das Teleporterziel berechnet wird) von Seiteneffekten (Schaden verbuchen, Benachrichtigungen senden, echte Objekte ändern) getrennt sind.
 3. Dieselben reinen Regeln sowohl in der echten Engine als auch in der Simulation verwenden, soweit das ohne Verhaltensänderung möglich ist. Die echte Engine führt anschließend die resultierenden Aktionen aus; die Simulation wendet sie auf eine Kopie ihres Zustands an.
-4. Durch Tests sicherstellen, dass Engine und Simulation für kontrollierte Szenarien dieselben Positionen, Flugzustände, Blockaden und Fallfolgen ergeben.
+4. Bei der Simulation die fachlichen Bewegungsregeln der Engine zugrunde legen und Seiteneffekte von der Kandidatenberechnung trennen.
 
-Das ist ein Architekturvorschlag, keine Aufforderung zu einer sofortigen Umstrukturierung. Der nächste sinnvolle Schritt ist, zunächst die Bewegungs- und Teleporterregeln als kleine, testbare Entscheidungen zu isolieren und danach die gemeinsame Zustandsrepräsentation zu entwerfen. Bis dahin sollte `ComputerMoveInfo` als heuristische Näherung und nicht als regelgetreuer Simulator behandelt werden.
+Das ist ein Architekturvorschlag, keine Aufforderung zu einer sofortigen Umstrukturierung. Für die KI-Arbeit sollte `ComputerMoveInfo` bis zu einer entsprechenden Erweiterung als heuristische Näherung und nicht als regelgetreuer Simulator behandelt werden.

@@ -2,11 +2,11 @@ package de.phlup.circuitchaos.server.service;
 
 import de.phlup.circuitchaos.common.enums.PullType;
 import de.phlup.circuitchaos.common.enums.Step;
-import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.PullingData;
 import de.phlup.circuitchaos.common.model.Registration;
 import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
+import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.Game;
 import lombok.AllArgsConstructor;

@@ -8,13 +8,13 @@ import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.enums.WallType;
-import de.phlup.circuitchaos.common.model.Checkpoint;
-import de.phlup.circuitchaos.common.model.Course;
-import de.phlup.circuitchaos.common.model.CourseObject;
-import de.phlup.circuitchaos.common.model.CourseProperties;
-import de.phlup.circuitchaos.common.model.Floor;
-import de.phlup.circuitchaos.common.model.Position;
-import de.phlup.circuitchaos.common.model.Range;
+import de.phlup.circuitchaos.common.model.course.Checkpoint;
+import de.phlup.circuitchaos.common.model.course.Course;
+import de.phlup.circuitchaos.common.model.course.CourseObject;
+import de.phlup.circuitchaos.common.model.course.CourseProperties;
+import de.phlup.circuitchaos.common.model.course.Floor;
+import de.phlup.circuitchaos.common.records.Position;
+import de.phlup.circuitchaos.common.records.Range;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -1071,8 +1071,8 @@ public class EditorGui extends BaseGui implements GuiHelper {
                 case GEARS_CCW, GEARS_CW -> courseProperties.setGears(true);
                 case TRAPDOOR -> courseProperties.setTrapdoor(true);
                 case CONVEYOR_BELT, TURNING_CONVEYOR_BELT_CCW, TURNING_CONVEYOR_BELT_CW_CCW,
-                     TURNING_EXPRESS_CONVEYOR_BELT_CW -> courseProperties.setConveyorBelts(true);
-                case EXPRESS_CONVEYOR_BELT, TURNING_EXPRESS_CONVEYOR_BELT_CCW, TURNING_CONVEYOR_BELT_CW,
+                     TURNING_CONVEYOR_BELT_CW -> courseProperties.setConveyorBelts(true);
+                case EXPRESS_CONVEYOR_BELT, TURNING_EXPRESS_CONVEYOR_BELT_CCW, TURNING_EXPRESS_CONVEYOR_BELT_CW,
                      TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW -> {
                     courseProperties.setConveyorBelts(true);
                     courseProperties.setExpressConveyorBelts(true);

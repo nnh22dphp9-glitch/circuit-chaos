@@ -192,13 +192,13 @@ Das Zielportal beziehungsweise Zielfeld wird unabhängig von dortigen Gefahren b
 
 Der Schaden nimmt mit der Entfernung vom Explosionszentrum ab:
 
-|  |  |  |  |  |
-|---:|---:|---:|---:|---:|
-| 0 | 0 | 1 | 0 | 0 |
-| 0 | 1 | 2 | 1 | 0 |
+|   |   |       |   |   |
+|--:|--:|------:|--:|--:|
+| 0 | 0 |     1 | 0 | 0 |
+| 0 | 1 |     2 | 1 | 0 |
 | 1 | 2 | **4** | 2 | 1 |
-| 0 | 1 | 2 | 1 | 0 |
-| 0 | 0 | 1 | 0 | 0 |
+| 0 | 1 |     2 | 1 | 0 |
+| 0 | 0 |     1 | 0 | 0 |
 
 Die Mine verursacht auf ihrem eigenen Feld 4 Schadenspunkte, auf den orthogonal angrenzenden Feldern 2 und auf den diagonal angrenzenden Feldern 1. Außerhalb dieses 5×5-Bereichs entsteht kein Schaden.
 
@@ -232,18 +232,18 @@ Ein Schuss wird von einem getroffenen Roboter aufgehalten (Ausnahme: **High Powe
 
 Die Waffen haben folgende Wirkungen:
 
-| Waffe | Wirkung |
-|---|---|
-| **Main Laser** / **Single Course-Mounted Laser** | Verursacht bei einem Treffer 1 Schadenspunkt. |
-| **Double Barrel Laser** / **Double Course-Mounted Laser** | Verursacht bei einem Treffer 2 Schadenspunkte. |
-| **Triple Course-Mounted Laser** | Verursacht bei einem Treffer 3 Schadenspunkte. |
-| **High Power Laser** | Verursacht beim ersten getroffenen Ziel 1 Schadenspunkt. Der Schuss geht durch dieses Ziel hindurch und kann ein zweites Ziel treffen, das ebenfalls 1 Schadenspunkt erhält. |
-| **Rear Laser** | Schießt nach hinten und verursacht bei einem Treffer 1 Schadenspunkt, wie der Main Laser. |
-| **Exchange Beam** | Tauscht die Position des schießenden Roboters mit der Position des Ziels. Verursacht keinen Schaden. |
-| **Pressure Beam** / **Course-Mounted Pressure Beam** | Drückt das Ziel ein Feld weiter. Verursacht keinen Schaden. |
-| **Tractor Beam** / **Course-Mounted Tractor Beam** | Zieht das Ziel ein Feld zum Schützen heran. Verursacht keinen Schaden. |
-| **Spin Left Beam** / **Course-Mounted Spin-Left Beam** | Dreht das Ziel um 90 Grad gegen den Uhrzeigersinn. Verursacht keinen Schaden. |
-| **Spin Right Beam** / **Course-Mounted Spin-Right Beam** | Dreht das Ziel um 90 Grad im Uhrzeigersinn. Verursacht keinen Schaden. |
+| Waffe                                                     | Wirkung                                                                                                                                                                      |
+|-----------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Main Laser** / **Single Course-Mounted Laser**          | Verursacht bei einem Treffer 1 Schadenspunkt.                                                                                                                                |
+| **Double Barrel Laser** / **Double Course-Mounted Laser** | Verursacht bei einem Treffer 2 Schadenspunkte.                                                                                                                               |
+| **Triple Course-Mounted Laser**                           | Verursacht bei einem Treffer 3 Schadenspunkte.                                                                                                                               |
+| **High Power Laser**                                      | Verursacht beim ersten getroffenen Ziel 1 Schadenspunkt. Der Schuss geht durch dieses Ziel hindurch und kann ein zweites Ziel treffen, das ebenfalls 1 Schadenspunkt erhält. |
+| **Rear Laser**                                            | Schießt nach hinten und verursacht bei einem Treffer 1 Schadenspunkt, wie der Main Laser.                                                                                    |
+| **Exchange Beam**                                         | Tauscht die Position des schießenden Roboters mit der Position des Ziels. Verursacht keinen Schaden.                                                                         |
+| **Pressure Beam** / **Course-Mounted Pressure Beam**      | Drückt das Ziel ein Feld weiter. Verursacht keinen Schaden.                                                                                                                  |
+| **Tractor Beam** / **Course-Mounted Tractor Beam**        | Zieht das Ziel ein Feld zum Schützen heran. Verursacht keinen Schaden.                                                                                                       |
+| **Spin Left Beam** / **Course-Mounted Spin-Left Beam**    | Dreht das Ziel um 90 Grad gegen den Uhrzeigersinn. Verursacht keinen Schaden.                                                                                                |
+| **Spin Right Beam** / **Course-Mounted Spin-Right Beam**  | Dreht das Ziel um 90 Grad im Uhrzeigersinn. Verursacht keinen Schaden.                                                                                                       |
 
 Die kursmontierten Waffen sind fest auf dem Kurs angebracht und feuern im Ablauf einer Phase nach den Waffen der Roboter. Einen kursmontierten Exchange Beam gibt es nicht, da dessen Ausgangspunkt dafür bewegt werden müsste.
 

@@ -1,8 +1,8 @@
 package de.phlup.circuitchaos.client.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.phlup.circuitchaos.common.model.Course;
 import de.phlup.circuitchaos.common.model.CourseInfo;
+import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

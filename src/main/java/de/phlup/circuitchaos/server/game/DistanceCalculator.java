@@ -2,9 +2,9 @@ package de.phlup.circuitchaos.server.game;
 
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.WallType;
-import de.phlup.circuitchaos.common.model.Course;
-import de.phlup.circuitchaos.common.model.Floor;
-import de.phlup.circuitchaos.common.model.Position;
+import de.phlup.circuitchaos.common.model.course.Course;
+import de.phlup.circuitchaos.common.model.course.Floor;
+import de.phlup.circuitchaos.common.records.Position;
 
 public class DistanceCalculator {
 

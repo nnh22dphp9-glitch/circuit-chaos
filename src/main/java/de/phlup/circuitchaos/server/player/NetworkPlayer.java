@@ -1,10 +1,9 @@
 package de.phlup.circuitchaos.server.player;
 
-import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.NetworkResponse;
 import de.phlup.circuitchaos.common.model.Registration;
-import de.phlup.circuitchaos.common.model.Robot;
+import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.Game;
 import lombok.EqualsAndHashCode;
@@ -23,8 +22,8 @@ public class NetworkPlayer extends Player {
     private final String       id;
     private final Registration registration;
 
-    public NetworkPlayer(Robot robot, String gameId, Registration registration, Goal goal) {
-        super(robot, gameId, goal);
+    public NetworkPlayer(Robot robot, String gameId, Registration registration) {
+        super(robot, gameId);
         this.registration = registration;
         this.id = UUID.randomUUID().toString();
     }

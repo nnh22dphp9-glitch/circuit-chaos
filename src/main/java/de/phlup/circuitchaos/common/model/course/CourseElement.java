@@ -1,7 +1,8 @@
-package de.phlup.circuitchaos.common.model;
+package de.phlup.circuitchaos.common.model.course;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.phlup.circuitchaos.common.enums.Direction;
+import de.phlup.circuitchaos.common.records.Position;
 import lombok.Data;
 
 @Data
@@ -20,5 +21,18 @@ public abstract class CourseElement {
 
     @JsonIgnore
     public abstract boolean isFlying();
+
+    @JsonIgnore
+    protected <T extends CourseElement> T copy(T copy) {
+        copy.setName(name);
+        copy.setPosition(position);
+        copy.setPrevPosition(prevPosition);
+        copy.setDirection(direction);
+        copy.setPrevDirection(prevDirection);
+        copy.setLevel(level);
+        copy.setOnCourse(onCourse);
+        copy.setConflictingMark(conflictingMark);
+        return copy;
+    }
 
 }

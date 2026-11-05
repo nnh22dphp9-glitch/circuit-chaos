@@ -2,7 +2,7 @@ package de.phlup.circuitchaos.client.gui;
 
 import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.enums.Step;
-import de.phlup.circuitchaos.common.model.Floor;
+import de.phlup.circuitchaos.common.model.course.Floor;
 import org.springframework.validation.annotation.Validated;
 
 import javax.swing.JLabel;

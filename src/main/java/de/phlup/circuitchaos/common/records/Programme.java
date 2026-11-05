@@ -1,30 +1,17 @@
-package de.phlup.circuitchaos.common.model;
+package de.phlup.circuitchaos.common.records;
 
 import de.phlup.circuitchaos.common.enums.ProgramType;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static de.phlup.circuitchaos.server.GlobalServerAttributes.RANDOM;
 
-@Data
-@NoArgsConstructor
-public class Programme {
-
-    private int         priority;
-    private ProgramType type;
+public record Programme(int priority, ProgramType type) {
 
     public static Programme create(boolean overdrive, boolean reverseDrive) {
-        Programme programme = new Programme();
-        programme.setType(getRandomType(overdrive, reverseDrive));
-        if (programme.getType().isMovement()) {
-            programme.setPriority(RANDOM.nextInt(10000));
-        } else {
-            programme.setPriority(0);
-        }
-        return programme;
+        ProgramType type = getRandomType(overdrive, reverseDrive);
+        return new Programme(type.isMovement() ? RANDOM.nextInt(10000) : 0, type);
     }
 
     private static ProgramType getRandomType(boolean overdrive, boolean reverseDrive) {

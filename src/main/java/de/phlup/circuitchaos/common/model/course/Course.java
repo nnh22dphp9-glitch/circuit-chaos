@@ -1,5 +1,7 @@
-package de.phlup.circuitchaos.common.model;
+package de.phlup.circuitchaos.common.model.course;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.phlup.circuitchaos.common.records.Range;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -22,5 +24,18 @@ public class Course {
 
     @NotNull
     private CourseProperties properties = new CourseProperties();
+
+    @NotNull
+    @JsonIgnore
+    public Course copy() {
+        Course course = new Course();
+        course.getFloor().addAll(floor.stream().map(Floor::copy).toList());
+        course.getObjects().addAll(objects.stream().map(CourseObject::copy).toList());
+        course.getRobots().addAll(robots.stream().map(Robot::copy).toList());
+        course.getCheckpoints().addAll(checkpoints.stream().map(Checkpoint::copy).toList());
+        course.setRange(range);
+        course.setProperties(properties.copy());
+        return course;
+    }
 
 }

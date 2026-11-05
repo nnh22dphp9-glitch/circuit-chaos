@@ -2,6 +2,7 @@ package de.phlup.circuitchaos.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import de.phlup.circuitchaos.common.records.RevealProgrammeListItem;
 import lombok.Data;
 
 import java.util.ArrayList;

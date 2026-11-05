@@ -4,13 +4,13 @@ import de.phlup.circuitchaos.client.ClientToServerConnection;
 import de.phlup.circuitchaos.client.service.AudioSupplier;
 import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.enums.Step;
-import de.phlup.circuitchaos.common.model.Course;
-import de.phlup.circuitchaos.common.model.CourseElement;
 import de.phlup.circuitchaos.common.model.GameAttributes;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
-import de.phlup.circuitchaos.common.model.RevealProgrammeListItem;
 import de.phlup.circuitchaos.common.model.RevealProgrammeResponse;
-import de.phlup.circuitchaos.common.model.Robot;
+import de.phlup.circuitchaos.common.model.course.Course;
+import de.phlup.circuitchaos.common.model.course.CourseElement;
+import de.phlup.circuitchaos.common.model.course.Robot;
+import de.phlup.circuitchaos.common.records.RevealProgrammeListItem;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.GameOptions;
@@ -138,7 +138,7 @@ public class GameGui extends BaseGui {
                                                                            StringUtils.hasText(reasonForCourseChange) ? reasonForCourseChange : ""));
         synchronized (courseJPanel) {
             courseJPanel.arrangeElements(this, step, phase, subPhase, animationSteps, myNextCheckpoint(course));
-            if (subPhase == null || state == CourseState.GAME_ENDED) {
+            if (subPhase == null || state == CourseState.GAME_ENDED || step == Step.SETUP) {
                 audioSupplier.stop();
             } else if (subPhase == 0) {
                 boolean hover   = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(movingRobotName);

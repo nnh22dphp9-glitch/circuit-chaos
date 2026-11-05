@@ -9,7 +9,7 @@ Die KI muss viele mögliche Programme bewerten können, ohne dabei den echten Sp
 1. **Simulation ohne Seiteneffekte:** Ein hypothetischer Zug verändert weder das echte Game, Course, Robot noch echte Module, Minen, Schadenswerte oder Benachrichtigungen.
 2. **Gemeinsame Regeln:** Entscheidungen über Bewegungsstärke, Wandübergänge, Flug, Öl, Teleporter und Konflikte sollen – wo sinnvoll – von Engine und Simulation gemeinsam verwendet werden.
 3. **Eigenständiger Kandidatenzustand:** Jede Kandidatenbewertung arbeitet auf einem unabhängigen Zustand. Zwei Kandidaten dürfen sich nicht gegenseitig beeinflussen.
-4. **Schrittweise Migration:** Bestehendes Spielverhalten bleibt unverändert, bis gezielte Tests belegen, dass eine Extraktion äquivalent ist.
+4. **Schrittweise Migration:** Die bestehende Engine bleibt bei der Weiterentwicklung der Simulation maßgeblich für das Spielverhalten; die abgestimmte Spielanleitung bleibt maßgeblich für die Spielregeln.
 
 ## 1. Grobe Architektur
 
@@ -51,7 +51,7 @@ Der Simulationszustand muss den für die Prognose relevanten Zustand explizit en
 - bereits erfolgte Aktionen der aktuellen Phase;
 - Status wie alive, falling oder teleportedThisProgramStep, damit Ereignisse die restliche Bewegung korrekt beenden.
 
-Die statische Spielfeldgeometrie muss nicht für jeden Kandidaten neu kopiert werden, wenn sie garantiert unveränderlich ist. Bewegliche Objekte und veränderliche Zustände müssen dagegen isoliert sein. Eine sichere erste Version darf eine tiefe Kopie verwenden; Optimierung durch immutable Board-Daten oder Copy-on-Write kommt erst nach Korrektheitstests.
+Die statische Spielfeldgeometrie muss nicht für jeden Kandidaten neu kopiert werden, wenn sie garantiert unveränderlich ist. Bewegliche Objekte und veränderliche Zustände müssen dagegen isoliert sein. Eine sichere erste Version darf eine tiefe Kopie verwenden; Optimierung durch immutable Board-Daten oder Copy-on-Write kommt erst nach sorgfältiger Implementierung.
 
 **Nicht als Simulationszustand verwenden:**
 - mutable Robot-Objekte aus dem echten Spiel;
@@ -63,16 +63,16 @@ Die statische Spielfeldgeometrie muss nicht für jeden Kandidaten neu kopiert we
 
 Die Trennlinie sollte nicht „Engine-Code versus KI-Code“ lauten, sondern **Regelentscheidung versus Ausführung eines Ereignisses**.
 
-| Regelbereich | Gemeinsame, möglichst reine Berechnung | Ausführung mit Seiteneffekten |
-|---|---|---|
-| Programmbewegung | Programmtyp + Bremsen + relevante Module → Bewegungsstärke | Programm-/Registerzustand fortschreiben |
-| Hovercraft | Modulaktivität + Bewegungsstärke → Flugzustand für diesen Schritt | Flugstatus des echten Roboters setzen |
-| Wasser/Öl | Flugstatus + Ausgangsfeld + Bewegungsstärke → reduzierte Bewegungsstärke | Bewegung mit Ergebnis ausführen |
-| Wand/Rampe/Einbahnwand | Zustand + Richtung → Übergang erlaubt, blockiert oder Spezialübergang | Position/Level ändern, Benachrichtigung |
-| Konflikt/Schieben | Kandidatenzustand + Bewegungsabsicht → Konflikt-/Schiebeentscheidung | Positionen ändern, Ramming Armor und Schaden anwenden |
-| Öl-Rutschen | Flugstatus + Kachel + Blockadeprüfung → nächster Schritt/Stop | Position ändern und gegebenenfalls Fall auslösen |
-| Teleporter | Bewegung, Flugstatus, Richtung, Zielbelegung → nicht aktiv / blockiert / teleportiert + Ziel | Position setzen und Ereignis melden |
-| Tod/Fall | Spielfeldzustand + Position + Flugstatus → Fall-/Todesereignis | Roboter entfernen, Schaden/Die-Counter/Benachrichtigung ändern |
+| Regelbereich           | Gemeinsame, möglichst reine Berechnung                                                       | Ausführung mit Seiteneffekten                                  |
+|------------------------|----------------------------------------------------------------------------------------------|----------------------------------------------------------------|
+| Programmbewegung       | Programmtyp + Bremsen + relevante Module → Bewegungsstärke                                   | Programm-/Registerzustand fortschreiben                        |
+| Hovercraft             | Modulaktivität + Bewegungsstärke → Flugzustand für diesen Schritt                            | Flugstatus des echten Roboters setzen                          |
+| Wasser/Öl              | Flugstatus + Ausgangsfeld + Bewegungsstärke → reduzierte Bewegungsstärke                     | Bewegung mit Ergebnis ausführen                                |
+| Wand/Rampe/Einbahnwand | Zustand + Richtung → Übergang erlaubt, blockiert oder Spezialübergang                        | Position/Level ändern, Benachrichtigung                        |
+| Konflikt/Schieben      | Kandidatenzustand + Bewegungsabsicht → Konflikt-/Schiebeentscheidung                         | Positionen ändern, Ramming Armor und Schaden anwenden          |
+| Öl-Rutschen            | Flugstatus + Kachel + Blockadeprüfung → nächster Schritt/Stop                                | Position ändern und gegebenenfalls Fall auslösen               |
+| Teleporter             | Bewegung, Flugstatus, Richtung, Zielbelegung → nicht aktiv / blockiert / teleportiert + Ziel | Position setzen und Ereignis melden                            |
+| Tod/Fall               | Spielfeldzustand + Position + Flugstatus → Fall-/Todesereignis                               | Roboter entfernen, Schaden/Die-Counter/Benachrichtigung ändern |
 
 Eine reine Funktion darf keine Game- oder Player-Methoden aufrufen, keine echten Modelle mutieren, keine Benachrichtigungen auslösen und keinen Zufallszustand verändern. Zufällige Ergebnisse müssen als Eingabe explizit sein oder über einen kontrollierten Zufallsdienst kommen.
 
@@ -111,7 +111,7 @@ Die vorhandene Teleporter.teleport()-Methode kombiniert Regelentscheidung und ec
 - Regelentscheidung: Teleporter am aktuellen Feld? Bewegung ungleich null? Nicht fliegend? Ziel anhand Richtung und Bewegungsstärke berechnen? Ziel frei?
 - Ausführung: game.setPosition(...), Benachrichtigung und Markierung des Programmschritts als teleportiert.
 
-Diese Trennung ist klein genug, um sie früh zu testen. Die bestehende Methode sollte zunächst durch Tests abgesichert werden. Danach kann eine reine Berechnung wie resolveTeleporterIntent(...) eingeführt werden, die Engine und Simulation gemeinsam verwenden. Die echte Engine führt das Ergebnis weiterhin über ihre vorhandenen Mechanismen aus; die Simulation verändert stattdessen ihren Snapshot.
+Diese Trennung ist klein genug, um sie bei Bedarf früh umzusetzen. Danach kann eine reine Berechnung wie resolveTeleporterIntent(...) eingeführt werden, die Engine und Simulation gemeinsam verwenden. Die echte Engine führt das Ergebnis weiterhin über ihre vorhandenen Mechanismen aus; die Simulation verändert stattdessen ihren Snapshot.
 
 Zu erhalten sind diese Regeln:
 - Flug verhindert die Teleportation.
@@ -136,34 +136,14 @@ Für einen Programmschritt:
 
 Die Reihenfolge ist an den Ist-Zustand der Engine angelehnt. Eine Änderung des Spielverhaltens wäre eine separate, ausdrücklich zu entscheidende Änderung.
 
-## 7. Teststrategie: erst Gleichheit, dann Ausbau
+## 7. Mögliche Reihenfolge der Umsetzung
 
-Für jede extrahierte Regel sollten Tests sowohl die Regelentscheidung als auch die Wirkung auf echte Engine und Simulation abdecken.
-
-### Erste Tests (MVP)
-
-- [ ] Bremsen: vorwärts/rückwärts, Bewegungsstärke 0 und 1.
-- [ ] Wasser am Boden: vorwärts/rückwärts reduziert um eins.
-- [ ] Öl am Boden: Bewegungsreduktion und anschließendes Rutschen.
-- [ ] Hovercraft-Abheben auf Wasser und Öl: keine Reduktion.
-- [ ] Hovercraft-Flug über Öl: kein Rutschen während der Flugbewegung.
-- [ ] Hovercraft-Landung auf Öl: kein nachträgliches Rutschen.
-- [ ] Öl-Rutschen: freier Weg, Wandblockade, Roboterblockade, Abgrund.
-- [ ] Teleporter: Flug, Bewegungsstärke 0, positive und negative Bewegung, freies Ziel, belegtes Ziel, Ziel im Abgrund.
-- [ ] Kandidatenisolation: Simulation verändert weder echten Roboter noch Kursobjekte, Module, Schaden oder Positionen.
-- [ ] Kandidatenreproduzierbarkeit: dieselben Eingaben ergeben denselben simulierten Zustand.
-
-Wo möglich, soll ein Test denselben kontrollierten Ausgangszustand auf echte Engine und Simulation anwenden und die beobachtbaren Ergebnisse vergleichen. Für echte Engine-Tests müssen externe Benachrichtigungen und globale Spielregistrierung kontrolliert eingerichtet werden; Produktionsregeln dürfen nicht nur für Tests dupliziert werden.
-
-## 8. Empfohlene Reihenfolge der Umsetzung
-
-1. Tests für vorhandenes Teleporter- und Wasser/Öl/Hovercraft-Verhalten ergänzen, ohne die Implementierung umzuschreiben.
-2. Kleine reine Bewegungsberechnungen extrahieren und die echte Engine darauf umstellen; nach jedem Schritt bestehende Tests ausführen.
-3. SimulationState und SimulationSnapshotFactory einführen, zunächst mit Position, Richtung, Level, Flugzustand, relevanten Modulen, Boden-/Wandzugriff und allen Roboterpositionen.
-4. Bewegung und Teleporter für einen Kandidatenzustand simulieren; Kandidatenisolation und Vergleichstests ergänzen.
-5. Wand-/Rampenübergänge, Konflikte und Schiebeketten nach und nach in die gemeinsame Regelbasis aufnehmen.
-6. Erst danach Förderbänder, Pusher, Zahnräder, Laser, Minen und Checkpoints als vollständigen Phasenablauf modellieren.
-7. Zum Schluss die Bewertung in ComputerMoveInfo von der konkreten Bewegungsimplementierung entkoppeln. Eine bestehende Heuristik kann vorübergehend weiter genutzt werden, aber nicht als Regelquelle.
+1. Kleine reine Bewegungsberechnungen extrahieren und die echte Engine darauf umstellen.
+2. SimulationState und SimulationSnapshotFactory einführen, zunächst mit Position, Richtung, Level, Flugzustand, relevanten Modulen, Boden-/Wandzugriff und allen Roboterpositionen.
+3. Bewegung und Teleporter für einen Kandidatenzustand simulieren; Kandidatenisolation berücksichtigen.
+4. Wand-/Rampenübergänge, Konflikte und Schiebeketten nach und nach in die gemeinsame Regelbasis aufnehmen.
+5. Erst danach Förderbänder, Pusher, Zahnräder, Laser, Minen und Checkpoints als vollständigen Phasenablauf modellieren.
+6. Zum Schluss die Bewertung in ComputerMoveInfo von der konkreten Bewegungsimplementierung entkoppeln. Eine bestehende Heuristik kann vorübergehend weiter genutzt werden, aber nicht als Regelquelle.
 
 ## 9. Risiken und bewusste Nicht-Ziele
 
@@ -175,6 +155,6 @@ Wo möglich, soll ein Test denselben kontrollierten Ausgangszustand auf echte En
 
 ## Fazit
 
-Empfohlen ist eine **kleine gemeinsame Regelbasis plus unabhängiger Kandidatenzustand**, keine zweite Spiel-Engine und kein Aufruf der echten Engine auf mutierbaren Live-Objekten. Teleporter und Wasser/Öl/Hovercraft sind gute erste Extraktionsschritte. Konfliktauflösung und Schiebeketten folgen erst, wenn Snapshot und Teststruktur stehen.
+Empfohlen ist eine **kleine gemeinsame Regelbasis plus unabhängiger Kandidatenzustand**, keine zweite Spiel-Engine und kein Aufruf der echten Engine auf mutierbaren Live-Objekten. Teleporter und Wasser/Öl/Hovercraft sind gute erste Extraktionsschritte. Konfliktauflösung und Schiebeketten folgen, wenn Snapshot und Zustandsmodell stehen.
 
-Die nächsten Codeänderungen sollten nach den Tests erfolgen und jeweils klein genug sein, um nachzuweisen, dass die echte Engine ihr bisheriges Verhalten beibehält.
+Die Codeänderungen sollten schrittweise erfolgen und bestehendes Engine-Verhalten nicht unbeabsichtigt verändern.

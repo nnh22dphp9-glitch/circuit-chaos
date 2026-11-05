@@ -3,11 +3,12 @@ package de.phlup.circuitchaos.client.gui;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
-import de.phlup.circuitchaos.common.model.Course;
-import de.phlup.circuitchaos.common.model.CourseObject;
-import de.phlup.circuitchaos.common.model.Floor;
-import de.phlup.circuitchaos.common.model.Module;
-import de.phlup.circuitchaos.common.model.Robot;
+import de.phlup.circuitchaos.common.enums.ModuleType;
+import de.phlup.circuitchaos.common.model.course.Course;
+import de.phlup.circuitchaos.common.model.course.CourseObject;
+import de.phlup.circuitchaos.common.model.course.Floor;
+import de.phlup.circuitchaos.common.model.course.Module;
+import de.phlup.circuitchaos.common.model.course.Robot;
 
 import java.util.List;
 
@@ -109,15 +110,23 @@ public class ToolTipTexts {
                    .append(module.getActiveInPhase()[4] ? " 5 " : "");
             }
         }
-        if (module.getDirection() != null) {
-            ttt.append(", Direction: ").append(switch (module.getDirection()) {
-                case Direction.NORTH -> "front";
-                case Direction.EAST -> "right";
-                case Direction.SOUTH -> "back";
-                case Direction.WEST -> "left";
-            });
+        if (module.getType() == ModuleType.SHIELD) {
+            ttt.append(", Direction: ").append(getDirectionAccordingToRobot(module.getShieldDirection()[0]))
+               .append(" - ").append(getDirectionAccordingToRobot(module.getShieldDirection()[1]))
+               .append(" - ").append(getDirectionAccordingToRobot(module.getShieldDirection()[2]))
+               .append(" - ").append(getDirectionAccordingToRobot(module.getShieldDirection()[3]))
+               .append(" - ").append(getDirectionAccordingToRobot(module.getShieldDirection()[4]));
         }
         return ttt.append(NEW_LINE).toString();
+    }
+
+    private static String getDirectionAccordingToRobot(Direction dir) {
+        return switch (dir) {
+            case Direction.NORTH -> "front";
+            case Direction.EAST -> "right";
+            case Direction.SOUTH -> "back";
+            case Direction.WEST -> "left";
+        };
     }
 
 }

@@ -3,10 +3,9 @@ package de.phlup.circuitchaos.server.game;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.enums.Step;
-import de.phlup.circuitchaos.common.model.Module;
-import de.phlup.circuitchaos.common.model.Position;
-import de.phlup.circuitchaos.common.model.Robot;
-import de.phlup.circuitchaos.server.player.Player;
+import de.phlup.circuitchaos.common.model.course.Module;
+import de.phlup.circuitchaos.common.model.course.Robot;
+import de.phlup.circuitchaos.common.records.Position;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -15,14 +14,13 @@ import lombok.Setter;
 @Setter(AccessLevel.PRIVATE)
 public class Shooter {
 
-    private Player player;
+    private Robot  robot;
     private Robot  target;
     private Robot  target2;
     private Module weapon;
 
-    public Shooter(int phase, Player player, Game game, Step step) {
-        this.player = player;
-        Robot     robot    = this.getPlayer().getRobot();
+    public Shooter(int phase, Robot robot, Game game, Step step) {
+        this.robot = robot;
         Position  position = robot.getPosition();
         int       level    = robot.getLevel();
         Direction dir      = robot.getDirection();
@@ -31,35 +29,35 @@ public class Shooter {
         target2 = null;
 
         if (step == Step.ROBOT_MOUNTED_LASER_FIRE) {
-            if (player.uses(ModuleType.MAIN_LASER, phase)) {
+            if (robot.uses(ModuleType.MAIN_LASER, phase)) {
                 target = game.getLaserTarget(position, dir, level, false, step);
-                weapon = player.getRobot().getModule(ModuleType.MAIN_LASER);
-            } else if (player.uses(ModuleType.HIGH_POWER_LASER, phase)) {
+                weapon = robot.getModule(ModuleType.MAIN_LASER);
+            } else if (robot.uses(ModuleType.HIGH_POWER_LASER, phase)) {
                 target = game.getLaserTarget(position, dir, level, false, step);
                 target2 = game.getLaserTarget(position, dir, level, true, step);
-                weapon = player.getRobot().getModule(ModuleType.HIGH_POWER_LASER);
-            } else if (player.uses(ModuleType.DOUBLE_BARREL_LASER, phase)) {
+                weapon = robot.getModule(ModuleType.HIGH_POWER_LASER);
+            } else if (robot.uses(ModuleType.DOUBLE_BARREL_LASER, phase)) {
                 target = game.getLaserTarget(position, dir, level, false, step);
-                weapon = player.getRobot().getModule(ModuleType.DOUBLE_BARREL_LASER);
-            } else if (player.uses(ModuleType.REAR_LASER, phase)) {
+                weapon = robot.getModule(ModuleType.DOUBLE_BARREL_LASER);
+            } else if (robot.uses(ModuleType.REAR_LASER, phase)) {
                 target = game.getLaserTarget(position, dir.reverse(), level, false, step);
-                weapon = player.getRobot().getModule(ModuleType.REAR_LASER);
+                weapon = robot.getModule(ModuleType.REAR_LASER);
             }
-        } else if (step == Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE && player.uses(ModuleType.EXCHANGE_BEAM, phase)) {
+        } else if (step == Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE && robot.uses(ModuleType.EXCHANGE_BEAM, phase)) {
             target = game.getLaserTarget(position, dir, level, false, step);
-            weapon = player.getRobot().getModule(ModuleType.EXCHANGE_BEAM);
-        } else if (step == Step.ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE && player.uses(ModuleType.SPIN_LEFT_BEAM, phase)) {
+            weapon = robot.getModule(ModuleType.EXCHANGE_BEAM);
+        } else if (step == Step.ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE && robot.uses(ModuleType.SPIN_LEFT_BEAM, phase)) {
             target = game.getLaserTarget(position, dir, level, false, step);
-            weapon = player.getRobot().getModule(ModuleType.SPIN_LEFT_BEAM);
-        } else if (step == Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE && player.uses(ModuleType.SPIN_RIGHT_BEAM, phase)) {
+            weapon = robot.getModule(ModuleType.SPIN_LEFT_BEAM);
+        } else if (step == Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE && robot.uses(ModuleType.SPIN_RIGHT_BEAM, phase)) {
             target = game.getLaserTarget(position, dir, level, false, step);
-            weapon = player.getRobot().getModule(ModuleType.SPIN_RIGHT_BEAM);
-        } else if (step == Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE && player.uses(ModuleType.PRESSURE_BEAM, phase)) {
+            weapon = robot.getModule(ModuleType.SPIN_RIGHT_BEAM);
+        } else if (step == Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE && robot.uses(ModuleType.PRESSURE_BEAM, phase)) {
             target = game.getLaserTarget(position, dir, level, false, step);
-            weapon = player.getRobot().getModule(ModuleType.PRESSURE_BEAM);
-        } else if (step == Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE && player.uses(ModuleType.TRACTOR_BEAM, phase)) {
+            weapon = robot.getModule(ModuleType.PRESSURE_BEAM);
+        } else if (step == Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE && robot.uses(ModuleType.TRACTOR_BEAM, phase)) {
             target = game.getLaserTarget(position, dir, level, false, step);
-            weapon = player.getRobot().getModule(ModuleType.TRACTOR_BEAM);
+            weapon = robot.getModule(ModuleType.TRACTOR_BEAM);
         }
     }
 

@@ -3,6 +3,7 @@ package de.phlup.circuitchaos.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import de.phlup.circuitchaos.common.enums.ModuleType;
+import de.phlup.circuitchaos.common.model.course.Robot;
 import lombok.Data;
 
 @Data

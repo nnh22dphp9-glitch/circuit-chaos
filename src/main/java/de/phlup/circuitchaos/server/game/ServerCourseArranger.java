@@ -3,9 +3,9 @@ package de.phlup.circuitchaos.server.game;
 import de.phlup.circuitchaos.common.CircuitChaosException;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Step;
-import de.phlup.circuitchaos.common.model.Checkpoint;
-import de.phlup.circuitchaos.common.model.Course;
-import de.phlup.circuitchaos.common.model.Position;
+import de.phlup.circuitchaos.common.model.course.Checkpoint;
+import de.phlup.circuitchaos.common.model.course.Course;
+import de.phlup.circuitchaos.common.records.Position;
 
 import java.util.Comparator;
 import java.util.List;

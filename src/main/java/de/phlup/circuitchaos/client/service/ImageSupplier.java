@@ -13,15 +13,15 @@ import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.RobotType;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.enums.WallType;
-import de.phlup.circuitchaos.common.model.Checkpoint;
-import de.phlup.circuitchaos.common.model.Course;
-import de.phlup.circuitchaos.common.model.CourseElement;
-import de.phlup.circuitchaos.common.model.CourseObject;
-import de.phlup.circuitchaos.common.model.Floor;
-import de.phlup.circuitchaos.common.model.Module;
-import de.phlup.circuitchaos.common.model.Position;
-import de.phlup.circuitchaos.common.model.Programme;
-import de.phlup.circuitchaos.common.model.Robot;
+import de.phlup.circuitchaos.common.model.course.Checkpoint;
+import de.phlup.circuitchaos.common.model.course.Course;
+import de.phlup.circuitchaos.common.model.course.CourseElement;
+import de.phlup.circuitchaos.common.model.course.CourseObject;
+import de.phlup.circuitchaos.common.model.course.Floor;
+import de.phlup.circuitchaos.common.model.course.Module;
+import de.phlup.circuitchaos.common.model.course.Robot;
+import de.phlup.circuitchaos.common.records.Position;
+import de.phlup.circuitchaos.common.records.Programme;
 import de.phlup.circuitchaos.common.settings.ClientSettings.Theme;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -61,6 +61,11 @@ import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_S_W;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W_N;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W_S;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_DISPENSER;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_LASER;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_POWER_DOWN_SHIELD;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_RAMMING_ARMOR;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_SHIELD;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CHECKPOINT;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_BACKGROUND;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_CCW;
@@ -115,8 +120,18 @@ import static de.phlup.circuitchaos.common.enums.Direction.EAST;
 import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
 import static de.phlup.circuitchaos.common.enums.Direction.SOUTH;
 import static de.phlup.circuitchaos.common.enums.Direction.WEST;
+import static de.phlup.circuitchaos.common.enums.ModuleType.DOUBLE_BARREL_LASER;
+import static de.phlup.circuitchaos.common.enums.ModuleType.EXCHANGE_BEAM;
+import static de.phlup.circuitchaos.common.enums.ModuleType.GLUE_DISPENSER;
+import static de.phlup.circuitchaos.common.enums.ModuleType.HIGH_POWER_LASER;
 import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
+import static de.phlup.circuitchaos.common.enums.ModuleType.OIL_DISPENSER;
+import static de.phlup.circuitchaos.common.enums.ModuleType.POWER_DOWN_SHIELD;
 import static de.phlup.circuitchaos.common.enums.ModuleType.PRESSURE_BEAM;
+import static de.phlup.circuitchaos.common.enums.ModuleType.RAMMING_ARMOR;
+import static de.phlup.circuitchaos.common.enums.ModuleType.REAR_LASER;
+import static de.phlup.circuitchaos.common.enums.ModuleType.SHIELD;
+import static de.phlup.circuitchaos.common.enums.ModuleType.SPIN_RIGHT_BEAM;
 import static de.phlup.circuitchaos.common.enums.ModuleType.TRACTOR_BEAM;
 import static de.phlup.circuitchaos.common.enums.Step.CONVEYOR_BELTS_MOVE;
 import static de.phlup.circuitchaos.common.enums.Step.COURSE_MOUNTED_LASER_FIRE;
@@ -231,14 +246,14 @@ public class ImageSupplier {
         try {
             drawBasicFloor(floor, gui, step, phase, subPhase, course, gr, animationSteps);
             drawCheckpoint(position, course, gr, nextCP);
-            drawObjects(position, subPhase, course, gr, animationSteps);
+            drawObjects(position, phase, subPhase, course, gr, animationSteps);
             if (subPhase != null) {
-                drawObjectsMoving(position, subPhase, course, gr, animationSteps);
+                drawObjectsMoving(position, phase, subPhase, course, gr, animationSteps);
                 drawBeams(floor, step, subPhase, image, animationSteps);
             }
             drawRobots(floor, subPhase, course, gr, animationSteps, step, phase);
             if (subPhase != null) {
-                drawFallingRobotsAndObjects(position, subPhase, course, gr, animationSteps);
+                drawFallingRobotsAndObjects(position, phase, subPhase, course, gr, animationSteps);
             }
             if (subPhase == null || subPhase < animationSteps) {
                 drawRobotsMovingAndActiveRobot(floor, activeRobot, step, subPhase, course, gr, animationSteps, phase);
@@ -269,12 +284,12 @@ public class ImageSupplier {
         }
     }
 
-    private void drawFallingRobotsAndObjects(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+    private void drawFallingRobotsAndObjects(Position position, Integer phase, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
         for (CourseElement ce : CourseHandler.getFallingIntoAbyss(course, position)) {
-            drawFalling(ce, gr, subPhase, false, animationSteps);
+            drawFalling(ce, gr, phase, subPhase, false, animationSteps);
         }
         for (CourseElement ce : CourseHandler.getLeavingFallingIntoAbyss(course, position)) {
-            drawFalling(ce, gr, subPhase, true, animationSteps);
+            drawFalling(ce, gr, phase, subPhase, true, animationSteps);
         }
     }
 
@@ -304,15 +319,15 @@ public class ImageSupplier {
         }
     }
 
-    private void drawObjectsMoving(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+    private void drawObjectsMoving(Position position, Integer phase, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
         for (CourseObject co : CourseHandler.getLeavingObjects(course, position)) {
-            drawCircuitChaosObject(co, gr, subPhase, true, animationSteps);
+            drawCircuitChaosObject(co, gr, phase, subPhase, true, animationSteps);
         }
     }
 
-    private void drawObjects(Position position, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
+    private void drawObjects(Position position, Integer phase, Integer subPhase, Course course, Graphics2D gr, int animationSteps) {
         for (CourseObject co : CourseHandler.getObjects(course, position)) {
-            drawCircuitChaosObject(co, gr, subPhase, false, animationSteps);
+            drawCircuitChaosObject(co, gr, phase, subPhase, false, animationSteps);
         }
     }
 
@@ -331,7 +346,7 @@ public class ImageSupplier {
 
     private void drawRobot(Robot robot, Graphics2D gr, Integer subPhase, boolean leaving, int animationSteps, Floor floor, Step step, Integer phase) {
         String picture = getRobotImagePathAndName(robot);
-        drawCourseElement(robot, gr, subPhase, leaving, picture, animationSteps);
+        drawCourseElement(robot, gr, phase, subPhase, leaving, picture, animationSteps);
         if (robot.isOnCourse() && !leaving
                 && ((step == ROBOT_MOUNTED_LASER_FIRE && (floor.isBeamsNS() || floor.isBeamsWE()))
                 || (step == COURSE_MOUNTED_LASER_FIRE && (floor.getCourseMountedLaserBeamsNS() > 0 || floor.getCourseMountedLaserBeamsWE() > 0)))
@@ -340,12 +355,12 @@ public class ImageSupplier {
         }
     }
 
-    private void drawFalling(CourseElement ce, Graphics2D gr, int subPhase, boolean leaving, int animationSteps) {
+    private void drawFalling(CourseElement ce, Graphics2D gr, int phase, int subPhase, boolean leaving, int animationSteps) {
         String picture = ce instanceof Robot r ? getRobotImagePathAndName(r) :
                 ce instanceof CourseObject co ? getGfxOfObjectType(co.getType()) : null;
         if (picture != null) {
             if (subPhase < animationSteps) {
-                drawCourseElement(ce, gr, subPhase, leaving, picture, animationSteps);
+                drawCourseElement(ce, gr, phase, subPhase, leaving, picture, animationSteps);
             } else if (!leaving) {
                 drawFalling(ce, gr, subPhase - animationSteps, picture, animationSteps);
             }
@@ -368,8 +383,11 @@ public class ImageSupplier {
         gr.translate(-offset, -offset);
     }
 
-    private void drawCourseElement(CourseElement ce, Graphics2D gr, Integer subPhase, boolean leaving, String picture, int animationSteps) {
+    private void drawCourseElement(CourseElement ce, Graphics2D gr, Integer phase, Integer subPhase, boolean leaving, String picture, int animationSteps) {
         Image pictureImage = getImageIconPlain(picture).getImage();
+        if (ce instanceof Robot r) {
+            pictureImage = drawShieldAddOn(r, phase, pictureImage);
+        }
         if (subPhase == null || subPhase >= animationSteps || ce.getPosition().equals(ce.getPrevPosition())) {
             if (!leaving) {
                 AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(ce.getPrevDirection().ordinal(), imageSize / 2.0, imageSize / 2.0);
@@ -410,17 +428,53 @@ public class ImageSupplier {
         }
     }
 
+    private Image drawShieldAddOn(Robot robot, Integer phase, Image pictureImage) {
+        BufferedImage imageCopy = new BufferedImage(pictureImage.getWidth(null), pictureImage.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D    graphics  = imageCopy.createGraphics();
+        try {
+            graphics.drawImage(pictureImage, 0, 0, null);
+            if (robot.hasModule(RAMMING_ARMOR)) {
+                graphics.drawImage(getImageIconPlain(GFX_ADD_ON_RAMMING_ARMOR).getImage(), 0, 0, null);
+            }
+            if (robot.hasModule(MAIN_LASER) || robot.hasModule(DOUBLE_BARREL_LASER) || robot.hasModule(HIGH_POWER_LASER)
+                    || robot.hasModule(EXCHANGE_BEAM) || robot.hasModule(SPIN_RIGHT_BEAM) || robot.hasModule(SPIN_RIGHT_BEAM)
+                    || robot.hasModule(PRESSURE_BEAM) || robot.hasModule(TRACTOR_BEAM)) {
+                graphics.drawImage(getImageIconPlain(GFX_ADD_ON_LASER).getImage(), 0, 0, null);
+            }
+            if (robot.hasModule(REAR_LASER)) {
+                AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(2, imageSize / 2.0, imageSize / 2.0);
+                graphics.drawImage(getImageIconPlain(GFX_ADD_ON_LASER).getImage(), affineTransform, null);
+            }
+            if (robot.hasModule(OIL_DISPENSER) || robot.hasModule(GLUE_DISPENSER)) {
+                graphics.drawImage(getImageIconPlain(GFX_ADD_ON_DISPENSER).getImage(), 0, 0, null);
+            }
+            if (phase != null && robot.uses(SHIELD, phase)) {
+                AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(robot.getModule(SHIELD).getShieldDirection()[phase].ordinal(), imageSize / 2.0, imageSize / 2.0);
+                graphics.drawImage(getImageIconPlain(GFX_ADD_ON_SHIELD).getImage(), affineTransform, null);
+            }
+            if (phase != null && robot.isPoweredDown() && robot.hasModule(POWER_DOWN_SHIELD)) {
+                graphics.drawImage(getImageIconPlain(GFX_ADD_ON_POWER_DOWN_SHIELD).getImage(), 0, 0, null);
+            }
+        } finally {
+            graphics.dispose();
+        }
+        return imageCopy;
+    }
+
     private double calculateRotation(CourseElement ce, Integer subPhase, int animationSteps) {
         if (subPhase == null) {
             return 0.0;
         }
-        float target = switch (ce.getPrevDirection().minus(ce.getDirection())) {
+        return calculateRotation(ce.getPrevDirection().minus(ce.getDirection())) * subPhase / animationSteps;
+    }
+
+    private static double calculateRotation(Direction direction) {
+        return Math.PI * switch (direction) {
             case SOUTH -> 1.0f;
             case EAST -> -0.5f;
             case WEST -> 0.5f;
             case NORTH -> 0.0f;
         };
-        return target * subPhase * Math.PI / animationSteps;
     }
 
     private Direction calculateMovingDirectionAccordingToBE(CourseElement ce) {
@@ -469,7 +523,7 @@ public class ImageSupplier {
         }
     }
 
-    private void drawCircuitChaosObject(CourseObject co, Graphics2D gr, Integer subPhase, boolean leaving, int animationSteps) {
+    private void drawCircuitChaosObject(CourseObject co, Graphics2D gr, Integer phase, Integer subPhase, boolean leaving, int animationSteps) {
         String picture = getGfxOfObjectType(co.getType());
         if (co.getType() == ObjectType.GLUE) {
             picture = picture + ((int) (co.getVariantSeed() * theme.getGlueVariants()));
@@ -477,7 +531,7 @@ public class ImageSupplier {
         if (co.getType() == ObjectType.OIL) {
             picture = picture + ((int) (co.getVariantSeed() * theme.getOilVariants()));
         }
-        drawCourseElement(co, gr, subPhase, leaving, picture, animationSteps);
+        drawCourseElement(co, gr, phase, subPhase, leaving, picture, animationSteps);
     }
 
     private void drawBeams(int amount, Graphics2D gr, boolean westEastDirection, Integer subPhase, int animationSteps, ModuleType type) {
@@ -867,7 +921,7 @@ public class ImageSupplier {
     }
 
     public ImageIcon getImageIcon(Programme pc, boolean slot, boolean blocked) {
-        Image         front_i = getImageIconPlain(GFX_PROGRAMME.get(pc.getType()) + (slot ? (blocked ? GFX_PROGRAMME_BLOCKED_SUFFIX : GFX_PROGRAMME_SLOT_SUFFIX) : "")).getImage();
+        Image         front_i = getImageIconPlain(GFX_PROGRAMME.get(pc.type()) + (slot ? (blocked ? GFX_PROGRAMME_BLOCKED_SUFFIX : GFX_PROGRAMME_SLOT_SUFFIX) : "")).getImage();
         BufferedImage bi      = new BufferedImage(front_i.getWidth(null), front_i.getHeight(null), BufferedImage.TYPE_INT_ARGB);
         Graphics2D    gr      = bi.createGraphics();
         try {
