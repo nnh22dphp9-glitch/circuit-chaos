@@ -96,8 +96,9 @@ public interface PictureConstants {
     String GFX_CONVEYOR_BELT_EXPRESS_CW         = FOLDER_FLOOR_CONVEYOR_BELTS + "express-cw";
     String GFX_CONVEYOR_BELT_EXPRESS_CW_CCW     = FOLDER_FLOOR_CONVEYOR_BELTS + "express-cw-ccw";
 
-    String GFX_ADD_ON_SHIELD = FOLDER_ADD_ONS + "shield";
     String GFX_ADD_ON_POWER_DOWN_SHIELD = FOLDER_ADD_ONS + "power-down-shield";
+    String GFX_ADD_ON_RAMMING_ARMOR     = FOLDER_ADD_ONS + "ramming-armor";
+    String GFX_ADD_ON_SHIELD            = FOLDER_ADD_ONS + "shield";
 
     Map<WallType, String> GFX_WALL_TYPE = Map.of(
             WallType.NONE, "",

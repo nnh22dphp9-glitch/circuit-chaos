@@ -62,6 +62,7 @@ import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W_N;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W_S;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_POWER_DOWN_SHIELD;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_RAMMING_ARMOR;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_SHIELD;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CHECKPOINT;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_BACKGROUND;
@@ -120,6 +121,7 @@ import static de.phlup.circuitchaos.common.enums.Direction.WEST;
 import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
 import static de.phlup.circuitchaos.common.enums.ModuleType.POWER_DOWN_SHIELD;
 import static de.phlup.circuitchaos.common.enums.ModuleType.PRESSURE_BEAM;
+import static de.phlup.circuitchaos.common.enums.ModuleType.RAMMING_ARMOR;
 import static de.phlup.circuitchaos.common.enums.ModuleType.SHIELD;
 import static de.phlup.circuitchaos.common.enums.ModuleType.TRACTOR_BEAM;
 import static de.phlup.circuitchaos.common.enums.Step.CONVEYOR_BELTS_MOVE;
@@ -422,6 +424,9 @@ public class ImageSupplier {
         Graphics2D    graphics  = imageCopy.createGraphics();
         try {
             graphics.drawImage(pictureImage, 0, 0, null);
+            if (robot.hasModule(RAMMING_ARMOR)) {
+                graphics.drawImage(getImageIconPlain(GFX_ADD_ON_RAMMING_ARMOR).getImage(), 0, 0, null);
+            }
             if (phase != null && robot.uses(SHIELD, phase)) {
                 AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(robot.getModule(SHIELD).getShieldDirection()[phase].ordinal(), imageSize / 2.0, imageSize / 2.0);
                 graphics.drawImage(getImageIconPlain(GFX_ADD_ON_SHIELD).getImage(), affineTransform, null);
