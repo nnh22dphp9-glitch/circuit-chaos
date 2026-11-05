@@ -423,8 +423,7 @@ public class ImageSupplier {
         try {
             graphics.drawImage(pictureImage, 0, 0, null);
             if (phase != null && robot.uses(SHIELD, phase)) {
-                AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(robot.getDirection().ordinal(), imageSize / 2.0, imageSize / 2.0);
-                affineTransform.rotate(calculateRotation(robot.getModule(SHIELD).getShieldDirection()[phase]), imageSize / 2.0, imageSize / 2.0);
+                AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(robot.getModule(SHIELD).getShieldDirection()[phase].ordinal(), imageSize / 2.0, imageSize / 2.0);
                 graphics.drawImage(getImageIconPlain(GFX_ADD_ON_SHIELD).getImage(), affineTransform, null);
             }
             if (phase != null && robot.isPoweredDown() && robot.hasModule(POWER_DOWN_SHIELD)) {

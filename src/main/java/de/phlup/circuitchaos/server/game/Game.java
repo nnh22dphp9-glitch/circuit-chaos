@@ -560,7 +560,7 @@ public class Game {
                 Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE,
                 Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE,
                 Step.ROBOT_MOUNTED_LASER_FIRE).forEach(step -> {
-            List<Shooter> shooters = rememberPositionsOfRobotMountedLasers(phase, step);
+            List<Shooter> shooters = getCurrentShooters(phase, step);
             robotMountedBeamsAndLasersShoot(phase, shooters, step);
         });
         List.of(Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE,
@@ -643,20 +643,20 @@ public class Game {
                 }
             }
         }
-        if (!gameAborted) {
+        if (!gameAborted && !shooters.isEmpty()) {
             notifyCourseMayHaveChanged(step, phase, null, null);
         }
         CourseHandler.clearBeams(course);
     }
 
-    private List<Shooter> rememberPositionsOfRobotMountedLasers(int phase, Step step) {
+    private List<Shooter> getCurrentShooters(int phase, Step step) {
         List<Shooter> shooters = new ArrayList<>();
-        for (Player player : players) {
+        for (Robot robot : course.getRobots()) {
             if (gameAborted) {
                 break;
             }
-            if (player.getRobot().isOnCourse()) {
-                shooters.add(new Shooter(phase, player.getRobot(), this, step));
+            if (robot.isOnCourse() && !robot.isPoweredDown()) {
+                shooters.add(new Shooter(phase, robot, this, step));
             }
         }
         return shooters;
@@ -1386,7 +1386,7 @@ public class Game {
     }
 
     private int getPriority(Robot robot, int phase) {
-        return robot.getProgram()[phase] == null ? -1 : robot.getProgram()[phase].priority();
+        return robot.isPoweredDown() || robot.getProgram()[phase] == null ? -1 : robot.getProgram()[phase].priority();
     }
 
     public void explode(Step step, Integer phase, Position position, int initialDamage) {

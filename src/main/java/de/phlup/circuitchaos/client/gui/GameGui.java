@@ -138,7 +138,7 @@ public class GameGui extends BaseGui {
                                                                            StringUtils.hasText(reasonForCourseChange) ? reasonForCourseChange : ""));
         synchronized (courseJPanel) {
             courseJPanel.arrangeElements(this, step, phase, subPhase, animationSteps, myNextCheckpoint(course));
-            if (subPhase == null || state == CourseState.GAME_ENDED) {
+            if (subPhase == null || state == CourseState.GAME_ENDED || step == Step.SETUP) {
                 audioSupplier.stop();
             } else if (subPhase == 0) {
                 boolean hover   = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(movingRobotName);
