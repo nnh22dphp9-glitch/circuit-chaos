@@ -61,6 +61,7 @@ import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_S_W;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W_N;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W_S;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_POWER_DOWN_SHIELD;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_SHIELD;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CHECKPOINT;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_BACKGROUND;
@@ -117,6 +118,7 @@ import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
 import static de.phlup.circuitchaos.common.enums.Direction.SOUTH;
 import static de.phlup.circuitchaos.common.enums.Direction.WEST;
 import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
+import static de.phlup.circuitchaos.common.enums.ModuleType.POWER_DOWN_SHIELD;
 import static de.phlup.circuitchaos.common.enums.ModuleType.PRESSURE_BEAM;
 import static de.phlup.circuitchaos.common.enums.ModuleType.SHIELD;
 import static de.phlup.circuitchaos.common.enums.ModuleType.TRACTOR_BEAM;
@@ -372,7 +374,9 @@ public class ImageSupplier {
 
     private void drawCourseElement(CourseElement ce, Graphics2D gr, Integer phase, Integer subPhase, boolean leaving, String picture, int animationSteps) {
         Image pictureImage = getImageIconPlain(picture).getImage();
-        pictureImage = drawShieldAddOn(ce, phase, pictureImage);
+        if (ce instanceof Robot r) {
+            pictureImage = drawShieldAddOn(r, phase, pictureImage);
+        }
         if (subPhase == null || subPhase >= animationSteps || ce.getPosition().equals(ce.getPrevPosition())) {
             if (!leaving) {
                 AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(ce.getPrevDirection().ordinal(), imageSize / 2.0, imageSize / 2.0);
@@ -413,21 +417,23 @@ public class ImageSupplier {
         }
     }
 
-    private Image drawShieldAddOn(CourseElement ce, Integer phase, Image pictureImage) {
-        if (ce instanceof Robot r && phase != null && r.uses(SHIELD, phase)) {
-            BufferedImage imageCopy = new BufferedImage(pictureImage.getWidth(null), pictureImage.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-            Graphics2D    graphics  = imageCopy.createGraphics();
-            try {
-                graphics.drawImage(pictureImage, 0, 0, null);
-                AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(ce.getPrevDirection().ordinal(), imageSize / 2.0, imageSize / 2.0);
-                affineTransform.rotate(calculateRotation(r.getModule(SHIELD).getShieldDirection()[phase]), imageSize / 2.0, imageSize / 2.0);
+    private Image drawShieldAddOn(Robot robot, Integer phase, Image pictureImage) {
+        BufferedImage imageCopy = new BufferedImage(pictureImage.getWidth(null), pictureImage.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D    graphics  = imageCopy.createGraphics();
+        try {
+            graphics.drawImage(pictureImage, 0, 0, null);
+            if (phase != null && robot.uses(SHIELD, phase)) {
+                AffineTransform affineTransform = AffineTransform.getQuadrantRotateInstance(robot.getDirection().ordinal(), imageSize / 2.0, imageSize / 2.0);
+                affineTransform.rotate(calculateRotation(robot.getModule(SHIELD).getShieldDirection()[phase]), imageSize / 2.0, imageSize / 2.0);
                 graphics.drawImage(getImageIconPlain(GFX_ADD_ON_SHIELD).getImage(), affineTransform, null);
-            } finally {
-                graphics.dispose();
             }
-            pictureImage = imageCopy;
+            if (phase != null && robot.isPoweredDown() && robot.hasModule(POWER_DOWN_SHIELD)) {
+                graphics.drawImage(getImageIconPlain(GFX_ADD_ON_POWER_DOWN_SHIELD).getImage(), 0, 0, null);
+            }
+        } finally {
+            graphics.dispose();
         }
-        return pictureImage;
+        return imageCopy;
     }
 
     private double calculateRotation(CourseElement ce, Integer subPhase, int animationSteps) {
