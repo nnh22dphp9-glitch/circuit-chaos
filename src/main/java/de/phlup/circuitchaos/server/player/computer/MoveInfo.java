@@ -26,10 +26,12 @@ import java.util.Objects;
 public class MoveInfo {
 
     private final Goal       goal;
-    private final Course     course;
-    private final GameLogic  gameLogic;
-    private final Robot      myself;
+    private final GameLogic  simulationTemplate;
     private final Checkpoint nextCP;
+    private Course    course;
+    private GameLogic gameLogic;
+    private Robot     myself;
+    private final String robotId;
 
     private Programme[] program;
     private Direction   startingDirection;
@@ -54,23 +56,25 @@ public class MoveInfo {
     private final int initialDieCounter;
 
     public MoveInfo(GameLogic gameLogic, Goal goal, Checkpoint nextCP, Robot originalRobot) {
-        this.gameLogic = gameLogic.createSimulationCopy();
-        this.course = this.gameLogic.getCourse();
+        this.simulationTemplate = gameLogic;
         this.goal = goal;
         this.nextCP = nextCP;
-        this.myself = this.course.getRobots().stream()
-                .filter(robot -> Objects.equals(robot.getId(), originalRobot.getId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Robot not found in simulation course: " + originalRobot.getId()));
-        this.initialX = myself.getPosition().x();
-        this.initialY = myself.getPosition().y();
-        this.initialDamage = myself.getDamage();
-        this.initialDieCounter = myself.getDieCounter();
+        this.robotId = originalRobot.getId();
+        this.initialX = originalRobot.getPosition().x();
+        this.initialY = originalRobot.getPosition().y();
+        this.initialDamage = originalRobot.getDamage();
+        this.initialDieCounter = originalRobot.getDieCounter();
         this.x = initialX;
         this.y = initialY;
     }
 
     public void simulateCourse() {
+        gameLogic = simulationTemplate.createSimulationCopy();
+        course = gameLogic.getCourse();
+        myself = course.getRobots().stream()
+                .filter(robot -> Objects.equals(robot.getId(), robotId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Robot not found in simulation course: " + robotId));
         distance = Integer.MAX_VALUE;
         endingDirection = startingDirection;
         reachesCheckpoint = 5;
@@ -116,6 +120,11 @@ public class MoveInfo {
             }
             calculateDistance2();
         }
+
+        // A MoveInfo retains only its evaluation result, not a full copied course.
+        myself = null;
+        gameLogic = null;
+        course = null;
     }
 
     private void touchCourseElements(int phase) {
@@ -191,7 +200,7 @@ public class MoveInfo {
 
     private void calculateProbableTargets() {
         for (Robot targetRobot : course.getRobots()) {
-            if (!targetRobot.getId().equals(myself.getId()) && targetRobot.isOnCourse()) {
+            if (!Objects.equals(targetRobot.getId(), myself.getId()) && targetRobot.isOnCourse()) {
                 int maxDist = 4;
                 int goalMultiplication = goal == Goal.KILL_ALL ? 1 : targetRobot.getNextCheckpoint();
                 Position targetPos = targetRobot.getPosition();
@@ -235,8 +244,9 @@ public class MoveInfo {
         } else if (deltaX == 0) {
             distance2 = deltaY;
         } else {
-            distance2 = Math.abs(deltaY / Math.sin(Math.atan(deltaY / (double) deltaX)));
+            distance2 = deltaY / Math.sin(Math.atan(deltaY / (double) deltaX));
         }
+        distance2 = Math.abs(distance2);
     }
 
 }
