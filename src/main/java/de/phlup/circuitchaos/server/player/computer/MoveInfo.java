@@ -235,8 +235,6 @@ public class MoveInfo {
     }
 
     private void calculateDistance2() {
-        int minX = course.getRange().minX();
-        int minY = course.getRange().minY();
         int deltaX = x - nextCP.getPosition().x();
         int deltaY = y - nextCP.getPosition().y();
         if (deltaY == 0) {
