@@ -8,8 +8,6 @@ import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
 import de.phlup.circuitchaos.common.model.course.Course;
-import de.phlup.circuitchaos.common.model.course.CourseElement;
-import de.phlup.circuitchaos.common.model.course.CourseObject;
 import de.phlup.circuitchaos.common.model.course.Floor;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Position;
@@ -18,7 +16,6 @@ import de.phlup.circuitchaos.server.game.DistanceCalculator;
 import de.phlup.circuitchaos.server.game.GameLogic;
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -92,7 +89,7 @@ public class MoveInfo {
             gameLogic.stepRobotsMove(phase, List.of(myself));
             gameLogic.stepCourseElementsMove(phase);
             gameLogic.stepResolveBeamsAndLaserFire(phase);
-            touchCourseElements(phase);
+            updateAfterTouchingCourse(phase);
             calculateProbableTargets();
         }
 
@@ -127,45 +124,27 @@ public class MoveInfo {
         course = null;
     }
 
-    private void touchCourseElements(int phase) {
+    private void updateAfterTouchingCourse(int phase) {
         if (!myself.isOnCourse()) {
             return;
         }
 
-        Position position = myself.getPosition();
-        Floor standingFloor = CourseHandler.getFloor(course, position);
-        Floor checkpointFloor = standingFloor;
-        Checkpoint checkpoint = CourseHandler.getCheckpoint(course, position);
+        int previousCheckpoint = myself.getNextCheckpoint();
+        Position previousArchivePosition = myself.getArchivePosition();
+        int previousArchiveLevel = myself.getArchiveLevel();
+        Floor standingFloor = CourseHandler.getFloor(course, myself.getPosition());
 
-        if (myself.uses(ModuleType.MECHANICAL_ARM, phase)) {
-            if (checkpoint == null && standingFloor.getFloortype() != Floortype.PIT_STOP) {
-                checkpointFloor = CourseHandler.getFloor(course, new Position(position.x(), position.y() - 1));
-                checkpoint = CourseHandler.getCheckpoint(course, checkpointFloor.getPosition());
-            }
-            if (checkpoint == null && checkpointFloor.getFloortype() != Floortype.PIT_STOP) {
-                checkpointFloor = CourseHandler.getFloor(course, new Position(position.x() + 1, position.y()));
-                checkpoint = CourseHandler.getCheckpoint(course, checkpointFloor.getPosition());
-            }
-            if (checkpoint == null && checkpointFloor.getFloortype() != Floortype.PIT_STOP) {
-                checkpointFloor = CourseHandler.getFloor(course, new Position(position.x(), position.y() + 1));
-                checkpoint = CourseHandler.getCheckpoint(course, checkpointFloor.getPosition());
-            }
-            if (checkpoint == null && checkpointFloor.getFloortype() != Floortype.PIT_STOP) {
-                checkpointFloor = CourseHandler.getFloor(course, new Position(position.x() - 2, position.y()));
-                checkpoint = CourseHandler.getCheckpoint(course, new Position(position.x() - 1, position.y()));
+        gameLogic.touchRobotCheckpoints(phase);
+
+        if (myself.getNextCheckpoint() > previousCheckpoint) {
+            copiesArchive = true;
+            if (nextCP != null && previousCheckpoint == nextCP.getNumber() && reachesCheckpoint == 5) {
+                reachesCheckpoint = phase;
             }
         }
-
-        if (checkpoint != null || checkpointFloor.getFloortype() == Floortype.PIT_STOP) {
-            myself.setArchivePosition(checkpointFloor.getPosition());
-            myself.setArchiveLevel(checkpointFloor.getLevel());
+        if (!Objects.equals(previousArchivePosition, myself.getArchivePosition())
+                || previousArchiveLevel != myself.getArchiveLevel()) {
             copiesArchive = true;
-            if (checkpoint != null && checkpoint.getNumber() == myself.getNextCheckpoint()) {
-                if (nextCP != null && checkpoint.getNumber() == nextCP.getNumber() && reachesCheckpoint == 5) {
-                    reachesCheckpoint = phase;
-                }
-                myself.setNextCheckpoint(myself.getNextCheckpoint() + 1);
-            }
         }
 
         if (phase == 4 && standingFloor.getFloortype() == Floortype.PIT_STOP) {
@@ -176,26 +155,7 @@ public class MoveInfo {
             }
         }
 
-        for (CourseObject object : new ArrayList<>(course.getObjects())) {
-            if (object.getType() != ObjectType.MINE && object.getType() != ObjectType.PROXIMITY_MINE) {
-                continue;
-            }
-            object.setActive(true);
-            boolean triggered = CourseHandler.getRobots(course, object.getPosition()).stream().anyMatch(CourseElement::isOnCourse);
-            if (!triggered && object.getType() == ObjectType.PROXIMITY_MINE) {
-                Position mine = object.getPosition();
-                triggered = List.of(
-                        new Position(mine.x() + 1, mine.y()),
-                        new Position(mine.x() - 1, mine.y()),
-                        new Position(mine.x(), mine.y() + 1),
-                        new Position(mine.x(), mine.y() - 1))
-                        .stream()
-                        .anyMatch(p -> CourseHandler.getRobots(course, p).stream().anyMatch(CourseElement::isOnCourse));
-            }
-            if (triggered) {
-                gameLogic.goOff(de.phlup.circuitchaos.common.enums.Step.TOUCH_CHECKPOINTS, phase, object);
-            }
-        }
+        gameLogic.activateMines(phase);
     }
 
     private void calculateProbableTargets() {
