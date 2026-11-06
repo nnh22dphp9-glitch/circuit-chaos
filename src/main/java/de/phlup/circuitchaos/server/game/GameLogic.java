@@ -797,6 +797,10 @@ public class GameLogic {
     }
 
     public void stepResolveBeamsAndLaserFire(int phase) {
+        stepResolveBeamsAndLaserFire(phase, null);
+    }
+
+    public void stepResolveBeamsAndLaserFire(int phase, Robot onlyRobot) {
         List.of(Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE,
                 Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE,
                 Step.ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE,
@@ -804,6 +808,9 @@ public class GameLogic {
                 Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE,
                 Step.ROBOT_MOUNTED_LASER_FIRE).forEach(step -> {
             List<Shooter> shooters = getCurrentShooters(phase, step);
+            if (onlyRobot != null) {
+                shooters.removeIf(shooter -> shooter.getRobot() != onlyRobot);
+            }
             robotMountedBeamsAndLasersShoot(phase, shooters, step);
         });
         List.of(Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE,
