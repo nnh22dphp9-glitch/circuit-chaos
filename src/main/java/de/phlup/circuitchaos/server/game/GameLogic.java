@@ -612,7 +612,7 @@ public class GameLogic {
         }
     }
 
-    private void openTrapdoors(Course course, int phase, List<Robot> robots) {
+    private void openTrapdoors(int phase, List<Robot> robots) {
         for (Robot ce : robots) {
             if (gameAborted) {
                 break;
@@ -628,7 +628,7 @@ public class GameLogic {
     }
 
     public void stepRobotsMove(int phase, List<Robot> robots) {
-        openTrapdoors(course, phase, robots);
+        openTrapdoors(phase, robots);
         deactivateRammingArmor(phase, true);
         robotsMove(phase, robots);
         deactivateRammingArmor(phase, false);
