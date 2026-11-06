@@ -683,15 +683,6 @@ public class GameLogic {
         }
     }
 
-    private void deactivateRammingArmor(int phase, boolean reactivate, List<Robot> robots) {
-        for (Robot robot : robots) {
-            if (robot.uses(ModuleType.RAMMING_ARMOR, phase)) {
-                robot.setReactivateRammingArmor(reactivate);
-                robot.getModule(ModuleType.RAMMING_ARMOR).getActiveInPhase()[phase] = false;
-            }
-        }
-    }
-
     private void openTrapdoors(int phase, List<Robot> robots) {
         for (Robot ce : robots) {
             if (gameAborted) {
@@ -708,22 +699,10 @@ public class GameLogic {
     }
 
     public void stepRobotsMove(int phase, List<Robot> robots) {
-        stepRobotsMove(phase, robots, false);
-    }
-
-    public void stepRobotsMove(int phase, List<Robot> robots, boolean onlyMovingRobots) {
         openTrapdoors(phase, robots);
-        if (onlyMovingRobots) {
-            deactivateRammingArmor(phase, true, robots);
-        } else {
-            deactivateRammingArmor(phase, true);
-        }
+        deactivateRammingArmor(phase, true);
         robotsMove(phase, robots);
-        if (onlyMovingRobots) {
-            deactivateRammingArmor(phase, false, robots);
-        } else {
-            deactivateRammingArmor(phase, false);
-        }
+        deactivateRammingArmor(phase, false);
     }
 
     private void robotsMove(int phase, List<Robot> robots) {
