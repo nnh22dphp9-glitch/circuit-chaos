@@ -427,9 +427,9 @@ public class Game {
     }
 
     private String setTouchCheckpoints(int phase) {
-        gameLogic.touchRobotCheckpoints(phase);
         String winner = null;
         if (!gameAborted) {
+            gameLogic.touchRobotCheckpoints(phase);
             for (Player player : players) {
                 Robot robot = player.getRobot();
                 if (robot.isOnCourse()) {
