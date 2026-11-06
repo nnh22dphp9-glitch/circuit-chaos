@@ -427,61 +427,18 @@ public class Game {
     }
 
     private String setTouchCheckpoints(int phase) {
+        gameLogic.touchCourseElements(phase);
         String winner = null;
-        for (CourseElement o : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
-            if (!gameAborted && o.isOnCourse()) {
-                if (o instanceof Robot robot) {
-                    Checkpoint cp = CourseHandler.getCheckpoint(course, robot.getPosition());
-                    Floor      f  = CourseHandler.getFloor(course, robot.getPosition());
-                    Floor      f2 = f;
-                    if (robot.uses(ModuleType.MECHANICAL_ARM, phase)) {
-                        if (!(cp != null || f.getFloortype() == Floortype.PIT_STOP)) {
-                            f = CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
-                            cp = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
-                        }
-                        if (!(cp != null || f.getFloortype() == Floortype.PIT_STOP)) {
-                            f = CourseHandler.getFloor(course, new Position(robot.getPosition().x() + 1, robot.getPosition().y()));
-                            cp = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x() + 1, robot.getPosition().y()));
-                        }
-                        if (!(cp != null || f.getFloortype() == Floortype.PIT_STOP)) {
-                            f = CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() + 1));
-                            cp = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x(), robot.getPosition().y() + 1));
-                        }
-                        if (!(cp != null || f.getFloortype() == Floortype.PIT_STOP)) {
-                            f = CourseHandler.getFloor(course, new Position(robot.getPosition().x() - 2, robot.getPosition().y()));
-                            cp = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x() - 1, robot.getPosition().y()));
-                        }
-                    }
-                    if (cp != null || f.getFloortype() == Floortype.PIT_STOP) {
-                        robot.setArchivePosition(f.getPosition());
-                        robot.setArchiveLevel(f.getLevel());
-                        if (cp != null && cp.getNumber() == robot.getNextCheckpoint()) {
-                            robot.setNextCheckpoint(robot.getNextCheckpoint() + 1);
-                        }
-                    }
-                    if (phase == 4 && f2.getFloortype() == Floortype.PIT_STOP) {
+        if (!gameAborted) {
+            for (Player player : players) {
+                Robot robot = player.getRobot();
+                if (robot.isOnCourse()) {
+                    Floor floor = CourseHandler.getFloor(course, robot.getPosition());
+                    if (phase == 4 && floor.getFloortype() == Floortype.PIT_STOP) {
                         arriveAtPitStop(robot);
                     }
                     if (goal == Goal.FINISH && robot.hasWon(goal, course.getCheckpoints().size())) {
                         winner = robot.getName();
-                    }
-                } else if (o instanceof CourseObject co) {
-                    co.setActive(true);
-                    switch (co.getType()) {
-                        case MINE -> {
-                            if (!CourseHandler.getRobots(course, new Position(co.getPosition().x(), co.getPosition().y())).isEmpty()) {
-                                gameLogic.goOff(Step.TOUCH_CHECKPOINTS, phase, co);
-                            }
-                        }
-                        case PROXIMITY_MINE -> {
-                            if (!(CourseHandler.getRobots(course, new Position(co.getPosition().x(), co.getPosition().y())).isEmpty()
-                                    && CourseHandler.getRobots(course, new Position(co.getPosition().x() + 1, co.getPosition().y())).isEmpty()
-                                    && CourseHandler.getRobots(course, new Position(co.getPosition().x(), co.getPosition().y() + 1)).isEmpty()
-                                    && CourseHandler.getRobots(course, new Position(co.getPosition().x() - 1, co.getPosition().y())).isEmpty()
-                                    && CourseHandler.getRobots(course, new Position(co.getPosition().x(), co.getPosition().y() - 1)).isEmpty())) {
-                                gameLogic.goOff(Step.TOUCH_CHECKPOINTS, phase, co);
-                            }
-                        }
                     }
                 }
             }
