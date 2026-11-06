@@ -143,12 +143,17 @@ public class MoveInfo {
                     || previousArchiveLevel != myself.getArchiveLevel()) {
                 copiesArchive = true;
             }
-
             if (phase == 4 && standingFloor.getFloortype() == Floortype.PIT_STOP) {
                 reachesPitStop = true;
                 copiesArchive = true;
-                if (myself.getDamage() > 0) {
-                    myself.setDamage(myself.getDamage() - 1);
+            }
+        }
+
+        if (phase == 4) {
+            for (Robot robot : course.getRobots()) {
+                if (CourseHandler.getFloor(course, robot.getPosition()).getFloortype() == Floortype.PIT_STOP
+                        && robot.getDamage() > 0) {
+                    robot.setDamage(robot.getDamage() - 1);
                 }
             }
         }
