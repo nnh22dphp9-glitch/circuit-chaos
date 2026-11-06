@@ -15,16 +15,14 @@ import de.phlup.circuitchaos.common.model.course.Floor;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
-import de.phlup.circuitchaos.server.game.Game;
-import de.phlup.circuitchaos.server.player.Player;
 import lombok.Data;
 
 @Data
 public class MoveInfo {
 
-    private final Game       game;
+    private final Goal       goal;
     private final Course     course;
-    private final Robot      robot;
+    private final Robot      myself;
     private final Checkpoint nextCP;
 
     private Programme[] program;
@@ -46,13 +44,13 @@ public class MoveInfo {
 
     private Floor tf;
 
-    public MoveInfo(Game game, Checkpoint nextCP, Player player) {
-        this.game = game;
-        course = game.getCourse();
+    public MoveInfo(Course course, Goal goal, Checkpoint nextCP, Robot myself) {
+        this.course = course;
+        this.goal = goal;
         this.nextCP = nextCP;
-        this.robot = player.getRobot();
-        x = robot.getPosition().x();
-        y = robot.getPosition().y();
+        this.myself = myself;
+        x = myself.getPosition().x();
+        y = myself.getPosition().y();
     }
 
     public void simulateCourse() {
@@ -65,7 +63,7 @@ public class MoveInfo {
         keepsStaying = false;
         probableTargets = 0;
 
-        tf = CourseHandler.getFloor(course, robot.getPosition());
+        tf = CourseHandler.getFloor(course, myself.getPosition());
         for (int phase = 0; phase < 5; phase++) {
             boolean flyingDuringMovement;
             checkForAbyss(phase);
@@ -76,9 +74,9 @@ public class MoveInfo {
             } else if (program[phase].type() == ProgramType.U_TURN) {
                 endingDirection = endingDirection.add(Direction.SOUTH);
             } else {
-                int movement = CourseHandler.determineMovementAmount(program[phase], robot.uses(ModuleType.BRAKES, phase));
+                int movement = CourseHandler.determineMovementAmount(program[phase], myself.uses(ModuleType.BRAKES, phase));
                 // Hovercraft flight starts before water/oil effects are applied.
-                flyingDuringMovement = robot.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
+                flyingDuringMovement = myself.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
                 if (!flyingDuringMovement && (tf.isWater() || CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
                     if (movement > 0) {
                         movement--;
@@ -226,50 +224,34 @@ public class MoveInfo {
             // course mounted lasers (resolve laser fire)
             damage = damage + tf.getLasers()[0] + tf.getLasers()[1] + tf.getLasers()[2] + tf.getLasers()[3];
             // probableTargets (resolve laser fire)
-            for (Player player2 : game.getPlayers()) {
-                if (player2.getRobot().isOnCourse()) {
-                    if (!player2.getRobot().equals(robot)) {
-                        int maxDist = 4;
-                        switch (endingDirection) {
-                            case NORTH -> {
-                                if (player2.getRobot().getPosition().y() < y && Math.abs(player2.getRobot().getPosition().y() - y) <= maxDist && Math.abs(
-                                        player2.getRobot().getPosition().x() - x) <= Math
-                                        .abs(player2.getRobot()
-                                                    .getPosition()
-                                                    .y() - y)) {
-                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x))
-                                            * (game.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
-                                }
+            for (Robot targetRobot : course.getRobots()) {
+                if (!targetRobot.getName().equals(myself.getName())) {
+                    int maxDist = 4;
+                    int goalMultiplication = goal == Goal.KILL_ALL ? 1 : targetRobot.getNextCheckpoint();
+                    Position targetPos = targetRobot.getPosition();
+                    switch (endingDirection) {
+                        case NORTH -> {
+                            if (targetPos.y() < y && Math.abs(targetPos.y() - y) <= maxDist
+                                    && Math.abs(targetPos.x() - x) <= Math.abs(targetPos.y() - y)) {
+                                probableTargets = probableTargets + (maxDist - Math.abs(targetPos.x() - x)) * goalMultiplication;
                             }
-                            case EAST -> {
-                                if (player2.getRobot().getPosition().x() > x && Math.abs(player2.getRobot().getPosition().x() - x) <= maxDist && Math.abs(
-                                        player2.getRobot().getPosition().x() - x) >= Math
-                                        .abs(player2.getRobot()
-                                                    .getPosition()
-                                                    .y() - y)) {
-                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y))
-                                            * (game.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
-                                }
+                        }
+                        case EAST -> {
+                            if (targetPos.x() > x && Math.abs(targetPos.x() - x) <= maxDist
+                                    && Math.abs(targetPos.x() - x) >= Math.abs(targetPos.y() - y)) {
+                                probableTargets = probableTargets + (maxDist - Math.abs(targetPos.y() - y)) * goalMultiplication;
                             }
-                            case SOUTH -> {
-                                if (player2.getRobot().getPosition().y() > y && Math.abs(player2.getRobot().getPosition().y() - y) <= maxDist && Math.abs(
-                                        player2.getRobot().getPosition().x() - x) <= Math
-                                        .abs(player2.getRobot()
-                                                    .getPosition()
-                                                    .y() - y)) {
-                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x))
-                                            * (game.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
-                                }
+                        }
+                        case SOUTH -> {
+                            if (targetPos.y() > y && Math.abs(targetPos.y() - y) <= maxDist
+                                    && Math.abs(targetPos.x() - x) <= Math.abs(targetPos.y() - y)) {
+                                probableTargets = probableTargets + (maxDist - Math.abs(targetPos.x() - x)) * goalMultiplication;
                             }
-                            case WEST -> {
-                                if (player2.getRobot().getPosition().x() < x && Math.abs(player2.getRobot().getPosition().x() - x) <= maxDist && Math.abs(
-                                        player2.getRobot().getPosition().x() - x) >= Math
-                                        .abs(player2.getRobot()
-                                                    .getPosition()
-                                                    .y() - y)) {
-                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y))
-                                            * (game.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
-                                }
+                        }
+                        case WEST -> {
+                            if (targetPos.x() < x && Math.abs(targetPos.x() - x) <= maxDist
+                                    && Math.abs(targetPos.x() - x) >= Math.abs(targetPos.y() - y)) {
+                                probableTargets = probableTargets + (maxDist - Math.abs(targetPos.y() - y)) * goalMultiplication;
                             }
                         }
                     }
@@ -297,7 +279,7 @@ public class MoveInfo {
                         copiesArchive = true;
                     }
                     if (phase == 4) {
-                        keepsStaying = x == robot.getPosition().x() && y == robot.getPosition().y();
+                        keepsStaying = x == myself.getPosition().x() && y == myself.getPosition().y();
                         switch (endingDirection) {
                             case NORTH -> facesTowardsCheckpoint = nextCP.getPosition().y() <= y;
                             case EAST -> facesTowardsCheckpoint = nextCP.getPosition().x() >= x;
@@ -362,9 +344,7 @@ public class MoveInfo {
         }
         WallType sourceWall = previousFloor.wall(direction);
         WallType targetWall = currentFloor.wall(direction.reverse());
-        boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
-                || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
-        if (!rampPassage) {
+        if (CourseHandler.isNotRampPassage(sourceWall, targetWall)) {
             damage++;
         }
     }

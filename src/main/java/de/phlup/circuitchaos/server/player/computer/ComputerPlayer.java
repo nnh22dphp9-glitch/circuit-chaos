@@ -55,17 +55,17 @@ public class ComputerPlayer extends Player {
     }
 
     private void nextTurn() {
-        Game game = GlobalServerAttributes.getGame(gameId);
+        Game   game   = GlobalServerAttributes.getGame(gameId);
+        Course course = game.getCourse().copy();
         this.setTurnFinished(false);
         initTurn();
         initMoveInfo();
-        programRobot(game);
+        programRobot(course);
         this.setTurnFinished(true);
     }
 
-    private void programRobot(Game game) {
-        Course   gameCourse  = game.getCourse();
-        MoveInfo bestProgram = evaluateAllPrograms(game, gameCourse);
+    private void programRobot(Course course) {
+        MoveInfo bestProgram = evaluateAllPrograms(course);
         setBestProgram(bestProgram);
     }
 
@@ -95,8 +95,8 @@ public class ComputerPlayer extends Player {
         }
     }
 
-    private MoveInfo evaluateAllPrograms(Game game, Course gameCourse) {
-        List<MoveInfo> programList = generatePrograms(game);
+    private MoveInfo evaluateAllPrograms(Course gameCourse) {
+        List<MoveInfo> programList = generatePrograms(gameCourse);
         programList.forEach(MoveInfo::simulateCourse);
         MoveInfo bestProgram = null;
         for (MoveInfo programme : programList) {
@@ -105,7 +105,7 @@ public class ComputerPlayer extends Player {
         return bestProgram;
     }
 
-    private List<MoveInfo> generatePrograms(Game game) {
+    private List<MoveInfo> generatePrograms(Course course) {
         List<MoveInfo> programList = new ArrayList<>();
         Programme[]    program     = new Programme[5];
         // use blocked registers
@@ -124,44 +124,44 @@ public class ComputerPlayer extends Player {
                 return programList; // illegal: one program step used twice
             }
         }
-        generatePrograms(game, 0, program, usedPrograms, programList);
+        generatePrograms(course, goal, 0, program, usedPrograms, programList);
         return programList;
     }
 
-    private void generatePrograms(Game game, int slot, Programme[] program, Set<Programme> usedPrograms, List<MoveInfo> programList) {
+    private void generatePrograms(Course course, Goal goal, int slot, Programme[] program, Set<Programme> usedPrograms, List<MoveInfo> programList) {
         if (slot == program.length) {
-            programList.addAll(createProgrammeForEveryPossibleStartingDirection(game, program));
+            programList.addAll(createProgrammeForEveryPossibleStartingDirection(course, goal, program));
             return;
         }
         // blocked registers are already set
         if (robot.getBlocked()[slot]) {
-            generatePrograms(game, slot + 1, program, usedPrograms, programList);
+            generatePrograms(course, goal, slot + 1, program, usedPrograms, programList);
             return;
         }
         for (Programme candidate : robot.getPotentialProgramme()) {
             if (candidate != null && usedPrograms.add(candidate)) { // identity constraint: don't use a program step twice
                 program[slot] = candidate;
-                generatePrograms(game, slot + 1, program, usedPrograms, programList);
+                generatePrograms(course, goal, slot + 1, program, usedPrograms, programList);
                 usedPrograms.remove(candidate); // backtracking: free the program card for the next use
                 program[slot] = null;
             }
         }
     }
 
-    private List<MoveInfo> createProgrammeForEveryPossibleStartingDirection(Game game, Programme[] program) {
+    private List<MoveInfo> createProgrammeForEveryPossibleStartingDirection(Course course, Goal goal, Programme[] program) {
         List<MoveInfo> programList = new ArrayList<>();
         if (robot.isMayChooseDirection()) {
             for (Direction dir : Direction.values()) {
-                programList.add(createComputerMoveInfo(game, program, dir));
+                programList.add(createComputerMoveInfo(course, goal, program, dir));
             }
         } else {
-            programList.add(createComputerMoveInfo(game, program, robot.getDirection()));
+            programList.add(createComputerMoveInfo(course, goal, program, robot.getDirection()));
         }
         return programList;
     }
 
-    private MoveInfo createComputerMoveInfo(Game game, Programme[] program, Direction dir) {
-        MoveInfo mi = new MoveInfo(game, nextCP, this);
+    private MoveInfo createComputerMoveInfo(Course course, Goal goal, Programme[] program, Direction dir) {
+        MoveInfo mi = new MoveInfo(course, goal, nextCP, robot);
         mi.setStartingDirection(dir);
         mi.setProgram(program.clone());
         return mi;

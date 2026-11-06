@@ -320,9 +320,7 @@ public class CourseHandler {
         }
         WallType sourceWall = sourceFloor.wall(direction);
         WallType targetWall = targetFloor.wall(direction.reverse());
-        boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
-                || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
-        if (targetFloor.getLevel() > sourceFloor.getLevel() && !rampPassage) {
+        if (targetFloor.getLevel() > sourceFloor.getLevel() && isNotRampPassage(sourceWall, targetWall)) {
             return true;
         }
         return ((sourceWall != WallType.NONE
@@ -335,6 +333,11 @@ public class CourseHandler {
                 && targetWall != WallType.RAMP_DOWN
                 && targetWall != WallType.LEDGE))
                 && (sourceWall != WallType.ONE_WAY_GREEN || targetWall != WallType.ONE_WAY_RED);
+    }
+
+    public static boolean isNotRampPassage(WallType sourceWall, WallType targetWall) {
+        return sourceWall != WallType.RAMP_UP && sourceWall != WallType.RAMP_DOWN
+                && targetWall != WallType.RAMP_UP && targetWall != WallType.RAMP_DOWN;
     }
 
 }
