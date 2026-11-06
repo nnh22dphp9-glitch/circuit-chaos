@@ -427,7 +427,7 @@ public class Game {
     }
 
     private String setTouchCheckpoints(int phase) {
-        gameLogic.touchCourseElements(phase);
+        gameLogic.touchRobotCheckpoints(phase);
         String winner = null;
         if (!gameAborted) {
             for (Player player : players) {
@@ -442,6 +442,7 @@ public class Game {
                     }
                 }
             }
+            gameLogic.activateMines(phase);
         }
         return winner;
     }
