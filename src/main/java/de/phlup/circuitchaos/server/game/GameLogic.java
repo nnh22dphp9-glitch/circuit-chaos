@@ -211,62 +211,67 @@ public class GameLogic {
         }
     }
 
-    public void touchCourseElements(int phase) {
-        for (CourseElement element : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
+    public void touchRobotCheckpoints(int phase) {
+        for (Robot robot : course.getRobots()) {
             if (gameAborted) {
                 break;
             }
-            if (!element.isOnCourse()) {
+            if (!robot.isOnCourse()) {
                 continue;
             }
-            if (element instanceof Robot robot) {
-                Checkpoint checkpoint = CourseHandler.getCheckpoint(course, robot.getPosition());
-                Floor floor = CourseHandler.getFloor(course, robot.getPosition());
-                if (robot.uses(ModuleType.MECHANICAL_ARM, phase)) {
-                    if (!(checkpoint != null || floor.getFloortype() == Floortype.PIT_STOP)) {
-                        floor = CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
-                        checkpoint = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
-                    }
-                    if (!(checkpoint != null || floor.getFloortype() == Floortype.PIT_STOP)) {
-                        floor = CourseHandler.getFloor(course, new Position(robot.getPosition().x() + 1, robot.getPosition().y()));
-                        checkpoint = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x() + 1, robot.getPosition().y()));
-                    }
-                    if (!(checkpoint != null || floor.getFloortype() == Floortype.PIT_STOP)) {
-                        floor = CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() + 1));
-                        checkpoint = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x(), robot.getPosition().y() + 1));
-                    }
-                    if (!(checkpoint != null || floor.getFloortype() == Floortype.PIT_STOP)) {
-                        floor = CourseHandler.getFloor(course, new Position(robot.getPosition().x() - 2, robot.getPosition().y()));
-                        checkpoint = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x() - 1, robot.getPosition().y()));
+            Checkpoint checkpoint = CourseHandler.getCheckpoint(course, robot.getPosition());
+            Floor floor = CourseHandler.getFloor(course, robot.getPosition());
+            if (robot.uses(ModuleType.MECHANICAL_ARM, phase)) {
+                if (!(checkpoint != null || floor.getFloortype() == Floortype.PIT_STOP)) {
+                    floor = CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
+                    checkpoint = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
+                }
+                if (!(checkpoint != null || floor.getFloortype() == Floortype.PIT_STOP)) {
+                    floor = CourseHandler.getFloor(course, new Position(robot.getPosition().x() + 1, robot.getPosition().y()));
+                    checkpoint = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x() + 1, robot.getPosition().y()));
+                }
+                if (!(checkpoint != null || floor.getFloortype() == Floortype.PIT_STOP)) {
+                    floor = CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() + 1));
+                    checkpoint = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x(), robot.getPosition().y() + 1));
+                }
+                if (!(checkpoint != null || floor.getFloortype() == Floortype.PIT_STOP)) {
+                    floor = CourseHandler.getFloor(course, new Position(robot.getPosition().x() - 2, robot.getPosition().y()));
+                    checkpoint = CourseHandler.getCheckpoint(course, new Position(robot.getPosition().x() - 1, robot.getPosition().y()));
+                }
+            }
+            if (checkpoint != null || floor.getFloortype() == Floortype.PIT_STOP) {
+                robot.setArchivePosition(floor.getPosition());
+                robot.setArchiveLevel(floor.getLevel());
+                if (checkpoint != null && checkpoint.getNumber() == robot.getNextCheckpoint()) {
+                    robot.setNextCheckpoint(robot.getNextCheckpoint() + 1);
+                }
+            }
+        }
+    }
+
+    public void activateMines(int phase) {
+        for (CourseObject object : new ArrayList<>(course.getObjects())) {
+            if (gameAborted) {
+                break;
+            }
+            object.setActive(true);
+            switch (object.getType()) {
+                case MINE -> {
+                    if (!CourseHandler.getRobots(course, object.getPosition()).isEmpty()) {
+                        goOff(Step.TOUCH_CHECKPOINTS, phase, object);
                     }
                 }
-                if (checkpoint != null || floor.getFloortype() == Floortype.PIT_STOP) {
-                    robot.setArchivePosition(floor.getPosition());
-                    robot.setArchiveLevel(floor.getLevel());
-                    if (checkpoint != null && checkpoint.getNumber() == robot.getNextCheckpoint()) {
-                        robot.setNextCheckpoint(robot.getNextCheckpoint() + 1);
+                case PROXIMITY_MINE -> {
+                    Position position = object.getPosition();
+                    if (!(CourseHandler.getRobots(course, position).isEmpty()
+                            && CourseHandler.getRobots(course, new Position(position.x() + 1, position.y())).isEmpty()
+                            && CourseHandler.getRobots(course, new Position(position.x(), position.y() + 1)).isEmpty()
+                            && CourseHandler.getRobots(course, new Position(position.x() - 1, position.y())).isEmpty()
+                            && CourseHandler.getRobots(course, new Position(position.x(), position.y() - 1)).isEmpty())) {
+                        goOff(Step.TOUCH_CHECKPOINTS, phase, object);
                     }
                 }
-            } else if (element instanceof CourseObject object) {
-                object.setActive(true);
-                switch (object.getType()) {
-                    case MINE -> {
-                        if (!CourseHandler.getRobots(course, object.getPosition()).isEmpty()) {
-                            goOff(Step.TOUCH_CHECKPOINTS, phase, object);
-                        }
-                    }
-                    case PROXIMITY_MINE -> {
-                        Position position = object.getPosition();
-                        if (!(CourseHandler.getRobots(course, position).isEmpty()
-                                && CourseHandler.getRobots(course, new Position(position.x() + 1, position.y())).isEmpty()
-                                && CourseHandler.getRobots(course, new Position(position.x(), position.y() + 1)).isEmpty()
-                                && CourseHandler.getRobots(course, new Position(position.x() - 1, position.y())).isEmpty()
-                                && CourseHandler.getRobots(course, new Position(position.x(), position.y() - 1)).isEmpty())) {
-                            goOff(Step.TOUCH_CHECKPOINTS, phase, object);
-                        }
-                    }
-                    default -> {
-                    }
+                default -> {
                 }
             }
         }
