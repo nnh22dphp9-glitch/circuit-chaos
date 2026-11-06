@@ -10,6 +10,7 @@ import de.phlup.circuitchaos.common.records.Programme;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.DistanceCalculator;
 import de.phlup.circuitchaos.server.game.Game;
+import de.phlup.circuitchaos.server.game.GameLogic;
 import de.phlup.circuitchaos.server.game.Sleep;
 import de.phlup.circuitchaos.server.player.Player;
 import jakarta.validation.constraints.NotNull;
@@ -33,6 +34,7 @@ public class ComputerPlayer extends Player {
 
     private Checkpoint nextCP;
     private boolean    turnFinished;
+    private GameLogic  gameLogic;
 
     public ComputerPlayer(@NotNull Robot robot, @NotNull String gameId, @NotNull Goal goal) {
         super(robot, gameId);
@@ -57,6 +59,7 @@ public class ComputerPlayer extends Player {
     private void nextTurn() {
         Game   game   = GlobalServerAttributes.getGame(gameId);
         Course course = game.getCourse().copy();
+        gameLogic = new GameLogic(course, (step, phase, detail, movingRobotName) -> {});
         this.setTurnFinished(false);
         initTurn();
         initMoveInfo();
