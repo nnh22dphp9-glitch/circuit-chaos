@@ -124,33 +124,32 @@ public class MoveInfo {
     }
 
     private void updateAfterTouchingCourse(int phase) {
-        if (!myself.isOnCourse()) {
-            return;
-        }
-
+        boolean robotOnCourse = myself.isOnCourse();
         int previousCheckpoint = myself.getNextCheckpoint();
         Position previousArchivePosition = myself.getArchivePosition();
         int previousArchiveLevel = myself.getArchiveLevel();
-        Floor standingFloor = CourseHandler.getFloor(course, myself.getPosition());
+        Floor standingFloor = robotOnCourse ? CourseHandler.getFloor(course, myself.getPosition()) : null;
 
         gameLogic.touchRobotCheckpoints(phase);
 
-        if (myself.getNextCheckpoint() > previousCheckpoint) {
-            copiesArchive = true;
-            if (nextCP != null && previousCheckpoint == nextCP.getNumber() && reachesCheckpoint == 5) {
-                reachesCheckpoint = phase;
+        if (robotOnCourse) {
+            if (myself.getNextCheckpoint() > previousCheckpoint) {
+                copiesArchive = true;
+                if (nextCP != null && previousCheckpoint == nextCP.getNumber() && reachesCheckpoint == 5) {
+                    reachesCheckpoint = phase;
+                }
             }
-        }
-        if (!Objects.equals(previousArchivePosition, myself.getArchivePosition())
-                || previousArchiveLevel != myself.getArchiveLevel()) {
-            copiesArchive = true;
-        }
+            if (!Objects.equals(previousArchivePosition, myself.getArchivePosition())
+                    || previousArchiveLevel != myself.getArchiveLevel()) {
+                copiesArchive = true;
+            }
 
-        if (phase == 4 && standingFloor.getFloortype() == Floortype.PIT_STOP) {
-            reachesPitStop = true;
-            copiesArchive = true;
-            if (myself.getDamage() > 0) {
-                myself.setDamage(myself.getDamage() - 1);
+            if (phase == 4 && standingFloor.getFloortype() == Floortype.PIT_STOP) {
+                reachesPitStop = true;
+                copiesArchive = true;
+                if (myself.getDamage() > 0) {
+                    myself.setDamage(myself.getDamage() - 1);
+                }
             }
         }
 
