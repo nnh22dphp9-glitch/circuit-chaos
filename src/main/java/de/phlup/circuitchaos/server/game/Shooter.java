@@ -19,7 +19,7 @@ public class Shooter {
     private Robot  target2;
     private Module weapon;
 
-    public Shooter(int phase, Robot robot, Game game, Step step) {
+    public Shooter(int phase, Robot robot, GameLogic game, Step step) {
         this.robot = robot;
         Position  position = robot.getPosition();
         int       level    = robot.getLevel();
