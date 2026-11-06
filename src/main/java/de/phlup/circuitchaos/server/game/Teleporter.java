@@ -18,11 +18,11 @@ public class Teleporter {
     private boolean hasBeenTeleported;
     private int     oldMovement;
 
-    public static Teleporter teleport(CourseElement ce, int movement, Game game, int phase) {
+    public static Teleporter teleport(CourseElement ce, int movement, GameLogic game, int phase) {
         return new Teleporter().teleportInternal(ce, movement, game, phase);
     }
 
-    private Teleporter teleportInternal(CourseElement ce, int movement, Game game, int phase) {
+    private Teleporter teleportInternal(CourseElement ce, int movement, GameLogic game, int phase) {
         hasBeenTeleported = false;
         oldMovement = movement;
         for (CourseObject co : CourseHandler.getObjects(game.getCourse(), ce.getPosition())) {

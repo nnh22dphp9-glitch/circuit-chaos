@@ -12,27 +12,36 @@ import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.CourseElement;
 import de.phlup.circuitchaos.common.model.course.CourseObject;
 import de.phlup.circuitchaos.common.model.course.Floor;
+import de.phlup.circuitchaos.common.model.course.Module;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static de.phlup.circuitchaos.common.enums.Direction.EAST;
 import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
 import static de.phlup.circuitchaos.common.enums.Direction.SOUTH;
 import static de.phlup.circuitchaos.common.enums.Direction.WEST;
+import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
 
 @RequiredArgsConstructor
 public class GameLogic {
 
     private static final int MINE_INITIAL_DAMAGE = 4;
 
+    @Getter
     private final Course               course;
     private final CourseChangeListener listener;
 
-    private void notifyCourseMayHaveChanged(Step step, Integer phase, String detail, String movingRobotName) {
+    @Setter
+    private boolean gameAborted = false;
+
+    public void notifyCourseMayHaveChanged(Step step, Integer phase, String detail, String movingRobotName) {
         listener.courseChanged(step, phase, detail, movingRobotName);
     }
 
@@ -311,7 +320,7 @@ public class GameLogic {
         moveInit(ce, NORTH, 0, 0, step, phase, false, wait, null);
     }
 
-    public CourseElement getConflictingElement(CourseElement courseElement, Direction direction) {
+    private CourseElement getConflictingElement(CourseElement courseElement, Direction direction) {
         if (!courseElement.isOnCourse() || courseElement.isFlying()) {
             return null;
         }
@@ -323,6 +332,16 @@ public class GameLogic {
         }
         return null;
     }
+
+    private int getCBConflictingElementMark(CourseElement be2, Direction direction) {
+        int           erg = 1;
+        CourseElement ce  = getConflictingElement(be2, direction);
+        if (ce != null) {
+            erg = ce.getConflictingMark();
+        }
+        return erg;
+    }
+
 
     public void rotate(CourseElement ce, Direction direction, Step step, int phase, boolean wait) {
         ce.setDirection(ce.getDirection().add(direction));
@@ -368,6 +387,451 @@ public class GameLogic {
             }
         }
         return target;
+    }
+
+    public void stepCourseElementsMove(int phase) {
+        expressConveyorBeltsMove(phase);
+        conveyorBeltsMove(phase);
+        pushersPush(phase);
+        gearsRotate(phase);
+    }
+
+    private void pushersPush(int phase) {
+        for (Floor f : new ArrayList<>(course.getFloor())) {
+            if (gameAborted) {
+                break;
+            }
+            if (f.isHasPusher() && f.getActiveInPhase()[phase]) {
+                for (CourseElement ce : CourseHandler.getObjectsAndRobots(course)) {
+                    if (ce.isOnCourse() && ce.getPosition().equals(f.getPosition()) && willBePushed(ce)) {
+                        moveInit(ce, f.getPusherDirection(), 1, 1, Step.PUSHERS_PUSH, phase, true, false, null);
+                    }
+                }
+            }
+        }
+        if (!gameAborted) {
+            notifyCourseMayHaveChanged(Step.PUSHERS_PUSH, phase, null, null);
+        }
+    }
+
+    private boolean willBePushed(CourseElement ce) {
+        if (ce instanceof CourseObject co) {
+            return co.getType() != ObjectType.RANDOMIZER
+                    && co.getType() != ObjectType.TELEPORTER
+                    && co.getType() != ObjectType.GLUE
+                    && co.getType() != ObjectType.OIL
+                    && co.getType() != ObjectType.PORTAL_RED
+                    && co.getType() != ObjectType.PORTAL_BLUE
+                    && co.getType() != ObjectType.PORTAL_YELLOW
+                    && co.getType() != ObjectType.PORTAL_PURPLE
+                    && co.getType() != ObjectType.PORTAL_GREEN;
+        } else {
+            return true;
+        }
+    }
+
+    private void gearsRotate(int phase) {
+        for (Floor f : course.getFloor()) {
+            if (gameAborted) {
+                break;
+            }
+            if (f.getFloortype() == Floortype.GEARS_CCW || f.getFloortype() == Floortype.GEARS_CW) {
+                for (CourseElement ce : CourseHandler.getObjectsAndRobots(course)) {
+                    if (ce.isOnCourse()
+                            && ce.getPosition().equals(f.getPosition())
+                            && !ce.isFlying()
+                            && !(ce instanceof Robot r && r.uses(ModuleType.GYROSCOPIC_STABILIZER, phase))) {
+                        rotate(ce, f.getFloortype() == Floortype.GEARS_CCW ? WEST : EAST, Step.GEARS_ROTATE, phase, false);
+                    }
+                }
+            }
+        }
+        if (!gameAborted) {
+            notifyCourseMayHaveChanged(Step.GEARS_ROTATE, phase, null, null);
+        }
+    }
+
+    private void conveyorBeltsMove(int phase) {
+        boolean needToGoAgain = false;
+        int     iteration     = 0;
+        for (CourseElement obj : CourseHandler.getObjectsAndRobots(course)) {
+            if (gameAborted) {
+                break;
+            }
+            if (obj.isOnCourse()) {
+                Floor f = CourseHandler.getFloor(course, obj.getPosition());
+                obj.setConflictingMark((f.getFloortype().isConveyorBelt() && !obj.isFlying()) ? 0 : -1);
+                if (f.getFloortype().isConveyorBelt()) {
+                    needToGoAgain = true;
+                }
+            }
+        }
+        while (needToGoAgain && iteration < 20 && !gameAborted) {
+            needToGoAgain = false;
+            iteration++;
+            for (CourseElement obj : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
+                if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
+                    Floor f           = CourseHandler.getFloor(course, obj.getPosition());
+                    Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
+                    if (CourseHandler.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
+                            || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
+                        obj.setConflictingMark(-1);
+                    } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
+                        obj.setConflictingMark(-1);
+                        rotateObjectsOnConveyorBelts(Step.CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
+                        setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
+                    } else {
+                        needToGoAgain = true;
+                    }
+                }
+            }
+        }
+        for (CourseElement obj : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
+            if (gameAborted) {
+                break;
+            }
+            if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
+                Floor f           = CourseHandler.getFloor(course, obj.getPosition());
+                Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
+                rotateObjectsOnConveyorBelts(Step.CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
+                setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
+            }
+        }
+        if (!gameAborted) {
+            notifyCourseMayHaveChanged(Step.CONVEYOR_BELTS_MOVE, phase, null, null);
+        }
+    }
+
+    private void expressConveyorBeltsMove(int phase) {
+        boolean needToGoAgain = false;
+        int     iteration     = 0;
+        for (CourseElement obj : CourseHandler.getObjectsAndRobots(course)) {
+            if (gameAborted) {
+                break;
+            }
+            if (obj.isOnCourse()) {
+                Floor f = CourseHandler.getFloor(course, obj.getPosition());
+                obj.setConflictingMark((f.getFloortype().isExpressConveyorBelt() && !obj.isFlying()) ? 0 : -1);
+                if (f.getFloortype().isExpressConveyorBelt()) {
+                    needToGoAgain = true;
+                }
+            }
+        }
+        while (needToGoAgain && iteration < 20 && !gameAborted) {
+            needToGoAgain = false;
+            iteration++;
+            for (CourseElement obj : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
+                if (gameAborted) {
+                    break;
+                }
+                if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
+                    Floor f           = CourseHandler.getFloor(course, obj.getPosition());
+                    Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
+                    if (CourseHandler.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
+                            || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
+                        obj.setConflictingMark(-1);
+                    } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
+                        obj.setConflictingMark(-1);
+                        rotateObjectsOnConveyorBelts(Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
+                        setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
+                    } else {
+                        needToGoAgain = true;
+                    }
+                }
+            }
+        }
+        for (CourseElement obj : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
+            if (gameAborted) {
+                break;
+            }
+            if (obj.isOnCourse()) {
+                if (obj.getConflictingMark() == 0) {
+                    Floor f           = CourseHandler.getFloor(course, obj.getPosition());
+                    Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
+                    rotateObjectsOnConveyorBelts(Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
+                    setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
+                }
+            }
+        }
+        if (!gameAborted) {
+            notifyCourseMayHaveChanged(Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, null, null);
+        }
+    }
+
+    private void rotateObjectsOnConveyorBelts(Step step, int phase, CourseElement obj, Floor targetFloor, Floor sourceFloor) {
+        if (!(obj instanceof Robot r && r.uses(ModuleType.GYROSCOPIC_STABILIZER, phase))) {
+            if ((targetFloor.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
+                    || targetFloor.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW)
+                    && (targetFloor.getFacingDirection() == sourceFloor.getFacingDirection().add(WEST)
+                    || (targetFloor.getFacingDirection() == WEST && sourceFloor.getFacingDirection() == NORTH))) {
+                rotate(obj, WEST, step, phase, false);
+            } else if ((targetFloor.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW
+                    || targetFloor.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW)
+                    && (targetFloor.getFacingDirection() == sourceFloor.getFacingDirection().add(EAST)
+                    || (sourceFloor.getFacingDirection() == WEST && targetFloor.getFacingDirection() == NORTH))) {
+                rotate(obj, EAST, step, phase, false);
+            } else if (targetFloor.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
+                    || targetFloor.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW) {
+                if (targetFloor.getFacingDirection() == sourceFloor.getFacingDirection().add(WEST)
+                        || (targetFloor.getFacingDirection() == WEST && sourceFloor.getFacingDirection() == NORTH)) {
+                    rotate(obj, WEST, step, phase, false);
+                } else if ((targetFloor.getFacingDirection() == NORTH && sourceFloor.getFacingDirection() == WEST)
+                        || targetFloor.getFacingDirection() == sourceFloor.getFacingDirection().add(EAST)) {
+                    rotate(obj, EAST, step, phase, false);
+                }
+            }
+        }
+    }
+
+    public int applyWaterAndOilSlick(CourseElement ce, Floor f, int movement) {
+        if (!ce.isFlying() && (f.isWater()
+                || CourseHandler.getObjects(course, f.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
+            if (movement > 0) {
+                movement--;
+            }
+            if (movement < 0) {
+                movement++;
+            }
+        }
+        return movement;
+    }
+
+    private void reactivateRammingArmor(int phase, Robot robot) {
+        if (robot.isReactivateRammingArmor() && robot.getModule(ModuleType.RAMMING_ARMOR) != null) {
+            robot.setReactivateRammingArmor(false);
+            robot.getModule(ModuleType.RAMMING_ARMOR).getActiveInPhase()[phase] = true;
+        }
+    }
+
+    private void deactivateRammingArmor(int phase, boolean reactivate) {
+        for (Robot robot : course.getRobots()) {
+            if (robot.uses(ModuleType.RAMMING_ARMOR, phase)) {
+                robot.setReactivateRammingArmor(reactivate);
+                robot.getModule(ModuleType.RAMMING_ARMOR).getActiveInPhase()[phase] = false;
+            }
+        }
+    }
+
+    private void openTrapdoors(Course course, int phase, List<Robot> robots) {
+        for (Robot ce : robots) {
+            if (gameAborted) {
+                break;
+            }
+            Floor f = CourseHandler.getFloor(course, ce.getPosition());
+            if (f.getFloortype() == Floortype.TRAPDOOR && f.getActiveInPhase()[phase]) {
+                die(ce, Step.OPEN_TRAPDOORS, phase);
+            }
+        }
+        if (!gameAborted) {
+            notifyCourseMayHaveChanged(Step.OPEN_TRAPDOORS, phase, null, null);
+        }
+    }
+
+    public void stepRobotsMove(int phase, List<Robot> robots) {
+        openTrapdoors(course, phase, robots);
+        deactivateRammingArmor(phase, true);
+        robotsMove(phase, robots);
+        deactivateRammingArmor(phase, false);
+    }
+
+    private void robotsMove(int phase, List<Robot> robots) {
+        for (Robot robot : robots) {
+            if (gameAborted) {
+                break;
+            }
+            Programme program = robot.getProgram()[phase];
+            Floor     f       = CourseHandler.getFloor(course, robot.getPosition());
+            reactivateRammingArmor(phase, robot);
+            releaseDevices(phase, robot);
+            while (!gameAborted && program != null) {
+                int movement = CourseHandler.determineMovementAmount(program, robot.uses(ModuleType.BRAKES, phase));
+                if (robot.uses(ModuleType.HOVERCRAFT, phase)) {
+                    robot.setFlying(movement != 0);
+                }
+
+                Teleporter teleportResult = Teleporter.teleport(robot, movement, this, phase);
+                if (teleportResult.isHasBeenTeleported()) {
+                    break;
+                } else {
+                    movement = teleportResult.getOldMovement();
+                }
+
+                movement = applyWaterAndOilSlick(robot, f, movement);
+                singleRobotMove(phase, robot, program, movement);
+                if (robot.isFlying()) {
+                    land(robot, Step.ROBOTS_AND_OBJECTS_MOVE, phase);
+                }
+                program = null;
+            }
+        }
+    }
+
+    private void releaseDevices(int phase, Robot robot) {
+        Floor standingOn = CourseHandler.getFloor(course, robot.getPosition());
+        if (robot.uses(ModuleType.MOBILE_TELEPORTER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            de.phlup.circuitchaos.common.model.course.Module module = robot.getModule(ModuleType.MOBILE_TELEPORTER);
+            if (module.getAmmunition() > 0) {
+                CourseHandler.createCircuitChaosObject(course, ObjectType.TELEPORTER, robot);
+                module.setAmmunition(module.getAmmunition() - 1);
+            }
+        }
+        if (robot.uses(ModuleType.MOBILE_RANDOMIZER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            de.phlup.circuitchaos.common.model.course.Module module = robot.getModule(ModuleType.MOBILE_RANDOMIZER);
+            if (module.getAmmunition() > 0) {
+                CourseHandler.createCircuitChaosObject(course, ObjectType.RANDOMIZER, robot);
+                module.setAmmunition(module.getAmmunition() - 1);
+            }
+        }
+        if (robot.uses(ModuleType.GLUE_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            de.phlup.circuitchaos.common.model.course.Module glueDispenser = robot.getModule(ModuleType.GLUE_DISPENSER);
+            if (glueDispenser.getAmmunition() > 0) {
+                CourseHandler.createGlue(course, robot.getPosition());
+                glueDispenser.setAmmunition(glueDispenser.getAmmunition() - 1);
+            }
+        }
+        if (robot.uses(ModuleType.OIL_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            de.phlup.circuitchaos.common.model.course.Module oilDispenser = robot.getModule(ModuleType.OIL_DISPENSER);
+            if (oilDispenser.getAmmunition() > 0) {
+                CourseHandler.createOil(course, robot.getPosition());
+                oilDispenser.setAmmunition(oilDispenser.getAmmunition() - 1);
+            }
+        }
+        if (robot.uses(ModuleType.MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            de.phlup.circuitchaos.common.model.course.Module mineLayer = robot.getModule(ModuleType.MINE_LAYER);
+            if (mineLayer.getAmmunition() > 0) {
+                CourseHandler.createCircuitChaosObject(course, ObjectType.MINE, robot);
+                mineLayer.setAmmunition(mineLayer.getAmmunition() - 1);
+            }
+        }
+        if (robot.uses(ModuleType.PROXIMITY_MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
+            de.phlup.circuitchaos.common.model.course.Module mineLayer = robot.getModule(ModuleType.PROXIMITY_MINE_LAYER);
+            if (mineLayer.getAmmunition() > 0) {
+                CourseHandler.createCircuitChaosObject(course, ObjectType.PROXIMITY_MINE, robot);
+                mineLayer.setAmmunition(mineLayer.getAmmunition() - 1);
+            }
+        }
+        if (robot.uses(ModuleType.BRIDGE_PROJECTOR, phase)) {
+            Module bridgeProjector = robot.getModule(ModuleType.BRIDGE_PROJECTOR);
+            if (bridgeProjector.getAmmunition() > 0) {
+                Floor f2 = CourseHandler.getFloor(course, robot.getPosition().neighbour(robot.getDirection()));
+                if (f2.getFloortype() == Floortype.ABYSS || f2.getFloortype() == Floortype.TRAPDOOR) {
+                    bridgeProjector.setAmmunition(bridgeProjector.getAmmunition() - 1);
+                    f2.setFloortype(Floortype.OPEN_FLOOR);
+                }
+            }
+        }
+        if (!gameAborted) {
+            notifyCourseMayHaveChanged(Step.RELEASE_DEVICES, phase, null, null);
+        }
+    }
+
+    public void stepResolveBeamsAndLaserFire(int phase) {
+        List.of(Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE,
+                Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE,
+                Step.ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE,
+                Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE,
+                Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE,
+                Step.ROBOT_MOUNTED_LASER_FIRE).forEach(step -> {
+            List<Shooter> shooters = getCurrentShooters(phase, step);
+            robotMountedBeamsAndLasersShoot(phase, shooters, step);
+        });
+        List.of(Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE,
+                Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE,
+                Step.COURSE_MOUNTED_LASER_FIRE)
+            .forEach(step -> courseMountedLasersShoot(phase, step));
+    }
+
+    private void courseMountedLasersShoot(int phase, Step step) {
+        for (Floor f : new ArrayList<>(course.getFloor())) {
+            for (Direction dir : Direction.values()) {
+                Direction dir2 = dir.reverse();
+                int amount = switch (step) {
+                    case COURSE_MOUNTED_PRESSURE_BEAMS_FIRE -> f.getPressureBeam()[dir.ordinal()] ? 1 : 0;
+                    case COURSE_MOUNTED_TRACTOR_BEAMS_FIRE -> f.getTractorBeam()[dir.ordinal()] ? 1 : 0;
+                    default -> f.getLasers()[dir.ordinal()];
+                };
+                for (int cnt = 0; cnt < amount; cnt++) {
+                    Robot target = getLaserTarget(f.getPosition(), dir, f.getLevel(), false, true, true, step);
+                    if (target != null) {
+                        if (step == Step.COURSE_MOUNTED_LASER_FIRE) {
+                            target.takeDamage(course, phase, dir2, true);
+                        } else if (step == Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE) {
+                            moveInit(target, dir, 0, 1, Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE, phase, true, false, null);
+                        } else if (step == Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE) {
+                            moveInit(target, dir.reverse(), 0, 1, Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE, phase, false, false, null);
+                        }
+                    }
+                }
+            }
+        }
+        if (!gameAborted) {
+            notifyCourseMayHaveChanged(step, phase, null, null);
+        }
+        CourseHandler.clearBeams(course);
+    }
+
+    private void robotMountedBeamsAndLasersShoot(int phase, List<Shooter> shooters, Step step) {
+        for (Shooter shooter : shooters) {
+            if (gameAborted) {
+                break;
+            }
+            Robot     robot           = shooter.getRobot();
+            Direction dir             = robot.getDirection();
+            Robot     targetRobot     = shooter.getTarget();
+            Robot     highPowerTarget = shooter.getTarget2();
+            Module    weapon          = shooter.getWeapon();
+            if (weapon != null) {
+                ModuleType weaponType = weapon.getType();
+                if (targetRobot != null && targetRobot.isOnCourse()) {
+                    if (step == Step.ROBOT_MOUNTED_LASER_FIRE
+                            && (weaponType == MAIN_LASER
+                            || weaponType == ModuleType.DOUBLE_BARREL_LASER
+                            || weaponType == ModuleType.HIGH_POWER_LASER
+                            || weaponType == ModuleType.REAR_LASER)) {
+                        targetRobot.takeDamage(course, phase, dir, true);
+                        if (weaponType == ModuleType.DOUBLE_BARREL_LASER) {
+                            targetRobot.takeDamage(course, phase, dir, true);
+                        }
+                    } else if (step == Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE && weaponType == ModuleType.PRESSURE_BEAM) {
+                        moveInit(targetRobot, dir, 0, 1, step, phase, true, false, null);
+                    } else if (step == Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE && weaponType == ModuleType.TRACTOR_BEAM) {
+                        moveInit(targetRobot, dir.reverse(), 0, 1, step, phase, false, false, null);
+                    } else if (step == Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE && weaponType == ModuleType.EXCHANGE_BEAM) {
+                        // Dreiecks-Tausch
+                        Position position = targetRobot.getPosition();
+                        int      level    = targetRobot.getLevel();
+                        targetRobot.setPosition(robot.getPosition());
+                        targetRobot.setLevel(robot.getLevel());
+                        robot.setPosition(position);
+                        robot.setLevel(level);
+                    } else if (step == Step.ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE && weaponType == ModuleType.SPIN_LEFT_BEAM) {
+                        targetRobot.setDirection(targetRobot.getDirection().add(WEST));
+                    } else if (step == Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE && weaponType == ModuleType.SPIN_RIGHT_BEAM) {
+                        targetRobot.setDirection(targetRobot.getDirection().add(EAST));
+                    }
+                }
+                if (highPowerTarget != null && step == Step.ROBOT_MOUNTED_LASER_FIRE && highPowerTarget.isOnCourse()) {
+                    highPowerTarget.takeDamage(course, phase, dir, true);
+                }
+            }
+        }
+        if (!gameAborted && !shooters.isEmpty()) {
+            notifyCourseMayHaveChanged(step, phase, null, null);
+        }
+        CourseHandler.clearBeams(course);
+    }
+
+    private List<Shooter> getCurrentShooters(int phase, Step step) {
+        List<Shooter> shooters = new ArrayList<>();
+        for (Robot robot : course.getRobots()) {
+            if (gameAborted) {
+                break;
+            }
+            if (robot.isOnCourse() && !robot.isPoweredDown()) {
+                shooters.add(new Shooter(phase, robot, this, step));
+            }
+        }
+        return shooters;
     }
 
 }

@@ -50,9 +50,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static de.phlup.circuitchaos.common.enums.Direction.EAST;
-import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
-import static de.phlup.circuitchaos.common.enums.Direction.WEST;
 import static de.phlup.circuitchaos.common.enums.ModuleType.DOUBLE_BARREL_LASER;
 import static de.phlup.circuitchaos.common.enums.ModuleType.EXCHANGE_BEAM;
 import static de.phlup.circuitchaos.common.enums.ModuleType.HIGH_POWER_LASER;
@@ -249,7 +246,8 @@ public class Game {
             loopThread = new LoopThread(getGameId());
             loopThread.start();
         } else {
-            gameAborted = true;
+            setGameAborted(true);
+            gameLogic.setGameAborted(true);
             end(null);
         }
     }
@@ -331,9 +329,9 @@ public class Game {
         for (int phase = 0; phase < 5 && winner == null && !players.isEmpty() && !gameAborted; phase++) {
             notifyCourseMayHaveChanged(Step.START_OF_TURN_COURSE_EFFECTS, phase, "begin of phase %s".formatted(phase + 1), null);
             List<Robot> robots = stepRevealProgrammes(phase);
-            stepRobotsMove(phase, robots);
-            stepCourseElementsMove(phase);
-            stepResolveBeamsAndLaserFire(phase);
+            gameLogic.stepRobotsMove(phase, robots);
+            gameLogic.stepCourseElementsMove(phase);
+            gameLogic.stepResolveBeamsAndLaserFire(phase);
             winner = setTouchCheckpoints(phase);
             if (goal == Goal.KILL_ALL) {
                 List.copyOf(players).stream().filter(p -> p.getRobot().hasLost(goal)).forEach(this::removeLostPlayer);
@@ -341,45 +339,6 @@ public class Game {
             }
         }
         return winner;
-    }
-
-    private void stepRobotsMove(int phase, List<Robot> robots) {
-        openTrapdoors(course, phase, robots);
-        deactivateRammingArmor(phase, true);
-        robotsMove(phase, robots);
-        deactivateRammingArmor(phase, false);
-    }
-
-    private void robotsMove(int phase, List<Robot> robots) {
-        for (Robot robot : robots) {
-            if (gameAborted) {
-                break;
-            }
-            Programme program = robot.getProgram()[phase];
-            Floor     f       = CourseHandler.getFloor(course, robot.getPosition());
-            reactivateRammingArmor(phase, robot);
-            releaseDevices(phase, robot);
-            while (!gameAborted && program != null) {
-                int movement = CourseHandler.determineMovementAmount(program, robot.uses(ModuleType.BRAKES, phase));
-                if (robot.uses(ModuleType.HOVERCRAFT, phase)) {
-                    robot.setFlying(movement != 0);
-                }
-
-                Teleporter teleportResult = Teleporter.teleport(robot, movement, this, phase);
-                if (teleportResult.isHasBeenTeleported()) {
-                    break;
-                } else {
-                    movement = teleportResult.getOldMovement();
-                }
-
-                movement = applyWaterAndOilSlick(robot, f, movement);
-                gameLogic.singleRobotMove(phase, robot, program, movement);
-                if (robot.isFlying()) {
-                    gameLogic.land(robot, Step.ROBOTS_AND_OBJECTS_MOVE, phase);
-                }
-                program = null;
-            }
-        }
     }
 
     private String endOfTurnCourseEffects(String winner) {
@@ -421,7 +380,8 @@ public class Game {
     private String checkKillAllWinner() {
         if (players.isEmpty() && !gameAborted) {
             showMessage(THIS_GAME_IS_A_TIE);
-            gameAborted = true;
+            setGameAborted(true);
+            gameLogic.setGameAborted(true);
         } else if (players.size() == 1) {
             return players.getFirst().getRobot().getName();
         }
@@ -536,411 +496,6 @@ public class Game {
         }
     }
 
-    private void stepResolveBeamsAndLaserFire(int phase) {
-        List.of(Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE,
-                Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE,
-                Step.ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE,
-                Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE,
-                Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE,
-                Step.ROBOT_MOUNTED_LASER_FIRE).forEach(step -> {
-            List<Shooter> shooters = getCurrentShooters(phase, step);
-            robotMountedBeamsAndLasersShoot(phase, shooters, step);
-        });
-        List.of(Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE,
-                Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE,
-                Step.COURSE_MOUNTED_LASER_FIRE)
-            .forEach(step -> courseMountedLasersShoot(phase, step));
-    }
-
-    private void courseMountedLasersShoot(int phase, Step step) {
-        for (Floor f : new ArrayList<>(course.getFloor())) {
-            for (Direction dir : Direction.values()) {
-                Direction dir2 = dir.reverse();
-                int amount = switch (step) {
-                    case COURSE_MOUNTED_PRESSURE_BEAMS_FIRE -> f.getPressureBeam()[dir.ordinal()] ? 1 : 0;
-                    case COURSE_MOUNTED_TRACTOR_BEAMS_FIRE -> f.getTractorBeam()[dir.ordinal()] ? 1 : 0;
-                    default -> f.getLasers()[dir.ordinal()];
-                };
-                for (int cnt = 0; cnt < amount; cnt++) {
-                    Robot target = gameLogic.getLaserTarget(f.getPosition(), dir, f.getLevel(), false, true, true, step);
-                    if (target != null) {
-                        if (step == Step.COURSE_MOUNTED_LASER_FIRE) {
-                            target.takeDamage(course, phase, dir2, true);
-                        } else if (step == Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE) {
-                            gameLogic.moveInit(target, dir, 0, 1, Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE, phase, true, false, null);
-                        } else if (step == Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE) {
-                            gameLogic.moveInit(target, dir.reverse(), 0, 1, Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE, phase, false, false, null);
-                        }
-                    }
-                }
-            }
-        }
-        if (!gameAborted) {
-            notifyCourseMayHaveChanged(step, phase, null, null);
-        }
-        CourseHandler.clearBeams(course);
-    }
-
-    private void robotMountedBeamsAndLasersShoot(int phase, List<Shooter> shooters, Step step) {
-        for (Shooter shooter : shooters) {
-            if (gameAborted) {
-                break;
-            }
-            Robot     robot           = shooter.getRobot();
-            Direction dir             = robot.getDirection();
-            Robot     targetRobot     = shooter.getTarget();
-            Robot     highPowerTarget = shooter.getTarget2();
-            Module    weapon          = shooter.getWeapon();
-            if (weapon != null) {
-                ModuleType weaponType = weapon.getType();
-                if (targetRobot != null && targetRobot.isOnCourse()) {
-                    if (step == Step.ROBOT_MOUNTED_LASER_FIRE
-                            && (weaponType == MAIN_LASER
-                            || weaponType == ModuleType.DOUBLE_BARREL_LASER
-                            || weaponType == ModuleType.HIGH_POWER_LASER
-                            || weaponType == ModuleType.REAR_LASER)) {
-                        targetRobot.takeDamage(course, phase, dir, true);
-                        if (weaponType == ModuleType.DOUBLE_BARREL_LASER) {
-                            targetRobot.takeDamage(course, phase, dir, true);
-                        }
-                    } else if (step == Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE && weaponType == ModuleType.PRESSURE_BEAM) {
-                        gameLogic.moveInit(targetRobot, dir, 0, 1, step, phase, true, false, null);
-                    } else if (step == Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE && weaponType == ModuleType.TRACTOR_BEAM) {
-                        gameLogic.moveInit(targetRobot, dir.reverse(), 0, 1, step, phase, false, false, null);
-                    } else if (step == Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE && weaponType == ModuleType.EXCHANGE_BEAM) {
-                        // Dreiecks-Tausch
-                        Position position = targetRobot.getPosition();
-                        int      level    = targetRobot.getLevel();
-                        targetRobot.setPosition(robot.getPosition());
-                        targetRobot.setLevel(robot.getLevel());
-                        robot.setPosition(position);
-                        robot.setLevel(level);
-                    } else if (step == Step.ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE && weaponType == ModuleType.SPIN_LEFT_BEAM) {
-                        targetRobot.setDirection(targetRobot.getDirection().add(WEST));
-                    } else if (step == Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE && weaponType == ModuleType.SPIN_RIGHT_BEAM) {
-                        targetRobot.setDirection(targetRobot.getDirection().add(EAST));
-                    }
-                }
-                if (highPowerTarget != null && step == Step.ROBOT_MOUNTED_LASER_FIRE && highPowerTarget.isOnCourse()) {
-                    highPowerTarget.takeDamage(course, phase, dir, true);
-                }
-            }
-        }
-        if (!gameAborted && !shooters.isEmpty()) {
-            notifyCourseMayHaveChanged(step, phase, null, null);
-        }
-        CourseHandler.clearBeams(course);
-    }
-
-    private List<Shooter> getCurrentShooters(int phase, Step step) {
-        List<Shooter> shooters = new ArrayList<>();
-        for (Robot robot : course.getRobots()) {
-            if (gameAborted) {
-                break;
-            }
-            if (robot.isOnCourse() && !robot.isPoweredDown()) {
-                shooters.add(new Shooter(phase, robot, gameLogic, step));
-            }
-        }
-        return shooters;
-    }
-
-    private void stepCourseElementsMove(int phase) {
-        expressConveyorBeltsMove(phase);
-        conveyorBeltsMove(phase);
-        pushersPush(phase);
-        gearsRotate(phase);
-    }
-
-    private void pushersPush(int phase) {
-        for (Floor f : new ArrayList<>(course.getFloor())) {
-            if (gameAborted) {
-                break;
-            }
-            if (f.isHasPusher() && f.getActiveInPhase()[phase]) {
-                for (CourseElement ce : CourseHandler.getObjectsAndRobots(course)) {
-                    if (ce.isOnCourse() && ce.getPosition().equals(f.getPosition()) && willBePushed(ce)) {
-                        gameLogic.moveInit(ce, f.getPusherDirection(), 1, 1, Step.PUSHERS_PUSH, phase, true, false, null);
-                    }
-                }
-            }
-        }
-        if (!gameAborted) {
-            notifyCourseMayHaveChanged(Step.PUSHERS_PUSH, phase, null, null);
-        }
-    }
-
-    private void gearsRotate(int phase) {
-        for (Floor f : course.getFloor()) {
-            if (gameAborted) {
-                break;
-            }
-            if (f.getFloortype() == Floortype.GEARS_CCW || f.getFloortype() == Floortype.GEARS_CW) {
-                for (CourseElement ce : CourseHandler.getObjectsAndRobots(course)) {
-                    if (ce.isOnCourse()
-                            && ce.getPosition().equals(f.getPosition())
-                            && !ce.isFlying()
-                            && !(ce instanceof Robot r && r.uses(ModuleType.GYROSCOPIC_STABILIZER, phase))) {
-                        gameLogic.rotate(ce, f.getFloortype() == Floortype.GEARS_CCW ? WEST : EAST, Step.GEARS_ROTATE, phase, false);
-                    }
-                }
-            }
-        }
-        if (!gameAborted) {
-            notifyCourseMayHaveChanged(Step.GEARS_ROTATE, phase, null, null);
-        }
-    }
-
-    private boolean willBePushed(CourseElement ce) {
-        if (ce instanceof CourseObject co) {
-            return co.getType() != ObjectType.RANDOMIZER
-                    && co.getType() != ObjectType.TELEPORTER
-                    && co.getType() != ObjectType.GLUE
-                    && co.getType() != ObjectType.OIL
-                    && co.getType() != ObjectType.PORTAL_RED
-                    && co.getType() != ObjectType.PORTAL_BLUE
-                    && co.getType() != ObjectType.PORTAL_YELLOW
-                    && co.getType() != ObjectType.PORTAL_PURPLE
-                    && co.getType() != ObjectType.PORTAL_GREEN;
-        } else {
-            return true;
-        }
-    }
-
-    private void conveyorBeltsMove(int phase) {
-        boolean needToGoAgain = false;
-        int     iteration     = 0;
-        for (CourseElement obj : CourseHandler.getObjectsAndRobots(course)) {
-            if (gameAborted) {
-                break;
-            }
-            if (obj.isOnCourse()) {
-                Floor f = CourseHandler.getFloor(course, obj.getPosition());
-                obj.setConflictingMark((f.getFloortype().isConveyorBelt() && !obj.isFlying()) ? 0 : -1);
-                if (f.getFloortype().isConveyorBelt()) {
-                    needToGoAgain = true;
-                }
-            }
-        }
-        while (needToGoAgain && iteration < 20 && !gameAborted) {
-            needToGoAgain = false;
-            iteration++;
-            for (CourseElement obj : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
-                if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
-                    Floor f           = CourseHandler.getFloor(course, obj.getPosition());
-                    Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    if (CourseHandler.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
-                            || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
-                        obj.setConflictingMark(-1);
-                    } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
-                        obj.setConflictingMark(-1);
-                        rotateObjectsOnConveyorBelts(Step.CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
-                        gameLogic.setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
-                    } else {
-                        needToGoAgain = true;
-                    }
-                }
-            }
-        }
-        for (CourseElement obj : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
-            if (gameAborted) {
-                break;
-            }
-            if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
-                Floor f           = CourseHandler.getFloor(course, obj.getPosition());
-                Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                rotateObjectsOnConveyorBelts(Step.CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
-                gameLogic.setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
-            }
-        }
-        if (!gameAborted) {
-            notifyCourseMayHaveChanged(Step.CONVEYOR_BELTS_MOVE, phase, null, null);
-        }
-    }
-
-    private void expressConveyorBeltsMove(int phase) {
-        boolean needToGoAgain = false;
-        int     iteration     = 0;
-        for (CourseElement obj : CourseHandler.getObjectsAndRobots(course)) {
-            if (gameAborted) {
-                break;
-            }
-            if (obj.isOnCourse()) {
-                Floor f = CourseHandler.getFloor(course, obj.getPosition());
-                obj.setConflictingMark((f.getFloortype().isExpressConveyorBelt() && !obj.isFlying()) ? 0 : -1);
-                if (f.getFloortype().isExpressConveyorBelt()) {
-                    needToGoAgain = true;
-                }
-            }
-        }
-        while (needToGoAgain && iteration < 20 && !gameAborted) {
-            needToGoAgain = false;
-            iteration++;
-            for (CourseElement obj : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
-                if (gameAborted) {
-                    break;
-                }
-                if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
-                    Floor f           = CourseHandler.getFloor(course, obj.getPosition());
-                    Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    if (CourseHandler.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
-                            || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
-                        obj.setConflictingMark(-1);
-                    } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
-                        obj.setConflictingMark(-1);
-                        rotateObjectsOnConveyorBelts(Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
-                        gameLogic.setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
-                    } else {
-                        needToGoAgain = true;
-                    }
-                }
-            }
-        }
-        for (CourseElement obj : new ArrayList<>(CourseHandler.getObjectsAndRobots(course))) {
-            if (gameAborted) {
-                break;
-            }
-            if (obj.isOnCourse()) {
-                if (obj.getConflictingMark() == 0) {
-                    Floor f           = CourseHandler.getFloor(course, obj.getPosition());
-                    Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    rotateObjectsOnConveyorBelts(Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, obj, targetFloor, f);
-                    gameLogic.setPosition(obj, targetFloor.getPosition().x(), targetFloor.getPosition().y(), Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, f.getFacingDirection(), false);
-                }
-            }
-        }
-        if (!gameAborted) {
-            notifyCourseMayHaveChanged(Step.EXPRESS_CONVEYOR_BELTS_MOVE, phase, null, null);
-        }
-    }
-
-    private void rotateObjectsOnConveyorBelts(Step step, int phase, CourseElement obj, Floor targetFloor, Floor sourceFloor) {
-        if (!(obj instanceof Robot r && r.uses(ModuleType.GYROSCOPIC_STABILIZER, phase))) {
-            if ((targetFloor.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
-                    || targetFloor.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW)
-                    && (targetFloor.getFacingDirection() == sourceFloor.getFacingDirection().add(WEST)
-                    || (targetFloor.getFacingDirection() == WEST && sourceFloor.getFacingDirection() == NORTH))) {
-                gameLogic.rotate(obj, WEST, step, phase, false);
-            } else if ((targetFloor.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW
-                    || targetFloor.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW)
-                    && (targetFloor.getFacingDirection() == sourceFloor.getFacingDirection().add(EAST)
-                    || (sourceFloor.getFacingDirection() == WEST && targetFloor.getFacingDirection() == NORTH))) {
-                gameLogic.rotate(obj, EAST, step, phase, false);
-            } else if (targetFloor.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
-                    || targetFloor.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW) {
-                if (targetFloor.getFacingDirection() == sourceFloor.getFacingDirection().add(WEST)
-                        || (targetFloor.getFacingDirection() == WEST && sourceFloor.getFacingDirection() == NORTH)) {
-                    gameLogic.rotate(obj, WEST, step, phase, false);
-                } else if ((targetFloor.getFacingDirection() == NORTH && sourceFloor.getFacingDirection() == WEST)
-                        || targetFloor.getFacingDirection() == sourceFloor.getFacingDirection().add(EAST)) {
-                    gameLogic.rotate(obj, EAST, step, phase, false);
-                }
-            }
-        }
-    }
-
-    private int applyWaterAndOilSlick(CourseElement ce, Floor f, int movement) {
-        if (!ce.isFlying() && (f.isWater()
-                || CourseHandler.getObjects(course, f.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
-            if (movement > 0) {
-                movement--;
-            }
-            if (movement < 0) {
-                movement++;
-            }
-        }
-        return movement;
-    }
-
-    private void releaseDevices(int phase, Robot robot) {
-        Floor standingOn = CourseHandler.getFloor(course, robot.getPosition());
-        if (robot.uses(ModuleType.MOBILE_TELEPORTER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-            Module module = robot.getModule(ModuleType.MOBILE_TELEPORTER);
-            if (module.getAmmunition() > 0) {
-                CourseHandler.createCircuitChaosObject(course, ObjectType.TELEPORTER, robot);
-                module.setAmmunition(module.getAmmunition() - 1);
-            }
-        }
-        if (robot.uses(ModuleType.MOBILE_RANDOMIZER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-            Module module = robot.getModule(ModuleType.MOBILE_RANDOMIZER);
-            if (module.getAmmunition() > 0) {
-                CourseHandler.createCircuitChaosObject(course, ObjectType.RANDOMIZER, robot);
-                module.setAmmunition(module.getAmmunition() - 1);
-            }
-        }
-        if (robot.uses(ModuleType.GLUE_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-            Module glueDispenser = robot.getModule(ModuleType.GLUE_DISPENSER);
-            if (glueDispenser.getAmmunition() > 0) {
-                CourseHandler.createGlue(course, robot.getPosition());
-                glueDispenser.setAmmunition(glueDispenser.getAmmunition() - 1);
-            }
-        }
-        if (robot.uses(ModuleType.OIL_DISPENSER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-            Module oilDispenser = robot.getModule(ModuleType.OIL_DISPENSER);
-            if (oilDispenser.getAmmunition() > 0) {
-                CourseHandler.createOil(course, robot.getPosition());
-                oilDispenser.setAmmunition(oilDispenser.getAmmunition() - 1);
-            }
-        }
-        if (robot.uses(ModuleType.MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-            Module mineLayer = robot.getModule(ModuleType.MINE_LAYER);
-            if (mineLayer.getAmmunition() > 0) {
-                CourseHandler.createCircuitChaosObject(course, ObjectType.MINE, robot);
-                mineLayer.setAmmunition(mineLayer.getAmmunition() - 1);
-            }
-        }
-        if (robot.uses(ModuleType.PROXIMITY_MINE_LAYER, phase) && standingOn.getFloortype() == Floortype.OPEN_FLOOR) {
-            Module mineLayer = robot.getModule(ModuleType.PROXIMITY_MINE_LAYER);
-            if (mineLayer.getAmmunition() > 0) {
-                CourseHandler.createCircuitChaosObject(course, ObjectType.PROXIMITY_MINE, robot);
-                mineLayer.setAmmunition(mineLayer.getAmmunition() - 1);
-            }
-        }
-        if (robot.uses(ModuleType.BRIDGE_PROJECTOR, phase)) {
-            Module bridgeProjector = robot.getModule(ModuleType.BRIDGE_PROJECTOR);
-            if (bridgeProjector.getAmmunition() > 0) {
-                Floor f2 = CourseHandler.getFloor(course, robot.getPosition().neighbour(robot.getDirection()));
-                if (f2.getFloortype() == Floortype.ABYSS || f2.getFloortype() == Floortype.TRAPDOOR) {
-                    bridgeProjector.setAmmunition(bridgeProjector.getAmmunition() - 1);
-                    f2.setFloortype(Floortype.OPEN_FLOOR);
-                }
-            }
-        }
-        if (!gameAborted) {
-            notifyCourseMayHaveChanged(Step.RELEASE_DEVICES, phase, null, null);
-        }
-    }
-
-    private void reactivateRammingArmor(int phase, Robot robot) {
-        if (robot.isReactivateRammingArmor() && robot.getModule(ModuleType.RAMMING_ARMOR) != null) {
-            robot.setReactivateRammingArmor(false);
-            robot.getModule(ModuleType.RAMMING_ARMOR).getActiveInPhase()[phase] = true;
-        }
-    }
-
-    private void deactivateRammingArmor(int phase, boolean reactivate) {
-        for (Robot robot : course.getRobots()) {
-            if (robot.uses(ModuleType.RAMMING_ARMOR, phase)) {
-                robot.setReactivateRammingArmor(reactivate);
-                robot.getModule(ModuleType.RAMMING_ARMOR).getActiveInPhase()[phase] = false;
-            }
-        }
-    }
-
-    private void openTrapdoors(Course course, int phase, List<Robot> robots) {
-        for (Robot ce : robots) {
-            if (gameAborted) {
-                break;
-            }
-            Floor f = CourseHandler.getFloor(course, ce.getPosition());
-            if (f.getFloortype() == Floortype.TRAPDOOR && f.getActiveInPhase()[phase]) {
-                gameLogic.die(ce, Step.OPEN_TRAPDOORS, phase);
-            }
-        }
-        if (!gameAborted) {
-            notifyCourseMayHaveChanged(Step.OPEN_TRAPDOORS, phase, null, null);
-        }
-    }
 
     private List<Robot> stepRevealProgrammes(int phase) {
         revealProgrammesRandomizers(phase);
@@ -1055,15 +610,6 @@ public class Game {
                 }
             }
         }
-    }
-
-    private int getCBConflictingElementMark(CourseElement be2, Direction direction) {
-        int           erg = 1;
-        CourseElement ce  = gameLogic.getConflictingElement(be2, direction);
-        if (ce != null) {
-            erg = ce.getConflictingMark();
-        }
-        return erg;
     }
 
     public void giveUp(Robot r, String registrationId) {
