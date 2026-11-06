@@ -83,7 +83,7 @@ public class MoveInfo {
         myself.setProgram(program.clone());
 
         for (int phase = 0; phase < 5 && myself.isOnCourse(); phase++) {
-            gameLogic.stepRobotsMove(phase, List.of(myself));
+            gameLogic.stepRobotsMove(phase, List.of(myself), true);
             gameLogic.stepCourseElementsMove(phase);
             gameLogic.stepResolveBeamsAndLaserFire(phase, myself);
             updateAfterTouchingCourse(phase);
