@@ -90,6 +90,8 @@ public class MoveInfo {
             gameLogic.stepCourseElementsMove(phase);
             gameLogic.stepResolveBeamsAndLaserFire(phase);
             updateAfterTouchingCourse(phase);
+            x = myself.getPosition().x();
+            y = myself.getPosition().y();
             calculateProbableTargets();
         }
 
