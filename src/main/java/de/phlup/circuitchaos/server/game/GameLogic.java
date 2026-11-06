@@ -45,6 +45,10 @@ public class GameLogic {
         listener.courseChanged(step, phase, detail, movingRobotName);
     }
 
+    public GameLogic createSimulationCopy() {
+        return new GameLogic(course.copy(), (step, phase, detail, movingRobotName) -> {});
+    }
+
     public void singleRobotMove(int phase, Robot robot, Programme pc, int movement) {
         if (movement > 0) {
             moveInit(robot, robot.getDirection(), movement, movement, Step.ROBOTS_AND_OBJECTS_MOVE, phase, true, true, robot.getName());
