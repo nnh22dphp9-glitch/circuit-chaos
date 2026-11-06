@@ -430,16 +430,13 @@ public class Game {
         String winner = null;
         if (!gameAborted) {
             gameLogic.touchRobotCheckpoints(phase);
-            for (Player player : players) {
-                Robot robot = player.getRobot();
-                if (robot.isOnCourse()) {
-                    Floor floor = CourseHandler.getFloor(course, robot.getPosition());
-                    if (phase == 4 && floor.getFloortype() == Floortype.PIT_STOP) {
-                        arriveAtPitStop(robot);
-                    }
-                    if (goal == Goal.FINISH && robot.hasWon(goal, course.getCheckpoints().size())) {
-                        winner = robot.getName();
-                    }
+            for (Robot robot : course.getRobots()) {
+                Floor floor = CourseHandler.getFloor(course, robot.getPosition());
+                if (phase == 4 && floor.getFloortype() == Floortype.PIT_STOP) {
+                    arriveAtPitStop(robot);
+                }
+                if (goal == Goal.FINISH && robot.hasWon(goal, course.getCheckpoints().size())) {
+                    winner = robot.getName();
                 }
             }
             gameLogic.activateMines(phase);
