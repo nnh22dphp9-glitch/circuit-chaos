@@ -163,7 +163,7 @@ public class MoveInfo {
         simulation.getObjects().addAll(template.getObjects().stream()
                 .map(object -> object.copy()).toList());
         simulation.getRobots().addAll(template.getRobots().stream()
-                .map(Robot::copy).toList());
+                .map(Robot::copyForSimulation).toList());
 
         // Checkpoints, range and course properties are only read by the simulation.
         simulation.getCheckpoints().addAll(template.getCheckpoints());
