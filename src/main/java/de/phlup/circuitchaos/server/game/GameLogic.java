@@ -12,6 +12,7 @@ import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
 import de.phlup.circuitchaos.common.model.course.CourseElement;
 import de.phlup.circuitchaos.common.model.course.CourseObject;
+import de.phlup.circuitchaos.common.model.course.CourseProperties;
 import de.phlup.circuitchaos.common.model.course.Floor;
 import de.phlup.circuitchaos.common.model.course.Module;
 import de.phlup.circuitchaos.common.model.course.Robot;
@@ -461,10 +462,18 @@ public class GameLogic {
     }
 
     public void stepCourseElementsMove(int phase) {
-        expressConveyorBeltsMove(phase);
-        conveyorBeltsMove(phase);
-        pushersPush(phase);
-        gearsRotate(phase);
+        if (course.getProperties().isExpressConveyorBelts()) {
+            expressConveyorBeltsMove(phase);
+        }
+        if (course.getProperties().isConveyorBelts() || course.getProperties().isExpressConveyorBelts()) {
+            conveyorBeltsMove(phase);
+        }
+        if (course.getProperties().isPushers()) {
+            pushersPush(phase);
+        }
+        if (course.getProperties().isGears()) {
+            gearsRotate(phase);
+        }
     }
 
     private void pushersPush(int phase) {
@@ -699,7 +708,9 @@ public class GameLogic {
     }
 
     public void stepRobotsMove(int phase, List<Robot> robots) {
-        openTrapdoors(phase, robots);
+        if (course.getProperties().isTrapdoor()) {
+            openTrapdoors(phase, robots);
+        }
         deactivateRammingArmor(phase, true);
         robotsMove(phase, robots);
         deactivateRammingArmor(phase, false);
@@ -815,23 +826,32 @@ public class GameLogic {
     }
 
     private void courseMountedLasersShoot(int phase, Step step) {
-        for (Floor f : new ArrayList<>(course.getFloor())) {
-            for (Direction dir : Direction.values()) {
-                Direction dir2 = dir.reverse();
-                int amount = switch (step) {
-                    case COURSE_MOUNTED_PRESSURE_BEAMS_FIRE -> f.getPressureBeam()[dir.ordinal()] ? 1 : 0;
-                    case COURSE_MOUNTED_TRACTOR_BEAMS_FIRE -> f.getTractorBeam()[dir.ordinal()] ? 1 : 0;
-                    default -> f.getLasers()[dir.ordinal()];
-                };
-                for (int cnt = 0; cnt < amount; cnt++) {
-                    Robot target = getLaserTarget(f.getPosition(), dir, f.getLevel(), false, true, true, step);
-                    if (target != null) {
-                        if (step == Step.COURSE_MOUNTED_LASER_FIRE) {
-                            target.takeDamage(course, phase, dir2, true);
-                        } else if (step == Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE) {
-                            moveInit(target, dir, 0, 1, Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE, phase, true, false, null);
-                        } else if (step == Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE) {
-                            moveInit(target, dir.reverse(), 0, 1, Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE, phase, false, false, null);
+        CourseProperties properties = course.getProperties();
+        boolean hasBeams = switch (step) {
+            case COURSE_MOUNTED_LASER_FIRE -> properties.isLasers();
+            case COURSE_MOUNTED_PRESSURE_BEAMS_FIRE -> properties.isPressureBeams();
+            case COURSE_MOUNTED_TRACTOR_BEAMS_FIRE -> properties.isTractorBeams();
+            default -> true;
+        };
+        if (hasBeams) {
+            for (Floor f : new ArrayList<>(course.getFloor())) {
+                for (Direction dir : Direction.values()) {
+                    Direction dir2 = dir.reverse();
+                    int amount = switch (step) {
+                        case COURSE_MOUNTED_PRESSURE_BEAMS_FIRE -> f.getPressureBeam()[dir.ordinal()] ? 1 : 0;
+                        case COURSE_MOUNTED_TRACTOR_BEAMS_FIRE -> f.getTractorBeam()[dir.ordinal()] ? 1 : 0;
+                        default -> f.getLasers()[dir.ordinal()];
+                    };
+                    for (int cnt = 0; cnt < amount; cnt++) {
+                        Robot target = getLaserTarget(f.getPosition(), dir, f.getLevel(), false, true, true, step);
+                        if (target != null) {
+                            if (step == Step.COURSE_MOUNTED_LASER_FIRE) {
+                                target.takeDamage(course, phase, dir2, true);
+                            } else if (step == Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE) {
+                                moveInit(target, dir, 0, 1, Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE, phase, true, false, null);
+                            } else if (step == Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE) {
+                                moveInit(target, dir.reverse(), 0, 1, Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE, phase, false, false, null);
+                            }
                         }
                     }
                 }
