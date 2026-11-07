@@ -27,6 +27,7 @@ public class MoveInfo {
     private GameLogic gameLogic;
     private Robot     myself;
     private final String robotId;
+    private final List<Robot> robotsInPriorityOrder = new java.util.ArrayList<>();
 
     private Programme[] program;
     private Direction   startingDirection;
@@ -66,10 +67,16 @@ public class MoveInfo {
     public void simulateCourse() {
         gameLogic = createSimulationGameLogic();
         course = gameLogic.getCourse();
-        myself = course.getRobots().stream()
-                .filter(robot -> Objects.equals(robot.getId(), robotId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Robot not found in simulation course: " + robotId));
+        myself = null;
+        for (Robot robot : course.getRobots()) {
+            if (Objects.equals(robot.getId(), robotId)) {
+                myself = robot;
+                break;
+            }
+        }
+        if (myself == null) {
+            throw new IllegalStateException("Robot not found in simulation course: " + robotId);
+        }
         distance = Integer.MAX_VALUE;
         endingDirection = startingDirection;
         reachesCheckpoint = 5;
@@ -148,22 +155,30 @@ public class MoveInfo {
         Course template = simulationTemplate.getCourse();
         Course simulation = new Course();
 
-        boolean needsOwnFloors = template.getRobots().stream()
-                .map(robot -> robot.getModule(ModuleType.BRIDGE_PROJECTOR))
-                .filter(Objects::nonNull)
-                .anyMatch(module -> module.getAmmunition() > 0
-                        && hasActivePhase(module.getActiveInPhase()));
-
-        if (needsOwnFloors) {
-            simulation.getFloor().addAll(template.getFloor().stream().map(Floor::copy).toList());
-        } else {
-            // Floors are read-only during simulation unless a Bridge Projector can change one.
-            simulation.getFloor().addAll(template.getFloor());
+        boolean needsOwnFloors = false;
+        for (Robot robot : template.getRobots()) {
+            var bridgeProjector = robot.getModule(ModuleType.BRIDGE_PROJECTOR);
+            if (bridgeProjector != null && bridgeProjector.getAmmunition() > 0
+                    && hasActivePhase(bridgeProjector.getActiveInPhase())) {
+                needsOwnFloors = true;
+                break;
+            }
         }
-        simulation.getObjects().addAll(template.getObjects().stream()
-                .map(object -> object.copy()).toList());
-        simulation.getRobots().addAll(template.getRobots().stream()
-                .map(Robot::copyForSimulation).toList());
+
+        for (Floor floor : template.getFloor()) {
+            simulation.getFloor().add(needsOwnFloors ? floor.copy() : floor);
+        }
+        // Course objects can move, be removed, or change their state during simulation.
+        for (var object : template.getObjects()) {
+            simulation.getObjects().add(object.copy());
+        }
+        for (Robot robot : template.getRobots()) {
+            Robot robotCopy = robot.copyForSimulation();
+            simulation.getRobots().add(robotCopy);
+            if (Objects.equals(robotCopy.getId(), robotId)) {
+                myself = robotCopy;
+            }
+        }
 
         // Checkpoints, range and course properties are only read by the simulation.
         simulation.getCheckpoints().addAll(template.getCheckpoints());
@@ -183,11 +198,15 @@ public class MoveInfo {
     }
 
     private List<Robot> getRobotsInPriorityOrder(int phase) {
-        return course.getRobots().stream()
-                .filter(robot -> !robot.isPoweredDown() && robot.getProgram()[phase] != null)
-                .sorted((first, second) -> Integer.compare(
-                        second.getProgram()[phase].priority(), first.getProgram()[phase].priority()))
-                .toList();
+        robotsInPriorityOrder.clear();
+        for (Robot robot : course.getRobots()) {
+            if (!robot.isPoweredDown() && robot.getProgram()[phase] != null) {
+                robotsInPriorityOrder.add(robot);
+            }
+        }
+        robotsInPriorityOrder.sort((first, second) -> Integer.compare(
+                second.getProgram()[phase].priority(), first.getProgram()[phase].priority()));
+        return robotsInPriorityOrder;
     }
 
     private void updateAfterTouchingCourse(int phase) {
