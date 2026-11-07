@@ -8,8 +8,8 @@ import de.phlup.circuitchaos.common.enums.ObjectType;
 import de.phlup.circuitchaos.common.enums.ProgramType;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.enums.WallType;
-import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
+import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.CourseElement;
 import de.phlup.circuitchaos.common.model.course.CourseObject;
 import de.phlup.circuitchaos.common.model.course.CourseProperties;
@@ -188,12 +188,12 @@ public class GameLogic {
         return !oldPosition.equals(ce.getPosition());
     }
 
-    private void minesGoOff(Step step, int phase, Floor floor3) {
-        minesGoesOff(floor3, null, step, phase);
-        minesGoesOff(floor3, NORTH, step, phase);
-        minesGoesOff(floor3, EAST, step, phase);
-        minesGoesOff(floor3, SOUTH, step, phase);
-        minesGoesOff(floor3, WEST, step, phase);
+    private void minesGoOff(Step step, int phase, Floor floor) {
+        minesGoesOff(floor, null, step, phase);
+        minesGoesOff(floor, NORTH, step, phase);
+        minesGoesOff(floor, EAST, step, phase);
+        minesGoesOff(floor, SOUTH, step, phase);
+        minesGoesOff(floor, WEST, step, phase);
     }
 
     private void minesGoesOff(Floor floor, Direction dir, Step step, int phase) {
@@ -217,7 +217,7 @@ public class GameLogic {
                 continue;
             }
             Checkpoint checkpoint = CourseHandler.getCheckpoint(course, robot.getPosition());
-            Floor floor = CourseHandler.getFloor(course, robot.getPosition());
+            Floor      floor      = CourseHandler.getFloor(course, robot.getPosition());
             if (robot.uses(ModuleType.MECHANICAL_ARM, phase)) {
                 if (!(checkpoint != null || floor.getFloortype() == Floortype.PIT_STOP)) {
                     floor = CourseHandler.getFloor(course, new Position(robot.getPosition().x(), robot.getPosition().y() - 1));
@@ -814,7 +814,7 @@ public class GameLogic {
                 Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE,
                 Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE,
                 Step.ROBOT_MOUNTED_LASER_FIRE).forEach(step ->
-            robotMountedBeamsAndLasersShoot(phase, getCurrentShooters(phase, step, onlyRobot), step));
+                                                               robotMountedBeamsAndLasersShoot(phase, getCurrentShooters(phase, step, onlyRobot), step));
         List.of(Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE,
                 Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE,
                 Step.COURSE_MOUNTED_LASER_FIRE)
@@ -852,25 +852,25 @@ public class GameLogic {
                     }
                 }
             }
+            if (!gameAborted) {
+                notifyCourseMayHaveChanged(step, phase, null, null);
+            }
+            CourseHandler.clearBeams(course);
         }
-        if (!gameAborted) {
-            notifyCourseMayHaveChanged(step, phase, null, null);
-        }
-        CourseHandler.clearBeams(course);
     }
 
     private void robotMountedBeamsAndLasersShoot(int phase, List<Shooter> shooters, Step step) {
+        if (gameAborted) {
+            return;
+        }
         for (Shooter shooter : shooters) {
-            if (gameAborted) {
-                break;
-            }
-            Robot     robot           = shooter.getRobot();
-            Direction dir             = robot.getDirection();
-            Robot     targetRobot     = shooter.getTarget();
-            Robot     highPowerTarget = shooter.getTarget2();
-            Module    weapon          = shooter.getWeapon();
+            Module weapon = shooter.getWeapon();
             if (weapon != null) {
-                ModuleType weaponType = weapon.getType();
+                Robot      robot           = shooter.getRobot();
+                Direction  dir             = robot.getDirection();
+                Robot      targetRobot     = shooter.getTarget();
+                Robot      highPowerTarget = shooter.getTarget2();
+                ModuleType weaponType      = weapon.getType();
                 if (targetRobot != null && targetRobot.isOnCourse()) {
                     if (step == Step.ROBOT_MOUNTED_LASER_FIRE
                             && (weaponType == MAIN_LASER
@@ -904,10 +904,12 @@ public class GameLogic {
                 }
             }
         }
-        if (!gameAborted && !shooters.isEmpty()) {
+        if (!gameAborted && shooters.stream().anyMatch(s -> s.getWeapon() != null)) {
             notifyCourseMayHaveChanged(step, phase, null, null);
         }
-        CourseHandler.clearBeams(course);
+        if (shooters.stream().anyMatch(s -> s.getWeapon() != null)) {
+            CourseHandler.clearBeams(course);
+        }
     }
 
     private List<Shooter> getCurrentShooters(int phase, Step step, Robot onlyRobot) {
