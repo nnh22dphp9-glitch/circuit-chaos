@@ -3,6 +3,7 @@ package de.phlup.circuitchaos.server.player.computer;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
+import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
 import de.phlup.circuitchaos.common.model.course.Course;
@@ -63,7 +64,7 @@ public class MoveInfo {
     }
 
     public void simulateCourse() {
-        gameLogic = simulationTemplate.createSimulationCopy();
+        gameLogic = createSimulationGameLogic();
         course = gameLogic.getCourse();
         myself = course.getRobots().stream()
                 .filter(robot -> Objects.equals(robot.getId(), robotId))
@@ -141,6 +142,35 @@ public class MoveInfo {
         myself = null;
         gameLogic = null;
         course = null;
+    }
+
+    private GameLogic createSimulationGameLogic() {
+        Course template = simulationTemplate.getCourse();
+        Course simulation = new Course();
+
+        boolean needsOwnFloors = template.getRobots().stream()
+                .map(robot -> robot.getModule(ModuleType.BRIDGE_PROJECTOR))
+                .filter(Objects::nonNull)
+                .anyMatch(module -> module.getAmmunition() > 0
+                        && java.util.Arrays.stream(module.getActiveInPhase()).anyMatch(active -> active));
+
+        if (needsOwnFloors) {
+            simulation.getFloor().addAll(template.getFloor().stream().map(Floor::copy).toList());
+        } else {
+            // Floors are read-only during simulation unless a Bridge Projector can change one.
+            simulation.getFloor().addAll(template.getFloor());
+        }
+        simulation.getObjects().addAll(template.getObjects().stream()
+                .map(object -> object.copy()).toList());
+        simulation.getRobots().addAll(template.getRobots().stream()
+                .map(Robot::copy).toList());
+
+        // Checkpoints, range and course properties are only read by the simulation.
+        simulation.getCheckpoints().addAll(template.getCheckpoints());
+        simulation.setRange(template.getRange());
+        simulation.setProperties(template.getProperties());
+
+        return new GameLogic(simulation, (step, phase, detail, movingRobotName) -> {});
     }
 
     private List<Robot> getRobotsInPriorityOrder(int phase) {
