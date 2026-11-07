@@ -83,10 +83,30 @@ public class MoveInfo {
         myself.setProgram(program.clone());
 
         for (int phase = 0; phase < 5 && myself.isOnCourse(); phase++) {
-            gameLogic.stepRobotsMove(phase, List.of(myself));
+            gameLogic.stepRobotsMove(phase, getRobotsInPriorityOrder(phase));
+            if (!myself.isOnCourse()) {
+                gameLogic.setGameAborted(true);
+                break;
+            }
+
             gameLogic.stepCourseElementsMove(phase);
+            if (!myself.isOnCourse()) {
+                gameLogic.setGameAborted(true);
+                break;
+            }
+
             gameLogic.stepResolveBeamsAndLaserFire(phase, myself);
+            if (!myself.isOnCourse()) {
+                gameLogic.setGameAborted(true);
+                break;
+            }
+
             updateAfterTouchingCourse(phase);
+            if (!myself.isOnCourse()) {
+                gameLogic.setGameAborted(true);
+                break;
+            }
+
             x = myself.getPosition().x();
             y = myself.getPosition().y();
             calculateProbableTargets();
@@ -121,6 +141,14 @@ public class MoveInfo {
         myself = null;
         gameLogic = null;
         course = null;
+    }
+
+    private List<Robot> getRobotsInPriorityOrder(int phase) {
+        return course.getRobots().stream()
+                .filter(robot -> !robot.isPoweredDown() && robot.getProgram()[phase] != null)
+                .sorted((first, second) -> Integer.compare(
+                        second.getProgram()[phase].priority(), first.getProgram()[phase].priority()))
+                .toList();
     }
 
     private void updateAfterTouchingCourse(int phase) {
