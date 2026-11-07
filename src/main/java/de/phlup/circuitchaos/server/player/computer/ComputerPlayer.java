@@ -67,8 +67,11 @@ public class ComputerPlayer extends Player {
     }
 
     private void programRobot(Course course) {
+        log.info("{}: evaluating programs", robot.getName());
         MoveInfo bestProgram = evaluateAllPrograms(course);
+        log.info("{}: evaluating best program", robot.getName());
         setBestProgram(bestProgram);
+        log.info("{}: program finished", robot.getName());
     }
 
     private void setBestProgram(MoveInfo chosenMove) {
