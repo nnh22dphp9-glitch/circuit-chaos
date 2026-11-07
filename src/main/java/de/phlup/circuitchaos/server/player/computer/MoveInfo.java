@@ -152,7 +152,7 @@ public class MoveInfo {
                 .map(robot -> robot.getModule(ModuleType.BRIDGE_PROJECTOR))
                 .filter(Objects::nonNull)
                 .anyMatch(module -> module.getAmmunition() > 0
-                        && java.util.Arrays.stream(module.getActiveInPhase()).anyMatch(active -> active));
+                        && hasActivePhase(module.getActiveInPhase()));
 
         if (needsOwnFloors) {
             simulation.getFloor().addAll(template.getFloor().stream().map(Floor::copy).toList());
@@ -171,6 +171,15 @@ public class MoveInfo {
         simulation.setProperties(template.getProperties());
 
         return new GameLogic(simulation, (step, phase, detail, movingRobotName) -> {});
+    }
+
+    private boolean hasActivePhase(boolean[] activeInPhase) {
+        for (boolean active : activeInPhase) {
+            if (active) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private List<Robot> getRobotsInPriorityOrder(int phase) {
