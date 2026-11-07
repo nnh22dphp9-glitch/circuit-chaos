@@ -20,7 +20,10 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import static de.phlup.circuitchaos.common.enums.ModuleType.EXCHANGE_BEAM;
 import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
@@ -32,6 +35,11 @@ import static de.phlup.circuitchaos.server.GlobalServerAttributes.RANDOM;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CourseHandler {
+
+    private static final Map<Course, FloorIndex> FLOOR_INDEXES = new WeakHashMap<>();
+
+    private record FloorIndex(int floorCount, Map<Position, Floor> floors) {}
+
 
     public static void add(Course course, CourseElement ce) {
         if (ce != null) {
@@ -60,12 +68,23 @@ public class CourseHandler {
      */
     @NotNull
     public static Floor getFloor(Course course, Position position) {
-        for (Floor floor : course.getFloor()) {
-            if (floor.getPosition().x() == position.x() && floor.getPosition().y() == position.y()) {
-                return floor;
+        Floor floor;
+        synchronized (FLOOR_INDEXES) {
+            FloorIndex index = FLOOR_INDEXES.get(course);
+            if (index == null || index.floorCount() != course.getFloor().size()) {
+                Map<Position, Floor> floors = new HashMap<>(course.getFloor().size());
+                for (Floor courseFloor : course.getFloor()) {
+                    floors.put(courseFloor.getPosition(), courseFloor);
+                }
+                index = new FloorIndex(course.getFloor().size(), floors);
+                FLOOR_INDEXES.put(course, index);
             }
+            floor = index.floors().get(position);
         }
-        Floor floor = new Floor();
+        if (floor != null) {
+            return floor;
+        }
+        floor = new Floor();
         floor.setFloortype(Floortype.ABYSS);
         floor.setPosition(position);
         return floor;
@@ -233,6 +252,9 @@ public class CourseHandler {
     }
 
     public static void replaceGameCourse(Course newCourse, Course currentCourse) {
+        synchronized (FLOOR_INDEXES) {
+            FLOOR_INDEXES.remove(currentCourse);
+        }
         currentCourse.getFloor().clear();
         currentCourse.getObjects().forEach(ce -> ce.setOnCourse(false));
         currentCourse.getObjects().clear();
