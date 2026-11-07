@@ -23,7 +23,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 
 import static de.phlup.circuitchaos.common.enums.ModuleType.EXCHANGE_BEAM;
 import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
@@ -36,10 +37,40 @@ import static de.phlup.circuitchaos.server.GlobalServerAttributes.RANDOM;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CourseHandler {
 
-    private static final Map<Course, FloorIndex> FLOOR_INDEXES = new WeakHashMap<>();
+    private static final ReferenceQueue<Course> COURSE_QUEUE = new ReferenceQueue<>();
+    private static final Map<IdentityWeakReference, FloorIndex> FLOOR_INDEXES = new HashMap<>();
 
     private record FloorIndex(int floorCount, Map<Position, Floor> floors) {}
 
+    private static final class IdentityWeakReference extends WeakReference<Course> {
+        private final int hashCode;
+
+        private IdentityWeakReference(Course course, ReferenceQueue<Course> queue) {
+            super(course, queue);
+            hashCode = System.identityHashCode(course);
+        }
+
+        @Override
+        public int hashCode() {
+            return hashCode;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            return other instanceof IdentityWeakReference reference
+                    && get() != null && get() == reference.get();
+        }
+    }
+
+    private static void cleanFloorIndexes() {
+        IdentityWeakReference reference;
+        while ((reference = (IdentityWeakReference) COURSE_QUEUE.poll()) != null) {
+            FLOOR_INDEXES.remove(reference);
+        }
+    }
 
     public static void add(Course course, CourseElement ce) {
         if (ce != null) {
@@ -70,14 +101,16 @@ public class CourseHandler {
     public static Floor getFloor(Course course, Position position) {
         Floor floor;
         synchronized (FLOOR_INDEXES) {
-            FloorIndex index = FLOOR_INDEXES.get(course);
+            cleanFloorIndexes();
+            IdentityWeakReference courseKey = new IdentityWeakReference(course, null);
+            FloorIndex index = FLOOR_INDEXES.get(courseKey);
             if (index == null || index.floorCount() != course.getFloor().size()) {
                 Map<Position, Floor> floors = new HashMap<>(course.getFloor().size());
                 for (Floor courseFloor : course.getFloor()) {
                     floors.put(courseFloor.getPosition(), courseFloor);
                 }
                 index = new FloorIndex(course.getFloor().size(), floors);
-                FLOOR_INDEXES.put(course, index);
+                FLOOR_INDEXES.put(new IdentityWeakReference(course, COURSE_QUEUE), index);
             }
             floor = index.floors().get(position);
         }
@@ -253,7 +286,8 @@ public class CourseHandler {
 
     public static void replaceGameCourse(Course newCourse, Course currentCourse) {
         synchronized (FLOOR_INDEXES) {
-            FLOOR_INDEXES.remove(currentCourse);
+            cleanFloorIndexes();
+            FLOOR_INDEXES.remove(new IdentityWeakReference(currentCourse, null));
         }
         currentCourse.getFloor().clear();
         currentCourse.getObjects().forEach(ce -> ce.setOnCourse(false));
