@@ -806,13 +806,8 @@ public class GameLogic {
                 Step.ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE,
                 Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE,
                 Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE,
-                Step.ROBOT_MOUNTED_LASER_FIRE).forEach(step -> {
-            List<Shooter> shooters = getCurrentShooters(phase, step);
-            if (onlyRobot != null) {
-                shooters.removeIf(shooter -> shooter.getRobot() != onlyRobot);
-            }
-            robotMountedBeamsAndLasersShoot(phase, shooters, step);
-        });
+                Step.ROBOT_MOUNTED_LASER_FIRE).forEach(step ->
+            robotMountedBeamsAndLasersShoot(phase, getCurrentShooters(phase, step, onlyRobot), step));
         List.of(Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE,
                 Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE,
                 Step.COURSE_MOUNTED_LASER_FIRE)
@@ -899,14 +894,20 @@ public class GameLogic {
         CourseHandler.clearBeams(course);
     }
 
-    private List<Shooter> getCurrentShooters(int phase, Step step) {
+    private List<Shooter> getCurrentShooters(int phase, Step step, Robot onlyRobot) {
         List<Shooter> shooters = new ArrayList<>();
-        for (Robot robot : course.getRobots()) {
-            if (gameAborted) {
-                break;
+        if (onlyRobot != null) {
+            if (!gameAborted && onlyRobot.isOnCourse() && !onlyRobot.isPoweredDown()) {
+                shooters.add(new Shooter(phase, onlyRobot, this, step));
             }
-            if (robot.isOnCourse() && !robot.isPoweredDown()) {
-                shooters.add(new Shooter(phase, robot, this, step));
+        } else {
+            for (Robot robot : course.getRobots()) {
+                if (gameAborted) {
+                    break;
+                }
+                if (robot.isOnCourse() && !robot.isPoweredDown()) {
+                    shooters.add(new Shooter(phase, robot, this, step));
+                }
             }
         }
         return shooters;
