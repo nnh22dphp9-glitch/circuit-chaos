@@ -896,18 +896,15 @@ public class GameLogic {
 
     private List<Shooter> getCurrentShooters(int phase, Step step, Robot onlyRobot) {
         List<Shooter> shooters = new ArrayList<>();
-        if (onlyRobot != null) {
-            if (!gameAborted && onlyRobot.isOnCourse() && !onlyRobot.isPoweredDown()) {
-                shooters.add(new Shooter(phase, onlyRobot, this, step));
+        for (Robot robot : course.getRobots()) {
+            if (gameAborted) {
+                break;
             }
-        } else {
-            for (Robot robot : course.getRobots()) {
-                if (gameAborted) {
-                    break;
-                }
-                if (robot.isOnCourse() && !robot.isPoweredDown()) {
-                    shooters.add(new Shooter(phase, robot, this, step));
-                }
+            if (onlyRobot != null && robot != onlyRobot) {
+                continue;
+            }
+            if (robot.isOnCourse() && !robot.isPoweredDown()) {
+                shooters.add(new Shooter(phase, robot, this, step));
             }
         }
         return shooters;
