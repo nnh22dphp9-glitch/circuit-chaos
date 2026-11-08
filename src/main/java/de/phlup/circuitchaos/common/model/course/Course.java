@@ -23,7 +23,7 @@ public class Course {
 
     @JsonIgnore
     @Setter(AccessLevel.NONE)
-    private boolean considerGui = false;
+    private boolean considerGui = true;
 
     @NotNull
     private Range range = new Range(0, 0, 0, 0);
