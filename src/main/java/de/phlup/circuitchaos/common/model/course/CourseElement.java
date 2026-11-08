@@ -20,9 +20,6 @@ public abstract class CourseElement {
     private int conflictingMark = 0;
 
     @JsonIgnore
-    public abstract boolean isFlying();
-
-    @JsonIgnore
     protected <T extends CourseElement> T copyForSimulation(T copy) {
         copy.setName(name);
         copy.setPosition(position);

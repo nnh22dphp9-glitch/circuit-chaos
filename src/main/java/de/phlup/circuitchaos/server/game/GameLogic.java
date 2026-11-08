@@ -71,7 +71,7 @@ public class GameLogic {
         Floor    floor1         = CourseHandler.getFloor(course, oldPosition);
         Position targetPosition = ce.getPosition().neighbour(direction);
         Floor    floor2         = CourseHandler.getFloor(course, targetPosition);
-        if (!ce.isFlying()) {
+        if (!(ce instanceof Robot r) || !r.isFlying()) {
             for (CourseObject co : new ArrayList<>(CourseHandler.getObjects(course, floor1.getPosition()))) {
                 if (co.getType() == ObjectType.GLUE && co.isActive()) {
                     while (co.getGlue() > 0 && amount > 0) {
@@ -104,7 +104,7 @@ public class GameLogic {
                     || targetWall == WallType.RAMP_DOWN
                     || targetWall == WallType.LEDGE))
                     || (sourceWall == WallType.ONE_WAY_GREEN && targetWall == WallType.ONE_WAY_RED);
-            if (ce.isFlying() || (!uphill && wallPassage)) {
+            if ((ce instanceof Robot r && r.isFlying()) || (!uphill && wallPassage)) {
                 CourseElement conflictingElement = getConflictingElement(ce, direction);
                 if (conflictingElement == null) {
                     ce.setPosition(targetPosition);
@@ -123,7 +123,7 @@ public class GameLogic {
                     }
                     if (move(conflictingElement, direction, strength, 1, step, phase, true, wait, movingRobotName)) {
                         ce.setPosition(targetPosition);
-                        if (!ce.isFlying()) {
+                        if (!(ce instanceof Robot r) || !r.isFlying()) {
                             ce.setLevel(floor2.getLevel());
                             if (downhill && ce instanceof Robot r) {
                                 r.takeDamage(course, phase, null, false);
@@ -160,7 +160,7 @@ public class GameLogic {
                 }
             }
         }
-        if (!ce.isFlying()) {
+        if (!(ce instanceof Robot r) || !r.isFlying()) {
             if (floor3.getFloortype() == Floortype.ABYSS || (floor3.getFloortype() == Floortype.TRAPDOOR && floor3.getActiveInPhase()[phase])) {
                 amount = 0;
                 die(ce, step, phase);
@@ -176,7 +176,7 @@ public class GameLogic {
         }
         if (!oldPosition.equals(ce.getPosition())) {
             boolean notBlocked = true;
-            if (!ce.isFlying()) {
+            if (!(ce instanceof Robot r) || !r.isFlying()) {
                 while (notBlocked && CourseHandler.getObjects(course, ce.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                     notBlocked = move(ce, direction, 0, 1, step, phase, false, wait, movingRobotName);
                 }
@@ -359,7 +359,7 @@ public class GameLogic {
         ce.setPrevPosition(ce.getPosition());
         ce.setPosition(new Position(x, y));
         Floor floor3 = CourseHandler.getFloor(course, ce.getPosition());
-        if (!ce.isFlying()) {
+        if (!(ce instanceof Robot r) || !r.isFlying()) {
             ce.setLevel(floor3.getLevel());
             boolean rampPassage = false;
             if (direction != null) {
@@ -389,7 +389,7 @@ public class GameLogic {
     }
 
     private CourseElement getConflictingElement(CourseElement courseElement, Direction direction) {
-        if (!courseElement.isOnCourse() || courseElement.isFlying()) {
+        if (!courseElement.isOnCourse() || (courseElement instanceof Robot r && r.isFlying())) {
             return null;
         }
         Position targetPosition = courseElement.getPosition().neighbour(direction);
@@ -515,7 +515,7 @@ public class GameLogic {
                 for (CourseElement ce : CourseHandler.getObjectsAndRobots(course)) {
                     if (ce.isOnCourse()
                             && ce.getPosition().equals(f.getPosition())
-                            && !ce.isFlying()
+                            && (!(ce instanceof Robot rob) || !rob.isFlying())
                             && !(ce instanceof Robot r && r.uses(ModuleType.GYROSCOPIC_STABILIZER, phase))) {
                         rotate(ce, f.getFloortype() == Floortype.GEARS_CCW ? WEST : EAST, Step.GEARS_ROTATE, phase, false);
                     }
@@ -536,7 +536,7 @@ public class GameLogic {
             }
             if (obj.isOnCourse()) {
                 Floor f = CourseHandler.getFloor(course, obj.getPosition());
-                obj.setConflictingMark((f.getFloortype().isConveyorBelt() && !obj.isFlying()) ? 0 : -1);
+                obj.setConflictingMark((f.getFloortype().isConveyorBelt() && (!(obj instanceof Robot r) || !r.isFlying())) ? 0 : -1);
                 if (f.getFloortype().isConveyorBelt()) {
                     needToGoAgain = true;
                 }
@@ -549,7 +549,7 @@ public class GameLogic {
                 if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
                     Floor f           = CourseHandler.getFloor(course, obj.getPosition());
                     Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    if (CourseHandler.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
+                    if (CourseHandler.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj instanceof Robot r && r.isFlying())
                             || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
                         obj.setConflictingMark(-1);
                     } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
@@ -587,7 +587,7 @@ public class GameLogic {
             }
             if (obj.isOnCourse()) {
                 Floor f = CourseHandler.getFloor(course, obj.getPosition());
-                obj.setConflictingMark((f.getFloortype().isExpressConveyorBelt() && !obj.isFlying()) ? 0 : -1);
+                obj.setConflictingMark((f.getFloortype().isExpressConveyorBelt() && (!(obj instanceof Robot r) || !r.isFlying())) ? 0 : -1);
                 if (f.getFloortype().isExpressConveyorBelt()) {
                     needToGoAgain = true;
                 }
@@ -603,7 +603,7 @@ public class GameLogic {
                 if (obj.isOnCourse() && obj.getConflictingMark() == 0) {
                     Floor f           = CourseHandler.getFloor(course, obj.getPosition());
                     Floor targetFloor = CourseHandler.getFloor(course, f.getPosition().neighbour(f.getFacingDirection()));
-                    if (CourseHandler.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj.isFlying())
+                    if (CourseHandler.cannotMoveAcross(f, targetFloor, f.getFacingDirection(), obj instanceof Robot r && r.isFlying())
                             || getCBConflictingElementMark(obj, f.getFacingDirection()) == -1) {
                         obj.setConflictingMark(-1);
                     } else if (getCBConflictingElementMark(obj, f.getFacingDirection()) == 1) {
@@ -660,7 +660,7 @@ public class GameLogic {
     }
 
     public int applyWaterAndOilSlick(CourseElement ce, Floor f, int movement) {
-        if (!ce.isFlying() && (f.isWater()
+        if ((!(ce instanceof Robot r) || !r.isFlying()) && (f.isWater()
                 || CourseHandler.getObjects(course, f.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
             if (movement > 0) {
                 movement--;

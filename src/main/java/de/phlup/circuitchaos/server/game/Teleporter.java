@@ -6,6 +6,7 @@ import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.model.course.CourseElement;
 import de.phlup.circuitchaos.common.model.course.CourseObject;
 import de.phlup.circuitchaos.common.model.course.Floor;
+import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Position;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,7 +27,7 @@ public class Teleporter {
         hasBeenTeleported = false;
         oldMovement = movement;
         for (CourseObject co : CourseHandler.getObjects(game.getCourse(), ce.getPosition())) {
-            if (co.getType() == ObjectType.TELEPORTER && movement != 0 && !ce.isFlying()) {
+            if (co.getType() == ObjectType.TELEPORTER && movement != 0 && (!(ce instanceof Robot r) || !r.isFlying())) {
                 if (movement < 0) {
                     movement = 1 - movement;
                 } else {

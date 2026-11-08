@@ -165,7 +165,7 @@ public class GameGui extends BaseGui {
         return course.getRobots().stream()
                      .filter(r -> r.getName().equals(movingRobotName))
                      .filter(CourseElement::isOnCourse)
-                     .anyMatch(CourseElement::isFlying);
+                     .anyMatch(Robot::isFlying);
     }
 
     private void playSound(Step step, Course course, boolean hover, boolean explode) {
