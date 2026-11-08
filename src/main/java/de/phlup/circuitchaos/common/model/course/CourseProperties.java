@@ -20,9 +20,9 @@ public class CourseProperties {
     private boolean trapdoor;
 
     // for performance optimization: pre-calculated positions
-    private final List<Position> laserPositions = new ArrayList<>();
+    private final List<Position> laserPositions        = new ArrayList<>();
     private final List<Position> pressureBeamPositions = new ArrayList<>();
-    private final List<Position> tractorBeamPositions = new ArrayList<>();
+    private final List<Position> tractorBeamPositions  = new ArrayList<>();
 
     @JsonIgnore
     public CourseProperties copyForSimulation() {

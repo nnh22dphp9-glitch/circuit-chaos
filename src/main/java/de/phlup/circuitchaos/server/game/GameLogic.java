@@ -18,6 +18,7 @@ import de.phlup.circuitchaos.common.model.course.Module;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
+import de.phlup.circuitchaos.common.records.Range;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -40,6 +41,7 @@ import static de.phlup.circuitchaos.common.enums.ModuleType.TRACTOR_BEAM;
 public class GameLogic {
 
     private static final int MINE_INITIAL_DAMAGE = 4;
+    private static final int MAX_DIST_FOR_MINES  = 3;
 
     @Getter
     private final Course               course;
@@ -319,10 +321,11 @@ public class GameLogic {
 
     public void explode(Step step, Integer phase, Position position, int initialDamage) {
         if (initialDamage > 0) {
-            DistanceCalculator.calculateDistance(course, position, 3);
+            Range range = Range.rangeAroundPosition(position, MAX_DIST_FOR_MINES);
+            DistanceCalculator.calculateDistance(course, position, MAX_DIST_FOR_MINES, range);
             if (course.isConsiderGui()) {
-                for (Floor f : course.getFloor()) {
-                    if (f.getDistanceCounter() < 3) {
+                for (Floor f : CourseHandler.getFloorsInRange(course, range)) {
+                    if (f.getDistanceCounter() < MAX_DIST_FOR_MINES) {
                         int damage = calculateEffectiveDamage(initialDamage, f.getDistanceCounter());
                         if (damage > 0) {
                             Floor floor = CourseHandler.getFloor(course, f.getPosition());
@@ -331,11 +334,13 @@ public class GameLogic {
                     }
                 }
             }
-            for (Robot robot : course.getRobots()) {
-                Floor f      = CourseHandler.getFloor(course, robot.getPosition());
-                int   damage = calculateEffectiveDamage(initialDamage, f.getDistanceCounter());
-                for (int damagePoints = 0; damagePoints < damage; damagePoints++) {
-                    robot.takeDamage(course);
+            for (Robot robot : List.copyOf(course.getRobots())) {
+                if (robot.getPosition().inRange(range)) {
+                    Floor f      = CourseHandler.getFloor(course, robot.getPosition());
+                    int   damage = calculateEffectiveDamage(initialDamage, f.getDistanceCounter());
+                    for (int damagePoints = 0; damagePoints < damage; damagePoints++) {
+                        robot.takeDamage(course);
+                    }
                 }
             }
             notifyCourseMayHaveChanged(step, phase, "explosion", null);

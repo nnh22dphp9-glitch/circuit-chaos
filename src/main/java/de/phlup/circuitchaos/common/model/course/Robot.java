@@ -210,9 +210,9 @@ public class Robot extends CourseElement {
         System.arraycopy(program, 0, robot.getProgram(), 0, 5);
         // robot.getPotentialProgramme().addAll(potentialProgramme); // Computer player should not know this
         robot.getModules().addAll(modules.stream()
-                .map(module -> isModifiedDuringSimulation(module.getType())
-                        ? module.copyForSimulation() : module)
-                .toList());
+                                         .map(module -> isModifiedDuringSimulation(module.getType())
+                                                 ? module.copyForSimulation() : module)
+                                         .toList());
         System.arraycopy(blocked, 0, robot.getBlocked(), 0, 5);
         robot.setGiveUp(giveUp);
         robot.setPoweredDown(poweredDown);
@@ -228,9 +228,9 @@ public class Robot extends CourseElement {
     private boolean isModifiedDuringSimulation(ModuleType type) {
         return switch (type) {
             case POWER_DOWN_SHIELD, SHIELD, LAYERED_ARMOR, RAMMING_ARMOR,
-                    MOBILE_TELEPORTER, MOBILE_RANDOMIZER, GLUE_DISPENSER,
-                    OIL_DISPENSER, MINE_LAYER, PROXIMITY_MINE_LAYER,
-                    BRIDGE_PROJECTOR -> true;
+                 MOBILE_TELEPORTER, MOBILE_RANDOMIZER, GLUE_DISPENSER,
+                 OIL_DISPENSER, MINE_LAYER, PROXIMITY_MINE_LAYER,
+                 BRIDGE_PROJECTOR -> true;
             default -> false;
         };
     }

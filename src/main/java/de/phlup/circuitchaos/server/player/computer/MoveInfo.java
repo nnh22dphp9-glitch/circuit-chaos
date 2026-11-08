@@ -3,8 +3,8 @@ package de.phlup.circuitchaos.server.player.computer;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
-import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.enums.Goal;
+import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
 import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.Floor;
@@ -20,13 +20,13 @@ import java.util.Objects;
 @Data
 public class MoveInfo {
 
-    private final Goal       goal;
-    private final GameLogic  simulationTemplate;
-    private final Checkpoint nextCP;
-    private Course    course;
-    private GameLogic gameLogic;
-    private Robot     myself;
-    private final String robotId;
+    private final Goal        goal;
+    private final GameLogic   simulationTemplate;
+    private final Checkpoint  nextCP;
+    private       Course      course;
+    private       GameLogic   gameLogic;
+    private       Robot       myself;
+    private final String      robotId;
     private final List<Robot> robotsInPriorityOrder = new java.util.ArrayList<>();
 
     private Programme[] program;
@@ -152,7 +152,7 @@ public class MoveInfo {
     }
 
     private GameLogic createSimulationGameLogic() {
-        Course template = simulationTemplate.getCourse();
+        Course template   = simulationTemplate.getCourse();
         Course simulation = new Course();
 
         boolean needsOwnFloors = false;
@@ -185,7 +185,8 @@ public class MoveInfo {
         simulation.setRange(template.getRange());
         simulation.setProperties(template.getProperties());
 
-        return new GameLogic(simulation, (step, phase, detail, movingRobotName) -> {});
+        return new GameLogic(simulation, (step, phase, detail, movingRobotName) -> {
+        });
     }
 
     private boolean hasActivePhase(boolean[] activeInPhase) {
@@ -210,11 +211,11 @@ public class MoveInfo {
     }
 
     private void updateAfterTouchingCourse(int phase) {
-        boolean robotOnCourse = myself.isOnCourse();
-        int previousCheckpoint = myself.getNextCheckpoint();
+        boolean  robotOnCourse           = myself.isOnCourse();
+        int      previousCheckpoint      = myself.getNextCheckpoint();
         Position previousArchivePosition = myself.getArchivePosition();
-        int previousArchiveLevel = myself.getArchiveLevel();
-        Floor standingFloor = robotOnCourse ? CourseHandler.getFloor(course, myself.getPosition()) : null;
+        int      previousArchiveLevel    = myself.getArchiveLevel();
+        Floor    standingFloor           = robotOnCourse ? CourseHandler.getFloor(course, myself.getPosition()) : null;
 
         gameLogic.touchRobotCheckpoints(phase);
 
@@ -250,9 +251,9 @@ public class MoveInfo {
     private void calculateProbableTargets() {
         for (Robot targetRobot : course.getRobots()) {
             if (!Objects.equals(targetRobot.getId(), myself.getId()) && targetRobot.isOnCourse()) {
-                int maxDist = 4;
-                int goalMultiplication = goal == Goal.KILL_ALL ? 1 : targetRobot.getNextCheckpoint();
-                Position targetPos = targetRobot.getPosition();
+                int      maxDist            = 4;
+                int      goalMultiplication = goal == Goal.KILL_ALL ? 1 : targetRobot.getNextCheckpoint();
+                Position targetPos          = targetRobot.getPosition();
                 switch (myself.getDirection()) {
                     case NORTH -> {
                         if (targetPos.y() < y && Math.abs(targetPos.y() - y) <= maxDist

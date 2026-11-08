@@ -30,6 +30,8 @@ import java.util.Set;
 @Slf4j
 public class ComputerPlayer extends Player {
 
+    public static final int MAX_DIST = 50;
+
     private final Goal goal;
 
     private Checkpoint nextCP;
@@ -60,7 +62,8 @@ public class ComputerPlayer extends Player {
         this.setTurnFinished(false);
         initTurn();
         Course course = game.getCourse().copyForSimulation();
-        gameLogic = new GameLogic(course, (step, phase, detail, movingRobotName) -> {});
+        gameLogic = new GameLogic(course, (step, phase, detail, movingRobotName) -> {
+        });
         initMoveInfo(course);
         programRobot(course);
         this.setTurnFinished(true);
@@ -249,12 +252,12 @@ public class ComputerPlayer extends Player {
         } else if (chosenMove.getReachesCheckpoint() == 6) {
             if (chosenMove.getDistance2() < 5 || mi.getDistance2() < 5) {
                 if (mi.getDistance() == Integer.MAX_VALUE) {
-                    mi.setDistance(DistanceCalculator.calculateDistance(gameCourse, new Position(mi.getX(), mi.getY()), nextCP.getPosition(), 100));
+                    mi.setDistance(DistanceCalculator.calculateDistance(gameCourse, new Position(mi.getX(), mi.getY()), nextCP.getPosition(), MAX_DIST));
                 }
                 if (chosenMove.getDistance() == Integer.MAX_VALUE) {
                     chosenMove.setDistance(
                             DistanceCalculator
-                                    .calculateDistance(gameCourse, new Position(chosenMove.getX(), chosenMove.getY()), nextCP.getPosition(), 100));
+                                    .calculateDistance(gameCourse, new Position(chosenMove.getX(), chosenMove.getY()), nextCP.getPosition(), MAX_DIST));
                 }
             }
             if ((chosenMove.getDistance2() < 5 || mi.getDistance2() < 5) && chosenMove.getDistance() < mi.getDistance()) {
