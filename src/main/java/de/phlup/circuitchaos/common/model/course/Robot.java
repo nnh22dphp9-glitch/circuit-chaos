@@ -196,16 +196,23 @@ public class Robot extends CourseElement {
         return !hasLost(goal) && (goal == Goal.FINISH && nextCheckpoint > numberOfCheckpoints - 1);
     }
 
+    /**
+     * Creates a copy for an isolated game simulation. Modules whose state can
+     * change during a turn are copied; all other modules are shared read-only.
+     */
     @JsonIgnore
-    public Robot copy() {
-        Robot robot = copy(new Robot());
+    public Robot copyForSimulation() {
+        Robot robot = copyForSimulation(new Robot());
         robot.setId(id);
         robot.setDamage(damage);
         robot.setArchivePosition(archivePosition);
         robot.setArchiveLevel(archiveLevel);
         System.arraycopy(program, 0, robot.getProgram(), 0, 5);
         // robot.getPotentialProgramme().addAll(potentialProgramme); // Computer player should not know this
-        robot.getModules().addAll(modules.stream().map(Module::copy).toList());
+        robot.getModules().addAll(modules.stream()
+                                         .map(module -> isModifiedDuringSimulation(module.getType())
+                                                 ? module.copyForSimulation() : module)
+                                         .toList());
         System.arraycopy(blocked, 0, robot.getBlocked(), 0, 5);
         robot.setGiveUp(giveUp);
         robot.setPoweredDown(poweredDown);
@@ -216,6 +223,16 @@ public class Robot extends CourseElement {
         robot.setFlying(flying);
         robot.setDieCounter(dieCounter);
         return robot;
+    }
+
+    private boolean isModifiedDuringSimulation(ModuleType type) {
+        return switch (type) {
+            case POWER_DOWN_SHIELD, SHIELD, LAYERED_ARMOR, RAMMING_ARMOR,
+                 MOBILE_TELEPORTER, MOBILE_RANDOMIZER, GLUE_DISPENSER,
+                 OIL_DISPENSER, MINE_LAYER, PROXIMITY_MINE_LAYER,
+                 BRIDGE_PROJECTOR -> true;
+            default -> false;
+        };
     }
 
 }

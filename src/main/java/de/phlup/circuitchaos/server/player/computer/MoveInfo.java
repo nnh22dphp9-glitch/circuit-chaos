@@ -5,27 +5,29 @@ import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
-import de.phlup.circuitchaos.common.enums.ObjectType;
-import de.phlup.circuitchaos.common.enums.ProgramType;
-import de.phlup.circuitchaos.common.enums.WallType;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
 import de.phlup.circuitchaos.common.model.course.Course;
-import de.phlup.circuitchaos.common.model.course.CourseObject;
 import de.phlup.circuitchaos.common.model.course.Floor;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
-import de.phlup.circuitchaos.server.game.Game;
-import de.phlup.circuitchaos.server.player.Player;
+import de.phlup.circuitchaos.server.game.GameLogic;
 import lombok.Data;
+
+import java.util.List;
+import java.util.Objects;
 
 @Data
 public class MoveInfo {
 
-    private final Game       game;
-    private final Course     course;
-    private final Robot      robot;
-    private final Checkpoint nextCP;
+    private final Goal        goal;
+    private final GameLogic   simulationTemplate;
+    private final Checkpoint  nextCP;
+    private       Course      course;
+    private       GameLogic   gameLogic;
+    private       Robot       myself;
+    private final String      robotId;
+    private final List<Robot> robotsInPriorityOrder = new java.util.ArrayList<>();
 
     private Programme[] program;
     private Direction   startingDirection;
@@ -44,353 +46,255 @@ public class MoveInfo {
     private Direction   endingDirection;
     private int         probableTargets;
 
-    private Floor tf;
+    private final int initialX;
+    private final int initialY;
+    private final int initialDamage;
+    private final int initialDieCounter;
 
-    public MoveInfo(Game game, Checkpoint nextCP, Player player) {
-        this.game = game;
-        course = game.getCourse();
+    public MoveInfo(GameLogic gameLogic, Goal goal, Checkpoint nextCP, Robot originalRobot) {
+        this.simulationTemplate = gameLogic;
+        this.goal = goal;
         this.nextCP = nextCP;
-        this.robot = player.getRobot();
-        x = robot.getPosition().x();
-        y = robot.getPosition().y();
+        this.robotId = originalRobot.getId();
+        this.initialX = originalRobot.getPosition().x();
+        this.initialY = originalRobot.getPosition().y();
+        this.initialDamage = originalRobot.getDamage();
+        this.initialDieCounter = originalRobot.getDieCounter();
+        this.x = initialX;
+        this.y = initialY;
     }
 
     public void simulateCourse() {
+        gameLogic = createSimulationGameLogic();
+        course = gameLogic.getCourse();
+        myself = null;
+        for (Robot robot : course.getRobots()) {
+            if (Objects.equals(robot.getId(), robotId)) {
+                myself = robot;
+                break;
+            }
+        }
+        if (myself == null) {
+            throw new IllegalStateException("Robot not found in simulation course: " + robotId);
+        }
         distance = Integer.MAX_VALUE;
         endingDirection = startingDirection;
-        willDie = false;
         reachesCheckpoint = 5;
         reachesPitStop = false;
+        copiesArchive = false;
         standsOnOpenFloor = false;
         keepsStaying = false;
+        facesTowardsCheckpoint = false;
         probableTargets = 0;
 
-        tf = CourseHandler.getFloor(course, robot.getPosition());
-        for (int phase = 0; phase < 5; phase++) {
-            boolean flyingDuringMovement;
-            checkForAbyss(phase);
-            if (program[phase].type() == ProgramType.ROTATE_LEFT) {
-                endingDirection = endingDirection.add(Direction.WEST);
-            } else if (program[phase].type() == ProgramType.ROTATE_RIGHT) {
-                endingDirection = endingDirection.add(Direction.EAST);
-            } else if (program[phase].type() == ProgramType.U_TURN) {
-                endingDirection = endingDirection.add(Direction.SOUTH);
-            } else {
-                int movement = CourseHandler.determineMovementAmount(program[phase], robot.uses(ModuleType.BRAKES, phase));
-                // Hovercraft flight starts before water/oil effects are applied.
-                flyingDuringMovement = robot.uses(ModuleType.HOVERCRAFT, phase) && movement != 0;
-                if (!flyingDuringMovement && (tf.isWater() || CourseHandler.getObjects(course, tf.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL))) {
-                    if (movement > 0) {
-                        movement--;
-                    }
-                    if (movement < 0) {
-                        movement++;
-                    }
-                }
-                if (movement != 0 && !CourseHandler.getObjects(course, new Position(x, y)).isEmpty()) {
-                    for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                        if (co.getType() == ObjectType.TELEPORTER && !flyingDuringMovement) {
-                            if (movement < 0) {
-                                movement = 1 - movement;
-                            } else {
-                                movement = 2 + movement;
-                            }
-                            switch (endingDirection) {
-                                case NORTH -> y = y - movement;
-                                case EAST -> x = x + movement;
-                                case SOUTH -> y = y + movement;
-                                case WEST -> x = x - movement;
-                            }
-                            movement = 0;
-                            checkForAbyss(phase);
-                            break;
-                        }
-                    }
-                }
-                int       movementStartX    = x;
-                int       movementStartY    = y;
-                Direction movementDirection = movement < 0 ? endingDirection.reverse() : endingDirection;
-                if (movement < 0) {
-                    while (movement < 0) {
-                        Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
-                        if (notBlocked(course, true, flyingDuringMovement)) {
-                            switch (endingDirection) {
-                                case NORTH -> y++;
-                                case EAST -> x--;
-                                case SOUTH -> y--;
-                                case WEST -> x++;
-                            }
-                        }
-                        tf = CourseHandler.getFloor(course, new Position(x, y));
-                        applyHeightDamage(previousFloor, tf, flyingDuringMovement, endingDirection.reverse());
-                        checkForAbyss(phase);
-                        for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                            if (co.getType().isPortal() && !flyingDuringMovement) {
-                                x = co.getTargetPosition().x();
-                                y = co.getTargetPosition().y();
-                                tf = CourseHandler.getFloor(course, co.getTargetPosition());
-                                break;
-                            }
-                        }
-                        movement++;
-                    }
-                } else if (movement > 0) {
-                    while (movement > 0) {
-                        Floor previousFloor = CourseHandler.getFloor(course, new Position(x, y));
-                        if (notBlocked(course, false, flyingDuringMovement)) {
-                            switch (endingDirection) {
-                                case NORTH -> y--;
-                                case EAST -> x++;
-                                case SOUTH -> y++;
-                                case WEST -> x--;
-                            }
-                        }
-                        tf = CourseHandler.getFloor(course, new Position(x, y));
-                        applyHeightDamage(previousFloor, tf, flyingDuringMovement, endingDirection);
-                        checkForAbyss(phase);
-                        for (CourseObject co : CourseHandler.getObjects(course, new Position(x, y))) {
-                            if (co.getType().isPortal() && !flyingDuringMovement) {
-                                x = co.getTargetPosition().x();
-                                y = co.getTargetPosition().y();
-                                tf = CourseHandler.getFloor(course, co.getTargetPosition());
-                                break;
-                            }
-                        }
-                        movement--;
-                    }
-                }
-                if (x != movementStartX || y != movementStartY) {
-                    slideOnOil(movementDirection, flyingDuringMovement, phase);
-                }
-            }
-            Direction lastDirection;
-            // express conveyor belts
-            if (tf.getFloortype().isExpressConveyorBelt()) {
-                lastDirection = tf.getFacingDirection();
-                if (moveForcedOneTile(lastDirection, phase)) {
-                    if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
-                            || tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
-                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW
-                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW)
-                            && (tf.getFacingDirection() == lastDirection.add(Direction.WEST)
-                            || (tf.getFacingDirection() == Direction.WEST && lastDirection == Direction.NORTH))) {
-                        endingDirection = endingDirection.add(Direction.WEST);
-                    } else if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW
-                            || tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
-                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW
-                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW)
-                            && (tf.getFacingDirection() == lastDirection.add(Direction.EAST)
-                            || (tf.getFacingDirection() == Direction.NORTH && lastDirection == Direction.WEST))) {
-                        endingDirection = endingDirection.add(Direction.EAST);
-                    }
-                    slideOnOil(lastDirection, false, phase);
-                }
+        myself.setDirection(startingDirection);
+        myself.setProgram(program.clone());
+
+        for (int phase = 0; phase < 5 && myself.isOnCourse(); phase++) {
+            gameLogic.stepRobotsMove(phase, getRobotsInPriorityOrder(phase));
+            if (!myself.isOnCourse()) {
+                gameLogic.setGameAborted(true);
+                break;
             }
 
-            // conveyor belts
-            if (tf.getFloortype().isConveyorBelt() && !tf.isWater()) {
-                lastDirection = tf.getFacingDirection();
-                if (moveForcedOneTile(lastDirection, phase)) {
-                    if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW
-                            || tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
-                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CCW
-                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW)
-                            && (tf.getFacingDirection() == lastDirection.add(Direction.WEST)
-                            || (tf.getFacingDirection() == Direction.WEST && lastDirection == Direction.NORTH))) {
-                        endingDirection = endingDirection.add(Direction.WEST);
-                    } else if ((tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW
-                            || tf.getFloortype() == Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CW_CCW
-                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW
-                            || tf.getFloortype() == Floortype.TURNING_CONVEYOR_BELT_CW_CCW)
-                            && (tf.getFacingDirection() == lastDirection.add(Direction.EAST)
-                            || (tf.getFacingDirection() == Direction.NORTH && lastDirection == Direction.WEST))) {
-                        endingDirection = endingDirection.add(Direction.EAST);
-                    }
-                    slideOnOil(lastDirection, false, phase);
-                }
+            gameLogic.stepCourseElementsMove(phase);
+            if (!myself.isOnCourse()) {
+                gameLogic.setGameAborted(true);
+                break;
             }
 
-            // pushers
-            if (tf.isHasPusher() && tf.getActiveInPhase()[phase]) {
-                lastDirection = tf.getPusherDirection();
-                if (moveForcedOneTile(lastDirection, phase)) {
-                    slideOnOil(lastDirection, false, phase);
-                }
+            gameLogic.stepResolveBeamsAndLaserFire(phase, myself);
+            if (!myself.isOnCourse()) {
+                gameLogic.setGameAborted(true);
+                break;
             }
-            // gears
-            if (tf.getFloortype() == Floortype.GEARS_CW) {
-                endingDirection = endingDirection.add(Direction.EAST);
-            } else if (tf.getFloortype() == Floortype.GEARS_CCW) {
-                endingDirection = endingDirection.add(Direction.WEST);
+
+            updateAfterTouchingCourse(phase);
+            if (!myself.isOnCourse()) {
+                gameLogic.setGameAborted(true);
+                break;
             }
-            // course mounted lasers (resolve laser fire)
-            damage = damage + tf.getLasers()[0] + tf.getLasers()[1] + tf.getLasers()[2] + tf.getLasers()[3];
-            // probableTargets (resolve laser fire)
-            for (Player player2 : game.getPlayers()) {
-                if (player2.getRobot().isOnCourse()) {
-                    if (!player2.getRobot().equals(robot)) {
-                        int maxDist = 4;
-                        switch (endingDirection) {
-                            case NORTH -> {
-                                if (player2.getRobot().getPosition().y() < y && Math.abs(player2.getRobot().getPosition().y() - y) <= maxDist && Math.abs(
-                                        player2.getRobot().getPosition().x() - x) <= Math
-                                        .abs(player2.getRobot()
-                                                    .getPosition()
-                                                    .y() - y)) {
-                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x))
-                                            * (game.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
-                                }
-                            }
-                            case EAST -> {
-                                if (player2.getRobot().getPosition().x() > x && Math.abs(player2.getRobot().getPosition().x() - x) <= maxDist && Math.abs(
-                                        player2.getRobot().getPosition().x() - x) >= Math
-                                        .abs(player2.getRobot()
-                                                    .getPosition()
-                                                    .y() - y)) {
-                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y))
-                                            * (game.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
-                                }
-                            }
-                            case SOUTH -> {
-                                if (player2.getRobot().getPosition().y() > y && Math.abs(player2.getRobot().getPosition().y() - y) <= maxDist && Math.abs(
-                                        player2.getRobot().getPosition().x() - x) <= Math
-                                        .abs(player2.getRobot()
-                                                    .getPosition()
-                                                    .y() - y)) {
-                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().x() - x))
-                                            * (game.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
-                                }
-                            }
-                            case WEST -> {
-                                if (player2.getRobot().getPosition().x() < x && Math.abs(player2.getRobot().getPosition().x() - x) <= maxDist && Math.abs(
-                                        player2.getRobot().getPosition().x() - x) >= Math
-                                        .abs(player2.getRobot()
-                                                    .getPosition()
-                                                    .y() - y)) {
-                                    probableTargets = probableTargets + (maxDist - Math.abs(player2.getRobot().getPosition().y() - y))
-                                            * (game.getGoal() == Goal.KILL_ALL ? 1 : player2.getRobot().getNextCheckpoint());
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            // end of phase/turn course effects
-            if (phase == 4 &&
-                    !tf.getFloortype().isConveyorBelt() &&
-                    tf.getFloortype() != Floortype.GEARS_CW &&
-                    tf.getFloortype() != Floortype.GEARS_CCW &&
-                    !tf.isHasPusher()) {
-                standsOnOpenFloor = true;
-            }
-            if (!willDie) {
-                if (tf.getFloortype() == Floortype.PIT_STOP) {
-                    reachesPitStop = phase == 4;
-                    copiesArchive = true;
-                }
-                if (nextCP != null) { // case Goal = KILL_ALL
-                    if (reachesCheckpoint == 5 && nextCP.getPosition().x() == x && nextCP.getPosition().y() == y) {
-                        reachesCheckpoint = phase;
-                        if (phase == 4) {
-                            reachesPitStop = true;
-                        }
-                        copiesArchive = true;
-                    }
-                    if (phase == 4) {
-                        keepsStaying = x == robot.getPosition().x() && y == robot.getPosition().y();
-                        switch (endingDirection) {
-                            case NORTH -> facesTowardsCheckpoint = nextCP.getPosition().y() <= y;
-                            case EAST -> facesTowardsCheckpoint = nextCP.getPosition().x() >= x;
-                            case SOUTH -> facesTowardsCheckpoint = nextCP.getPosition().y() >= y;
-                            case WEST -> facesTowardsCheckpoint = nextCP.getPosition().x() <= x;
-                        }
-                        int minx = course.getRange().minX();
-                        int miny = course.getRange().minY();
-                        if ((y - miny) - (nextCP.getPosition().y() - miny) == 0) {
-                            distance2 = (x - minx) - (nextCP.getPosition().x() - minx);
-                        } else if ((x - minx) - (nextCP.getPosition().x() - minx) == 0) {
-                            distance2 = (y - miny) - (nextCP.getPosition().y() - miny);
-                        } else {
-                            distance2 = Math.abs(((y - miny) - (nextCP.getPosition().y() - miny)) / Math
-                                    .sin(Math.atan(((y - miny) - (nextCP.getPosition().y() - miny)) / (double) ((x - minx) - (nextCP.getPosition().x() - minx)))));
-                        }
-                        if (distance2 < 0) {
-                            distance2 = -distance2;
-                        }
-                    }
-                }
-            }
+
+            x = myself.getPosition().x();
+            y = myself.getPosition().y();
+            calculateProbableTargets();
         }
+
+        Floor finalFloor = CourseHandler.getFloor(course, myself.getPosition());
+        x = myself.getPosition().x();
+        y = myself.getPosition().y();
+        endingDirection = myself.getDirection();
+        willDie = myself.getDieCounter() > initialDieCounter || !myself.isOnCourse();
+        damage = myself.getDamage() - initialDamage;
+
+        if (myself.isOnCourse()) {
+            standsOnOpenFloor = !finalFloor.getFloortype().isConveyorBelt()
+                    && finalFloor.getFloortype() != Floortype.GEARS_CW
+                    && finalFloor.getFloortype() != Floortype.GEARS_CCW
+                    && !finalFloor.isHasPusher();
+        }
+        keepsStaying = x == initialX && y == initialY;
+
+        if (nextCP != null) {
+            switch (endingDirection) {
+                case NORTH -> facesTowardsCheckpoint = nextCP.getPosition().y() <= y;
+                case EAST -> facesTowardsCheckpoint = nextCP.getPosition().x() >= x;
+                case SOUTH -> facesTowardsCheckpoint = nextCP.getPosition().y() >= y;
+                case WEST -> facesTowardsCheckpoint = nextCP.getPosition().x() <= x;
+            }
+            calculateDistance2();
+        }
+
+        // A MoveInfo retains only its evaluation result, not a full copied course.
+        myself = null;
+        gameLogic = null;
+        course = null;
     }
 
-    private boolean moveForcedOneTile(Direction direction, int phase) {
-        Floor    previousFloor  = CourseHandler.getFloor(course, new Position(x, y));
-        Position targetPosition = previousFloor.getPosition().neighbour(direction);
-        Floor    targetFloor    = CourseHandler.getFloor(course, targetPosition);
-        if (!CourseHandler.cannotMoveAcross(previousFloor, targetFloor, direction, false)) {
-            return false;
-        }
-        x = targetPosition.x();
-        y = targetPosition.y();
-        tf = targetFloor;
-        applyHeightDamage(previousFloor, targetFloor, false, direction);
-        checkForAbyss(phase);
-        for (CourseObject co : CourseHandler.getObjects(course, targetPosition)) {
-            if (co.getType().isPortal() && co.getTargetPosition() != null) {
-                x = co.getTargetPosition().x();
-                y = co.getTargetPosition().y();
-                tf = CourseHandler.getFloor(course, co.getTargetPosition());
-                checkForAbyss(phase);
+    private GameLogic createSimulationGameLogic() {
+        Course template   = simulationTemplate.getCourse();
+        Course simulation = new Course();
+
+        boolean needsOwnFloors = false;
+        for (Robot robot : template.getRobots()) {
+            var bridgeProjector = robot.getModule(ModuleType.BRIDGE_PROJECTOR);
+            if (bridgeProjector != null && bridgeProjector.getAmmunition() > 0
+                    && hasActivePhase(bridgeProjector.getActiveInPhase())) {
+                needsOwnFloors = true;
                 break;
             }
         }
-        return true;
+
+        for (Floor floor : template.getFloor()) {
+            simulation.getFloor().add(needsOwnFloors ? floor.copyForSimulation() : floor);
+        }
+        // Course objects can move, be removed, or change their state during simulation.
+        for (var object : template.getObjects()) {
+            simulation.getObjects().add(object.copyForSimulation());
+        }
+        for (Robot robot : template.getRobots()) {
+            Robot robotCopy = robot.copyForSimulation();
+            simulation.getRobots().add(robotCopy);
+            if (Objects.equals(robotCopy.getId(), robotId)) {
+                myself = robotCopy;
+            }
+        }
+
+        // Checkpoints, range and course properties are only read by the simulation.
+        simulation.getCheckpoints().addAll(template.getCheckpoints());
+        simulation.setRange(template.getRange());
+        simulation.setProperties(template.getProperties());
+
+        return new GameLogic(simulation, (step, phase, detail, movingRobotName) -> {
+        });
     }
 
-    private void slideOnOil(Direction direction, boolean flying, int phase) {
-        while (!flying && CourseHandler.getObjects(course, tf.getPosition()).stream()
-                                       .anyMatch(co -> co.getType() == ObjectType.OIL)) {
-            if (!moveForcedOneTile(direction, phase)) {
-                break;
+    private boolean hasActivePhase(boolean[] activeInPhase) {
+        for (boolean active : activeInPhase) {
+            if (active) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<Robot> getRobotsInPriorityOrder(int phase) {
+        robotsInPriorityOrder.clear();
+        for (Robot robot : course.getRobots()) {
+            if (!robot.isPoweredDown() && robot.getProgram()[phase] != null) {
+                robotsInPriorityOrder.add(robot);
+            }
+        }
+        robotsInPriorityOrder.sort((first, second) -> Integer.compare(
+                second.getProgram()[phase].priority(), first.getProgram()[phase].priority()));
+        return robotsInPriorityOrder;
+    }
+
+    private void updateAfterTouchingCourse(int phase) {
+        boolean  robotOnCourse           = myself.isOnCourse();
+        int      previousCheckpoint      = myself.getNextCheckpoint();
+        Position previousArchivePosition = myself.getArchivePosition();
+        int      previousArchiveLevel    = myself.getArchiveLevel();
+        Floor    standingFloor           = robotOnCourse ? CourseHandler.getFloor(course, myself.getPosition()) : null;
+
+        gameLogic.touchRobotCheckpoints(phase);
+
+        if (robotOnCourse) {
+            if (myself.getNextCheckpoint() > previousCheckpoint) {
+                copiesArchive = true;
+                if (nextCP != null && previousCheckpoint == nextCP.getNumber() && reachesCheckpoint == 5) {
+                    reachesCheckpoint = phase;
+                }
+            }
+            if (!Objects.equals(previousArchivePosition, myself.getArchivePosition())
+                    || previousArchiveLevel != myself.getArchiveLevel()) {
+                copiesArchive = true;
+            }
+            if (phase == 4 && standingFloor.getFloortype() == Floortype.PIT_STOP) {
+                reachesPitStop = true;
+                copiesArchive = true;
+            }
+        }
+
+        if (phase == 4) {
+            for (Robot robot : course.getRobots()) {
+                if (CourseHandler.getFloor(course, robot.getPosition()).getFloortype() == Floortype.PIT_STOP
+                        && robot.getDamage() > 0) {
+                    robot.setDamage(robot.getDamage() - 1);
+                }
+            }
+        }
+
+        gameLogic.activateMines(phase);
+    }
+
+    private void calculateProbableTargets() {
+        for (Robot targetRobot : course.getRobots()) {
+            if (!Objects.equals(targetRobot.getId(), myself.getId()) && targetRobot.isOnCourse()) {
+                int      maxDist            = 4;
+                int      goalMultiplication = goal == Goal.KILL_ALL ? 1 : targetRobot.getNextCheckpoint();
+                Position targetPos          = targetRobot.getPosition();
+                switch (myself.getDirection()) {
+                    case NORTH -> {
+                        if (targetPos.y() < y && Math.abs(targetPos.y() - y) <= maxDist
+                                && Math.abs(targetPos.x() - x) <= Math.abs(targetPos.y() - y)) {
+                            probableTargets += (maxDist - Math.abs(targetPos.x() - x)) * goalMultiplication;
+                        }
+                    }
+                    case EAST -> {
+                        if (targetPos.x() > x && Math.abs(targetPos.x() - x) <= maxDist
+                                && Math.abs(targetPos.x() - x) >= Math.abs(targetPos.y() - y)) {
+                            probableTargets += (maxDist - Math.abs(targetPos.y() - y)) * goalMultiplication;
+                        }
+                    }
+                    case SOUTH -> {
+                        if (targetPos.y() > y && Math.abs(targetPos.y() - y) <= maxDist
+                                && Math.abs(targetPos.x() - x) <= Math.abs(targetPos.y() - y)) {
+                            probableTargets += (maxDist - Math.abs(targetPos.x() - x)) * goalMultiplication;
+                        }
+                    }
+                    case WEST -> {
+                        if (targetPos.x() < x && Math.abs(targetPos.x() - x) <= maxDist
+                                && Math.abs(targetPos.x() - x) >= Math.abs(targetPos.y() - y)) {
+                            probableTargets += (maxDist - Math.abs(targetPos.y() - y)) * goalMultiplication;
+                        }
+                    }
+                }
             }
         }
     }
 
-    private void applyHeightDamage(Floor previousFloor, Floor currentFloor, boolean flying, Direction direction) {
-        if (flying || currentFloor.getLevel() >= previousFloor.getLevel()) {
-            return;
+    private void calculateDistance2() {
+        int deltaX = x - nextCP.getPosition().x();
+        int deltaY = y - nextCP.getPosition().y();
+        if (deltaY == 0) {
+            distance2 = deltaX;
+        } else if (deltaX == 0) {
+            distance2 = deltaY;
+        } else {
+            distance2 = deltaY / Math.sin(Math.atan(deltaY / (double) deltaX));
         }
-        WallType sourceWall = previousFloor.wall(direction);
-        WallType targetWall = currentFloor.wall(direction.reverse());
-        boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
-                || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
-        if (!rampPassage) {
-            damage++;
-        }
-    }
-
-    private void checkForAbyss(int phase) {
-        if (tf.getFloortype() == Floortype.ABYSS || (tf.getFloortype() == Floortype.TRAPDOOR && tf.getActiveInPhase()[phase])) {
-            willDie = true;
-        }
-    }
-
-    private boolean notBlocked(Course course, boolean backup, boolean flying) {
-        Floor f = CourseHandler.getFloor(course, new Position(x, y));
-        Floor targetFloor = switch (endingDirection) {
-            case NORTH -> CourseHandler.getFloor(course, new Position(x, backup ? y + 1 : y - 1));
-            case EAST -> CourseHandler.getFloor(course, new Position(backup ? x - 1 : x + 1, y));
-            case SOUTH -> CourseHandler.getFloor(course, new Position(x, backup ? y - 1 : y + 1));
-            case WEST -> CourseHandler.getFloor(course, new Position(backup ? x + 1 : x - 1, y));
-            case null -> {
-                Floor t = new Floor();
-                t.setFloortype(Floortype.ABYSS);
-                t.setPosition(new Position(x, y));
-                yield t;
-            }
-        };
-        Direction direction = backup ? endingDirection.reverse() : endingDirection;
-        return !CourseHandler.cannotMoveAcross(f, targetFloor, direction, flying);
+        distance2 = Math.abs(distance2);
     }
 
 }

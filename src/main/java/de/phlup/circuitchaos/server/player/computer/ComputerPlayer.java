@@ -10,6 +10,7 @@ import de.phlup.circuitchaos.common.records.Programme;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.game.DistanceCalculator;
 import de.phlup.circuitchaos.server.game.Game;
+import de.phlup.circuitchaos.server.game.GameLogic;
 import de.phlup.circuitchaos.server.game.Sleep;
 import de.phlup.circuitchaos.server.player.Player;
 import jakarta.validation.constraints.NotNull;
@@ -29,10 +30,13 @@ import java.util.Set;
 @Slf4j
 public class ComputerPlayer extends Player {
 
+    public static final int MAX_DIST = 50;
+
     private final Goal goal;
 
     private Checkpoint nextCP;
     private boolean    turnFinished;
+    private GameLogic  gameLogic;
 
     public ComputerPlayer(@NotNull Robot robot, @NotNull String gameId, @NotNull Goal goal) {
         super(robot, gameId);
@@ -46,7 +50,7 @@ public class ComputerPlayer extends Player {
         Game game = GlobalServerAttributes.getGame(gameId);
         if (!(robot.hasWon(goal, numberOfCheckpoints) || robot.hasLost(goal) || robot.isPoweredDown())) {
             if (!game.isGameAborted()) {
-                this.nextTurn();
+                this.nextTurn(game);
             }
             while (!turnFinished && !game.isGameAborted()) {
                 Sleep.waitForWakeUp(game);
@@ -54,19 +58,23 @@ public class ComputerPlayer extends Player {
         }
     }
 
-    private void nextTurn() {
-        Game game = GlobalServerAttributes.getGame(gameId);
+    private void nextTurn(Game game) {
         this.setTurnFinished(false);
         initTurn();
-        initMoveInfo();
-        programRobot(game);
+        Course course = game.getCourse().copyForSimulation();
+        gameLogic = new GameLogic(course, (step, phase, detail, movingRobotName) -> {
+        });
+        initMoveInfo(course);
+        programRobot(course);
         this.setTurnFinished(true);
     }
 
-    private void programRobot(Game game) {
-        Course   gameCourse  = game.getCourse();
-        MoveInfo bestProgram = evaluateAllPrograms(game, gameCourse);
+    private void programRobot(Course course) {
+        log.info("{}: evaluating programs", robot.getName());
+        MoveInfo bestProgram = evaluateAllPrograms(course);
+        log.info("{}: evaluating best program", robot.getName());
         setBestProgram(bestProgram);
+        log.info("{}: program finished", robot.getName());
     }
 
     private void setBestProgram(MoveInfo chosenMove) {
@@ -95,8 +103,8 @@ public class ComputerPlayer extends Player {
         }
     }
 
-    private MoveInfo evaluateAllPrograms(Game game, Course gameCourse) {
-        List<MoveInfo> programList = generatePrograms(game);
+    private MoveInfo evaluateAllPrograms(Course gameCourse) {
+        List<MoveInfo> programList = generatePrograms();
         programList.forEach(MoveInfo::simulateCourse);
         MoveInfo bestProgram = null;
         for (MoveInfo programme : programList) {
@@ -105,7 +113,7 @@ public class ComputerPlayer extends Player {
         return bestProgram;
     }
 
-    private List<MoveInfo> generatePrograms(Game game) {
+    private List<MoveInfo> generatePrograms() {
         List<MoveInfo> programList = new ArrayList<>();
         Programme[]    program     = new Programme[5];
         // use blocked registers
@@ -124,44 +132,44 @@ public class ComputerPlayer extends Player {
                 return programList; // illegal: one program step used twice
             }
         }
-        generatePrograms(game, 0, program, usedPrograms, programList);
+        generatePrograms(goal, 0, program, usedPrograms, programList);
         return programList;
     }
 
-    private void generatePrograms(Game game, int slot, Programme[] program, Set<Programme> usedPrograms, List<MoveInfo> programList) {
+    private void generatePrograms(Goal goal, int slot, Programme[] program, Set<Programme> usedPrograms, List<MoveInfo> programList) {
         if (slot == program.length) {
-            programList.addAll(createProgrammeForEveryPossibleStartingDirection(game, program));
+            programList.addAll(createProgrammeForEveryPossibleStartingDirection(goal, program));
             return;
         }
         // blocked registers are already set
         if (robot.getBlocked()[slot]) {
-            generatePrograms(game, slot + 1, program, usedPrograms, programList);
+            generatePrograms(goal, slot + 1, program, usedPrograms, programList);
             return;
         }
         for (Programme candidate : robot.getPotentialProgramme()) {
             if (candidate != null && usedPrograms.add(candidate)) { // identity constraint: don't use a program step twice
                 program[slot] = candidate;
-                generatePrograms(game, slot + 1, program, usedPrograms, programList);
+                generatePrograms(goal, slot + 1, program, usedPrograms, programList);
                 usedPrograms.remove(candidate); // backtracking: free the program card for the next use
                 program[slot] = null;
             }
         }
     }
 
-    private List<MoveInfo> createProgrammeForEveryPossibleStartingDirection(Game game, Programme[] program) {
+    private List<MoveInfo> createProgrammeForEveryPossibleStartingDirection(Goal goal, Programme[] program) {
         List<MoveInfo> programList = new ArrayList<>();
         if (robot.isMayChooseDirection()) {
             for (Direction dir : Direction.values()) {
-                programList.add(createComputerMoveInfo(game, program, dir));
+                programList.add(createComputerMoveInfo(goal, program, dir));
             }
         } else {
-            programList.add(createComputerMoveInfo(game, program, robot.getDirection()));
+            programList.add(createComputerMoveInfo(goal, program, robot.getDirection()));
         }
         return programList;
     }
 
-    private MoveInfo createComputerMoveInfo(Game game, Programme[] program, Direction dir) {
-        MoveInfo mi = new MoveInfo(game, nextCP, this);
+    private MoveInfo createComputerMoveInfo(Goal goal, Programme[] program, Direction dir) {
+        MoveInfo mi = new MoveInfo(gameLogic, goal, nextCP, robot);
         mi.setStartingDirection(dir);
         mi.setProgram(program.clone());
         return mi;
@@ -244,12 +252,12 @@ public class ComputerPlayer extends Player {
         } else if (chosenMove.getReachesCheckpoint() == 6) {
             if (chosenMove.getDistance2() < 5 || mi.getDistance2() < 5) {
                 if (mi.getDistance() == Integer.MAX_VALUE) {
-                    mi.setDistance(DistanceCalculator.calculateDistance(gameCourse, new Position(mi.getX(), mi.getY()), nextCP.getPosition(), 100));
+                    mi.setDistance(DistanceCalculator.calculateDistance(gameCourse, new Position(mi.getX(), mi.getY()), nextCP.getPosition(), MAX_DIST));
                 }
                 if (chosenMove.getDistance() == Integer.MAX_VALUE) {
                     chosenMove.setDistance(
                             DistanceCalculator
-                                    .calculateDistance(gameCourse, new Position(chosenMove.getX(), chosenMove.getY()), nextCP.getPosition(), 100));
+                                    .calculateDistance(gameCourse, new Position(chosenMove.getX(), chosenMove.getY()), nextCP.getPosition(), MAX_DIST));
                 }
             }
             if ((chosenMove.getDistance2() < 5 || mi.getDistance2() < 5) && chosenMove.getDistance() < mi.getDistance()) {
@@ -327,10 +335,9 @@ public class ComputerPlayer extends Player {
         return newMove;
     }
 
-    private void initMoveInfo() {
-        Game game = GlobalServerAttributes.getGame(gameId);
+    private void initMoveInfo(Course course) {
         nextCP = null;
-        for (Checkpoint cp : game.getCourse().getCheckpoints()) {
+        for (Checkpoint cp : course.getCheckpoints()) {
             if (cp.getNumber() == robot.getNextCheckpoint()) {
                 nextCP = cp;
                 break;

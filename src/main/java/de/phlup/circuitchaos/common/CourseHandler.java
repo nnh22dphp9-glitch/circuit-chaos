@@ -14,13 +14,18 @@ import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.CourseElementStub;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
+import de.phlup.circuitchaos.common.records.Range;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static de.phlup.circuitchaos.common.enums.ModuleType.EXCHANGE_BEAM;
 import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
@@ -32,6 +37,42 @@ import static de.phlup.circuitchaos.server.GlobalServerAttributes.RANDOM;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CourseHandler {
+
+    private static final ReferenceQueue<Course>                 COURSE_QUEUE  = new ReferenceQueue<>();
+    private static final Map<IdentityWeakReference, FloorIndex> FLOOR_INDEXES = new HashMap<>();
+
+    private record FloorIndex(int floorCount, Map<Position, Floor> floors) {
+    }
+
+    private static final class IdentityWeakReference extends WeakReference<Course> {
+        private final int hashCode;
+
+        private IdentityWeakReference(Course course, ReferenceQueue<Course> queue) {
+            super(course, queue);
+            hashCode = System.identityHashCode(course);
+        }
+
+        @Override
+        public int hashCode() {
+            return hashCode;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            return other instanceof IdentityWeakReference reference
+                    && get() != null && get() == reference.get();
+        }
+    }
+
+    private static void cleanFloorIndexes() {
+        IdentityWeakReference reference;
+        while ((reference = (IdentityWeakReference) COURSE_QUEUE.poll()) != null) {
+            FLOOR_INDEXES.remove(reference);
+        }
+    }
 
     public static void add(Course course, CourseElement ce) {
         if (ce != null) {
@@ -55,20 +96,51 @@ public class CourseHandler {
         }
     }
 
+    private static FloorIndex getFloorIndex(Course course) {
+        synchronized (FLOOR_INDEXES) {
+            cleanFloorIndexes();
+            IdentityWeakReference courseKey = new IdentityWeakReference(course, null);
+            FloorIndex            index     = FLOOR_INDEXES.get(courseKey);
+            if (index == null || index.floorCount() != course.getFloor().size()) {
+                Map<Position, Floor> floors = new HashMap<>(course.getFloor().size());
+                for (Floor floor : course.getFloor()) {
+                    floors.put(floor.getPosition(), floor);
+                }
+                index = new FloorIndex(course.getFloor().size(), floors);
+                FLOOR_INDEXES.put(new IdentityWeakReference(course, COURSE_QUEUE), index);
+            }
+            return index;
+        }
+    }
+
     /**
      * Liefert im Zweifelsfall ein ABYSS zurück, nicht null. Ist so im Spielverlauf sinnvoll.
      */
     @NotNull
     public static Floor getFloor(Course course, Position position) {
-        for (Floor floor : course.getFloor()) {
-            if (floor.getPosition().x() == position.x() && floor.getPosition().y() == position.y()) {
-                return floor;
+        FloorIndex index = getFloorIndex(course);
+        Floor      floor = index.floors().get(position);
+        if (floor == null) {
+            floor = new Floor();
+            floor.setFloortype(Floortype.ABYSS);
+            floor.setPosition(position);
+        }
+        return floor;
+    }
+
+    public static List<Floor> getFloorsInRange(Course course, Range range) {
+        Map<Position, Floor> floors = getFloorIndex(course).floors();
+        List<Floor> result = new ArrayList<>((range.maxX() - range.minX() + 1)
+                                                     * (range.maxY() - range.minY() + 1));
+        for (int x = range.minX(); x <= range.maxX(); x++) {
+            for (int y = range.minY(); y <= range.maxY(); y++) {
+                Floor floor = floors.get(new Position(x, y));
+                if (floor != null) {
+                    result.add(floor);
+                }
             }
         }
-        Floor floor = new Floor();
-        floor.setFloortype(Floortype.ABYSS);
-        floor.setPosition(position);
-        return floor;
+        return result;
     }
 
     public static List<CourseElement> getObjectsAndRobots(Course course) {
@@ -233,6 +305,10 @@ public class CourseHandler {
     }
 
     public static void replaceGameCourse(Course newCourse, Course currentCourse) {
+        synchronized (FLOOR_INDEXES) {
+            cleanFloorIndexes();
+            FLOOR_INDEXES.remove(new IdentityWeakReference(currentCourse, null));
+        }
         currentCourse.getFloor().clear();
         currentCourse.getObjects().forEach(ce -> ce.setOnCourse(false));
         currentCourse.getObjects().clear();
@@ -320,9 +396,7 @@ public class CourseHandler {
         }
         WallType sourceWall = sourceFloor.wall(direction);
         WallType targetWall = targetFloor.wall(direction.reverse());
-        boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
-                || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
-        if (targetFloor.getLevel() > sourceFloor.getLevel() && !rampPassage) {
+        if (targetFloor.getLevel() > sourceFloor.getLevel() && isNotRampPassage(sourceWall, targetWall)) {
             return true;
         }
         return ((sourceWall != WallType.NONE
@@ -335,6 +409,11 @@ public class CourseHandler {
                 && targetWall != WallType.RAMP_DOWN
                 && targetWall != WallType.LEDGE))
                 && (sourceWall != WallType.ONE_WAY_GREEN || targetWall != WallType.ONE_WAY_RED);
+    }
+
+    public static boolean isNotRampPassage(WallType sourceWall, WallType targetWall) {
+        return sourceWall != WallType.RAMP_UP && sourceWall != WallType.RAMP_DOWN
+                && targetWall != WallType.RAMP_UP && targetWall != WallType.RAMP_DOWN;
     }
 
 }

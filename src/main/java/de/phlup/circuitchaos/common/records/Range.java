@@ -23,4 +23,9 @@ public record Range(int minX, int minY, int maxX, int maxY) {
         return range;
     }
 
+    public static Range rangeAroundPosition(Position position, int amount) {
+        return new Range(position.x() - amount, position.y() - amount,
+                         position.x() + amount, position.y() + amount);
+    }
+
 }

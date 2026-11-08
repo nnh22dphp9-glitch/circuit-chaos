@@ -15,7 +15,7 @@ public class Checkpoint {
     private int      number   = 0;
 
     @JsonIgnore
-    public Checkpoint copy() {
+    public Checkpoint copyForSimulation() {
         Checkpoint checkpoint = new Checkpoint();
         checkpoint.setPosition(position);
         checkpoint.setNumber(number);

@@ -5,18 +5,22 @@ import de.phlup.circuitchaos.common.enums.WallType;
 import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.Floor;
 import de.phlup.circuitchaos.common.records.Position;
+import de.phlup.circuitchaos.common.records.Range;
 
 public class DistanceCalculator {
 
     public static int calculateDistance(Course course, Position src, Position target, int maxDist) {
-        calculateDistance(course, src, maxDist);
-        return CourseHandler.getFloor(course, target).getDistanceCounter();
+        Range range = Range.rangeAroundPosition(src, maxDist);
+        if (target.inRange(range)) {
+            calculateDistance(course, src, maxDist, range);
+            return CourseHandler.getFloor(course, target).getDistanceCounter();
+        } else {
+            return maxDist;
+        }
     }
 
-    public static void calculateDistance(Course course, Position position, int maxDist) {
-        for (Floor f : course.getFloor()) {
-            f.setDistanceCounter(maxDist);
-        }
+    public static void calculateDistance(Course course, Position position, int maxDist, Range range) {
+        CourseHandler.getFloorsInRange(course, range).forEach(f -> f.setDistanceCounter(maxDist));
         countDistances(course, 0, CourseHandler.getFloor(course, position), maxDist);
     }
 

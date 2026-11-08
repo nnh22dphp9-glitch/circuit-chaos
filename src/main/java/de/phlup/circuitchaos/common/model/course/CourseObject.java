@@ -21,15 +21,8 @@ public class CourseObject extends CourseElement {
     private boolean    active      = false;
 
     @JsonIgnore
-    @Override
-    public boolean isFlying() {
-        // currently there are no flying objects
-        return false;
-    }
-
-    @JsonIgnore
-    public CourseObject copy() {
-        CourseObject object = copy(new CourseObject());
+    public CourseObject copyForSimulation() {
+        CourseObject object = copyForSimulation(new CourseObject());
         object.setType(type);
         object.setTargetPosition(targetPosition);
         object.setGlue(glue);

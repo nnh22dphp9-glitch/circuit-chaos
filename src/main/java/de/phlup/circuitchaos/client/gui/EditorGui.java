@@ -1080,12 +1080,15 @@ public class EditorGui extends BaseGui implements GuiHelper {
             }
             if (Math.max(Math.max(floor.getLasers()[0], floor.getLasers()[1]), Math.max(floor.getLasers()[2], floor.getLasers()[3])) > 0) {
                 courseProperties.setLasers(true);
+                courseProperties.getLaserPositions().add(floor.getPosition());
             }
             if (floor.getPressureBeam()[0] || floor.getPressureBeam()[1] || floor.getPressureBeam()[2] || floor.getPressureBeam()[3]) {
                 courseProperties.setPressureBeams(true);
+                courseProperties.getPressureBeamPositions().add(floor.getPosition());
             }
             if (floor.getTractorBeam()[0] || floor.getTractorBeam()[1] || floor.getTractorBeam()[2] || floor.getTractorBeam()[3]) {
                 courseProperties.setTractorBeams(true);
+                courseProperties.getTractorBeamPositions().add(floor.getPosition());
             }
         }
     }
