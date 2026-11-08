@@ -28,8 +28,8 @@ public class CourseObject extends CourseElement {
     }
 
     @JsonIgnore
-    public CourseObject copy() {
-        CourseObject object = copy(new CourseObject());
+    public CourseObject copyForSimulation() {
+        CourseObject object = copyForSimulation(new CourseObject());
         object.setType(type);
         object.setTargetPosition(targetPosition);
         object.setGlue(glue);

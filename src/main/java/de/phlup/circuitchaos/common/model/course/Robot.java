@@ -196,22 +196,13 @@ public class Robot extends CourseElement {
         return !hasLost(goal) && (goal == Goal.FINISH && nextCheckpoint > numberOfCheckpoints - 1);
     }
 
-    @JsonIgnore
-    public Robot copy() {
-        return copy(true);
-    }
-
     /**
      * Creates a copy for an isolated game simulation. Modules whose state can
      * change during a turn are copied; all other modules are shared read-only.
      */
     @JsonIgnore
     public Robot copyForSimulation() {
-        return copy(false);
-    }
-
-    private Robot copy(boolean copyAllModules) {
-        Robot robot = copy(new Robot());
+        Robot robot = copyForSimulation(new Robot());
         robot.setId(id);
         robot.setDamage(damage);
         robot.setArchivePosition(archivePosition);
@@ -219,8 +210,8 @@ public class Robot extends CourseElement {
         System.arraycopy(program, 0, robot.getProgram(), 0, 5);
         // robot.getPotentialProgramme().addAll(potentialProgramme); // Computer player should not know this
         robot.getModules().addAll(modules.stream()
-                .map(module -> copyAllModules || isModifiedDuringSimulation(module.getType())
-                        ? module.copy() : module)
+                .map(module -> isModifiedDuringSimulation(module.getType())
+                        ? module.copyForSimulation() : module)
                 .toList());
         System.arraycopy(blocked, 0, robot.getBlocked(), 0, 5);
         robot.setGiveUp(giveUp);

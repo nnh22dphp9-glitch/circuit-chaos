@@ -16,7 +16,7 @@ public class CourseProperties {
     private boolean trapdoor;
 
     @JsonIgnore
-    public CourseProperties copy() {
+    public CourseProperties copyForSimulation() {
         CourseProperties courseProperties = new CourseProperties();
         courseProperties.setLasers(lasers);
         courseProperties.setPressureBeams(pressureBeams);

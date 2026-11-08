@@ -23,7 +23,7 @@ public abstract class CourseElement {
     public abstract boolean isFlying();
 
     @JsonIgnore
-    protected <T extends CourseElement> T copy(T copy) {
+    protected <T extends CourseElement> T copyForSimulation(T copy) {
         copy.setName(name);
         copy.setPosition(position);
         copy.setPrevPosition(prevPosition);

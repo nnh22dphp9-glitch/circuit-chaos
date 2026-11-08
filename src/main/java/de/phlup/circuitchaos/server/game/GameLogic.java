@@ -855,7 +855,9 @@ public class GameLogic {
             if (!gameAborted) {
                 notifyCourseMayHaveChanged(step, phase, null, null);
             }
-            CourseHandler.clearBeams(course);
+            if (course.isConsiderGui()) {
+                CourseHandler.clearBeams(course);
+            }
         }
     }
 
@@ -907,7 +909,7 @@ public class GameLogic {
         if (!gameAborted && shooters.stream().anyMatch(s -> s.getWeapon() != null)) {
             notifyCourseMayHaveChanged(step, phase, null, null);
         }
-        if (shooters.stream().anyMatch(s -> s.getWeapon() != null)) {
+        if (course.isConsiderGui() && shooters.stream().anyMatch(s -> s.getWeapon() != null)) {
             CourseHandler.clearBeams(course);
         }
     }

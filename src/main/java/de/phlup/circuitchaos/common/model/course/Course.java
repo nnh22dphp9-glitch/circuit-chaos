@@ -3,7 +3,9 @@ package de.phlup.circuitchaos.common.model.course;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.phlup.circuitchaos.common.records.Range;
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,10 @@ public class Course {
     private final List<CourseObject> objectsFallingIntoAbyss = new ArrayList<>();
     private final List<Robot>        robotsFallingIntoAbyss  = new ArrayList<>();
 
+    @JsonIgnore
+    @Setter(AccessLevel.NONE)
+    private boolean considerGui = false;
+
     @NotNull
     private Range range = new Range(0, 0, 0, 0);
 
@@ -27,14 +33,15 @@ public class Course {
 
     @NotNull
     @JsonIgnore
-    public Course copy() {
+    public Course copyForSimulation() {
         Course course = new Course();
-        course.getFloor().addAll(floor.stream().map(Floor::copy).toList());
-        course.getObjects().addAll(objects.stream().map(CourseObject::copy).toList());
-        course.getRobots().addAll(robots.stream().map(Robot::copy).toList());
-        course.getCheckpoints().addAll(checkpoints.stream().map(Checkpoint::copy).toList());
+        course.getFloor().addAll(floor.stream().map(Floor::copyForSimulation).toList());
+        course.getObjects().addAll(objects.stream().map(CourseObject::copyForSimulation).toList());
+        course.getRobots().addAll(robots.stream().map(Robot::copyForSimulation).toList());
+        course.getCheckpoints().addAll(checkpoints.stream().map(Checkpoint::copyForSimulation).toList());
         course.setRange(range);
-        course.setProperties(properties.copy());
+        course.setProperties(properties.copyForSimulation());
+        course.considerGui = false;
         return course;
     }
 

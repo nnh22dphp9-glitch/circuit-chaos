@@ -166,11 +166,11 @@ public class MoveInfo {
         }
 
         for (Floor floor : template.getFloor()) {
-            simulation.getFloor().add(needsOwnFloors ? floor.copy() : floor);
+            simulation.getFloor().add(needsOwnFloors ? floor.copyForSimulation() : floor);
         }
         // Course objects can move, be removed, or change their state during simulation.
         for (var object : template.getObjects()) {
-            simulation.getObjects().add(object.copy());
+            simulation.getObjects().add(object.copyForSimulation());
         }
         for (Robot robot : template.getRobots()) {
             Robot robotCopy = robot.copyForSimulation();

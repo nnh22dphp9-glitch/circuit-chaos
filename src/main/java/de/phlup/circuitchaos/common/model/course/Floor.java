@@ -68,7 +68,7 @@ public class Floor {
     }
 
     @JsonIgnore
-    public Floor copy() {
+    public Floor copyForSimulation() {
         Floor floor = new Floor();
         floor.setFloortype(floortype);
         floor.setPosition(position);

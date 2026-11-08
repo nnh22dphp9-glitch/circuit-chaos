@@ -26,7 +26,7 @@ public class Module {
     }
 
     @JsonIgnore
-    public Module copy() {
+    public Module copyForSimulation() {
         Module module = new Module();
         module.setType(type);
         module.setAmmunition(ammunition);

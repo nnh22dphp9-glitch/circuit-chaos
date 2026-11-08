@@ -59,7 +59,7 @@ public class ComputerPlayer extends Player {
     private void nextTurn(Game game) {
         this.setTurnFinished(false);
         initTurn();
-        Course course = game.getCourse().copy();
+        Course course = game.getCourse().copyForSimulation();
         gameLogic = new GameLogic(course, (step, phase, detail, movingRobotName) -> {});
         initMoveInfo(course);
         programRobot(course);
