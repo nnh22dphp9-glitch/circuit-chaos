@@ -504,19 +504,22 @@ public class GameLogic {
     }
 
     private void gearsRotate(int phase) {
-        for (Floor f : course.getFloor()) {
+        if (gameAborted) {
+            return;
+        }
+        List<CourseElement> ceList = CourseHandler.getObjectsAndRobots(course).stream()
+                                                  .filter(CourseElement::isOnCourse)
+                                                  .filter(ce -> !(ce instanceof Robot r && r.isFlying()))
+                                                  .filter(ce -> !(ce instanceof Robot r && r.uses(ModuleType.GYROSCOPIC_STABILIZER, phase)))
+                                                  .toList();
+        for (CourseElement ce : ceList) {
             if (gameAborted) {
-                break;
+                return;
             }
-            if (f.getFloortype() == Floortype.GEARS_CCW || f.getFloortype() == Floortype.GEARS_CW) {
-                for (CourseElement ce : CourseHandler.getObjectsAndRobots(course)) {
-                    if (ce.isOnCourse()
-                            && ce.getPosition().equals(f.getPosition())
-                            && (!(ce instanceof Robot rob) || !rob.isFlying())
-                            && !(ce instanceof Robot r && r.uses(ModuleType.GYROSCOPIC_STABILIZER, phase))) {
-                        rotate(ce, f.getFloortype() == Floortype.GEARS_CCW ? WEST : EAST, Step.GEARS_ROTATE, phase, false);
-                    }
-                }
+            Position pos   = ce.getPosition();
+            Floor    floor = CourseHandler.getFloor(course, pos);
+            if (floor.getFloortype() == Floortype.GEARS_CCW || floor.getFloortype() == Floortype.GEARS_CW) {
+                rotate(ce, floor.getFloortype() == Floortype.GEARS_CCW ? WEST : EAST, Step.GEARS_ROTATE, phase, false);
             }
         }
         if (!gameAborted) {
