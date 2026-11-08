@@ -473,16 +473,21 @@ public class GameLogic {
     }
 
     private void pushersPush(int phase) {
-        for (Floor f : new ArrayList<>(course.getFloor())) {
+        if (gameAborted) {
+            return;
+        }
+        List<CourseElement> ceList = CourseHandler.getObjectsAndRobots(course).stream()
+                                                  .filter(CourseElement::isOnCourse)
+                                                  .filter(this::willBePushed)
+                                                  .toList();
+        for (CourseElement ce : ceList) {
             if (gameAborted) {
-                break;
+                return;
             }
-            if (f.isHasPusher() && f.getActiveInPhase()[phase]) {
-                for (CourseElement ce : CourseHandler.getObjectsAndRobots(course)) {
-                    if (ce.isOnCourse() && ce.getPosition().equals(f.getPosition()) && willBePushed(ce)) {
-                        moveInit(ce, f.getPusherDirection(), 1, 1, Step.PUSHERS_PUSH, phase, true, false, null);
-                    }
-                }
+            Position pos   = ce.getPosition();
+            Floor    floor = CourseHandler.getFloor(course, pos);
+            if (floor.isHasPusher() && floor.getActiveInPhase()[phase]) {
+                moveInit(ce, floor.getPusherDirection(), 1, 1, Step.PUSHERS_PUSH, phase, true, false, null);
             }
         }
         if (!gameAborted) {
@@ -492,15 +497,7 @@ public class GameLogic {
 
     private boolean willBePushed(CourseElement ce) {
         if (ce instanceof CourseObject co) {
-            return co.getType() != ObjectType.RANDOMIZER
-                    && co.getType() != ObjectType.TELEPORTER
-                    && co.getType() != ObjectType.GLUE
-                    && co.getType() != ObjectType.OIL
-                    && co.getType() != ObjectType.PORTAL_RED
-                    && co.getType() != ObjectType.PORTAL_BLUE
-                    && co.getType() != ObjectType.PORTAL_YELLOW
-                    && co.getType() != ObjectType.PORTAL_PURPLE
-                    && co.getType() != ObjectType.PORTAL_GREEN;
+            return co.getType() == ObjectType.MINE || co.getType() == ObjectType.PROXIMITY_MINE;
         } else {
             return true;
         }
