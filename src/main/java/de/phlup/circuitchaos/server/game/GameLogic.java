@@ -319,17 +319,19 @@ public class GameLogic {
 
     public void explode(Step step, Integer phase, Position position, int initialDamage) {
         if (initialDamage > 0) {
-            DistanceCalculator.calculateDistance(course, position, 7);
-            for (Floor f : new ArrayList<>(course.getFloor())) {
-                if (f.getDistanceCounter() < 7) {
-                    int damage = calculateEffectiveDamage(initialDamage, f.getDistanceCounter());
-                    if (damage > 0) {
-                        Floor floor = CourseHandler.getFloor(course, f.getPosition());
-                        floor.setExplosiveDamage(damage);
+            DistanceCalculator.calculateDistance(course, position, 3);
+            if (course.isConsiderGui()) {
+                for (Floor f : course.getFloor()) {
+                    if (f.getDistanceCounter() < 3) {
+                        int damage = calculateEffectiveDamage(initialDamage, f.getDistanceCounter());
+                        if (damage > 0) {
+                            Floor floor = CourseHandler.getFloor(course, f.getPosition());
+                            floor.setExplosiveDamage(damage);
+                        }
                     }
                 }
             }
-            for (Robot robot : new ArrayList<>(course.getRobots())) {
+            for (Robot robot : course.getRobots()) {
                 Floor f      = CourseHandler.getFloor(course, robot.getPosition());
                 int   damage = calculateEffectiveDamage(initialDamage, f.getDistanceCounter());
                 for (int damagePoints = 0; damagePoints < damage; damagePoints++) {

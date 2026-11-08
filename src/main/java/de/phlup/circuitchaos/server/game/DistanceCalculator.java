@@ -14,9 +14,7 @@ public class DistanceCalculator {
     }
 
     public static void calculateDistance(Course course, Position position, int maxDist) {
-        for (Floor f : course.getFloor()) {
-            f.setDistanceCounter(maxDist);
-        }
+        course.getFloor().forEach(f -> f.setDistanceCounter(maxDist));
         countDistances(course, 0, CourseHandler.getFloor(course, position), maxDist);
     }
 
