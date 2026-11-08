@@ -29,7 +29,12 @@ import static de.phlup.circuitchaos.common.enums.Direction.EAST;
 import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
 import static de.phlup.circuitchaos.common.enums.Direction.SOUTH;
 import static de.phlup.circuitchaos.common.enums.Direction.WEST;
+import static de.phlup.circuitchaos.common.enums.ModuleType.EXCHANGE_BEAM;
 import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
+import static de.phlup.circuitchaos.common.enums.ModuleType.PRESSURE_BEAM;
+import static de.phlup.circuitchaos.common.enums.ModuleType.SPIN_LEFT_BEAM;
+import static de.phlup.circuitchaos.common.enums.ModuleType.SPIN_RIGHT_BEAM;
+import static de.phlup.circuitchaos.common.enums.ModuleType.TRACTOR_BEAM;
 
 @RequiredArgsConstructor
 public class GameLogic {
@@ -823,14 +828,15 @@ public class GameLogic {
 
     private void courseMountedLasersShoot(int phase, Step step) {
         CourseProperties properties = course.getProperties();
-        boolean hasBeams = switch (step) {
-            case COURSE_MOUNTED_LASER_FIRE -> properties.isLasers();
-            case COURSE_MOUNTED_PRESSURE_BEAMS_FIRE -> properties.isPressureBeams();
-            case COURSE_MOUNTED_TRACTOR_BEAMS_FIRE -> properties.isTractorBeams();
-            default -> true;
+        List<Position> positions = switch (step) {
+            case COURSE_MOUNTED_LASER_FIRE -> properties.getLaserPositions();
+            case COURSE_MOUNTED_PRESSURE_BEAMS_FIRE -> properties.getPressureBeamPositions();
+            case COURSE_MOUNTED_TRACTOR_BEAMS_FIRE -> properties.getTractorBeamPositions();
+            default -> List.of();
         };
-        if (hasBeams) {
-            for (Floor f : new ArrayList<>(course.getFloor())) {
+        if (!positions.isEmpty()) {
+            for (Position position : positions) {
+                Floor f = CourseHandler.getFloor(course, position);
                 for (Direction dir : Direction.values()) {
                     Direction dir2 = dir.reverse();
                     int amount = switch (step) {
@@ -845,7 +851,7 @@ public class GameLogic {
                                 target.takeDamage(course, phase, dir2, true);
                             } else if (step == Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE) {
                                 moveInit(target, dir, 0, 1, Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE, phase, true, false, null);
-                            } else if (step == Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE) {
+                            } else { // if (step == Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE) {
                                 moveInit(target, dir.reverse(), 0, 1, Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE, phase, false, false, null);
                             }
                         }
@@ -923,7 +929,15 @@ public class GameLogic {
             if (onlyRobot != null && robot != onlyRobot) {
                 continue;
             }
-            if (robot.isOnCourse() && !robot.isPoweredDown()) {
+            if (robot.isOnCourse() && !robot.isPoweredDown() &&
+                    switch (step) {
+                        case Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE -> robot.uses(TRACTOR_BEAM, phase);
+                        case Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE -> robot.uses(PRESSURE_BEAM, phase);
+                        case Step.ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE -> robot.uses(SPIN_LEFT_BEAM, phase);
+                        case Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE -> robot.uses(SPIN_RIGHT_BEAM, phase);
+                        case Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE -> robot.uses(EXCHANGE_BEAM, phase);
+                        default -> true;
+                    }) {
                 shooters.add(new Shooter(phase, robot, this, step));
             }
         }
