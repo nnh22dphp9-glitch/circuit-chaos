@@ -7,20 +7,22 @@ import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Range;
 import de.phlup.circuitchaos.server.game.DistanceCalculator;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * Evaluates simulated moves for the FINISH goal.
  */
 public class MoveEvaluator {
 
     private static final int CHECKPOINT_SCORE = 1_000;
-    private static final int CHECKPOINT_PHASE_SCORE = 10;
     private static final int WIN_SCORE = 1_000_000;
-    private static final int DEATH_PENALTY = 400;
-    private static final int DAMAGE_SCORE = 40;
-    private static final int PIT_STOP_SCORE = 20;
-    private static final int ARCHIVE_SCORE = 10;
-    private static final int DISTANCE_SCORE = 10;
     private static final int MAX_PATH_DISTANCE = 8;
+
+    private final EvaluationWeights weights;
+
+    public MoveEvaluator() {
+        weights = EvaluationWeights.createRandomized();
+    }
 
     public double evaluate(MoveInfo move, Course course) {
         if (move.isWon()) {
@@ -28,25 +30,25 @@ public class MoveEvaluator {
         }
 
         double score = move.getCheckpointsReached() * CHECKPOINT_SCORE;
-        score += move.getCheckpointPhaseBonus() * CHECKPOINT_PHASE_SCORE;
+        score += move.getCheckpointPhaseBonus() * weights.checkpointPhaseScore();
 
-        score -= calculateDistance(move, course) * DISTANCE_SCORE;
-        score -= move.getDamage() * DAMAGE_SCORE;
+        score -= calculateDistance(move, course) * weights.distanceScore();
+        score -= move.getDamage() * weights.damageScore();
 
         if (move.isWillDie()) {
-            score -= DEATH_PENALTY;
+            score -= weights.deathPenalty();
         }
         if (move.isReachesPitStop()) {
-            score += PIT_STOP_SCORE;
+            score += weights.pitStopScore();
         }
         if (move.isCopiesArchive()) {
-            score += ARCHIVE_SCORE;
+            score += weights.archiveScore();
         }
         if (move.isFacesTowardsCheckpoint()) {
-            score += 2;
+            score += weights.facingCheckpointScore();
         }
         if (move.isStandsOnOpenFloor()) {
-            score += 1;
+            score += weights.openFloorScore();
         }
 
         return score;
@@ -73,5 +75,32 @@ public class MoveEvaluator {
 
         DistanceCalculator.calculateDistance(course, position, MAX_PATH_DISTANCE, range);
         return CourseHandler.getFloor(course, target.getPosition()).getDistanceCounter();
+    }
+
+    private record EvaluationWeights(
+            double checkpointPhaseScore,
+            double deathPenalty,
+            double damageScore,
+            double pitStopScore,
+            double archiveScore,
+            double distanceScore,
+            double facingCheckpointScore,
+            double openFloorScore) {
+
+        private static EvaluationWeights createRandomized() {
+            return new EvaluationWeights(
+                    vary(10, 0.40),
+                    vary(400, 0.20),
+                    vary(40, 0.30),
+                    vary(20, 0.50),
+                    vary(10, 0.50),
+                    vary(10, 0.30),
+                    vary(2, 0.50),
+                    vary(1, 0.50));
+        }
+
+        private static double vary(double baseValue, double variation) {
+            return baseValue * ThreadLocalRandom.current().nextDouble(1.0 - variation, 1.0 + variation);
+        }
     }
 }
