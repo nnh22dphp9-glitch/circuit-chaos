@@ -19,7 +19,11 @@ public class SettingFloorMouseAdapter extends MouseAdapter {
         }
         gui.setSelectedFloor(floor);
         gui.redrawAll();
-        gui.adjustSelectionToFloor();
+        if (gui.getCopyCheckbox().isSelected()) {
+            gui.adjustFloorToSelection();
+        } else {
+            gui.adjustSelectionToFloor();
+        }
     }
 
 }

@@ -33,6 +33,10 @@ public class MoveInfo {
     private Direction   startingDirection;
     private boolean     willDie;
     private int         reachesCheckpoint;
+    private int         checkpointsReached;
+    private int         checkpointPhaseBonus;
+    private int         nextCheckpointNumber;
+    private boolean     won;
     private int         damage;
     private boolean     reachesPitStop;
     private boolean     copiesArchive;
@@ -80,6 +84,10 @@ public class MoveInfo {
         distance = Integer.MAX_VALUE;
         endingDirection = startingDirection;
         reachesCheckpoint = 5;
+        checkpointsReached = 0;
+        checkpointPhaseBonus = 0;
+        nextCheckpointNumber = myself.getNextCheckpoint();
+        won = false;
         reachesPitStop = false;
         copiesArchive = false;
         standsOnOpenFloor = false;
@@ -126,6 +134,8 @@ public class MoveInfo {
         endingDirection = myself.getDirection();
         willDie = myself.getDieCounter() > initialDieCounter || !myself.isOnCourse();
         damage = myself.getDamage() - initialDamage;
+        nextCheckpointNumber = myself.getNextCheckpoint();
+        won = myself.hasWon(goal, course.getCheckpoints().size());
 
         if (myself.isOnCourse()) {
             standsOnOpenFloor = !finalFloor.getFloortype().isConveyorBelt()
@@ -135,14 +145,17 @@ public class MoveInfo {
         }
         keepsStaying = x == initialX && y == initialY;
 
-        if (nextCP != null) {
+        Checkpoint targetCheckpoint = findCheckpoint(nextCheckpointNumber);
+        if (targetCheckpoint != null) {
             switch (endingDirection) {
-                case NORTH -> facesTowardsCheckpoint = nextCP.getPosition().y() <= y;
-                case EAST -> facesTowardsCheckpoint = nextCP.getPosition().x() >= x;
-                case SOUTH -> facesTowardsCheckpoint = nextCP.getPosition().y() >= y;
-                case WEST -> facesTowardsCheckpoint = nextCP.getPosition().x() <= x;
+                case NORTH -> facesTowardsCheckpoint = targetCheckpoint.getPosition().y() <= y;
+                case EAST -> facesTowardsCheckpoint = targetCheckpoint.getPosition().x() >= x;
+                case SOUTH -> facesTowardsCheckpoint = targetCheckpoint.getPosition().y() >= y;
+                case WEST -> facesTowardsCheckpoint = targetCheckpoint.getPosition().x() <= x;
             }
-            calculateDistance2();
+            calculateDistance2(targetCheckpoint);
+        } else {
+            distance2 = Double.MAX_VALUE;
         }
 
         // A MoveInfo retains only its evaluation result, not a full copied course.
@@ -221,8 +234,11 @@ public class MoveInfo {
 
         if (robotOnCourse) {
             if (myself.getNextCheckpoint() > previousCheckpoint) {
+                int newlyReached = myself.getNextCheckpoint() - previousCheckpoint;
+                checkpointsReached += newlyReached;
+                checkpointPhaseBonus += newlyReached * (5 - phase);
                 copiesArchive = true;
-                if (nextCP != null && previousCheckpoint == nextCP.getNumber() && reachesCheckpoint == 5) {
+                if (reachesCheckpoint == 5) {
                     reachesCheckpoint = phase;
                 }
             }
@@ -284,17 +300,17 @@ public class MoveInfo {
         }
     }
 
-    private void calculateDistance2() {
-        int deltaX = x - nextCP.getPosition().x();
-        int deltaY = y - nextCP.getPosition().y();
-        if (deltaY == 0) {
-            distance2 = deltaX;
-        } else if (deltaX == 0) {
-            distance2 = deltaY;
-        } else {
-            distance2 = deltaY / Math.sin(Math.atan(deltaY / (double) deltaX));
+    private Checkpoint findCheckpoint(int checkpointNumber) {
+        for (Checkpoint checkpoint : simulationTemplate.getCourse().getCheckpoints()) {
+            if (checkpoint.getNumber() == checkpointNumber) {
+                return checkpoint;
+            }
         }
-        distance2 = Math.abs(distance2);
+        return null;
+    }
+
+    private void calculateDistance2(Checkpoint checkpoint) {
+        distance2 = Math.hypot(x - checkpoint.getPosition().x(), y - checkpoint.getPosition().y());
     }
 
 }

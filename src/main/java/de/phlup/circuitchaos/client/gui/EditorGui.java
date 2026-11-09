@@ -102,6 +102,8 @@ public class EditorGui extends BaseGui implements GuiHelper {
     private final JTextField           portalTargetX      = new JTextField(4);
     private final JTextField           portalTargetY      = new JTextField(4);
     private final JButton              checkpointButton   = new JButton("Add");
+    @Getter
+    private final JCheckBox            copyCheckbox       = new JCheckBox();
 
     private boolean updatingFields = true;
 
@@ -395,7 +397,10 @@ public class EditorGui extends BaseGui implements GuiHelper {
             }
         });
         addComponentToPanel(new JLabel("Start / Checkpoint / Finish: "), courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
-        addComponentToPanel(checkpointButton, courseEditorPanel, layout, 1, y, 1, GridBagConstraints.WEST);
+        addComponentToPanel(checkpointButton, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
+        addComponentToPanel(new JLabel(" "), courseEditorPanel, layout, 0, y++, 2, GridBagConstraints.CENTER);
+        addComponentToPanel(new JLabel("Copy"), courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
+        addComponentToPanel(copyCheckbox, courseEditorPanel, layout, 1, y, 1, GridBagConstraints.WEST);
         updatingFields = false;
         return courseEditorPanel;
     }
@@ -747,7 +752,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
         redrawAll();
     }
 
-    private void adjustFloorToSelection() {
+    public void adjustFloorToSelection() {
         if (updatingFields) {
             return;
         }
