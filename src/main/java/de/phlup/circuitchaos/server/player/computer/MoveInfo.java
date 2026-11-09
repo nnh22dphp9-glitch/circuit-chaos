@@ -236,7 +236,7 @@ public class MoveInfo {
             if (myself.getNextCheckpoint() > previousCheckpoint) {
                 int newlyReached = myself.getNextCheckpoint() - previousCheckpoint;
                 checkpointsReached += newlyReached;
-                checkpointPhaseBonus += newlyReached * (5 - phase) * 10;
+                checkpointPhaseBonus += newlyReached * (5 - phase);
                 copiesArchive = true;
                 if (reachesCheckpoint == 5) {
                     reachesCheckpoint = phase;
