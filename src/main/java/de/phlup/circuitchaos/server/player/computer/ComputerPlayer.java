@@ -5,10 +5,8 @@ import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
 import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.Robot;
-import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
-import de.phlup.circuitchaos.server.game.DistanceCalculator;
 import de.phlup.circuitchaos.server.game.Game;
 import de.phlup.circuitchaos.server.game.GameLogic;
 import de.phlup.circuitchaos.server.game.Sleep;
@@ -30,9 +28,8 @@ import java.util.Set;
 @Slf4j
 public class ComputerPlayer extends Player {
 
-    public static final int MAX_DIST = 50;
-
     private final Goal goal;
+    private final MoveEvaluator moveEvaluator = new MoveEvaluator();
 
     private Checkpoint nextCP;
     private boolean    turnFinished;
@@ -201,7 +198,7 @@ public class ComputerPlayer extends Player {
             } else if (goal == Goal.KILL_ALL) {
                 newMove = evaluateForKillAllGoal(mi, chosenMove, gameCourse);
             } else {
-                newMove = evaluateForFinishGoal(mi, chosenMove, gameCourse);
+                newMove = moveEvaluator.evaluate(mi, gameCourse) > moveEvaluator.evaluate(chosenMove, gameCourse);
             }
 
             if (newMove) {
@@ -209,87 +206,6 @@ public class ComputerPlayer extends Player {
             }
         }
         return chosenMove;
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    private boolean evaluateForFinishGoal(MoveInfo mi, MoveInfo chosenMove, Course gameCourse) {
-        boolean newMove = true;
-        if (chosenMove.getReachesCheckpoint() < mi.getReachesCheckpoint()) {
-            newMove = false;
-            // "old move reaches checkpoint earlier";
-        } else if (chosenMove.getReachesCheckpoint() > mi.getReachesCheckpoint()) {
-            // "new move reaches checkpoint earlier";
-        } else if (mi.isWillDie() && !chosenMove.isWillDie()) {
-            newMove = false;
-            // "old move won't result in death";
-        } else if (chosenMove.isWillDie() && !mi.isWillDie()) {
-            // "new move won't result in death";
-        } else if (chosenMove.getDistance2() < mi.getDistance2() - 2) {
-            newMove = false;
-            // "old move has by far better distance (" + chosenMove.getDistance2() + " <-> " + mi.getDistance2() + ")";
-        } else if (chosenMove.getDistance2() > mi.getDistance2() + 2) {
-            // "new move has by far better distance (" + chosenMove.getDistance2() + " <-> " + mi.getDistance2() + ")";
-        } else if (chosenMove.getDamage() < mi.getDamage() - 3) {
-            newMove = false;
-            // "old move has by far less damage (" + chosenMove.getDamage() + " <-> " + mi.getDamage() + ")";
-        } else if (chosenMove.getDamage() > mi.getDamage() + 3) {
-            // "new move has by far less damage (" + chosenMove.getDamage() + " <-> " + mi.getDamage() + ")";
-        } else if (chosenMove.isReachesPitStop() && !mi.isReachesPitStop()) {
-            newMove = false;
-            // "old move reaches pit stop";
-        } else if (mi.isReachesPitStop() && !chosenMove.isReachesPitStop()) {
-            // "new move reaches pit stop";
-        } else if (chosenMove.isCopiesArchive() && !mi.isCopiesArchive()) {
-            newMove = false;
-            // "old move reaches archive point";
-        } else if (mi.isCopiesArchive() && !chosenMove.isCopiesArchive()) {
-            // "new move reaches archive point";
-        } else if (chosenMove.getDamage() < mi.getDamage()) {
-            newMove = false;
-            // "old move has less damage (" + chosenMove.getDamage() + " <-> " + mi.getDamage() + ")";
-        } else if (chosenMove.getDamage() > mi.getDamage()) {
-            // "new move has less damage (" + chosenMove.getDamage() + " <-> " + mi.getDamage() + ")";
-        } else if (chosenMove.getReachesCheckpoint() == 6) {
-            if (chosenMove.getDistance2() < 5 || mi.getDistance2() < 5) {
-                if (mi.getDistance() == Integer.MAX_VALUE) {
-                    mi.setDistance(DistanceCalculator.calculateDistance(gameCourse, new Position(mi.getX(), mi.getY()), nextCP.getPosition(), MAX_DIST));
-                }
-                if (chosenMove.getDistance() == Integer.MAX_VALUE) {
-                    chosenMove.setDistance(
-                            DistanceCalculator
-                                    .calculateDistance(gameCourse, new Position(chosenMove.getX(), chosenMove.getY()), nextCP.getPosition(), MAX_DIST));
-                }
-            }
-            if ((chosenMove.getDistance2() < 5 || mi.getDistance2() < 5) && chosenMove.getDistance() < mi.getDistance()) {
-                newMove = false;
-                // "old move has better distance (" + chosenMove.getDistance() + " <-> " + mi.getDistance() + ")";
-            } else if ((chosenMove.getDistance2() < 5 || mi.getDistance2() < 5) && chosenMove.getDistance() > mi.getDistance()) {
-                // "new move has better distance (" + chosenMove.getDistance() + " <-> " + mi.getDistance() + ")";
-            } else if ((chosenMove.getDistance2() >= 5 && mi.getDistance2() >= 5) && chosenMove.getDistance2() < mi.getDistance2()) {
-                newMove = false;
-                // "old move has better distance (" + chosenMove.getDistance2() + " <-> " + mi.getDistance2() + ")";
-            } else if ((chosenMove.getDistance2() >= 5 && mi.getDistance2() >= 5) && chosenMove.getDistance2() > mi.getDistance2()) {
-                // "new move has better distance (" + chosenMove.getDistance2() + " <-> " + mi.getDistance2() + ")";
-            } else if (chosenMove.getProbableTargets() > mi.getProbableTargets()) {
-                newMove = false;
-                // "old move has more probable targets (" + chosenMove.getProbableTargets() + " <-> " + mi.getProbableTargets() + ")";
-            } else if (chosenMove.getProbableTargets() < mi.getProbableTargets()) {
-                // "new move has more probable targets (" + chosenMove.getProbableTargets() + " <-> " + mi.getProbableTargets() + ")";
-            } else if (chosenMove.isStandsOnOpenFloor() && !mi.isStandsOnOpenFloor()) {
-                newMove = false;
-                // "old move will end on open floor";
-            } else if (mi.isStandsOnOpenFloor() && !chosenMove.isStandsOnOpenFloor()) {
-                // "new move will end on open floor";
-            } else if (chosenMove.isFacesTowardsCheckpoint() && !mi.isFacesTowardsCheckpoint()) {
-                newMove = false; // "old move faces towards checkpoint";
-            } else if (mi.isFacesTowardsCheckpoint() && !chosenMove.isFacesTowardsCheckpoint()) {
-                // "new move faces towards checkpoint";
-            } else if (mi.isKeepsStaying() && !chosenMove.isKeepsStaying()) {
-                newMove = false;
-                // "old move won't result in doing nothing";
-            } // else  "new move won't result in doing nothing"; || "new move makes no difference";
-        } // else "new move makes no difference";
-        return newMove;
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
