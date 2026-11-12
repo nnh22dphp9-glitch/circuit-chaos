@@ -1067,7 +1067,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
     }
 
     private void determineCourseProperties() {
-        CourseProperties courseProperties = course.getProperties();
+        CourseProperties courseProperties = new CourseProperties();
         for (Floor floor : course.getFloor()) {
             if (floor.isHasPusher()) {
                 courseProperties.setPushers(true);
@@ -1096,6 +1096,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
                 courseProperties.getTractorBeamPositions().add(floor.getPosition());
             }
         }
+        course.setProperties(courseProperties);
     }
 
     private void adjustCheckpointNumbers() {
