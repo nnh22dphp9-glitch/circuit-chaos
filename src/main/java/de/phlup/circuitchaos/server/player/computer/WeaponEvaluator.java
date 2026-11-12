@@ -99,12 +99,22 @@ final class WeaponEvaluator {
         }
 
         Direction direction = robot.getDirection();
-        Robot forwardTarget = game.getLaserTarget(robot.getPosition(), direction, robot.getLevel(),
-                false, Step.ROBOT_MOUNTED_LASER_FIRE);
-        Robot secondTarget = game.getLaserTarget(robot.getPosition(), direction, robot.getLevel(),
-                true, Step.ROBOT_MOUNTED_LASER_FIRE);
-        Robot rearTarget = game.getLaserTarget(robot.getPosition(), direction.reverse(), robot.getLevel(),
-                false, Step.ROBOT_MOUNTED_LASER_FIRE);
+        boolean needsForwardTarget = available.stream().anyMatch(type -> type != ModuleType.REAR_LASER);
+        boolean needsSecondTarget = available.contains(ModuleType.HIGH_POWER_LASER);
+        boolean needsRearTarget = available.contains(ModuleType.REAR_LASER);
+
+        Robot forwardTarget = needsForwardTarget
+                ? game.getLaserTarget(robot.getPosition(), direction, robot.getLevel(),
+                        false, Step.ROBOT_MOUNTED_LASER_FIRE)
+                : null;
+        Robot secondTarget = needsSecondTarget
+                ? game.getLaserTarget(robot.getPosition(), direction, robot.getLevel(),
+                        true, Step.ROBOT_MOUNTED_LASER_FIRE)
+                : null;
+        Robot rearTarget = needsRearTarget
+                ? game.getLaserTarget(robot.getPosition(), direction.reverse(), robot.getLevel(),
+                        false, Step.ROBOT_MOUNTED_LASER_FIRE)
+                : null;
 
         ModuleType bestWeapon = available.get(0);
         double bestScore = Double.NEGATIVE_INFINITY;
