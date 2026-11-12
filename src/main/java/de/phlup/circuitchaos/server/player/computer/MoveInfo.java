@@ -102,9 +102,6 @@ public class MoveInfo {
 
         for (int phase = 0; phase < 5 && myself.isOnCourse(); phase++) {
             ModuleType selectedWeapon = WeaponEvaluator.selectRammingArmor(course, myself, phase, program[phase]);
-            if (selectedWeapon == null) {
-                selectedWeapon = WeaponEvaluator.selectBeamWeapon(gameLogic, myself, phase);
-            }
             setSelectedWeapon(phase, selectedWeapon);
             gameLogic.stepRobotsMove(phase, getRobotsInPriorityOrder(phase));
             if (!myself.isOnCourse()) {
