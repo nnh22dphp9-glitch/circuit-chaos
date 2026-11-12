@@ -100,7 +100,7 @@ final class WeaponEvaluator {
         }
 
         double bestScore = Double.NEGATIVE_INFINITY;
-        ModuleType bestWeapon = available.getFirst();
+        ModuleType bestWeapon = available.get(0);
         for (ModuleType candidate : available) {
             double score = evaluateWeapon(currentGame, robot, phase, candidate);
             if (score > bestScore) {
