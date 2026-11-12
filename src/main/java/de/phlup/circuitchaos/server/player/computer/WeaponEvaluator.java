@@ -159,7 +159,7 @@ final class WeaponEvaluator {
             }
 
             score += (after.getDamage() - before.getDamage()) * DAMAGE_VALUE;
-            if (after.getDieCounter() > before.getDieCounter() || !after.isOnCourse()) {
+            if (after.getDieCounter() > before.getDieCounter() || (before.isOnCourse() && !after.isOnCourse())) {
                 score += DEATH_VALUE;
             }
 
