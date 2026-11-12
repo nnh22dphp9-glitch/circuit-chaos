@@ -5,6 +5,7 @@ import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
+import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
 import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.Floor;
@@ -30,6 +31,7 @@ public class MoveInfo {
     private final List<Robot> robotsInPriorityOrder = new java.util.ArrayList<>();
 
     private Programme[] program;
+    private final ModuleType[] selectedWeapons = new ModuleType[5];
     private Direction   startingDirection;
     private boolean     willDie;
     private int         reachesCheckpoint;
@@ -99,6 +101,11 @@ public class MoveInfo {
         myself.setProgram(program.clone());
 
         for (int phase = 0; phase < 5 && myself.isOnCourse(); phase++) {
+            ModuleType selectedWeapon = WeaponEvaluator.selectRammingArmor(course, myself, phase, program[phase]);
+            if (selectedWeapon == null) {
+                selectedWeapon = WeaponEvaluator.selectBeamWeapon(gameLogic, myself, phase);
+            }
+            setSelectedWeapon(phase, selectedWeapon);
             gameLogic.stepRobotsMove(phase, getRobotsInPriorityOrder(phase));
             if (!myself.isOnCourse()) {
                 gameLogic.setGameAborted(true);
@@ -111,6 +118,10 @@ public class MoveInfo {
                 break;
             }
 
+            if (selectedWeapons[phase] != ModuleType.RAMMING_ARMOR) {
+                selectedWeapon = WeaponEvaluator.selectBeamWeapon(gameLogic, myself, phase);
+                setSelectedWeapon(phase, selectedWeapon);
+            }
             gameLogic.stepResolveBeamsAndLaserFire(phase, myself);
             if (!myself.isOnCourse()) {
                 gameLogic.setGameAborted(true);
@@ -162,6 +173,15 @@ public class MoveInfo {
         myself = null;
         gameLogic = null;
         course = null;
+    }
+
+    private void setSelectedWeapon(int phase, ModuleType selectedWeapon) {
+        selectedWeapons[phase] = selectedWeapon;
+        for (var module : myself.getModules()) {
+            if (module.getType().isWeapon()) {
+                module.getActiveInPhase()[phase] = module.getType() == selectedWeapon;
+            }
+        }
     }
 
     private GameLogic createSimulationGameLogic() {
