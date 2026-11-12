@@ -40,7 +40,7 @@ public class Course {
         course.getRobots().addAll(robots.stream().map(Robot::copyForSimulation).toList());
         course.getCheckpoints().addAll(checkpoints.stream().map(Checkpoint::copyForSimulation).toList());
         course.setRange(range);
-        course.setProperties(properties.copyForSimulation());
+        course.setProperties(properties);
         course.considerGui = false;
         return course;
     }

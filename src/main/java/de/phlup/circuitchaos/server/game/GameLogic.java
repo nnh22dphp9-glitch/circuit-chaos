@@ -22,9 +22,11 @@ import de.phlup.circuitchaos.common.records.Range;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static de.phlup.circuitchaos.common.enums.Direction.EAST;
 import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
@@ -37,6 +39,7 @@ import static de.phlup.circuitchaos.common.enums.ModuleType.SPIN_LEFT_BEAM;
 import static de.phlup.circuitchaos.common.enums.ModuleType.SPIN_RIGHT_BEAM;
 import static de.phlup.circuitchaos.common.enums.ModuleType.TRACTOR_BEAM;
 
+@Slf4j
 @RequiredArgsConstructor
 public class GameLogic {
 
@@ -835,11 +838,11 @@ public class GameLogic {
 
     private void courseMountedLasersShoot(int phase, Step step) {
         CourseProperties properties = course.getProperties();
-        List<Position> positions = switch (step) {
+        Set<Position> positions = switch (step) {
             case COURSE_MOUNTED_LASER_FIRE -> properties.getLaserPositions();
             case COURSE_MOUNTED_PRESSURE_BEAMS_FIRE -> properties.getPressureBeamPositions();
             case COURSE_MOUNTED_TRACTOR_BEAMS_FIRE -> properties.getTractorBeamPositions();
-            default -> List.of();
+            default -> Set.of();
         };
         if (!positions.isEmpty()) {
             for (Position position : positions) {
