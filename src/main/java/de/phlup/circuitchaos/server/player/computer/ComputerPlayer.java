@@ -79,6 +79,13 @@ public class ComputerPlayer extends Player {
             robot.setDirection(chosenMove.getStartingDirection());
             robot.setPrevDirection(robot.getDirection());
             robot.setProgram(chosenMove.getProgram());
+            for (var module : robot.getModules()) {
+                if (module.getType().isWeapon()) {
+                    for (int phase = 0; phase < 5; phase++) {
+                        module.getActiveInPhase()[phase] = module.getType() == chosenMove.getSelectedWeapons()[phase];
+                    }
+                }
+            }
         } else {
             Iterator<Programme> i2 = robot.getPotentialProgramme().iterator();
             if (i2.hasNext() && !robot.getBlocked()[0]) {
