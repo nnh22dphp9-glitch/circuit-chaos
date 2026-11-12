@@ -2,32 +2,32 @@ package de.phlup.circuitchaos.server.player.computer;
 
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
+import de.phlup.circuitchaos.common.enums.Floortype;
+import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
+import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.model.course.Course;
+import de.phlup.circuitchaos.common.model.course.Floor;
 import de.phlup.circuitchaos.common.model.course.Module;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
 import de.phlup.circuitchaos.server.game.GameLogic;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /**
  * Selects the weapon to use in one program phase.
  *
- * Beam weapons are compared by running the real beam-resolution code on
- * independent copies of the current simulated course. Ramming Armor must be
- * selected before movement, so its selection is based on the planned movement
- * path instead.
+ * Beam target positions are obtained from GameLogic, so range, line of sight,
+ * walls and level differences use the same rules as the actual game. Ramming
+ * Armor must be selected before movement and is therefore evaluated separately.
  */
 final class WeaponEvaluator {
 
     private static final double DAMAGE_VALUE = 100.0;
-    private static final double DEATH_VALUE = 1_000.0;
-    private static final double OWN_DAMAGE_COST = 150.0;
-    private static final double OWN_DEATH_COST = 10_000.0;
+    private static final double KILL_ALL_ELIMINATION_VALUE = 1_000.0;
 
     private static final List<ModuleType> BEAM_WEAPONS = List.of(
             ModuleType.MAIN_LASER,
@@ -86,12 +86,11 @@ final class WeaponEvaluator {
     }
 
     /**
-     * Chooses one owned beam weapon by comparing the actual simulated outcome
-     * of each candidate. The fallback is the first owned beam weapon, ensuring
-     * that a robot with a beam weapon never deliberately leaves the phase
-     * without a weapon selected.
+     * Evaluates all owned beam weapons using the engine's actual beam-target
+     * lookup. Only three ray lookups are needed: forward, the second target for
+     * High Power Laser, and backward for Rear Laser.
      */
-    static ModuleType selectBeamWeapon(GameLogic currentGame, Robot robot, int phase) {
+    static ModuleType selectBeamWeapon(GameLogic game, Robot robot, int phase, Goal goal) {
         List<ModuleType> available = BEAM_WEAPONS.stream()
                 .filter(robot::hasModule)
                 .toList();
@@ -99,10 +98,30 @@ final class WeaponEvaluator {
             return robot.hasModule(ModuleType.RAMMING_ARMOR) ? ModuleType.RAMMING_ARMOR : null;
         }
 
-        double bestScore = Double.NEGATIVE_INFINITY;
+        Direction direction = robot.getDirection();
+        Robot forwardTarget = game.getLaserTarget(robot.getPosition(), direction, robot.getLevel(),
+                false, Step.ROBOT_MOUNTED_LASER_FIRE);
+        Robot secondTarget = game.getLaserTarget(robot.getPosition(), direction, robot.getLevel(),
+                true, Step.ROBOT_MOUNTED_LASER_FIRE);
+        Robot rearTarget = game.getLaserTarget(robot.getPosition(), direction.reverse(), robot.getLevel(),
+                false, Step.ROBOT_MOUNTED_LASER_FIRE);
+
         ModuleType bestWeapon = available.get(0);
+        double bestScore = Double.NEGATIVE_INFINITY;
         for (ModuleType candidate : available) {
-            double score = evaluateWeapon(currentGame, robot, phase, candidate);
+            double score = switch (candidate) {
+                case MAIN_LASER -> scoreDamage(forwardTarget, direction, phase, 1, goal);
+                case DOUBLE_BARREL_LASER -> scoreDamage(forwardTarget, direction, phase, 2, goal);
+                case HIGH_POWER_LASER -> scoreDamage(forwardTarget, direction, phase, 1, goal)
+                        + scoreDamage(secondTarget, direction, phase, 1, goal);
+                case REAR_LASER -> scoreDamage(rearTarget, direction, phase, 1, goal);
+                case PRESSURE_BEAM -> scorePressureBeam(game.getCourse(), forwardTarget, direction, phase);
+                case TRACTOR_BEAM -> scoreTractorBeam(robot, forwardTarget, direction);
+                case EXCHANGE_BEAM -> scoreExchangeBeam(game.getCourse(), robot, forwardTarget);
+                case SPIN_LEFT_BEAM -> scoreSpinBeam(robot, forwardTarget, Direction.WEST);
+                case SPIN_RIGHT_BEAM -> scoreSpinBeam(robot, forwardTarget, Direction.EAST);
+                default -> Double.NEGATIVE_INFINITY;
+            };
             if (score > bestScore) {
                 bestScore = score;
                 bestWeapon = candidate;
@@ -111,96 +130,135 @@ final class WeaponEvaluator {
         return bestWeapon;
     }
 
-    private static double evaluateWeapon(GameLogic currentGame, Robot robot, int phase, ModuleType weapon) {
-        Course simulation = currentGame.getCourse().copyForSimulation();
-        Robot simulatedRobot = findRobot(simulation, robot.getId());
-        if (simulatedRobot == null) {
-            return Double.NEGATIVE_INFINITY;
+    private static double scoreDamage(Robot target, Direction shooterDirection, int phase, int hits, Goal goal) {
+        if (target == null) {
+            return 0.0;
         }
 
-        // Robot.copyForSimulation intentionally shares read-only modules.
-        // The weapon activation flags are changed here, so this simulation
-        // needs private module instances for the selected robot.
-        simulatedRobot.setModules(simulatedRobot.getModules().stream()
-                .map(Module::copyForSimulation)
-                .collect(java.util.stream.Collectors.toCollection(ArrayList::new)));
-
-        for (Module module : simulatedRobot.getModules()) {
-            if (module.getType().isWeapon()) {
-                module.getActiveInPhase()[phase] = module.getType() == weapon;
-            }
-        }
-
-        GameLogic simulationLogic = new GameLogic(simulation, (step, currentPhase, detail, movingRobotName) -> {
-        });
-        simulationLogic.stepResolveBeamsAndLaserFire(phase, simulatedRobot);
-        return evaluateOutcome(simulation, robot.getId(), currentGame.getCourse());
-    }
-
-    private static double evaluateOutcome(Course result, String ownRobotId, Course initialCourse) {
-        Robot ownBefore = findRobot(initialCourse, ownRobotId);
-        Robot ownAfter = findRobot(result, ownRobotId);
-        if (ownBefore == null || ownAfter == null) {
-            return -OWN_DEATH_COST;
-        }
-
-        double score = (ownBefore.getDamage() - ownAfter.getDamage()) * OWN_DAMAGE_COST;
-        if (!ownAfter.isOnCourse() || ownAfter.getDieCounter() > ownBefore.getDieCounter()) {
-            score -= OWN_DEATH_COST;
-        }
-
-        for (Robot before : initialCourse.getRobots()) {
-            if (Objects.equals(before.getId(), ownRobotId)) {
-                continue;
-            }
-            Robot after = findRobot(result, before.getId());
-            if (after == null) {
-                continue;
-            }
-
-            score += (after.getDamage() - before.getDamage()) * DAMAGE_VALUE;
-            if (after.getDieCounter() > before.getDieCounter() || (before.isOnCourse() && !after.isOnCourse())) {
-                score += DEATH_VALUE;
-            }
-
-            // A pull that brings an opponent closer can create an opportunity
-            // in a later phase. A push that opens distance has the opposite
-            // (smaller) value. Damage and elimination remain dominant.
-            int oldDistance = manhattanDistance(ownBefore, before);
-            int newDistance = manhattanDistance(ownAfter, after);
-            score += (oldDistance - newDistance) * 2.0;
-
-            if (before.getDirection() != after.getDirection()) {
-                boolean wasFacingUs = isFacing(before, ownBefore);
-                boolean nowFacingUs = isFacing(after, ownAfter);
-                if (wasFacingUs && !nowFacingUs) {
-                    score += 8.0;
-                } else if (!wasFacingUs && nowFacingUs) {
-                    score -= 8.0;
-                }
-            }
+        int damage = calculateDamage(target, shooterDirection, phase, hits);
+        double score = damage * DAMAGE_VALUE;
+        if (goal == Goal.KILL_ALL && target.getDamage() + damage >= 10) {
+            score += KILL_ALL_ELIMINATION_VALUE;
         }
         return score;
     }
 
-    private static Robot findRobot(Course course, String id) {
-        return course.getRobots().stream()
-                .filter(robot -> Objects.equals(robot.getId(), id))
-                .findFirst()
-                .orElse(null);
+    /**
+     * Mirrors Robot.takeDamage's shield-consumption order for the expected
+     * number of hits without modifying the simulated robot.
+     */
+    private static int calculateDamage(Robot target, Direction shooterDirection, int phase, int hits) {
+        Module powerDownShield = target.getModule(ModuleType.POWER_DOWN_SHIELD);
+        boolean[] remainingPowerDownShield = powerDownShield == null
+                ? null : powerDownShield.getPowerDownShield()[phase].clone();
+
+        Module shield = target.getModule(ModuleType.SHIELD);
+        boolean shieldActive = shield != null && target.uses(ModuleType.SHIELD, phase);
+        Direction shieldDirection = shield == null ? null : shield.getShieldDirection()[phase];
+
+        Module layeredArmor = target.getModule(ModuleType.LAYERED_ARMOR);
+        int layeredArmorAmmunition = layeredArmor == null ? 0 : layeredArmor.getAmmunition();
+
+        Direction incomingDirection = shooterDirection.reverse();
+        int damage = 0;
+        for (int hit = 0; hit < hits; hit++) {
+            boolean takesDamage = true;
+
+            if (powerDownShield != null && target.uses(ModuleType.POWER_DOWN_SHIELD, phase)
+                    && powerDownShield.getActiveInPhase()[phase]
+                    && remainingPowerDownShield != null
+                    && remainingPowerDownShield[incomingDirection.ordinal()]) {
+                remainingPowerDownShield[incomingDirection.ordinal()] = false;
+                takesDamage = false;
+            }
+
+            if (incomingDirection != null && shieldActive && shieldDirection == incomingDirection) {
+                shieldActive = false;
+                takesDamage = false;
+            }
+
+            if (layeredArmorAmmunition > 0) {
+                layeredArmorAmmunition--;
+                takesDamage = false;
+            }
+
+            if (takesDamage) {
+                damage++;
+            }
+        }
+        return damage;
     }
 
-    private static int manhattanDistance(Robot first, Robot second) {
-        return Math.abs(first.getPosition().x() - second.getPosition().x())
-                + Math.abs(first.getPosition().y() - second.getPosition().y());
+    private static double scorePressureBeam(Course course, Robot target, Direction direction, int phase) {
+        if (target == null) {
+            return 0.0;
+        }
+
+        Position destination = target.getPosition().neighbour(direction);
+        if (!destination.inRange(course.getRange())) {
+            return 20.0;
+        }
+
+        Floor floor = CourseHandler.getFloor(course, destination);
+        if (floor.getFloortype() == Floortype.ABYSS
+                || (floor.getFloortype() == Floortype.TRAPDOOR && floor.getActiveInPhase()[phase])) {
+            return 250.0;
+        }
+        return 5.0;
     }
 
-    private static boolean isFacing(Robot robot, Robot target) {
-        return switch (robot.getDirection()) {
-            case NORTH -> target.getPosition().y() < robot.getPosition().y();
-            case EAST -> target.getPosition().x() > robot.getPosition().x();
-            case SOUTH -> target.getPosition().y() > robot.getPosition().y();
-            case WEST -> target.getPosition().x() < robot.getPosition().x();
+    private static double scoreTractorBeam(Robot robot, Robot target, Direction direction) {
+        if (target == null) {
+            return 0.0;
+        }
+        Position destination = target.getPosition().neighbour(direction.reverse());
+        return Objects.equals(destination, robot.getPosition()) ? 2.0 : 12.0;
+    }
+
+    private static double scoreExchangeBeam(Course course, Robot robot, Robot target) {
+        if (target == null) {
+            return 0.0;
+        }
+
+        int oldDistance = totalDistanceToOtherRobots(course, robot, target, robot.getPosition());
+        int newDistance = totalDistanceToOtherRobots(course, robot, target, target.getPosition());
+        return (oldDistance - newDistance) * 2.0 + 5.0;
+    }
+
+    private static int totalDistanceToOtherRobots(Course course, Robot robot, Robot excludedTarget, Position position) {
+        int distance = 0;
+        for (Robot other : course.getRobots()) {
+            if (other != robot && other != excludedTarget && other.isOnCourse()) {
+                distance += Math.abs(position.x() - other.getPosition().x())
+                        + Math.abs(position.y() - other.getPosition().y());
+            }
+        }
+        return distance;
+    }
+
+    private static double scoreSpinBeam(Robot robot, Robot target, Direction rotation) {
+        if (target == null) {
+            return 0.0;
+        }
+
+        Direction newDirection = target.getDirection().add(rotation);
+        boolean currentlyFacingUs = isFacing(target.getDirection(), target.getPosition(), robot.getPosition());
+        boolean willFaceUs = isFacing(newDirection, target.getPosition(), robot.getPosition());
+        if (currentlyFacingUs && !willFaceUs) {
+            return 18.0;
+        }
+        if (!currentlyFacingUs && willFaceUs) {
+            return 2.0;
+        }
+        return 10.0;
+    }
+
+    private static boolean isFacing(Direction direction, Position from, Position target) {
+        return switch (direction) {
+            case NORTH -> target.y() < from.y();
+            case EAST -> target.x() > from.x();
+            case SOUTH -> target.y() > from.y();
+            case WEST -> target.x() < from.x();
         };
     }
 
