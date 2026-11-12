@@ -8,6 +8,7 @@ import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
 import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.Floor;
+import de.phlup.circuitchaos.common.model.course.Module;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
@@ -115,7 +116,7 @@ public class MoveInfo {
             }
 
             if (selectedWeapons[phase] != ModuleType.RAMMING_ARMOR) {
-                selectedWeapon = WeaponEvaluator.selectBeamWeapon(gameLogic, myself, phase);
+                selectedWeapon = WeaponEvaluator.selectBeamWeapon(gameLogic, myself, phase, goal);
                 setSelectedWeapon(phase, selectedWeapon);
             }
             gameLogic.stepResolveBeamsAndLaserFire(phase, myself);
@@ -203,10 +204,16 @@ public class MoveInfo {
         }
         for (Robot robot : template.getRobots()) {
             Robot robotCopy = robot.copyForSimulation();
-            simulation.getRobots().add(robotCopy);
             if (Objects.equals(robotCopy.getId(), robotId)) {
+                // Weapon activation is changed while evaluating this program.
+                // Keep those changes isolated from the real robot and other
+                // program candidates.
+                robotCopy.setModules(robotCopy.getModules().stream()
+                        .map(Module::copyForSimulation)
+                        .toList());
                 myself = robotCopy;
             }
+            simulation.getRobots().add(robotCopy);
         }
 
         // Checkpoints, range and course properties are only read by the simulation.
