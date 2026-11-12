@@ -5,7 +5,6 @@ import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
-import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
 import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.Floor;
