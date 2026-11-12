@@ -2,6 +2,7 @@ package de.phlup.circuitchaos.server.player.computer;
 
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Goal;
+import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
 import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.Robot;
@@ -102,6 +103,18 @@ public class ComputerPlayer extends Player {
             }
             if (i2.hasNext() && !robot.getBlocked()[4]) {
                 robot.getProgram()[4] = i2.next();
+            }
+            ModuleType fallbackWeapon = robot.getModules().stream()
+                    .map(module -> module.getType())
+                    .filter(ModuleType::isWeapon)
+                    .findFirst()
+                    .orElse(null);
+            for (var module : robot.getModules()) {
+                if (module.getType().isWeapon()) {
+                    for (int phase = 0; phase < 5; phase++) {
+                        module.getActiveInPhase()[phase] = module.getType() == fallbackWeapon;
+                    }
+                }
             }
             robot.setPowerDownAnnounced(true);
         }
