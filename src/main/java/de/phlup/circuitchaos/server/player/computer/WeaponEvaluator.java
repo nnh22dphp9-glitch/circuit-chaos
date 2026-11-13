@@ -19,14 +19,14 @@ import java.util.Objects;
 
 /**
  * Selects the weapon to use in one program phase.
- *
+ * <p>
  * Beam target positions are obtained from GameLogic, so range, line of sight,
  * walls and level differences use the same rules as the actual game. Ramming
  * Armor must be selected before movement and is therefore evaluated separately.
  */
 final class WeaponEvaluator {
 
-    private static final double DAMAGE_VALUE = 100.0;
+    private static final double DAMAGE_VALUE               = 100.0;
     private static final double KILL_ALL_ELIMINATION_VALUE = 1_000.0;
 
     private static final List<ModuleType> BEAM_WEAPONS = List.of(
@@ -71,7 +71,7 @@ final class WeaponEvaluator {
         }
 
         Direction direction = movement > 0 ? robot.getDirection() : robot.getDirection().reverse();
-        Position position = robot.getPosition();
+        Position  position  = robot.getPosition();
         for (int step = 0; step < Math.abs(movement); step++) {
             position = position.neighbour(direction);
             for (Robot other : course.getRobots()) {
@@ -92,32 +92,32 @@ final class WeaponEvaluator {
      */
     static ModuleType selectBeamWeapon(GameLogic game, Robot robot, int phase, Goal goal) {
         List<ModuleType> available = BEAM_WEAPONS.stream()
-                .filter(robot::hasModule)
-                .toList();
+                                                 .filter(robot::hasModule)
+                                                 .toList();
         if (available.isEmpty()) {
             return robot.hasModule(ModuleType.RAMMING_ARMOR) ? ModuleType.RAMMING_ARMOR : null;
         }
 
-        Direction direction = robot.getDirection();
-        boolean needsForwardTarget = available.stream().anyMatch(type -> type != ModuleType.REAR_LASER);
-        boolean needsSecondTarget = available.contains(ModuleType.HIGH_POWER_LASER);
-        boolean needsRearTarget = available.contains(ModuleType.REAR_LASER);
+        Direction direction          = robot.getDirection();
+        boolean   needsForwardTarget = available.stream().anyMatch(type -> type != ModuleType.REAR_LASER);
+        boolean   needsSecondTarget  = available.contains(ModuleType.HIGH_POWER_LASER);
+        boolean   needsRearTarget    = available.contains(ModuleType.REAR_LASER);
 
         Robot forwardTarget = needsForwardTarget
                 ? game.getLaserTarget(robot.getPosition(), direction, robot.getLevel(),
-                        false, Step.ROBOT_MOUNTED_LASER_FIRE)
+                                      false, 1, false, Step.ROBOT_MOUNTED_LASER_FIRE)
                 : null;
         Robot secondTarget = needsSecondTarget
                 ? game.getLaserTarget(robot.getPosition(), direction, robot.getLevel(),
-                        true, Step.ROBOT_MOUNTED_LASER_FIRE)
+                                      true, 1, false, Step.ROBOT_MOUNTED_LASER_FIRE)
                 : null;
         Robot rearTarget = needsRearTarget
                 ? game.getLaserTarget(robot.getPosition(), direction.reverse(), robot.getLevel(),
-                        false, Step.ROBOT_MOUNTED_LASER_FIRE)
+                                      false, 1, false, Step.ROBOT_MOUNTED_LASER_FIRE)
                 : null;
 
-        ModuleType bestWeapon = available.get(0);
-        double bestScore = Double.NEGATIVE_INFINITY;
+        ModuleType bestWeapon = available.getFirst();
+        double     bestScore  = Double.NEGATIVE_INFINITY;
         for (ModuleType candidate : available) {
             double score = switch (candidate) {
                 case MAIN_LASER -> scoreDamage(forwardTarget, direction, phase, 1, goal);
@@ -145,8 +145,8 @@ final class WeaponEvaluator {
             return 0.0;
         }
 
-        int damage = calculateDamage(target, shooterDirection, phase, hits);
-        double score = damage * DAMAGE_VALUE;
+        int    damage = calculateDamage(target, shooterDirection, phase, hits);
+        double score  = damage * DAMAGE_VALUE;
         if (goal == Goal.KILL_ALL && target.getDamage() + damage >= 10) {
             score += KILL_ALL_ELIMINATION_VALUE;
         }
@@ -162,15 +162,15 @@ final class WeaponEvaluator {
         boolean[] remainingPowerDownShield = powerDownShield == null
                 ? null : powerDownShield.getPowerDownShield()[phase].clone();
 
-        Module shield = target.getModule(ModuleType.SHIELD);
-        boolean shieldActive = shield != null && target.uses(ModuleType.SHIELD, phase);
+        Module    shield          = target.getModule(ModuleType.SHIELD);
+        boolean   shieldActive    = shield != null && target.uses(ModuleType.SHIELD, phase);
         Direction shieldDirection = shield == null ? null : shield.getShieldDirection()[phase];
 
-        Module layeredArmor = target.getModule(ModuleType.LAYERED_ARMOR);
-        int layeredArmorAmmunition = layeredArmor == null ? 0 : layeredArmor.getAmmunition();
+        Module layeredArmor           = target.getModule(ModuleType.LAYERED_ARMOR);
+        int    layeredArmorAmmunition = layeredArmor == null ? 0 : layeredArmor.getAmmunition();
 
         Direction incomingDirection = shooterDirection.reverse();
-        int damage = 0;
+        int       damage            = 0;
         for (int hit = 0; hit < hits; hit++) {
             boolean takesDamage = true;
 
@@ -182,7 +182,7 @@ final class WeaponEvaluator {
                 takesDamage = false;
             }
 
-            if (incomingDirection != null && shieldActive && shieldDirection == incomingDirection) {
+            if (shieldActive && shieldDirection == incomingDirection) {
                 shieldActive = false;
                 takesDamage = false;
             }
@@ -251,9 +251,9 @@ final class WeaponEvaluator {
             return 0.0;
         }
 
-        Direction newDirection = target.getDirection().add(rotation);
-        boolean currentlyFacingUs = isFacing(target.getDirection(), target.getPosition(), robot.getPosition());
-        boolean willFaceUs = isFacing(newDirection, target.getPosition(), robot.getPosition());
+        Direction newDirection      = target.getDirection().add(rotation);
+        boolean   currentlyFacingUs = isFacing(target.getDirection(), target.getPosition(), robot.getPosition());
+        boolean   willFaceUs        = isFacing(newDirection, target.getPosition(), robot.getPosition());
         if (currentlyFacingUs && !willFaceUs) {
             return 18.0;
         }

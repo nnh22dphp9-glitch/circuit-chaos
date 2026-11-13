@@ -43,102 +43,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static de.phlup.circuitchaos.client.gui.PictureConstants.FOLDER_ROBOTS;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_BG;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_E;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_E_N;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_E_S;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_N;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_NE;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_NW;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_N_E;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_N_W;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_S;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_SE;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_SW;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_S_E;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_S_W;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W_N;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ABYSS_W_S;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_DISPENSER;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_LASER;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_POWER_DOWN_SHIELD;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_RAMMING_ARMOR;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_ADD_ON_SHIELD;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CHECKPOINT;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_BACKGROUND;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_CCW;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_CW;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_CW_CCW;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_EXPRESS_BACKGROUND;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_EXPRESS_CCW;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_EXPRESS_CW;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_EXPRESS_CW_CCW;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_EXPRESS_STRAIGHT;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_CONVEYOR_BELT_STRAIGHT;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_EXCHANGE_BEAM;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_EXPLOSION;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_FINISH;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_GEARS_CCW;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_GEARS_CW;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_GEARS_SOCKET;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LASER_1;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LASER_2;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LASER_3;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LASER_BEAM_1;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LASER_BEAM_2;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LASER_BEAM_3;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_OPEN_FLOOR;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PIT_STOP;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PORTAL_TARGET_SUFFIX;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PRESSURE_BEAM;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PRESSURE_SOCKET;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PROGRAMME;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PROGRAMME_BLOCKED_SUFFIX;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PROGRAMME_NOT_SET;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PROGRAMME_SLOT_SUFFIX;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_PUSHER;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_SELECTION;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_SPIN_LEFT_BEAM;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_SPIN_RIGHT_BEAM;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_START;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRACTOR_BEAM;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRACTOR_SOCKET;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRAPDOOR_1;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRAPDOOR_2;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRAPDOOR_3;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRAPDOOR_4;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRAPDOOR_5;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_TRAPDOOR_6;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_WALL_TYPE;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_WATER;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.ROBOT_POSTFIX_FLYING;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.getGfxOfModuleType;
-import static de.phlup.circuitchaos.client.gui.PictureConstants.getGfxOfObjectType;
-import static de.phlup.circuitchaos.common.enums.Direction.EAST;
-import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
-import static de.phlup.circuitchaos.common.enums.Direction.SOUTH;
-import static de.phlup.circuitchaos.common.enums.Direction.WEST;
-import static de.phlup.circuitchaos.common.enums.ModuleType.DOUBLE_BARREL_LASER;
-import static de.phlup.circuitchaos.common.enums.ModuleType.EXCHANGE_BEAM;
-import static de.phlup.circuitchaos.common.enums.ModuleType.GLUE_DISPENSER;
-import static de.phlup.circuitchaos.common.enums.ModuleType.HIGH_POWER_LASER;
-import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
-import static de.phlup.circuitchaos.common.enums.ModuleType.OIL_DISPENSER;
-import static de.phlup.circuitchaos.common.enums.ModuleType.POWER_DOWN_SHIELD;
-import static de.phlup.circuitchaos.common.enums.ModuleType.PRESSURE_BEAM;
-import static de.phlup.circuitchaos.common.enums.ModuleType.RAMMING_ARMOR;
-import static de.phlup.circuitchaos.common.enums.ModuleType.REAR_LASER;
-import static de.phlup.circuitchaos.common.enums.ModuleType.SHIELD;
-import static de.phlup.circuitchaos.common.enums.ModuleType.SPIN_RIGHT_BEAM;
-import static de.phlup.circuitchaos.common.enums.ModuleType.TRACTOR_BEAM;
-import static de.phlup.circuitchaos.common.enums.Step.CONVEYOR_BELTS_MOVE;
-import static de.phlup.circuitchaos.common.enums.Step.COURSE_MOUNTED_LASER_FIRE;
-import static de.phlup.circuitchaos.common.enums.Step.EXPRESS_CONVEYOR_BELTS_MOVE;
-import static de.phlup.circuitchaos.common.enums.Step.GEARS_ROTATE;
-import static de.phlup.circuitchaos.common.enums.Step.OPEN_TRAPDOORS;
-import static de.phlup.circuitchaos.common.enums.Step.ROBOT_MOUNTED_LASER_FIRE;
+import static de.phlup.circuitchaos.client.gui.PictureConstants.*;
+import static de.phlup.circuitchaos.common.enums.Direction.*;
+import static de.phlup.circuitchaos.common.enums.ModuleType.*;
+import static de.phlup.circuitchaos.common.enums.Step.*;
 import static de.phlup.circuitchaos.server.GlobalServerAttributes.RANDOM;
 
 @Slf4j
@@ -249,7 +157,6 @@ public class ImageSupplier {
             drawObjects(position, phase, subPhase, course, gr, animationSteps);
             if (subPhase != null) {
                 drawObjectsMoving(position, phase, subPhase, course, gr, animationSteps);
-                drawBeams(floor, step, subPhase, image, animationSteps);
             }
             drawRobots(floor, subPhase, course, gr, animationSteps, step, phase);
             if (subPhase != null) {
@@ -279,7 +186,7 @@ public class ImageSupplier {
         for (Robot r : CourseHandler.getLeavingRobots(course, floor.getPosition())) {
             drawRobot(r, gr, subPhase, true, animationSteps, floor, step, phase);
         }
-        if (activeRobot != null && step == Step.SETUP) {
+        if (activeRobot != null && step == SETUP) {
             drawRobot(activeRobot, gr, subPhase, false, animationSteps, floor, step, phase);
         }
     }
@@ -296,26 +203,6 @@ public class ImageSupplier {
     private void drawRobots(Floor floor, Integer subPhase, Course course, Graphics2D gr, int animationSteps, Step step, Integer phase) {
         for (Robot r : CourseHandler.getRobots(course, floor.getPosition())) {
             drawRobot(r, gr, subPhase, false, animationSteps, floor, step, phase);
-        }
-    }
-
-    private void drawBeams(Floor floor, Step step, Integer subPhase, BufferedImage image, int animationSteps) {
-        if (subPhase < animationSteps) {
-            if (step == Step.ROBOT_MOUNTED_LASER_FIRE
-                    || step == Step.ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE
-                    || step == Step.ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE
-                    || step == Step.ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE
-                    || step == Step.ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE
-                    || step == Step.ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE) {
-                Graphics2D gra = image.createGraphics();
-                try {
-                    gra.translate(imageSize / 2, imageSize / 2);
-                    drawBeams(floor.isBeamsNS() ? 1 : 0, gra, false, subPhase, animationSteps, floor.getBeamType());
-                    drawBeams(floor.isBeamsWE() ? 1 : 0, gra, true, subPhase, animationSteps, floor.getBeamType());
-                } finally {
-                    gra.dispose();
-                }
-            }
         }
     }
 
@@ -348,8 +235,7 @@ public class ImageSupplier {
         String picture = getRobotImagePathAndName(robot);
         drawCourseElement(robot, gr, phase, subPhase, leaving, picture, animationSteps);
         if (robot.isOnCourse() && !leaving
-                && ((step == ROBOT_MOUNTED_LASER_FIRE && (floor.isBeamsNS() || floor.isBeamsWE()))
-                || (step == COURSE_MOUNTED_LASER_FIRE && (floor.getCourseMountedLaserBeamsNS() > 0 || floor.getCourseMountedLaserBeamsWE() > 0)))
+                && (((step == ROBOT_MOUNTED_LASER_FIRE || step == COURSE_MOUNTED_LASER_FIRE) && (floor.getBeamsNS() > 0 || floor.getBeamsWE() > 0)))
                 || (step == OPEN_TRAPDOORS && floor.getFloortype() == Floortype.TRAPDOOR && phase != null && floor.getActiveInPhase()[phase])) {
             drawExplosion(1, gr, subPhase, animationSteps, floor.getVariant());
         }
@@ -534,29 +420,6 @@ public class ImageSupplier {
         drawCourseElement(co, gr, phase, subPhase, leaving, picture, animationSteps);
     }
 
-    private void drawBeams(int amount, Graphics2D gr, boolean westEastDirection, Integer subPhase, int animationSteps, ModuleType type) {
-        if (amount <= 0) {
-            return;
-        }
-        Composite oldComposite = gr.getComposite();
-        if (subPhase != null) {
-            gr.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, calculateAlpha(subPhase, 1.0f / animationSteps, animationSteps)));
-        }
-        addToImage(switch (type) {
-            case EXCHANGE_BEAM -> GFX_EXCHANGE_BEAM;
-            case PRESSURE_BEAM -> GFX_PRESSURE_BEAM;
-            case TRACTOR_BEAM -> GFX_TRACTOR_BEAM;
-            case SPIN_LEFT_BEAM -> GFX_SPIN_LEFT_BEAM;
-            case SPIN_RIGHT_BEAM -> GFX_SPIN_RIGHT_BEAM;
-            default -> switch (amount) {
-                case 1 -> GFX_LASER_BEAM_1;
-                case 2 -> GFX_LASER_BEAM_2;
-                default -> GFX_LASER_BEAM_3;
-            };
-        }, westEastDirection ? EAST : NORTH, gr);
-        gr.setComposite(oldComposite);
-    }
-
     private void drawExplosion(int damage, Graphics2D gr, Integer subPhase, int animationSteps, double variant) {
         if (damage <= 0) {
             return;
@@ -589,26 +452,7 @@ public class ImageSupplier {
                 addToImage(GFX_WATER + RANDOM.nextInt(theme.getWaterVariants()), NORTH, gr);
             }
             addPusher(floor, gr, gameIsNotStartedYet, step, phase, subPhase, animationSteps);
-            if (step == Step.COURSE_MOUNTED_LASER_FIRE || gameIsNotStartedYet) {
-                drawBeams(floor.getCourseMountedLaserBeamsNS(), gr, false, subPhase, animationSteps, MAIN_LASER);
-                drawBeams(floor.getCourseMountedLaserBeamsWE(), gr, true, subPhase, animationSteps, MAIN_LASER);
-            }
-            if (step == Step.COURSE_MOUNTED_PRESSURE_BEAMS_FIRE || gameIsNotStartedYet) {
-                if (floor.isCourseMountedPressureBeamsNS()) {
-                    drawBeams(1, gr, false, subPhase, animationSteps, PRESSURE_BEAM);
-                }
-                if (floor.isCourseMountedPressureBeamsWE()) {
-                    drawBeams(1, gr, true, subPhase, animationSteps, PRESSURE_BEAM);
-                }
-            }
-            if (step == Step.COURSE_MOUNTED_TRACTOR_BEAMS_FIRE || gameIsNotStartedYet) {
-                if (floor.isCourseMountedTractorBeamsNS()) {
-                    drawBeams(1, gr, false, subPhase, animationSteps, TRACTOR_BEAM);
-                }
-                if (floor.isCourseMountedTractorBeamsWE()) {
-                    drawBeams(1, gr, true, subPhase, animationSteps, TRACTOR_BEAM);
-                }
-            }
+            drawBeams(floor, gameIsNotStartedYet, step, subPhase, animationSteps, gr);
             addWalls(floor, gr);
             addLasers(floor, gr);
 
@@ -622,9 +466,65 @@ public class ImageSupplier {
         return bi;
     }
 
+    private void drawBeams(Floor floor, boolean gameIsNotStartedYet, Step step, Integer subPhase, int animationSteps, Graphics2D gr) {
+        if (gameIsNotStartedYet) {
+            drawBeams(floor.getCourseMountedLaserBeamsNS(), gr, false, subPhase, animationSteps, MAIN_LASER);
+            drawBeams(floor.getCourseMountedLaserBeamsWE(), gr, true, subPhase, animationSteps, MAIN_LASER);
+            if (floor.isCourseMountedPressureBeamsNS()) {
+                drawBeams(1, gr, false, subPhase, animationSteps, PRESSURE_BEAM);
+            }
+            if (floor.isCourseMountedPressureBeamsWE()) {
+                drawBeams(1, gr, true, subPhase, animationSteps, PRESSURE_BEAM);
+            }
+            if (floor.isCourseMountedTractorBeamsNS()) {
+                drawBeams(1, gr, false, subPhase, animationSteps, TRACTOR_BEAM);
+            }
+            if (floor.isCourseMountedTractorBeamsWE()) {
+                drawBeams(1, gr, true, subPhase, animationSteps, TRACTOR_BEAM);
+            }
+        } else {
+            if (subPhase != null && subPhase < animationSteps
+                    && (step == ROBOT_MOUNTED_LASER_FIRE
+                    || step == ROBOT_MOUNTED_PRESSURE_BEAMS_FIRE
+                    || step == ROBOT_MOUNTED_TRACTOR_BEAMS_FIRE
+                    || step == ROBOT_MOUNTED_SPIN_LEFT_BEAMS_FIRE
+                    || step == ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE
+                    || step == ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE
+                    || step == COURSE_MOUNTED_LASER_FIRE
+                    || step == COURSE_MOUNTED_TRACTOR_BEAMS_FIRE
+                    || step == COURSE_MOUNTED_PRESSURE_BEAMS_FIRE)) {
+                drawBeams(floor.getBeamsNS(), gr, false, subPhase, animationSteps, floor.getBeamType());
+                drawBeams(floor.getBeamsWE(), gr, true, subPhase, animationSteps, floor.getBeamType());
+            }
+        }
+    }
+
+    private void drawBeams(int amount, Graphics2D gr, boolean westEastDirection, Integer subPhase, int animationSteps, ModuleType type) {
+        if (amount <= 0) {
+            return;
+        }
+        Composite oldComposite = gr.getComposite();
+        if (subPhase != null) {
+            gr.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, calculateAlpha(subPhase, 1.0f / animationSteps, animationSteps)));
+        }
+        addToImage(switch (type) {
+            case EXCHANGE_BEAM -> GFX_EXCHANGE_BEAM;
+            case PRESSURE_BEAM -> GFX_PRESSURE_BEAM;
+            case TRACTOR_BEAM -> GFX_TRACTOR_BEAM;
+            case SPIN_LEFT_BEAM -> GFX_SPIN_LEFT_BEAM;
+            case SPIN_RIGHT_BEAM -> GFX_SPIN_RIGHT_BEAM;
+            default -> switch (amount) {
+                case 1 -> GFX_LASER_BEAM_1;
+                case 2 -> GFX_LASER_BEAM_2;
+                default -> GFX_LASER_BEAM_3;
+            };
+        }, westEastDirection ? EAST : NORTH, gr);
+        gr.setComposite(oldComposite);
+    }
+
     private void addTrapdoor(Floor floor, Step step, Integer phase, Integer subPhase, Graphics2D gr, Direction rotation, int animationSteps) {
         if (floor.getFloortype() == Floortype.TRAPDOOR && subPhase != null) {
-            if (phase != null && step == Step.OPEN_TRAPDOORS) {
+            if (phase != null && step == OPEN_TRAPDOORS) {
                 boolean currentOpen  = floor.getActiveInPhase()[phase];
                 boolean previousOpen = phase == 0 ? floor.getActiveInPhase()[4] : floor.getActiveInPhase()[phase - 1];
                 String  image        = getTrapdoorAnimatedImage(subPhase, currentOpen, previousOpen, animationSteps);
@@ -708,7 +608,7 @@ public class ImageSupplier {
         if (floor.isHasPusher()) {
             if (gameIsNotStartedYet) {
                 addToImage(GFX_PUSHER + (theme.getPusherAnimationSteps() / 2), floor.getPusherDirection(), gr);
-            } else if (phase == null || subPhase == null || !floor.getActiveInPhase()[phase] || step != Step.PUSHERS_PUSH) {
+            } else if (phase == null || subPhase == null || !floor.getActiveInPhase()[phase] || step != PUSHERS_PUSH) {
                 addToImage(GFX_PUSHER + 0, floor.getPusherDirection(), gr);
             } else {
                 double alpha       = calculateAlpha(subPhase, 0, animationSteps) / 2;

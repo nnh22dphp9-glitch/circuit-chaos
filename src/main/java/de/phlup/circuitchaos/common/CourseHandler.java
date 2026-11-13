@@ -27,12 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static de.phlup.circuitchaos.common.enums.ModuleType.EXCHANGE_BEAM;
-import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
-import static de.phlup.circuitchaos.common.enums.ModuleType.PRESSURE_BEAM;
-import static de.phlup.circuitchaos.common.enums.ModuleType.SPIN_LEFT_BEAM;
-import static de.phlup.circuitchaos.common.enums.ModuleType.SPIN_RIGHT_BEAM;
-import static de.phlup.circuitchaos.common.enums.ModuleType.TRACTOR_BEAM;
+import static de.phlup.circuitchaos.common.enums.ModuleType.*;
 import static de.phlup.circuitchaos.server.GlobalServerAttributes.RANDOM;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -359,11 +354,11 @@ public class CourseHandler {
                        .toList();
     }
 
-    public static void setBeam(Course course, Position position, Direction direction, Step step) {
+    public static void setBeam(Course course, Position position, Direction direction, Step step, int amount) {
         Floor floor = getFloor(course, position);
         switch (direction) {
-            case NORTH, SOUTH -> floor.setBeamsNS(true);
-            case EAST, WEST -> floor.setBeamsWE(true);
+            case NORTH, SOUTH -> floor.setBeamsNS(amount);
+            case EAST, WEST -> floor.setBeamsWE(amount);
         }
         floor.setBeamType(switch (step) {
             case ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE -> EXCHANGE_BEAM;
@@ -377,8 +372,8 @@ public class CourseHandler {
 
     public static void clearBeams(Course course) {
         for (Floor f : course.getFloor()) {
-            f.setBeamsNS(false);
-            f.setBeamsWE(false);
+            f.setBeamsNS(0);
+            f.setBeamsWE(0);
         }
     }
 

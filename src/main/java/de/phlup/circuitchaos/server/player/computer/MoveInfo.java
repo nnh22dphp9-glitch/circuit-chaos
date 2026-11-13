@@ -30,27 +30,27 @@ public class MoveInfo {
     private final String      robotId;
     private final List<Robot> robotsInPriorityOrder = new java.util.ArrayList<>();
 
-    private Programme[] program;
+    private       Programme[]  program;
     private final ModuleType[] selectedWeapons = new ModuleType[5];
-    private Direction   startingDirection;
-    private boolean     willDie;
-    private int         reachesCheckpoint;
-    private int         checkpointsReached;
-    private int         checkpointPhaseBonus;
-    private int         nextCheckpointNumber;
-    private boolean     won;
-    private int         damage;
-    private boolean     reachesPitStop;
-    private boolean     copiesArchive;
-    private boolean     standsOnOpenFloor;
-    private boolean     keepsStaying;
-    private boolean     facesTowardsCheckpoint;
-    private int         x;
-    private int         y;
-    private int         distance;
-    private double      distance2;
-    private Direction   endingDirection;
-    private int         probableTargets;
+    private       Direction    startingDirection;
+    private       boolean      willDie;
+    private       int          reachesCheckpoint;
+    private       int          checkpointsReached;
+    private       int          checkpointPhaseBonus;
+    private       int          nextCheckpointNumber;
+    private       boolean      won;
+    private       int          damage;
+    private       boolean      reachesPitStop;
+    private       boolean      copiesArchive;
+    private       boolean      standsOnOpenFloor;
+    private       boolean      keepsStaying;
+    private       boolean      facesTowardsCheckpoint;
+    private       int          x;
+    private       int          y;
+    private       int          distance;
+    private       double       distance2;
+    private       Direction    endingDirection;
+    private       int          probableTargets;
 
     private final int initialX;
     private final int initialY;
@@ -209,8 +209,8 @@ public class MoveInfo {
                 // Keep those changes isolated from the real robot and other
                 // program candidates.
                 robotCopy.setModules(robotCopy.getModules().stream()
-                        .map(Module::copyForSimulation)
-                        .toList());
+                                              .map(Module::copyForSimulation)
+                                              .toList());
                 myself = robotCopy;
             }
             simulation.getRobots().add(robotCopy);

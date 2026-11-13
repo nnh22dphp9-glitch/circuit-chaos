@@ -5,6 +5,7 @@ import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
 import de.phlup.circuitchaos.common.model.course.Course;
+import de.phlup.circuitchaos.common.model.course.Module;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Programme;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
@@ -29,7 +30,7 @@ import java.util.Set;
 @Slf4j
 public class ComputerPlayer extends Player {
 
-    private final Goal goal;
+    private final Goal          goal;
     private final MoveEvaluator moveEvaluator = new MoveEvaluator();
 
     private Checkpoint nextCP;
@@ -105,10 +106,10 @@ public class ComputerPlayer extends Player {
                 robot.getProgram()[4] = i2.next();
             }
             ModuleType fallbackWeapon = robot.getModules().stream()
-                    .map(module -> module.getType())
-                    .filter(ModuleType::isWeapon)
-                    .findFirst()
-                    .orElse(null);
+                                             .map(Module::getType)
+                                             .filter(ModuleType::isWeapon)
+                                             .findFirst()
+                                             .orElse(null);
             for (var module : robot.getModules()) {
                 if (module.getType().isWeapon()) {
                     for (int phase = 0; phase < 5; phase++) {

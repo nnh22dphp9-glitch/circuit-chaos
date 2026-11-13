@@ -14,8 +14,8 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class MoveEvaluator {
 
-    private static final int CHECKPOINT_SCORE = 1_000;
-    private static final int WIN_SCORE = 1_000_000;
+    private static final int CHECKPOINT_SCORE  = 1_000;
+    private static final int WIN_SCORE         = 1_000_000;
     private static final int MAX_PATH_DISTANCE = 8;
 
     private final EvaluationWeights weights;
@@ -66,9 +66,9 @@ public class MoveEvaluator {
             return 0;
         }
 
-        Position position = new Position(move.getX(), move.getY());
-        double geometricDistance = move.getDistance2();
-        Range range = Range.rangeAroundPosition(position, MAX_PATH_DISTANCE);
+        Position position          = new Position(move.getX(), move.getY());
+        double   geometricDistance = move.getDistance2();
+        Range    range             = Range.rangeAroundPosition(position, MAX_PATH_DISTANCE);
         if (!target.getPosition().inRange(range) || geometricDistance > MAX_PATH_DISTANCE) {
             return geometricDistance;
         }

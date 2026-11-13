@@ -59,10 +59,7 @@ import java.util.Optional;
 
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LOGO_SMALL;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_NO_ACTION;
-import static de.phlup.circuitchaos.common.enums.Direction.EAST;
-import static de.phlup.circuitchaos.common.enums.Direction.NORTH;
-import static de.phlup.circuitchaos.common.enums.Direction.SOUTH;
-import static de.phlup.circuitchaos.common.enums.Direction.WEST;
+import static de.phlup.circuitchaos.common.enums.Direction.*;
 import static de.phlup.circuitchaos.common.enums.Floortype.ABYSS;
 import static de.phlup.circuitchaos.common.enums.Floortype.TRAPDOOR;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
