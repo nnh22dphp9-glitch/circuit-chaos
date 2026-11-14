@@ -1,5 +1,8 @@
 package de.phlup.circuitchaos.common.records;
 
-public record RevealProgrammeListItem(String name, String imageIconPath, Programme programme) {
+import de.phlup.circuitchaos.common.enums.ModuleType;
+
+public record RevealProgrammeListItem(String name, String imageIconPath, Programme programme, ModuleType weapon,
+                                      int damage) {
 
 }

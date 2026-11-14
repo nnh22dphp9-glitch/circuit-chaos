@@ -457,7 +457,8 @@ public class Game {
         for (Robot r : robots) {
             Programme program = r.getProgram()[phase];
             if (program != null && !r.isPoweredDown() && r.isOnCourse()) {
-                revealProgrammeResponse.getProgramme().add(new RevealProgrammeListItem(r.getName(), ImageSupplier.getRobotImagePathAndName(r), program));
+                revealProgrammeResponse.getProgramme().add(
+                        new RevealProgrammeListItem(r.getName(), ImageSupplier.getRobotImagePathAndName(r), program, r.getWeapon(phase), r.getDamage()));
             }
         }
         for (Registration reg : watchers) {

@@ -7,11 +7,13 @@ import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
+import jakarta.annotation.Nullable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static de.phlup.circuitchaos.common.enums.ModuleType.*;
@@ -85,6 +87,13 @@ public class Robot extends CourseElement {
             }
         }
         return null;
+    }
+
+    @Nullable
+    @JsonIgnore
+    public ModuleType getWeapon(int phase) {
+        return Arrays.stream(values()).filter(ModuleType::isWeapon).filter(mt -> mt != RAMMING_ARMOR)
+                     .filter(mt -> uses(mt, phase)).findAny().orElse(null);
     }
 
     @JsonIgnore

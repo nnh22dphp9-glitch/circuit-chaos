@@ -31,18 +31,21 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Optional;
 import java.util.UUID;
 
+import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_EXPLOSION;
+
 @Slf4j
 @Getter
-public class GameGui extends BaseGui {
+public class GameGui extends BaseGui implements GuiHelper {
 
     private final String id = UUID.randomUUID().toString();
 
@@ -221,26 +224,40 @@ public class GameGui extends BaseGui {
         synchronized (revealPanel) {
             revealPanel.removeAll();
             revealPanel.setBackground(Color.WHITE);
-            revealPanel.add(new JLabel(" Phase: %s ".formatted(revealProgrammeResponse.getPhase() + 1)));
-            for (RevealProgrammeListItem item : revealProgrammeResponse.getProgramme()) {
-                JPanel    p            = new JPanel(new BorderLayout());
+            GridBagLayout displayLayout = new GridBagLayout();
+            JPanel        p             = new JPanel(displayLayout);
+            addComponentToPanel(new JLabel(" Phase: %s ".formatted(revealProgrammeResponse.getPhase() + 1)),
+                                p, displayLayout, 1, 2, 1, GridBagConstraints.CENTER);
+            Image scaledExplosion = imageSupplier.getImageIconPlain(GFX_EXPLOSION + "0").getImage()
+                                                 .getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+            for (int i = 0; i < revealProgrammeResponse.getProgramme().size(); i++) {
+                int                     y    = 1;
+                RevealProgrammeListItem item = revealProgrammeResponse.getProgramme().get(i);
+                addComponentToPanel(new JLabel(item.name()), p, displayLayout, 2 + i, y++, 1, GridBagConstraints.CENTER);
                 ImageIcon originalIcon = imageSupplier.getImageIconPlain(item.imageIconPath());
                 Image     scaledImage  = originalIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-                p.add(new JLabel(new ImageIcon(scaledImage)), BorderLayout.NORTH);
-                p.add(new JLabel(imageSupplier.getImageIcon(item.programme(), true, false)), BorderLayout.CENTER);
-                p.setBackground(Color.WHITE);
-                JPanel p2 = new JPanel(new BorderLayout());
-                p2.add(new JLabel(item.name()), BorderLayout.NORTH);
-                p2.setBackground(Color.WHITE);
-                p.add(p2, BorderLayout.SOUTH);
-                revealPanel.add(p);
+                addComponentToPanel(new JLabel(new ImageIcon(scaledImage)),
+                                    p, displayLayout, 2 + i, y++, 1, GridBagConstraints.CENTER);
+                addComponentToPanel(new JLabel(" "), p, displayLayout, 2 + i, y++, 1, GridBagConstraints.CENTER);
+                addComponentToPanel(new JLabel(imageSupplier.getImageIcon(item.programme(), true, false)),
+                                    p, displayLayout, 2 + i, y++, 1, GridBagConstraints.CENTER);
+                addComponentToPanel(new JLabel(" "), p, displayLayout, 2 + i, y++, 1, GridBagConstraints.CENTER);
+                if (item.weapon() != null) {
+                    addComponentToPanel(new JLabel(imageSupplier.getImageIcon(item.weapon(), 0.75)),
+                                        p, displayLayout, 2 + i, y++, 1, GridBagConstraints.CENTER);
+                }
+                for (int d = 0; d < item.damage(); d++) {
+                    addComponentToPanel(new JLabel(new ImageIcon(scaledExplosion)),
+                                        p, displayLayout, 2 + i, y++, 1, GridBagConstraints.CENTER);
+                }
             }
+            revealPanel.add(p);
             if (lastRevealFrame == null) {
                 lastRevealFrame = new JFrame("Circuit Chaos - %s - %s".formatted(gameAttributes.getRegistration().getGameName(), myRobotsName));
                 lastRevealFrame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
                 lastRevealFrame.setLocationRelativeTo(mainFrame);
-                lastRevealFrame.setLocation(lastRevealFrame.getLocation().x - mainFrame.getWidth() / 2 + 50,
-                                            lastRevealFrame.getLocation().y + 120);
+                lastRevealFrame.setLocation(lastRevealFrame.getX() + mainFrame.getWidth() / 2,
+                                            lastRevealFrame.getY() - mainFrame.getHeight() / 2 + 20);
                 lastRevealFrame.setContentPane(new JScrollPane(revealPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
             }
             lastRevealFrame.pack();

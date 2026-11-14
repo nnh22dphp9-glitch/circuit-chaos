@@ -18,7 +18,6 @@ import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.CourseElement;
 import de.phlup.circuitchaos.common.model.course.CourseObject;
 import de.phlup.circuitchaos.common.model.course.Floor;
-import de.phlup.circuitchaos.common.model.course.Module;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
@@ -804,8 +803,8 @@ public class ImageSupplier {
         }
     }
 
-    public ImageIcon getImageIcon(Module module, double scale) {
-        String imagename = getGfxOfModuleType(module.getType());
+    public ImageIcon getImageIcon(ModuleType module, double scale) {
+        String imagename = getGfxOfModuleType(module);
         if (scale == 1.0) {
             return getImageIconPlain(imagename);
         }
