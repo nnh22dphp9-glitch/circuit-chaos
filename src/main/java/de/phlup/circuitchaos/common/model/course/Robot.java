@@ -14,9 +14,7 @@ import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.phlup.circuitchaos.common.enums.ModuleType.LAYERED_ARMOR;
-import static de.phlup.circuitchaos.common.enums.ModuleType.POWER_DOWN_SHIELD;
-import static de.phlup.circuitchaos.common.enums.ModuleType.SHIELD;
+import static de.phlup.circuitchaos.common.enums.ModuleType.*;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

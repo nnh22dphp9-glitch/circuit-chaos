@@ -2,8 +2,10 @@ package de.phlup.circuitchaos.server.player.computer;
 
 import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Goal;
+import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
 import de.phlup.circuitchaos.common.model.course.Course;
+import de.phlup.circuitchaos.common.model.course.Module;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Programme;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
@@ -28,7 +30,7 @@ import java.util.Set;
 @Slf4j
 public class ComputerPlayer extends Player {
 
-    private final Goal goal;
+    private final Goal          goal;
     private final MoveEvaluator moveEvaluator = new MoveEvaluator();
 
     private Checkpoint nextCP;
@@ -79,6 +81,13 @@ public class ComputerPlayer extends Player {
             robot.setDirection(chosenMove.getStartingDirection());
             robot.setPrevDirection(robot.getDirection());
             robot.setProgram(chosenMove.getProgram());
+            for (var module : robot.getModules()) {
+                if (module.getType().isWeapon()) {
+                    for (int phase = 0; phase < 5; phase++) {
+                        module.getActiveInPhase()[phase] = module.getType() == chosenMove.getSelectedWeapons()[phase];
+                    }
+                }
+            }
         } else {
             Iterator<Programme> i2 = robot.getPotentialProgramme().iterator();
             if (i2.hasNext() && !robot.getBlocked()[0]) {
@@ -95,6 +104,18 @@ public class ComputerPlayer extends Player {
             }
             if (i2.hasNext() && !robot.getBlocked()[4]) {
                 robot.getProgram()[4] = i2.next();
+            }
+            ModuleType fallbackWeapon = robot.getModules().stream()
+                                             .map(Module::getType)
+                                             .filter(ModuleType::isWeapon)
+                                             .findFirst()
+                                             .orElse(null);
+            for (var module : robot.getModules()) {
+                if (module.getType().isWeapon()) {
+                    for (int phase = 0; phase < 5; phase++) {
+                        module.getActiveInPhase()[phase] = module.getType() == fallbackWeapon;
+                    }
+                }
             }
             robot.setPowerDownAnnounced(true);
         }

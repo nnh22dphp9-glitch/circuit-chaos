@@ -81,7 +81,7 @@ Die KI sollte nicht einfach die bisherige `ComputerMoveInfo.simulateCourse()`-Lo
 
 - **Eine Bewegung ist nicht das Ende einer Phase.** Nach der eigenen Programmbewegung können Förderbänder, Pusher, Zahnräder, Strahlen/Laser, Minen und Checkpoints den Zustand weiter verändern.
 - **Reihenfolge ist relevant.** Roboter bewegen sich nach Programm-Priorität. Roboterbewegungen finden vor Spielfeldelementbewegung und vor der Waffenauflösung statt.
-- **Andere Roboter sind Teil des Zustands.** Sie können Bewegungen blockieren, geschoben werden, Waffen abfangen oder Ziele sein. Die gegnerischen Programme sind nicht bekannt; die KI kann daher nur plausible Szenarien bewerten, keine tatsächlichen geheimen Programme voraussetzen.
+- **Andere Roboter sind Teil des Zustands.** Sie können Bewegungen blockieren, geschoben werden, Waffen abfangen oder Ziele sein. Ihre Programmschritte sind unbekannt. Module aller Roboter dürfen dagegen aus dem Simulationszustand berücksichtigt werden, auch wenn sie menschlichen Spielern nicht sichtbar wären.
 - **Waffenentscheidungen sind vor der Ausführung festgelegt.** Die KI muss eine erlaubte Waffenauswahl vor Programmablauf berücksichtigen und kann Ziele nicht während der Phasen neu auswählen.
 - **Module und Effekte haben unterschiedliche Zeitpunkte.** Einige wirken bei der Bewegungsbestimmung, andere beim Gerätefreisetzen, bei automatischen Spielfeldeffekten, bei Treffern oder am Rundenende.
 - **Der Zustand ist veränderlich.** Die bestehende Simulation referenziert das echte `Game`, `Course` und `Player`-Objekt. Eine künftige Suche über viele Kandidaten braucht eine sichere, unabhängige Zustandsrepräsentation oder eine andere garantiert nebenwirkungsfreie Simulationsstrategie.

@@ -1,5 +1,7 @@
 package de.phlup.circuitchaos.common.enums;
 
+import jakarta.validation.constraints.NotNull;
+
 import static de.phlup.circuitchaos.server.GlobalServerAttributes.RANDOM;
 
 public enum Direction {
@@ -10,6 +12,7 @@ public enum Direction {
     WEST, // aka TURN_LEFT
     ;
 
+    @NotNull
     public Direction add(Direction direction) {
         return switch (direction) {
             case null -> this;
@@ -35,6 +38,7 @@ public enum Direction {
         };
     }
 
+    @NotNull
     public Direction minus(Direction direction) {
         return switch (direction) {
             case null -> this;
@@ -60,10 +64,12 @@ public enum Direction {
         };
     }
 
+    @NotNull
     public Direction reverse() {
         return add(SOUTH);
     }
 
+    @NotNull
     public static Direction random() {
         return switch (RANDOM.nextInt(4)) {
             case 0 -> NORTH;

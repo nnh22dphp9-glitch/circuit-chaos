@@ -81,7 +81,7 @@ Ziel: Tatsächliches Engine-Verhalten und KI-relevante technische Konsequenzen d
 
 ## 6. Nächste Schritte
 
-1. Diese erste Inventur mit dem Spieleigner abgleichen, besonders Waffenauswahl bei mehreren installierten Modulen und High-Power-Laser.
+1. Die phasenweise Waffenwahl der Computer-KI anhand der tatsächlichen Spielsituationen weiter verfeinern; die erste Implementierung simuliert die Beam-Auflösung mit der Engine und behandelt Ramming Armor separat vor der Bewegung.
 2. Danach Geräte/Fallen einzeln prüfen (Auslösezeitpunkt, Aktivierungsdauer, Munition, Auswirkungen auf andere Roboter).
 3. Anschließend defensive und Bewegungsmodule mit der Simulation vergleichen.
 4. Erst nach dem Regelabgleich die KI-Bewertung ändern. Keine Änderungen an Spielregeln allein aufgrund dieser Dokumentation.
@@ -98,7 +98,7 @@ Die frühere Auffälligkeit in `Player.takeDamage`, bei der Schaden offenbar nur
 
 - Pro Phase ist höchstens eine robotermontierte Waffe aktiv. Der NetworkPlayer wählt die Waffe pro Phase vor der Programmausführung; diese Auswahl kann während der laufenden Programmausführung nicht mehr geändert werden. Die Computer-KI muss ihre Waffenwahl ebenfalls vorab je Phase festlegen.
 - Wenn der Roboter mindestens eine Waffe besitzt, darf er nicht absichtlich „keine Waffe“ wählen. Besitzt er beispielsweise nur den Exchange Beam, muss er ihn verwenden, auch wenn ein Treffer taktisch nachteilig wäre. Die KI darf die Waffe nicht nach Kenntnis des tatsächlichen Ziels nachträglich wechseln.
-- Spieler kennen weder die Programme noch die Module anderer Spieler. Sichtbar sind nur Module, die ein Spieler tatsächlich aktiv einsetzt, sowie die Module, die andere Spieler standardmäßig zu Spielbeginn besitzen. Die KI darf daher nicht auf geheime gegnerische Module oder Programme zugreifen, wenn sie eine Entscheidung aus Spielersicht bewertet.
+- Die Programmschritte anderer Roboter sind unbekannt. Die KI darf jedoch alle Module aller Roboter aus dem Simulationszustand berücksichtigen, auch wenn diese Module für menschliche Gegner nicht sichtbar wären. Der eigene Roboter kennt seine vollständige Kartenhand und darf ausschließlich diese Karten – jede höchstens einmal – einsetzen.
 - High Power Laser: Der Strahl trifft einen Roboter und geht durch diesen hindurch, um einen dahinterliegenden Roboter ebenfalls zu treffen.
 - Gewünschte Strahlblockierung: Roboter blockieren Strahlen, außer beim zweiten Treffer eines High Power Lasers; solide Wände, Repulsor-Felder, One-Way-Wände in Rot-nach-Grün-Richtung sowie ein höheres Level blockieren. Ein niedrigeres Level blockiert nicht; Roboter auf darunterliegenden Levels sollen nicht getroffen werden.
 - Die frühere fehlerhafte Einschränkung auf `source == null` in `Player.takeDamage` wurde laut Spieleigner behoben; sie soll nicht mehr als aktueller Codebefund geführt werden.

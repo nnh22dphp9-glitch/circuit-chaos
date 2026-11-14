@@ -8,6 +8,7 @@ import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
 import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.Floor;
+import de.phlup.circuitchaos.common.model.course.Module;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
@@ -29,26 +30,27 @@ public class MoveInfo {
     private final String      robotId;
     private final List<Robot> robotsInPriorityOrder = new java.util.ArrayList<>();
 
-    private Programme[] program;
-    private Direction   startingDirection;
-    private boolean     willDie;
-    private int         reachesCheckpoint;
-    private int         checkpointsReached;
-    private int         checkpointPhaseBonus;
-    private int         nextCheckpointNumber;
-    private boolean     won;
-    private int         damage;
-    private boolean     reachesPitStop;
-    private boolean     copiesArchive;
-    private boolean     standsOnOpenFloor;
-    private boolean     keepsStaying;
-    private boolean     facesTowardsCheckpoint;
-    private int         x;
-    private int         y;
-    private int         distance;
-    private double      distance2;
-    private Direction   endingDirection;
-    private int         probableTargets;
+    private       Programme[]  program;
+    private final ModuleType[] selectedWeapons = new ModuleType[5];
+    private       Direction    startingDirection;
+    private       boolean      willDie;
+    private       int          reachesCheckpoint;
+    private       int          checkpointsReached;
+    private       int          checkpointPhaseBonus;
+    private       int          nextCheckpointNumber;
+    private       boolean      won;
+    private       int          damage;
+    private       boolean      reachesPitStop;
+    private       boolean      copiesArchive;
+    private       boolean      standsOnOpenFloor;
+    private       boolean      keepsStaying;
+    private       boolean      facesTowardsCheckpoint;
+    private       int          x;
+    private       int          y;
+    private       int          distance;
+    private       double       distance2;
+    private       Direction    endingDirection;
+    private       int          probableTargets;
 
     private final int initialX;
     private final int initialY;
@@ -99,6 +101,8 @@ public class MoveInfo {
         myself.setProgram(program.clone());
 
         for (int phase = 0; phase < 5 && myself.isOnCourse(); phase++) {
+            ModuleType selectedWeapon = WeaponEvaluator.selectRammingArmor(course, myself, phase, program[phase]);
+            setSelectedWeapon(phase, selectedWeapon);
             gameLogic.stepRobotsMove(phase, getRobotsInPriorityOrder(phase));
             if (!myself.isOnCourse()) {
                 gameLogic.setGameAborted(true);
@@ -111,6 +115,10 @@ public class MoveInfo {
                 break;
             }
 
+            if (selectedWeapons[phase] != ModuleType.RAMMING_ARMOR) {
+                selectedWeapon = WeaponEvaluator.selectBeamWeapon(gameLogic, myself, phase, goal);
+                setSelectedWeapon(phase, selectedWeapon);
+            }
             gameLogic.stepResolveBeamsAndLaserFire(phase, myself);
             if (!myself.isOnCourse()) {
                 gameLogic.setGameAborted(true);
@@ -164,6 +172,15 @@ public class MoveInfo {
         course = null;
     }
 
+    private void setSelectedWeapon(int phase, ModuleType selectedWeapon) {
+        selectedWeapons[phase] = selectedWeapon;
+        for (var module : myself.getModules()) {
+            if (module.getType().isWeapon()) {
+                module.getActiveInPhase()[phase] = module.getType() == selectedWeapon;
+            }
+        }
+    }
+
     private GameLogic createSimulationGameLogic() {
         Course template   = simulationTemplate.getCourse();
         Course simulation = new Course();
@@ -187,10 +204,16 @@ public class MoveInfo {
         }
         for (Robot robot : template.getRobots()) {
             Robot robotCopy = robot.copyForSimulation();
-            simulation.getRobots().add(robotCopy);
             if (Objects.equals(robotCopy.getId(), robotId)) {
+                // Weapon activation is changed while evaluating this program.
+                // Keep those changes isolated from the real robot and other
+                // program candidates.
+                robotCopy.setModules(robotCopy.getModules().stream()
+                                              .map(Module::copyForSimulation)
+                                              .toList());
                 myself = robotCopy;
             }
+            simulation.getRobots().add(robotCopy);
         }
 
         // Checkpoints, range and course properties are only read by the simulation.

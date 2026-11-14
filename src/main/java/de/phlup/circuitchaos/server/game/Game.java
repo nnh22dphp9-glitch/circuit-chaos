@@ -50,15 +50,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static de.phlup.circuitchaos.common.enums.ModuleType.DOUBLE_BARREL_LASER;
-import static de.phlup.circuitchaos.common.enums.ModuleType.EXCHANGE_BEAM;
-import static de.phlup.circuitchaos.common.enums.ModuleType.HIGH_POWER_LASER;
-import static de.phlup.circuitchaos.common.enums.ModuleType.MAIN_LASER;
-import static de.phlup.circuitchaos.common.enums.ModuleType.PRESSURE_BEAM;
-import static de.phlup.circuitchaos.common.enums.ModuleType.REAR_LASER;
-import static de.phlup.circuitchaos.common.enums.ModuleType.SPIN_LEFT_BEAM;
-import static de.phlup.circuitchaos.common.enums.ModuleType.SPIN_RIGHT_BEAM;
-import static de.phlup.circuitchaos.common.enums.ModuleType.TRACTOR_BEAM;
+import static de.phlup.circuitchaos.common.enums.ModuleType.*;
 import static de.phlup.circuitchaos.server.GlobalServerAttributes.RANDOM;
 
 @Slf4j
