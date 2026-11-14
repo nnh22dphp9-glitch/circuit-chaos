@@ -11,7 +11,6 @@ import de.phlup.circuitchaos.common.model.course.Floor;
 import de.phlup.circuitchaos.common.model.course.Module;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Position;
-import de.phlup.circuitchaos.common.records.Programme;
 import de.phlup.circuitchaos.server.game.GameLogic;
 
 import java.util.List;
