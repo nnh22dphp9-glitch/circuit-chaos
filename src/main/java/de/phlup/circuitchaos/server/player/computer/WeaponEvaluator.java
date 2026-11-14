@@ -45,47 +45,6 @@ final class WeaponEvaluator {
     }
 
     /**
-     * Ramming Armor has to be active during movement. If another robot lies
-     * directly on the planned movement path, it takes precedence over a beam
-     * weapon for this phase.
-     *
-     * @return RAMMING_ARMOR if it should be selected, otherwise null
-     */
-    static ModuleType selectRammingArmor(Course course, Robot robot, int phase, Programme program) {
-        if (!robot.hasModule(ModuleType.RAMMING_ARMOR)) {
-            return null;
-        }
-
-        boolean hasBeamWeapon = BEAM_WEAPONS.stream().anyMatch(robot::hasModule);
-        if (!hasBeamWeapon) {
-            return ModuleType.RAMMING_ARMOR;
-        }
-
-        if (program == null) {
-            return null;
-        }
-
-        int movement = CourseHandler.determineMovementAmount(program, robot.uses(ModuleType.BRAKES, phase));
-        if (movement == 0) {
-            return null;
-        }
-
-        Direction direction = movement > 0 ? robot.getDirection() : robot.getDirection().reverse();
-        Position  position  = robot.getPosition();
-        for (int step = 0; step < Math.abs(movement); step++) {
-            position = position.neighbour(direction);
-            for (Robot other : course.getRobots()) {
-                if (other != robot && other.isOnCourse()
-                        && other.getLevel() == robot.getLevel()
-                        && Objects.equals(other.getPosition(), position)) {
-                    return ModuleType.RAMMING_ARMOR;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
      * Evaluates all owned beam weapons using the engine's actual beam-target
      * lookup. Only three ray lookups are needed: forward, the second target for
      * High Power Laser, and backward for Rear Laser.
@@ -95,7 +54,7 @@ final class WeaponEvaluator {
                                                  .filter(robot::hasModule)
                                                  .toList();
         if (available.isEmpty()) {
-            return robot.hasModule(ModuleType.RAMMING_ARMOR) ? ModuleType.RAMMING_ARMOR : null;
+            return null;
         }
 
         Direction direction          = robot.getDirection();

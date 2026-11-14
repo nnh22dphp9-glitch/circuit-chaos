@@ -101,8 +101,7 @@ public class MoveInfo {
         myself.setProgram(program.clone());
 
         for (int phase = 0; phase < 5 && myself.isOnCourse(); phase++) {
-            ModuleType selectedWeapon = WeaponEvaluator.selectRammingArmor(course, myself, phase, program[phase]);
-            setSelectedWeapon(phase, selectedWeapon);
+            setRammingArmorActive(phase);
             gameLogic.stepRobotsMove(phase, getRobotsInPriorityOrder(phase));
             if (!myself.isOnCourse()) {
                 gameLogic.setGameAborted(true);
@@ -115,10 +114,8 @@ public class MoveInfo {
                 break;
             }
 
-            if (selectedWeapons[phase] != ModuleType.RAMMING_ARMOR) {
-                selectedWeapon = WeaponEvaluator.selectBeamWeapon(gameLogic, myself, phase, goal);
-                setSelectedWeapon(phase, selectedWeapon);
-            }
+            ModuleType selectedWeapon = WeaponEvaluator.selectBeamWeapon(gameLogic, myself, phase, goal);
+            setSelectedWeapon(phase, selectedWeapon);
             gameLogic.stepResolveBeamsAndLaserFire(phase, myself);
             if (!myself.isOnCourse()) {
                 gameLogic.setGameAborted(true);
@@ -172,10 +169,18 @@ public class MoveInfo {
         course = null;
     }
 
+    private void setRammingArmorActive(int phase) {
+        Module rammingArmor = myself.getModule(ModuleType.RAMMING_ARMOR);
+        if (rammingArmor != null) {
+            rammingArmor.getActiveInPhase()[phase] = true;
+        }
+    }
+
     private void setSelectedWeapon(int phase, ModuleType selectedWeapon) {
         selectedWeapons[phase] = selectedWeapon;
+        setRammingArmorActive(phase);
         for (var module : myself.getModules()) {
-            if (module.getType().isWeapon()) {
+            if (module.getType().isWeapon() && module.getType() != ModuleType.RAMMING_ARMOR) {
                 module.getActiveInPhase()[phase] = module.getType() == selectedWeapon;
             }
         }
