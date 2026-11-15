@@ -59,6 +59,7 @@ public interface PictureConstants {
     String GFX_TRACTOR_SOCKET  = FOLDER_FLOOR + "tractor-beam-socket";
     String GFX_PIT_STOP        = FOLDER_FLOOR + "pit-stop";
     String GFX_SELECTION       = FOLDER_FLOOR + "selection";
+    String GFX_SWITCH          = FOLDER_FLOOR + "switch";
 
     String GFX_ABYSS_BG  = FOLDER_FLOOR_ABYSS + "abyss-background";
     String GFX_ABYSS_E   = FOLDER_FLOOR_ABYSS + "abyss_e";
