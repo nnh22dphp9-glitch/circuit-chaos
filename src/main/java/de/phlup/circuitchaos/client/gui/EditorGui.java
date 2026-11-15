@@ -77,7 +77,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
     private final JButton              directionButton    = new JButton();
     private final JLabel               pusherLabel        = new JLabel("Pusher: ");
     private final JButton              pusherButton       = new JButton();
-    private final JLabel               activeInPhaseLabel = new JLabel("Trapdoor and Pusher phases: ");
+    private final JLabel               activeInPhaseLabel = new JLabel("Trapdoor, Repulsor and Pusher phases: ");
     private final JCheckBox[]          activeInPhase      = new JCheckBox[]{new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox()};
     private final JLabel               waterLabel         = new JLabel("Water: ");
     private final JCheckBox            waterBox           = new JCheckBox();
@@ -500,7 +500,11 @@ public class EditorGui extends BaseGui implements GuiHelper {
         directionButton.setEnabled(newFloortype.isConveyorBelt());
         waterBox.setSelected(selectedFloor.isWater());
         for (int i = 0; i < 5; i++) {
-            boolean activationValid = newFloortype == TRAPDOOR || selectedFloor.isHasPusher();
+            boolean activationValid = newFloortype == TRAPDOOR || selectedFloor.isHasPusher()
+                    || selectedFloor.getWallNorth() == WallType.REPULSOR_FIELD
+                    || selectedFloor.getWallEast() == WallType.REPULSOR_FIELD
+                    || selectedFloor.getWallSouth() == WallType.REPULSOR_FIELD
+                    || selectedFloor.getWallWest() == WallType.REPULSOR_FIELD;
             activeInPhase[i].setSelected(activationValid && selectedFloor.getActiveInPhase()[i]);
             activeInPhase[i].setEnabled(activationValid);
             activeInPhaseLabel.setEnabled(activationValid);
@@ -760,7 +764,11 @@ public class EditorGui extends BaseGui implements GuiHelper {
             directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
             directionButton.setEnabled(newFloortype.isConveyorBelt());
             for (int i = 0; i < 5; i++) {
-                boolean activationValid = newFloortype == TRAPDOOR || selectedFloor.isHasPusher();
+                boolean activationValid = newFloortype == TRAPDOOR || selectedFloor.isHasPusher()
+                        || selectedFloor.getWallNorth() == WallType.REPULSOR_FIELD
+                        || selectedFloor.getWallEast() == WallType.REPULSOR_FIELD
+                        || selectedFloor.getWallSouth() == WallType.REPULSOR_FIELD
+                        || selectedFloor.getWallWest() == WallType.REPULSOR_FIELD;
                 selectedFloor.getActiveInPhase()[i] = activationValid && activeInPhase[i].isSelected();
                 activeInPhase[i].setEnabled(activationValid);
                 activeInPhaseLabel.setEnabled(activationValid);

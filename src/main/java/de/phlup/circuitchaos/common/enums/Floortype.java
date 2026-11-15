@@ -11,6 +11,7 @@ public enum Floortype {
     ABYSS("abyss"),
     TRAPDOOR("trapdoor"),
     PIT_STOP("pit stop"),
+    SWITCH("switch"),
     GEARS_CW("gears (clockwise)"),
     GEARS_CCW("gears (counter clockwise)"),
     CONVEYOR_BELT("conveyor belt"),
