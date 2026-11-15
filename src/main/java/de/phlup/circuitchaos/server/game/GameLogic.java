@@ -107,8 +107,8 @@ public class GameLogic {
                     || targetWall == WallType.ONE_WAY_GREEN
                     || targetWall == WallType.RAMP_UP
                     || targetWall == WallType.RAMP_DOWN
-                    || targetWall == WallType.LEDGE)
-                    || repulsorPassage2)
+                    || targetWall == WallType.LEDGE
+                    || repulsorPassage2))
                     || (sourceWall == WallType.ONE_WAY_GREEN && targetWall == WallType.ONE_WAY_RED);
             if ((ce instanceof Robot r && r.isFlying()) || (!uphill && wallPassage)) {
                 CourseElement conflictingElement = getConflictingElement(ce, direction);
