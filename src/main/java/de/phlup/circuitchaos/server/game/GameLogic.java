@@ -94,8 +94,8 @@ public class GameLogic {
             WallType targetWall = floor2.wall(direction2);
             boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
                     || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
-            boolean uphill   = floor2.getLevel() > floor1.getLevel() && !rampPassage;
-            boolean downhill = floor2.getLevel() < floor1.getLevel() && !rampPassage;
+            boolean uphill           = floor2.getLevel() > floor1.getLevel() && !rampPassage;
+            boolean downhill         = floor2.getLevel() < floor1.getLevel() && !rampPassage;
             boolean repulsorPassage1 = sourceWall == WallType.REPULSOR_FIELD && !floor1.getActiveInPhase()[phase];
             boolean repulsorPassage2 = targetWall == WallType.REPULSOR_FIELD && !floor2.getActiveInPhase()[phase];
             boolean wallPassage = ((sourceWall == WallType.NONE
@@ -168,16 +168,24 @@ public class GameLogic {
                     }
                 }
             }
-        }
-        if (!(ce instanceof Robot r) || !r.isFlying()) {
-            if (floor3.getFloortype() == Floortype.ABYSS || (floor3.getFloortype() == Floortype.TRAPDOOR && floor3.getActiveInPhase()[phase])) {
-                amount = 0;
-                die(ce, step, phase);
-                if (ce instanceof Robot r) {
-                    course.getRobotsFallingIntoAbyss().add(r);
-                } else if (ce instanceof CourseObject co) {
-                    course.getObjectsFallingIntoAbyss().add(co);
+            if (floor3.getFloortype() == Floortype.SWITCH && floor3.getSwitchTarget() != null) {
+                Floor floor4 = CourseHandler.getFloor(course, floor3.getSwitchTarget());
+                for (int i = 0; i < 5; i++) {
+                    floor4.getActiveInPhase()[i] = !floor4.getActiveInPhase()[i];
                 }
+                if (wait) {
+                    notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
+                }
+            }
+        }
+        if ((!(ce instanceof Robot r) || !r.isFlying())
+                && (floor3.getFloortype() == Floortype.ABYSS || (floor3.getFloortype() == Floortype.TRAPDOOR && floor3.getActiveInPhase()[phase]))) {
+            amount = 0;
+            die(ce, step, phase);
+            if (ce instanceof Robot r) {
+                course.getRobotsFallingIntoAbyss().add(r);
+            } else if (ce instanceof CourseObject co) {
+                course.getObjectsFallingIntoAbyss().add(co);
             }
         }
         if (amount > 1) {

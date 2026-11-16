@@ -32,6 +32,7 @@ public class Floor {
     private WallType  wallSouth       = WallType.NONE;
     private WallType  wallWest        = WallType.NONE;
     private double    variant         = RANDOM.nextDouble();
+    private Position  switchTarget    = null;
 
     // for drawing only
     private int        explosiveDamage              = 0;
