@@ -189,18 +189,11 @@ public class MoveInfo {
         Course template   = simulationTemplate.getCourse();
         Course simulation = new Course();
 
-        boolean needsOwnFloors = false;
-        for (Robot robot : template.getRobots()) {
-            var bridgeProjector = robot.getModule(ModuleType.BRIDGE_PROJECTOR);
-            if (bridgeProjector != null && bridgeProjector.getAmmunition() > 0
-                    && hasActivePhase(bridgeProjector.getActiveInPhase())) {
-                needsOwnFloors = true;
-                break;
-            }
-        }
-
+        // Switches and bridge projectors can change floor state during a simulation.
+        // Every candidate therefore needs its own floor instances to prevent state
+        // changes from leaking into other candidates or the simulation template.
         for (Floor floor : template.getFloor()) {
-            simulation.getFloor().add(needsOwnFloors ? floor.copyForSimulation() : floor);
+            simulation.getFloor().add(floor.copyForSimulation());
         }
         // Course objects can move, be removed, or change their state during simulation.
         for (var object : template.getObjects()) {
@@ -227,15 +220,6 @@ public class MoveInfo {
 
         return new GameLogic(simulation, (step, phase, detail, movingRobotName) -> {
         });
-    }
-
-    private boolean hasActivePhase(boolean[] activeInPhase) {
-        for (boolean active : activeInPhase) {
-            if (active) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private List<Robot> getRobotsInPriorityOrder(int phase) {

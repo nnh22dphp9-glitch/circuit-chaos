@@ -91,7 +91,9 @@ Wände und andere Hindernisse können eine Bewegung verhindern. Roboter können 
 
 ### Einbahnwände und Abstoßfelder
 
-Einbahnwände mit grüner und roter Kennzeichnung werden als zusammengehörige Paare angelegt. Die grüne Seite lässt die Bewegung in Richtung der roten Seite zu; die rote Seite blockiert die Bewegung in Gegenrichtung. Abstoßfelder reflektieren eine versuchte Bewegung in die entgegengesetzte Richtung.
+Einbahnwände mit grüner und roter Kennzeichnung werden als zusammengehörige Paare angelegt. Die grüne Seite lässt die Bewegung in Richtung der roten Seite zu; die rote Seite blockiert die Bewegung in Gegenrichtung.
+
+**Repulsorfelder** sind phasenabhängig aktiv. In aktiven Phasen stoßen sie eine Bewegung zurück, die das Feld überqueren würde. In inaktiven Phasen können sie passiert werden.
 
 ### Fliegen und Hovercraft
 
@@ -133,7 +135,7 @@ Der **Gyroscopic Stabilizer** verhindert, dass der Roboter durch Zahnräder oder
 
 ### Pusher
 
-Pusher sind phasenabhängig aktiv; ihre aktiven Phasen sind im Tooltip des Feldes angegeben. Sind sie aktiv, werden sie im Step PUSHERS_PUSH ausgefahren und unmittelbar danach wieder eingefahren. Sie drücken den Roboter auf ihrem Feld um ein Feld weiter, sofern das Zielfeld nicht blockiert ist.
+Pusher sind phasenabhängig aktiv. Sind sie aktiv, werden sie im Step PUSHERS_PUSH ausgefahren und unmittelbar danach wieder eingefahren. Sie drücken den Roboter auf ihrem Feld um ein Feld weiter, sofern das Zielfeld nicht blockiert ist. Ein Schalter kann die aktiven Phasen eines Pushers umschalten.
 
 ### Öl
 
@@ -165,7 +167,13 @@ Die Phasen, in denen eine Falltür geöffnet ist, werden im Tooltip des Feldes a
 
 Minen, Kleber und Öl können ebenfalls in einen Abgrund fallen, wenn sie auf einem Förderband dorthin geschoben werden. Sie werden dann vom Spielfeld entfernt. Eine Mine explodiert dabei nicht.
 
-Ein Schalter zum Öffnen und Schließen von Falltüren ist als mögliche zukünftige Erweiterung angedacht; aktuell werden Falltüren phasenabhängig gesteuert.
+Ein Schalter kann die aktiven Phasen einer Falltür umschalten. Die allgemeine Funktionsweise der Schalter ist im folgenden Abschnitt beschrieben.
+
+### Schalter
+
+Ein Schalter ist mit einem Zielfeld verbunden. Gelangt ein nicht fliegender Roboter auf ein scharf geschaltetes Schalterfeld, wird der Schalter ausgelöst: Alle fünf Einträge von `activeInPhase` des Zielfeldes werden umgedreht. Jede zuvor aktive Phase wird inaktiv und jede zuvor inaktive Phase wird aktiv.
+
+Auf diese Weise lassen sich die phasenabhängigen Eigenschaften einer **Falltür**, eines **Pushers** oder eines **Repulsorfeldes** umschalten. Ein Schalter wird nach dem Auslösen deaktiviert. Sobald sein Feld bei einem späteren Bewegungsvorgang frei ist, wird er wieder scharf geschaltet.
 
 ### Teleporter
 
@@ -228,7 +236,7 @@ Laser und Beams schießen grundsätzlich in die Richtung, in die der Roboter aus
 
 Der erste Trefferpunkt ist bei einer Robotermodul-Waffe das nächste Feld vor dem Roboter, bei einer kursmontierten Waffe dagegen das Feld, auf dem die Waffe selbst montiert ist. Der Schuss läuft anschließend bis zum Spielfeldrand.
 
-Ein Schuss wird von einem getroffenen Roboter aufgehalten (Ausnahme: **High Power Laser**). Die aktuelle Codeprüfung ergibt außerdem: Schüsse werden blockiert, wenn sich auf der Schützenseite eine SOLID-Wand, ONE_WAY_RED, ein Repulsor, eine LEDGE oder eine RAMP_UP befindet, oder auf der Zielseite eine SOLID-Wand beziehungsweise ein Repulsor. Eine ONE_WAY_GREEN-Wand auf der Schützenseite blockiert den Schuss nicht. Der High Power Laser hat eine Sonderbehandlung und kann den Strahl auch über ein Hindernis hinweg zum zweiten Ziel fortsetzen. Höhenunterschiede werden beim Schießen absichtlich ignoriert: Eine LEDGE hält einen Schuss nicht auf. Ein Roboter auf einer anderen Höhe kann jedoch getroffen werden und den Schuss aufhalten.
+Ein Schuss wird von einem getroffenen Roboter aufgehalten (Ausnahme: **High Power Laser**). Die aktuelle Codeprüfung ergibt außerdem: Schüsse werden blockiert, wenn sich auf der Schützenseite eine SOLID-Wand, ONE_WAY_RED, ein Repulsor, eine LEDGE oder eine RAMP_UP befindet, oder auf der Zielseite eine SOLID-Wand beziehungsweise ein Repulsor. Eine ONE_WAY_GREEN-Wand auf der Schützenseite blockiert den Schuss nicht. **Offener Punkt:** Die Laserprüfung berücksichtigt Repulsorfelder derzeit noch unabhängig von ihrer phasenabhängigen Aktivität. Es muss noch überprüft werden, ob aktive und inaktive Repulsorfelder auch für Laserstrahlen unterschiedlich behandelt werden sollen. Der High Power Laser hat eine Sonderbehandlung und kann den Strahl auch über ein Hindernis hinweg zum zweiten Ziel fortsetzen. Höhenunterschiede werden beim Schießen absichtlich ignoriert: Eine LEDGE hält einen Schuss nicht auf. Ein Roboter auf einer anderen Höhe kann jedoch getroffen werden und den Schuss aufhalten.
 
 Die Waffen haben folgende Wirkungen:
 
