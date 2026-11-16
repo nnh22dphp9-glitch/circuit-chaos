@@ -19,6 +19,7 @@ public class CourseProperties {
     private boolean trapdoor;
 
     // for performance optimization: pre-calculated positions
+    private final Set<Position> switchPositions       = new HashSet<>();
     private final Set<Position> laserPositions        = new HashSet<>();
     private final Set<Position> pressureBeamPositions = new HashSet<>();
     private final Set<Position> tractorBeamPositions  = new HashSet<>();

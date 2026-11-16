@@ -65,6 +65,11 @@ public class GameLogic {
     }
 
     public void moveInit(CourseElement ce, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, String movingRobotName) {
+        course.getProperties().getSwitchPositions().forEach(pos -> {
+            if (CourseHandler.getRobots(course, pos).isEmpty()) {
+                CourseHandler.getFloor(course, pos).setSwitchActive(true);
+            }
+        });
         move(ce, direction, strength, amount, step, phase, notBlockedByMovableRobot, wait, movingRobotName, true);
     }
 
@@ -168,11 +173,12 @@ public class GameLogic {
                     }
                 }
             }
-            if (floor3.getFloortype() == Floortype.SWITCH && floor3.getSwitchTarget() != null) {
+            if (floor3.getFloortype() == Floortype.SWITCH && floor3.getSwitchTarget() != null && floor3.isSwitchActive()) {
                 Floor floor4 = CourseHandler.getFloor(course, floor3.getSwitchTarget());
                 for (int i = 0; i < 5; i++) {
                     floor4.getActiveInPhase()[i] = !floor4.getActiveInPhase()[i];
                 }
+                floor3.setSwitchActive(false);
                 if (wait) {
                     notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
                 }
