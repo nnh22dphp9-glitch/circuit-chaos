@@ -63,15 +63,15 @@ final class WeaponEvaluator {
 
         Robot forwardTarget = needsForwardTarget
                 ? game.getLaserTarget(robot.getPosition(), direction, robot.getLevel(),
-                                      false, 1, false, Step.ROBOT_MOUNTED_LASER_FIRE)
+                                      false, 1, false, Step.ROBOT_MOUNTED_LASER_FIRE, phase)
                 : null;
         Robot secondTarget = needsSecondTarget
                 ? game.getLaserTarget(robot.getPosition(), direction, robot.getLevel(),
-                                      true, 1, false, Step.ROBOT_MOUNTED_LASER_FIRE)
+                                      true, 1, false, Step.ROBOT_MOUNTED_LASER_FIRE, phase)
                 : null;
         Robot rearTarget = needsRearTarget
                 ? game.getLaserTarget(robot.getPosition(), direction.reverse(), robot.getLevel(),
-                                      false, 1, false, Step.ROBOT_MOUNTED_LASER_FIRE)
+                                      false, 1, false, Step.ROBOT_MOUNTED_LASER_FIRE, phase)
                 : null;
 
         ModuleType bestWeapon = available.getFirst();

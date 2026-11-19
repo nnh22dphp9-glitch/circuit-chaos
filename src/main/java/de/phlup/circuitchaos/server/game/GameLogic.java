@@ -446,7 +446,7 @@ public class GameLogic {
         }
     }
 
-    public Robot getLaserTarget(Position position, Direction direction, int level, boolean highPowerLaser, int amount, boolean firstFloorGetsHit, Step step) {
+    public Robot getLaserTarget(Position position, Direction direction, int level, boolean highPowerLaser, int amount, boolean firstFloorGetsHit, Step step, int phase) {
         Robot target = null;
         if (firstFloorGetsHit) {
             for (Robot r : CourseHandler.getRobots(course, position)) {
@@ -471,13 +471,13 @@ public class GameLogic {
             if (targetPosition.inRange(course.getRange())) {
                 if (!(sourceFloor.wall(direction) == WallType.SOLID
                         || sourceFloor.wall(direction) == WallType.ONE_WAY_RED
-                        || sourceFloor.wall(direction) == WallType.REPULSOR_FIELD
+                        || (sourceFloor.wall(direction) == WallType.REPULSOR_FIELD && sourceFloor.getActiveInPhase()[phase])
                         || targetFloor.wall(direction2) == WallType.SOLID
-                        || targetFloor.wall(direction2) == WallType.REPULSOR_FIELD)) {
+                        || (targetFloor.wall(direction2) == WallType.REPULSOR_FIELD) && targetFloor.getActiveInPhase()[phase])) {
                     if (course.isConsiderGui()) {
                         CourseHandler.setBeam(course, targetPosition, direction, step, amount);
                     }
-                    return getLaserTarget(targetPosition, direction, level, highPowerLaser, amount, true, step);
+                    return getLaserTarget(targetPosition, direction, level, highPowerLaser, amount, true, step, phase);
                 }
             }
         }
@@ -877,7 +877,7 @@ public class GameLogic {
                         default -> f.getLasers()[dir.ordinal()];
                     };
                     for (int cnt = 0; cnt < amount; cnt++) {
-                        Robot target = getLaserTarget(f.getPosition(), dir, f.getLevel(), false, amount, true, step);
+                        Robot target = getLaserTarget(f.getPosition(), dir, f.getLevel(), false, amount, true, step, phase);
                         if (target != null) {
                             if (step == Step.COURSE_MOUNTED_LASER_FIRE) {
                                 target.takeDamage(course, phase, dir2, true);
