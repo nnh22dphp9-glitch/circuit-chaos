@@ -344,9 +344,3 @@ Der **Mechanical Arm** ermöglicht es, einen Checkpoint auch von einem benachbar
 Im normalen Rennmodus müssen Kontrollpunkte in der vorgegebenen Reihenfolge erreicht werden. Wer das Finish zuerst erreicht, gewinnt. Der Pit Stop kann im Verlauf des Rennens zur Reparatur genutzt werden.
 
 Im Modus **Kill All** gewinnt man, wenn alle anderen Roboter ausgeschaltet wurden. In diesem Modus werden alle Kontrollpunkte zu Startpositionen, auf die die Roboter gleichmäßig verteilt werden. **Auch im normalen Finish-Modus können mehrere Startpositionen verwendet werden.**
-
-
-
----
-
-**Redaktioneller Hinweis:** Dies ist eine konsolidierte Arbeitsfassung aus bisher besprochenen Regeln. Vor der Veröffentlichung sollte jeder offene Punkt entschieden und der Text anschließend mit dem tatsächlich spielbaren Verhalten abgeglichen werden.
