@@ -26,6 +26,7 @@ public class ToolTipTexts {
             case Floortype.OPEN_FLOOR -> text.append("Open floor");
             case Floortype.ABYSS -> text.append("Abyss");
             case Floortype.TRAPDOOR -> text.append("Trapdoor");
+            case Floortype.SWITCH -> text.append("Switch");
             case Floortype.PIT_STOP -> text.append("Pit Stop");
             case Floortype.EXPRESS_CONVEYOR_BELT -> text.append("Express Conveyor Belt");
             case Floortype.TURNING_EXPRESS_CONVEYOR_BELT_CCW -> text.append("Turning Express Conveyor Belt (ccw)");

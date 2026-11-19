@@ -168,16 +168,16 @@ public class ProgramRobotGui implements GuiHelper {
         panel.add(robotLabel);
         panel.add(new JLabel("   "));
 
+        ImageIcon originalExplosion = imageSupplier.getImageIconPlain(GFX_EXPLOSION + "0");
+        scaledImage = originalExplosion.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
         for (int i = 0; i < robot.getDamage(); i++) {
-            ImageIcon originalExplosion = imageSupplier.getImageIconPlain(GFX_EXPLOSION + "0");
-            scaledImage = originalExplosion.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
             panel.add(new JLabel(new ImageIcon(scaledImage)));
         }
     }
 
     private void fillModulePanel(JPanel panel) {
         for (Module module : robot.getModules()) {
-            JLabel p = new JLabel(imageSupplier.getImageIcon(module, 1));
+            JLabel p = new JLabel(imageSupplier.getImageIcon(module.getType(), 1));
             p.setToolTipText(module.getType().getModuleName());
             panel.add(p);
         }
@@ -242,7 +242,7 @@ public class ProgramRobotGui implements GuiHelper {
                 addComponentToPanel(weaponButton[phaseCounter], panel, layout, 3 + phaseCounter, y, 1, GridBagConstraints.CENTER);
                 Iterator<Module> iterator    = weapons.iterator();
                 Module           firstWeapon = iterator.next();
-                weaponButton[phaseCounter].setIcon(imageSupplier.getImageIcon(firstWeapon, .5));
+                weaponButton[phaseCounter].setIcon(imageSupplier.getImageIcon(firstWeapon.getType(), .5));
                 weaponButton[phaseCounter].setBorderPainted(false);
                 weaponButton[phaseCounter].setBackground(new Color(0, 0, 0, 0));
                 weaponButton[phaseCounter].addActionListener(new WeaponListener(weaponButton[phaseCounter], phaseCounter, imageSupplier, weapons, iterator));
@@ -435,7 +435,7 @@ public class ProgramRobotGui implements GuiHelper {
                 weaponModule[phaseCounter] = next;
             }
             weapons.forEach(m -> m.getActiveInPhase()[phaseCounter] = m.equals(weaponModule[phaseCounter]));
-            button.setIcon(imageSupplier.getImageIcon(weaponModule[phaseCounter], .5));
+            button.setIcon(imageSupplier.getImageIcon(weaponModule[phaseCounter].getType(), .5));
         }
     }
 

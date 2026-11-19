@@ -60,8 +60,7 @@ import java.util.Optional;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LOGO_SMALL;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_NO_ACTION;
 import static de.phlup.circuitchaos.common.enums.Direction.*;
-import static de.phlup.circuitchaos.common.enums.Floortype.ABYSS;
-import static de.phlup.circuitchaos.common.enums.Floortype.TRAPDOOR;
+import static de.phlup.circuitchaos.common.enums.Floortype.*;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
 
 @Slf4j
@@ -77,7 +76,10 @@ public class EditorGui extends BaseGui implements GuiHelper {
     private final JButton              directionButton    = new JButton();
     private final JLabel               pusherLabel        = new JLabel("Pusher: ");
     private final JButton              pusherButton       = new JButton();
-    private final JLabel               activeInPhaseLabel = new JLabel("Trapdoor and Pusher phases: ");
+    private final JLabel               switchLabel        = new JLabel("Switch target:");
+    private final JTextField           switchTargetX      = new JTextField(4);
+    private final JTextField           switchTargetY      = new JTextField(4);
+    private final JLabel               activeInPhaseLabel = new JLabel("Trapdoor, Repulsor and Pusher phases: ");
     private final JCheckBox[]          activeInPhase      = new JCheckBox[]{new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox()};
     private final JLabel               waterLabel         = new JLabel("Water: ");
     private final JCheckBox            waterBox           = new JCheckBox();
@@ -260,6 +262,23 @@ public class EditorGui extends BaseGui implements GuiHelper {
         pusherButton.addActionListener(pusherButtonEvent);
         pusherButton.setEnabled(true);
         addComponentToPanel(pusherButton, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
+
+        switchTargetX.setText("0");
+        switchTargetY.setText("0");
+        flowPanel = new JPanel(new FlowLayout());
+        flowPanel.add(new JLabel(" "));
+        flowPanel.add(switchTargetX);
+        flowPanel.add(new JLabel(" "));
+        flowPanel.add(switchTargetY);
+        switchTargetX.setEnabled(false);
+        switchTargetX.addActionListener(floorChangedActionEvent);
+        switchTargetX.addFocusListener(floorChangedFocusEvent);
+        switchTargetY.setEnabled(false);
+        switchTargetY.addActionListener(floorChangedActionEvent);
+        switchTargetY.addFocusListener(floorChangedFocusEvent);
+        switchLabel.setEnabled(false);
+        addComponentToPanel(switchLabel, courseEditorPanel, layout, 0, y, 1, GridBagConstraints.WEST);
+        addComponentToPanel(flowPanel, courseEditorPanel, layout, 1, y++, 1, GridBagConstraints.WEST);
 
         flowPanel = new JPanel(new FlowLayout());
         for (int i = 0; i < 5; i++) {
@@ -500,7 +519,11 @@ public class EditorGui extends BaseGui implements GuiHelper {
         directionButton.setEnabled(newFloortype.isConveyorBelt());
         waterBox.setSelected(selectedFloor.isWater());
         for (int i = 0; i < 5; i++) {
-            boolean activationValid = newFloortype == TRAPDOOR || selectedFloor.isHasPusher();
+            boolean activationValid = newFloortype == TRAPDOOR || selectedFloor.isHasPusher()
+                    || selectedFloor.getWallNorth() == WallType.REPULSOR_FIELD
+                    || selectedFloor.getWallEast() == WallType.REPULSOR_FIELD
+                    || selectedFloor.getWallSouth() == WallType.REPULSOR_FIELD
+                    || selectedFloor.getWallWest() == WallType.REPULSOR_FIELD;
             activeInPhase[i].setSelected(activationValid && selectedFloor.getActiveInPhase()[i]);
             activeInPhase[i].setEnabled(activationValid);
             activeInPhaseLabel.setEnabled(activationValid);
@@ -566,6 +589,12 @@ public class EditorGui extends BaseGui implements GuiHelper {
             beamChooserWest.setEnabled(false);
             beamChooserWest.setSelectedIndex(0);
         }
+
+        switchLabel.setEnabled(selectedFloor.getFloortype() == SWITCH);
+        switchTargetX.setEnabled(selectedFloor.getFloortype() == SWITCH);
+        switchTargetX.setText(selectedFloor.getSwitchTarget() == null ? "0" : "" + selectedFloor.getSwitchTarget().x());
+        switchTargetY.setEnabled(selectedFloor.getFloortype() == SWITCH);
+        switchTargetY.setText(selectedFloor.getSwitchTarget() == null ? "0" : "" + selectedFloor.getSwitchTarget().y());
 
         Optional<CourseObject> courseObjectOptional = CourseHandler.getObjects(course, selectedFloor.getPosition()).stream().findFirst();
         if (courseObjectOptional.isEmpty()) {
@@ -760,7 +789,11 @@ public class EditorGui extends BaseGui implements GuiHelper {
             directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
             directionButton.setEnabled(newFloortype.isConveyorBelt());
             for (int i = 0; i < 5; i++) {
-                boolean activationValid = newFloortype == TRAPDOOR || selectedFloor.isHasPusher();
+                boolean activationValid = newFloortype == TRAPDOOR || selectedFloor.isHasPusher()
+                        || selectedFloor.getWallNorth() == WallType.REPULSOR_FIELD
+                        || selectedFloor.getWallEast() == WallType.REPULSOR_FIELD
+                        || selectedFloor.getWallSouth() == WallType.REPULSOR_FIELD
+                        || selectedFloor.getWallWest() == WallType.REPULSOR_FIELD;
                 selectedFloor.getActiveInPhase()[i] = activationValid && activeInPhase[i].isSelected();
                 activeInPhase[i].setEnabled(activationValid);
                 activeInPhaseLabel.setEnabled(activationValid);
@@ -811,6 +844,12 @@ public class EditorGui extends BaseGui implements GuiHelper {
                 selectedFloor.getTractorBeam()[3] = false;
             }
             setBeams();
+
+            if (selectedFloor.getFloortype() == SWITCH) {
+                selectedFloor.setSwitchTarget(new Position(Integer.parseInt(switchTargetX.getText()), Integer.parseInt(switchTargetY.getText())));
+            } else {
+                selectedFloor.setSwitchTarget(null);
+            }
 
             Position               selectedPosition     = selectedFloor.getPosition();
             Optional<CourseObject> courseObjectOptional = CourseHandler.getObjects(course, selectedPosition).stream().findFirst();
@@ -1079,6 +1118,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
                     courseProperties.setConveyorBelts(true);
                     courseProperties.setExpressConveyorBelts(true);
                 }
+                case SWITCH -> courseProperties.getSwitchPositions().add(floor.getPosition());
             }
             if (Math.max(Math.max(floor.getLasers()[0], floor.getLasers()[1]), Math.max(floor.getLasers()[2], floor.getLasers()[3])) > 0) {
                 courseProperties.setLasers(true);

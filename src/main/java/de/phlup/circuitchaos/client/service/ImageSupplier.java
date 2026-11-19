@@ -18,7 +18,6 @@ import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.CourseElement;
 import de.phlup.circuitchaos.common.model.course.CourseObject;
 import de.phlup.circuitchaos.common.model.course.Floor;
-import de.phlup.circuitchaos.common.model.course.Module;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
@@ -453,7 +452,7 @@ public class ImageSupplier {
             }
             addPusher(floor, gr, gameIsNotStartedYet, step, phase, subPhase, animationSteps);
             drawBeams(floor, gameIsNotStartedYet, step, subPhase, animationSteps, gr);
-            addWalls(floor, gr);
+            addWalls(floor, gr, phase);
             addLasers(floor, gr);
 
             for (int i = 0; i > floor.getLevel(); i--) {
@@ -579,6 +578,9 @@ public class ImageSupplier {
     private void addGround(Floor floor, Direction rotation, Graphics2D gr, Step step, Integer subPhase, int animationSteps) {
         String picture = getGroundElementPicture(floor);
         addToImage(picture, rotation, gr);
+        if (floor.getFloortype() == Floortype.SWITCH) {
+            addToImage(GFX_SWITCH, NORTH, gr);
+        }
         addAnimationToImage(floor.getFloortype(), gr, step, subPhase == null ? 1 : subPhase, rotation, animationSteps);
     }
 
@@ -618,25 +620,26 @@ public class ImageSupplier {
         }
     }
 
-    private void addWalls(Floor floor, Graphics2D gr) {
+    private void addWalls(Floor floor, Graphics2D gr, Integer phase) {
+        boolean repulsorActive = phase == null || floor.getActiveInPhase()[phase];
         if (floor.getWallNorth() != WallType.NONE) {
-            addSingleWall(floor.getWallNorth(), NORTH, gr);
+            addSingleWall(floor.getWallNorth(), repulsorActive, NORTH, gr);
         }
         if (floor.getWallEast() != WallType.NONE) {
-            addSingleWall(floor.getWallEast(), EAST, gr);
+            addSingleWall(floor.getWallEast(), repulsorActive, EAST, gr);
         }
         if (floor.getWallSouth() != WallType.NONE) {
-            addSingleWall(floor.getWallSouth(), SOUTH, gr);
+            addSingleWall(floor.getWallSouth(), repulsorActive, SOUTH, gr);
         }
         if (floor.getWallWest() != WallType.NONE) {
-            addSingleWall(floor.getWallWest(), WEST, gr);
+            addSingleWall(floor.getWallWest(), repulsorActive, WEST, gr);
         }
     }
 
-    private void addSingleWall(WallType floor, Direction north, Graphics2D gr) {
+    private void addSingleWall(WallType floor, boolean repulsorActive, Direction north, Graphics2D gr) {
         String suffix = "";
         if (floor == WallType.REPULSOR_FIELD) {
-            suffix = "-" + RANDOM.nextInt(theme.getRepulsorAnimationSteps());
+            suffix = "-" + (repulsorActive ? RANDOM.nextInt(theme.getRepulsorAnimationSteps()) : "inactive");
         }
         addToImage(GFX_WALL_TYPE.get(floor) + suffix, north, gr);
     }
@@ -782,7 +785,7 @@ public class ImageSupplier {
 
     private String getGroundElementPicture(Floor floor) {
         return switch (floor.getFloortype()) {
-            case Floortype.OPEN_FLOOR -> GFX_OPEN_FLOOR + ((int) (floor.getVariant() * theme.getOpenFloorVariants()));
+            case Floortype.OPEN_FLOOR, Floortype.SWITCH -> GFX_OPEN_FLOOR + ((int) (floor.getVariant() * theme.getOpenFloorVariants()));
             case Floortype.PIT_STOP -> GFX_PIT_STOP;
             case Floortype.ABYSS -> GFX_ABYSS_BG;
             case Floortype.TRAPDOOR -> GFX_TRAPDOOR_3;
@@ -804,8 +807,8 @@ public class ImageSupplier {
         }
     }
 
-    public ImageIcon getImageIcon(Module module, double scale) {
-        String imagename = getGfxOfModuleType(module.getType());
+    public ImageIcon getImageIcon(ModuleType module, double scale) {
+        String imagename = getGfxOfModuleType(module);
         if (scale == 1.0) {
             return getImageIconPlain(imagename);
         }

@@ -101,8 +101,7 @@ public class MoveInfo {
         myself.setProgram(program.clone());
 
         for (int phase = 0; phase < 5 && myself.isOnCourse(); phase++) {
-            ModuleType selectedWeapon = WeaponEvaluator.selectRammingArmor(course, myself, phase, program[phase]);
-            setSelectedWeapon(phase, selectedWeapon);
+            setRammingArmorActive(phase);
             gameLogic.stepRobotsMove(phase, getRobotsInPriorityOrder(phase));
             if (!myself.isOnCourse()) {
                 gameLogic.setGameAborted(true);
@@ -115,10 +114,8 @@ public class MoveInfo {
                 break;
             }
 
-            if (selectedWeapons[phase] != ModuleType.RAMMING_ARMOR) {
-                selectedWeapon = WeaponEvaluator.selectBeamWeapon(gameLogic, myself, phase, goal);
-                setSelectedWeapon(phase, selectedWeapon);
-            }
+            ModuleType selectedWeapon = WeaponEvaluator.selectBeamWeapon(gameLogic, myself, phase, goal);
+            setSelectedWeapon(phase, selectedWeapon);
             gameLogic.stepResolveBeamsAndLaserFire(phase, myself);
             if (!myself.isOnCourse()) {
                 gameLogic.setGameAborted(true);
@@ -172,10 +169,17 @@ public class MoveInfo {
         course = null;
     }
 
+    private void setRammingArmorActive(int phase) {
+        Module rammingArmor = myself.getModule(ModuleType.RAMMING_ARMOR);
+        if (rammingArmor != null) {
+            rammingArmor.getActiveInPhase()[phase] = true;
+        }
+    }
+
     private void setSelectedWeapon(int phase, ModuleType selectedWeapon) {
         selectedWeapons[phase] = selectedWeapon;
         for (var module : myself.getModules()) {
-            if (module.getType().isWeapon()) {
+            if (module.getType().isWeapon() && module.getType() != ModuleType.RAMMING_ARMOR) {
                 module.getActiveInPhase()[phase] = module.getType() == selectedWeapon;
             }
         }
@@ -185,18 +189,11 @@ public class MoveInfo {
         Course template   = simulationTemplate.getCourse();
         Course simulation = new Course();
 
-        boolean needsOwnFloors = false;
-        for (Robot robot : template.getRobots()) {
-            var bridgeProjector = robot.getModule(ModuleType.BRIDGE_PROJECTOR);
-            if (bridgeProjector != null && bridgeProjector.getAmmunition() > 0
-                    && hasActivePhase(bridgeProjector.getActiveInPhase())) {
-                needsOwnFloors = true;
-                break;
-            }
-        }
-
+        // Switches and bridge projectors can change floor state during a simulation.
+        // Every candidate therefore needs its own floor instances to prevent state
+        // changes from leaking into other candidates or the simulation template.
         for (Floor floor : template.getFloor()) {
-            simulation.getFloor().add(needsOwnFloors ? floor.copyForSimulation() : floor);
+            simulation.getFloor().add(floor.copyForSimulation());
         }
         // Course objects can move, be removed, or change their state during simulation.
         for (var object : template.getObjects()) {
@@ -223,15 +220,6 @@ public class MoveInfo {
 
         return new GameLogic(simulation, (step, phase, detail, movingRobotName) -> {
         });
-    }
-
-    private boolean hasActivePhase(boolean[] activeInPhase) {
-        for (boolean active : activeInPhase) {
-            if (active) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private List<Robot> getRobotsInPriorityOrder(int phase) {

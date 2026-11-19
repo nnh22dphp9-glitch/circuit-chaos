@@ -32,6 +32,8 @@ public class Floor {
     private WallType  wallSouth       = WallType.NONE;
     private WallType  wallWest        = WallType.NONE;
     private double    variant         = RANDOM.nextDouble();
+    private boolean   switchActive    = false;
+    private Position  switchTarget    = null;
 
     // for drawing only
     private int        explosiveDamage              = 0;
@@ -87,6 +89,8 @@ public class Floor {
         floor.setWallSouth(wallSouth);
         floor.setWallWest(wallWest);
         floor.setVariant(variant);
+        floor.setSwitchActive(switchActive);
+        floor.setSwitchTarget(switchTarget);
         return floor;
     }
 

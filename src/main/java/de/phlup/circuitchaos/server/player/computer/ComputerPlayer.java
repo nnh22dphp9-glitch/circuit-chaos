@@ -82,7 +82,11 @@ public class ComputerPlayer extends Player {
             robot.setPrevDirection(robot.getDirection());
             robot.setProgram(chosenMove.getProgram());
             for (var module : robot.getModules()) {
-                if (module.getType().isWeapon()) {
+                if (module.getType() == ModuleType.RAMMING_ARMOR) {
+                    for (int phase = 0; phase < 5; phase++) {
+                        module.getActiveInPhase()[phase] = true;
+                    }
+                } else if (module.getType().isWeapon()) {
                     for (int phase = 0; phase < 5; phase++) {
                         module.getActiveInPhase()[phase] = module.getType() == chosenMove.getSelectedWeapons()[phase];
                     }
@@ -108,10 +112,15 @@ public class ComputerPlayer extends Player {
             ModuleType fallbackWeapon = robot.getModules().stream()
                                              .map(Module::getType)
                                              .filter(ModuleType::isWeapon)
-                                             .findFirst()
+                                             .filter(type -> type != ModuleType.RAMMING_ARMOR)
+                                             .findAny()
                                              .orElse(null);
             for (var module : robot.getModules()) {
-                if (module.getType().isWeapon()) {
+                if (module.getType() == ModuleType.RAMMING_ARMOR) {
+                    for (int phase = 0; phase < 5; phase++) {
+                        module.getActiveInPhase()[phase] = true;
+                    }
+                } else if (module.getType().isWeapon()) {
                     for (int phase = 0; phase < 5; phase++) {
                         module.getActiveInPhase()[phase] = module.getType() == fallbackWeapon;
                     }

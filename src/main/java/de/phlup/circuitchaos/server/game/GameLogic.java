@@ -65,10 +65,15 @@ public class GameLogic {
     }
 
     public void moveInit(CourseElement ce, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, String movingRobotName) {
-        move(ce, direction, strength, amount, step, phase, notBlockedByMovableRobot, wait, movingRobotName);
+        course.getProperties().getSwitchPositions().forEach(pos -> {
+            if (CourseHandler.getRobots(course, pos).isEmpty()) {
+                CourseHandler.getFloor(course, pos).setSwitchActive(true);
+            }
+        });
+        move(ce, direction, strength, amount, step, phase, notBlockedByMovableRobot, wait, movingRobotName, true);
     }
 
-    private boolean move(CourseElement ce, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, String movingRobotName) {
+    private boolean move(CourseElement ce, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, String movingRobotName, boolean considerRepulsor) {
         Position oldPosition    = ce.getPosition();
         Floor    floor1         = CourseHandler.getFloor(course, oldPosition);
         Position targetPosition = ce.getPosition().neighbour(direction);
@@ -94,17 +99,21 @@ public class GameLogic {
             WallType targetWall = floor2.wall(direction2);
             boolean rampPassage = sourceWall == WallType.RAMP_UP || sourceWall == WallType.RAMP_DOWN
                     || targetWall == WallType.RAMP_UP || targetWall == WallType.RAMP_DOWN;
-            boolean uphill   = floor2.getLevel() > floor1.getLevel() && !rampPassage;
-            boolean downhill = floor2.getLevel() < floor1.getLevel() && !rampPassage;
+            boolean uphill           = floor2.getLevel() > floor1.getLevel() && !rampPassage;
+            boolean downhill         = floor2.getLevel() < floor1.getLevel() && !rampPassage;
+            boolean repulsorPassage1 = sourceWall == WallType.REPULSOR_FIELD && !floor1.getActiveInPhase()[phase];
+            boolean repulsorPassage2 = targetWall == WallType.REPULSOR_FIELD && !floor2.getActiveInPhase()[phase];
             boolean wallPassage = ((sourceWall == WallType.NONE
                     || sourceWall == WallType.ONE_WAY_GREEN
                     || sourceWall == WallType.RAMP_DOWN
-                    || sourceWall == WallType.RAMP_UP)
+                    || sourceWall == WallType.RAMP_UP
+                    || repulsorPassage1)
                     && (targetWall == WallType.NONE
                     || targetWall == WallType.ONE_WAY_GREEN
                     || targetWall == WallType.RAMP_UP
                     || targetWall == WallType.RAMP_DOWN
-                    || targetWall == WallType.LEDGE))
+                    || targetWall == WallType.LEDGE
+                    || repulsorPassage2))
                     || (sourceWall == WallType.ONE_WAY_GREEN && targetWall == WallType.ONE_WAY_RED);
             if ((ce instanceof Robot r && r.isFlying()) || (!uphill && wallPassage)) {
                 CourseElement conflictingElement = getConflictingElement(ce, direction);
@@ -123,7 +132,7 @@ public class GameLogic {
                             rob.takeDamage(course, phase, null, false);
                         }
                     }
-                    if (move(conflictingElement, direction, strength, 1, step, phase, true, wait, movingRobotName)) {
+                    if (move(conflictingElement, direction, strength, 1, step, phase, true, wait, movingRobotName, considerRepulsor)) {
                         ce.setPosition(targetPosition);
                         if (!(ce instanceof Robot r) || !r.isFlying()) {
                             ce.setLevel(floor2.getLevel());
@@ -133,12 +142,15 @@ public class GameLogic {
                         }
                     }
                 }
-            } else if (sourceWall == WallType.REPULSOR_FIELD
-                    || ((floor1.wall(direction) == WallType.NONE
-                    || floor1.wall(direction) == WallType.ONE_WAY_GREEN
-                    || floor1.wall(direction) == WallType.RAMP_DOWN)
-                    && floor2.wall(direction2) == WallType.REPULSOR_FIELD)) {
-                move(ce, direction2, strength, strength, step, phase, true, wait, movingRobotName);
+            } else if (considerRepulsor) {
+                if ((floor1.wall(direction) == WallType.REPULSOR_FIELD && floor1.getActiveInPhase()[phase])
+                        || ((floor1.wall(direction) == WallType.NONE
+                        || floor1.wall(direction) == WallType.ONE_WAY_GREEN
+                        || floor1.wall(direction) == WallType.RAMP_DOWN)
+                        && floor2.wall(direction2) == WallType.REPULSOR_FIELD
+                        && floor2.getActiveInPhase()[phase])) {
+                    move(ce, direction2, strength, strength, step, phase, true, wait, movingRobotName, false);
+                }
             }
         }
         if (amount > 0 && wait) {
@@ -161,26 +173,35 @@ public class GameLogic {
                     }
                 }
             }
-        }
-        if (!(ce instanceof Robot r) || !r.isFlying()) {
-            if (floor3.getFloortype() == Floortype.ABYSS || (floor3.getFloortype() == Floortype.TRAPDOOR && floor3.getActiveInPhase()[phase])) {
-                amount = 0;
-                die(ce, step, phase);
-                if (ce instanceof Robot r) {
-                    course.getRobotsFallingIntoAbyss().add(r);
-                } else if (ce instanceof CourseObject co) {
-                    course.getObjectsFallingIntoAbyss().add(co);
+            if (floor3.getFloortype() == Floortype.SWITCH && floor3.getSwitchTarget() != null && floor3.isSwitchActive()) {
+                Floor floor4 = CourseHandler.getFloor(course, floor3.getSwitchTarget());
+                for (int i = 0; i < 5; i++) {
+                    floor4.getActiveInPhase()[i] = !floor4.getActiveInPhase()[i];
+                }
+                floor3.setSwitchActive(false);
+                if (wait) {
+                    notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
                 }
             }
         }
+        if ((!(ce instanceof Robot r) || !r.isFlying())
+                && (floor3.getFloortype() == Floortype.ABYSS || (floor3.getFloortype() == Floortype.TRAPDOOR && floor3.getActiveInPhase()[phase]))) {
+            amount = 0;
+            die(ce, step, phase);
+            if (ce instanceof Robot r) {
+                course.getRobotsFallingIntoAbyss().add(r);
+            } else if (ce instanceof CourseObject co) {
+                course.getObjectsFallingIntoAbyss().add(co);
+            }
+        }
         if (amount > 1) {
-            move(ce, direction, strength, amount - 1, step, phase, true, wait, movingRobotName);
+            move(ce, direction, strength, amount - 1, step, phase, true, wait, movingRobotName, considerRepulsor);
         }
         if (!oldPosition.equals(ce.getPosition())) {
             boolean notBlocked = true;
             if (!(ce instanceof Robot r) || !r.isFlying()) {
                 while (notBlocked && CourseHandler.getObjects(course, ce.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
-                    notBlocked = move(ce, direction, 0, 1, step, phase, false, wait, movingRobotName);
+                    notBlocked = move(ce, direction, 0, 1, step, phase, false, wait, movingRobotName, considerRepulsor);
                 }
             }
         }
@@ -425,7 +446,7 @@ public class GameLogic {
         }
     }
 
-    public Robot getLaserTarget(Position position, Direction direction, int level, boolean highPowerLaser, int amount, boolean firstFloorGetsHit, Step step) {
+    public Robot getLaserTarget(Position position, Direction direction, int level, boolean highPowerLaser, int amount, boolean firstFloorGetsHit, Step step, int phase) {
         Robot target = null;
         if (firstFloorGetsHit) {
             for (Robot r : CourseHandler.getRobots(course, position)) {
@@ -450,13 +471,13 @@ public class GameLogic {
             if (targetPosition.inRange(course.getRange())) {
                 if (!(sourceFloor.wall(direction) == WallType.SOLID
                         || sourceFloor.wall(direction) == WallType.ONE_WAY_RED
-                        || sourceFloor.wall(direction) == WallType.REPULSOR_FIELD
+                        || (sourceFloor.wall(direction) == WallType.REPULSOR_FIELD && sourceFloor.getActiveInPhase()[phase])
                         || targetFloor.wall(direction2) == WallType.SOLID
-                        || targetFloor.wall(direction2) == WallType.REPULSOR_FIELD)) {
+                        || (targetFloor.wall(direction2) == WallType.REPULSOR_FIELD) && targetFloor.getActiveInPhase()[phase])) {
                     if (course.isConsiderGui()) {
                         CourseHandler.setBeam(course, targetPosition, direction, step, amount);
                     }
-                    return getLaserTarget(targetPosition, direction, level, highPowerLaser, amount, true, step);
+                    return getLaserTarget(targetPosition, direction, level, highPowerLaser, amount, true, step, phase);
                 }
             }
         }
@@ -856,7 +877,7 @@ public class GameLogic {
                         default -> f.getLasers()[dir.ordinal()];
                     };
                     for (int cnt = 0; cnt < amount; cnt++) {
-                        Robot target = getLaserTarget(f.getPosition(), dir, f.getLevel(), false, amount, true, step);
+                        Robot target = getLaserTarget(f.getPosition(), dir, f.getLevel(), false, amount, true, step, phase);
                         if (target != null) {
                             if (step == Step.COURSE_MOUNTED_LASER_FIRE) {
                                 target.takeDamage(course, phase, dir2, true);

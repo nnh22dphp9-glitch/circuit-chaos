@@ -91,7 +91,9 @@ Wände und andere Hindernisse können eine Bewegung verhindern. Roboter können 
 
 ### Einbahnwände und Abstoßfelder
 
-Einbahnwände mit grüner und roter Kennzeichnung werden als zusammengehörige Paare angelegt. Die grüne Seite lässt die Bewegung in Richtung der roten Seite zu; die rote Seite blockiert die Bewegung in Gegenrichtung. Abstoßfelder reflektieren eine versuchte Bewegung in die entgegengesetzte Richtung.
+Einbahnwände mit grüner und roter Kennzeichnung werden als zusammengehörige Paare angelegt. Die grüne Seite lässt die Bewegung in Richtung der roten Seite zu; die rote Seite blockiert die Bewegung in Gegenrichtung.
+
+**Repulsorfelder** sind phasenabhängig aktiv. In aktiven Phasen stoßen sie eine Bewegung zurück, die das Feld überqueren würde. In inaktiven Phasen können sie passiert werden.
 
 ### Fliegen und Hovercraft
 
@@ -133,7 +135,7 @@ Der **Gyroscopic Stabilizer** verhindert, dass der Roboter durch Zahnräder oder
 
 ### Pusher
 
-Pusher sind phasenabhängig aktiv; ihre aktiven Phasen sind im Tooltip des Feldes angegeben. Sind sie aktiv, werden sie im Step PUSHERS_PUSH ausgefahren und unmittelbar danach wieder eingefahren. Sie drücken den Roboter auf ihrem Feld um ein Feld weiter, sofern das Zielfeld nicht blockiert ist.
+Pusher sind phasenabhängig aktiv. Sind sie aktiv, werden sie im Step PUSHERS_PUSH ausgefahren und unmittelbar danach wieder eingefahren. Sie drücken den Roboter auf ihrem Feld um ein Feld weiter, sofern das Zielfeld nicht blockiert ist. Ein Schalter kann die aktiven Phasen eines Pushers umschalten.
 
 ### Öl
 
@@ -165,7 +167,13 @@ Die Phasen, in denen eine Falltür geöffnet ist, werden im Tooltip des Feldes a
 
 Minen, Kleber und Öl können ebenfalls in einen Abgrund fallen, wenn sie auf einem Förderband dorthin geschoben werden. Sie werden dann vom Spielfeld entfernt. Eine Mine explodiert dabei nicht.
 
-Ein Schalter zum Öffnen und Schließen von Falltüren ist als mögliche zukünftige Erweiterung angedacht; aktuell werden Falltüren phasenabhängig gesteuert.
+Ein Schalter kann die aktiven Phasen einer Falltür umschalten. Die allgemeine Funktionsweise der Schalter ist im folgenden Abschnitt beschrieben.
+
+### Schalter
+
+Ein Schalter ist mit einem Zielfeld verbunden. Gelangt ein nicht fliegender Roboter auf ein scharf geschaltetes Schalterfeld, wird der Schalter ausgelöst: Alle fünf Einträge von `activeInPhase` des Zielfeldes werden umgedreht. Jede zuvor aktive Phase wird inaktiv und jede zuvor inaktive Phase wird aktiv.
+
+Auf diese Weise lassen sich die phasenabhängigen Eigenschaften einer **Falltür**, eines **Pushers** oder eines **Repulsorfeldes** umschalten. Ein Schalter wird nach dem Auslösen deaktiviert. Sobald sein Feld bei einem späteren Bewegungsvorgang frei ist, wird er wieder scharf geschaltet.
 
 ### Teleporter
 
@@ -336,9 +344,3 @@ Der **Mechanical Arm** ermöglicht es, einen Checkpoint auch von einem benachbar
 Im normalen Rennmodus müssen Kontrollpunkte in der vorgegebenen Reihenfolge erreicht werden. Wer das Finish zuerst erreicht, gewinnt. Der Pit Stop kann im Verlauf des Rennens zur Reparatur genutzt werden.
 
 Im Modus **Kill All** gewinnt man, wenn alle anderen Roboter ausgeschaltet wurden. In diesem Modus werden alle Kontrollpunkte zu Startpositionen, auf die die Roboter gleichmäßig verteilt werden. **Auch im normalen Finish-Modus können mehrere Startpositionen verwendet werden.**
-
-
-
----
-
-**Redaktioneller Hinweis:** Dies ist eine konsolidierte Arbeitsfassung aus bisher besprochenen Regeln. Vor der Veröffentlichung sollte jeder offene Punkt entschieden und der Text anschließend mit dem tatsächlich spielbaren Verhalten abgeglichen werden.
