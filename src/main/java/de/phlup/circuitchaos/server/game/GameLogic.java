@@ -359,7 +359,9 @@ public class GameLogic {
                     }
                 }
             }
-            notifyCourseMayHaveChanged(step, phase, "explosion", null);
+            if (step != Step.CONVEYOR_BELTS_MOVE && step != Step.EXPRESS_CONVEYOR_BELTS_MOVE) {
+                notifyCourseMayHaveChanged(step, phase, "explosion", null);
+            }
         }
     }
 
