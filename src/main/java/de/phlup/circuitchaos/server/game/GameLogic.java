@@ -197,7 +197,7 @@ public class GameLogic {
         if (amount > 1) {
             move(ce, direction, strength, amount - 1, step, phase, true, wait, movingRobotName, considerRepulsor);
         }
-        if (!oldPosition.equals(ce.getPosition())) {
+        if (!oldPosition.equals(ce.getPosition()) && !(ce instanceof CourseObject co && co.getType() == ObjectType.OIL)) {
             boolean notBlocked = true;
             if (!(ce instanceof Robot r) || !r.isFlying()) {
                 while (notBlocked && CourseHandler.getObjects(course, ce.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
@@ -414,7 +414,7 @@ public class GameLogic {
                 course.getObjectsFallingIntoAbyss().add(co);
             }
         }
-        if (direction != null) {
+        if (direction != null && !(ce instanceof CourseObject co && co.getType() == ObjectType.OIL)) {
             if (CourseHandler.getObjects(course, floor3.getPosition()).stream().anyMatch(co -> co.getType() == ObjectType.OIL)) {
                 moveInit(ce, direction, 0, 1, step, phase, false, wait, null);
             }
