@@ -331,16 +331,13 @@ Diese Module besitzen keine Ammunition:
 - **Shield:** schützt vor einem direkten Lasertreffer aus der eingestellten Richtung. Ein erfolgreicher Schutz blockiert den Treffer und verbraucht den Shield für diese Phase.
 - **Power-Down Shield:** ist während eines Power-Downs aktiv und blockiert direkte Lasertreffer. Der Schutz wird richtungsweise verbraucht: In jeder Phase stehen vier Richtungs-Schutzpunkte zur Verfügung, und ein Treffer verbraucht den Schutz aus der entsprechenden Richtung. Er schützt nicht vor Schub- oder Fallschaden.
 
-### Mechanical Arm
-
-Der **Mechanical Arm** ermöglicht es, einen Checkpoint auch von einem benachbarten Feld aus zu erreichen. Er besitzt keine Ammunition.
-
 ### Weitere Module
 
+- Der **Mechanical Arm** ermöglicht es, einen Checkpoint auch von einem benachbarten Feld aus zu erreichen. Er besitzt keine Ammunition.
 - **Superior Archive Copy:** reduziert den Schaden bei der Rückkehr an die Archivposition auf null.
 
 ## 8. Kontrollpunkte und Sieg
 
 Im normalen Rennmodus müssen Kontrollpunkte in der vorgegebenen Reihenfolge erreicht werden. Wer das Finish zuerst erreicht, gewinnt. Der Pit Stop kann im Verlauf des Rennens zur Reparatur genutzt werden.
 
-Im Modus **Kill All** gewinnt man, wenn alle anderen Roboter ausgeschaltet wurden. In diesem Modus werden alle Kontrollpunkte zu Startpositionen, auf die die Roboter gleichmäßig verteilt werden. **Auch im normalen Finish-Modus können mehrere Startpositionen verwendet werden.**
+Im Modus **Kill All** gewinnt man, wenn alle anderen Roboter ausgeschaltet wurden. In diesem Modus werden alle Kontrollpunkte zu Startpositionen, auf die die Roboter gleichmäßig verteilt werden.

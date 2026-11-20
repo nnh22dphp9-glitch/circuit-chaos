@@ -125,7 +125,7 @@ public class GameLogic {
                             r.takeDamage(course, phase, null, false);
                         }
                     }
-                } else if (notBlockedByMovableRobot) {
+                } else if (notBlockedByMovableRobot && isNoRobotStack(targetPosition)) {
                     if (ce instanceof Robot r && r.uses(ModuleType.RAMMING_ARMOR, phase)) {
                         r.getModule(ModuleType.RAMMING_ARMOR).getActiveInPhase()[phase] = false;
                         if (conflictingElement instanceof Robot rob) {
@@ -209,6 +209,10 @@ public class GameLogic {
             notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
         }
         return !oldPosition.equals(ce.getPosition());
+    }
+
+    private boolean isNoRobotStack(Position position) {
+        return CourseHandler.getRobots(course, position).stream().filter(r -> !r.isFlying()).count() < 2;
     }
 
     private void minesGoOff(Step step, int phase, Floor floor) {

@@ -243,18 +243,18 @@ A shot is stopped by a robot it hits (exception: **High Power Laser**). The curr
 
 The weapons have the following effects:
 
-| Weapon | Effect |
-|---|---|
-| **Main Laser** / **Single Course-Mounted Laser** | Causes 1 damage point on a hit. |
-| **Double Barrel Laser** / **Double Course-Mounted Laser** | Causes 2 damage points on a hit. |
-| **Triple Course-Mounted Laser** | Causes 3 damage points on a hit. |
-| **High Power Laser** | Causes 1 damage point to the first target hit. The shot passes through that target and can hit a second target, which also receives 1 damage point. |
-| **Rear Laser** | Fires backwards and causes 1 damage point on a hit, just like the Main Laser. |
-| **Exchange Beam** | Swaps the firing robot's position with the target's position. Causes no damage. |
-| **Pressure Beam** / **Course-Mounted Pressure Beam** | Pushes the target one space further. Causes no damage. |
-| **Tractor Beam** / **Course-Mounted Tractor Beam** | Pulls the target one space towards the shooter. Causes no damage. |
-| **Spin Left Beam** / **Course-Mounted Spin-Left Beam** | Rotates the target 90 degrees counter-clockwise. Causes no damage. |
-| **Spin Right Beam** / **Course-Mounted Spin-Right Beam** | Rotates the target 90 degrees clockwise. Causes no damage. |
+| Weapon                                                    | Effect                                                                                                                                              |
+|-----------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Main Laser** / **Single Course-Mounted Laser**          | Causes 1 damage point on a hit.                                                                                                                     |
+| **Double Barrel Laser** / **Double Course-Mounted Laser** | Causes 2 damage points on a hit.                                                                                                                    |
+| **Triple Course-Mounted Laser**                           | Causes 3 damage points on a hit.                                                                                                                    |
+| **High Power Laser**                                      | Causes 1 damage point to the first target hit. The shot passes through that target and can hit a second target, which also receives 1 damage point. |
+| **Rear Laser**                                            | Fires backwards and causes 1 damage point on a hit, just like the Main Laser.                                                                       |
+| **Exchange Beam**                                         | Swaps the firing robot's position with the target's position. Causes no damage.                                                                     |
+| **Pressure Beam** / **Course-Mounted Pressure Beam**      | Pushes the target one space further. Causes no damage.                                                                                              |
+| **Tractor Beam** / **Course-Mounted Tractor Beam**        | Pulls the target one space towards the shooter. Causes no damage.                                                                                   |
+| **Spin Left Beam** / **Course-Mounted Spin-Left Beam**    | Rotates the target 90 degrees counter-clockwise. Causes no damage.                                                                                  |
+| **Spin Right Beam** / **Course-Mounted Spin-Right Beam**  | Rotates the target 90 degrees clockwise. Causes no damage.                                                                                          |
 
 Course-mounted weapons are fixed to the course and fire during a phase after the robots' weapons. There is no course-mounted Exchange Beam, as its point of origin would have to move.
 
@@ -334,16 +334,13 @@ These modules do not have ammunition:
 - **Shield:** Protects against a direct laser hit from the selected direction. A successful block prevents the hit and consumes the Shield for that phase.
 - **Power-Down Shield:** Is active during a Power-Down and blocks direct laser hits. Protection is consumed direction by direction: Four directional shield points are available in each phase, and a hit consumes the protection from the corresponding direction. It does not protect against push or fall damage.
 
-### Mechanical Arm
-
-The **Mechanical Arm** allows a checkpoint to be reached from an adjacent space. It has no ammunition.
-
 ### Other Modules
 
+- The **Mechanical Arm** allows a checkpoint to be reached from an adjacent space. It has no ammunition.
 - **Superior Archive Copy:** Reduces the damage taken when returning to the Archive Position to zero.
 
 ## 8. Checkpoints and Victory
 
 In the normal racing mode, checkpoints must be reached in the specified order. The first player to reach the finish wins. The Pit Stop can be used for repairs during the race.
 
-In **Kill All** mode, the winner is the player who eliminates all other robots. In this mode, all checkpoints become starting positions, and the robots are distributed evenly among them. **Multiple starting positions can also be used in normal Finish mode.**
+In **Kill All** mode, the winner is the player who eliminates all other robots. In this mode, all checkpoints become starting positions, and the robots are distributed evenly among them.
