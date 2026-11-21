@@ -56,6 +56,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LOGO_SMALL;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_NO_ACTION;
@@ -437,7 +438,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
     }
 
     @Override
-    public void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
+    public void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, UUID movingRobotId) {
         setAndClearIfEmpty(course);
         redrawAll();
     }

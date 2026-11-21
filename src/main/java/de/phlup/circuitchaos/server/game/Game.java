@@ -93,7 +93,7 @@ public class Game {
 
     private int animationSteps;
 
-    public void notifyCourseMayHaveChanged(Step step, Integer phase, String detail, String movingRobotName) {
+    public void notifyCourseMayHaveChanged(Step step, Integer phase, String detail, UUID movingRobotId) {
         String reason = (phase == null ? "" : (phase + 1) + ": ") + step.getName() + (StringUtils.hasText(detail) ? " - " + detail : "");
         log.debug("Course may have changed: {}: {}", step.name(), reason);
         List<CourseElementStub> stubList    = CourseHandler.createCourseElementStubList(course);
@@ -132,13 +132,13 @@ public class Game {
             if (step == Step.SETUP || !wait) {
                 for (Registration reg : watchers) {
                     // Please note: "reason" will become part of the window title
-                    pollOrPushSwitchService.notifyOfCourseChange(reg, course, reason, step, phase, null, animationSteps, movingRobotName);
+                    pollOrPushSwitchService.notifyOfCourseChange(reg, course, reason, step, phase, null, animationSteps, movingRobotId);
                 }
             } else {
                 randomlySetFloorOrientationForDisplay();
                 for (int subPhase = 0; subPhase < animationSteps; subPhase++) {
                     for (Registration reg : watchers) {
-                        pollOrPushSwitchService.notifyOfCourseChange(reg, course, reason, step, phase, subPhase, animationSteps, movingRobotName);
+                        pollOrPushSwitchService.notifyOfCourseChange(reg, course, reason, step, phase, subPhase, animationSteps, movingRobotId);
                     }
                     Sleep.sleepForMillis(timeSettings.getTimeBetweenSteps() / animationSteps);
                 }
@@ -151,7 +151,7 @@ public class Game {
             randomlySetFloorOrientationForDisplay();
             for (int subPhase = animationSteps; subPhase < 2 * animationSteps; subPhase++) {
                 for (Registration reg : watchers) {
-                    pollOrPushSwitchService.notifyOfCourseChange(reg, course, reason, step, phase, subPhase, animationSteps, movingRobotName);
+                    pollOrPushSwitchService.notifyOfCourseChange(reg, course, reason, step, phase, subPhase, animationSteps, movingRobotId);
                 }
                 Sleep.sleepForMillis(timeSettings.getTimeBetweenSteps() / animationSteps);
             }

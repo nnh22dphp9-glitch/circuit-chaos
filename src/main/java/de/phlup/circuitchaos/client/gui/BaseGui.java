@@ -30,6 +30,7 @@ import java.awt.image.BufferedImage;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Getter
@@ -148,7 +149,7 @@ public abstract class BaseGui {
         images.put(f.getPosition(), bi);
     }
 
-    public abstract void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName);
+    public abstract void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, UUID movingRobotId);
 
 }
 

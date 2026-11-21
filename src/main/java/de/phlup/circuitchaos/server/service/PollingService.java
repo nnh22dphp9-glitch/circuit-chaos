@@ -35,7 +35,7 @@ public class PollingService {
         }
     }
 
-    public void notifyOfCourseChange(Registration registration, Course course, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
+    public void notifyOfCourseChange(Registration registration, Course course, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, UUID movingRobotId) {
         NetworkRequest programRequest = new NetworkRequest();
         programRequest.setCourse(course);
         programRequest.setReasonForCourseChange(reason);
@@ -43,7 +43,7 @@ public class PollingService {
         programRequest.setPhase(phase);
         programRequest.setSubPhase(subPhase);
         programRequest.setAnimationSteps(animationSteps);
-        programRequest.setMovingRobotName(movingRobotName);
+        programRequest.setMovingRobotId(movingRobotId);
         PullingData pullingData = new PullingData();
         pullingData.setType(PullType.COURSE_CHANGE);
         pullingData.setRequest(programRequest);

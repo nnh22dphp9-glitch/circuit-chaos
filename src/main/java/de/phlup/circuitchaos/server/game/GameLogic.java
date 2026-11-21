@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static de.phlup.circuitchaos.common.enums.Direction.*;
 import static de.phlup.circuitchaos.common.enums.Floortype.*;
@@ -47,15 +48,15 @@ public class GameLogic {
     @Setter
     private boolean gameAborted = false;
 
-    public void notifyCourseMayHaveChanged(Step step, Integer phase, String detail, String movingRobotName) {
-        listener.courseChanged(step, phase, detail, movingRobotName);
+    public void notifyCourseMayHaveChanged(Step step, Integer phase, String detail, UUID movingRobotId) {
+        listener.courseChanged(step, phase, detail, movingRobotId);
     }
 
     public void singleRobotMove(int phase, Robot robot, Programme pc, int movement) {
         if (movement > 0) {
-            moveInit(robot, robot.getDirection(), movement, movement, ROBOTS_AND_OBJECTS_MOVE, phase, true, true, robot.getName());
+            moveInit(robot, robot.getDirection(), movement, movement, ROBOTS_AND_OBJECTS_MOVE, phase, true, true, robot.getId());
         } else if (movement < 0) {
-            moveInit(robot, SOUTH.add(robot.getDirection()), movement, -movement, ROBOTS_AND_OBJECTS_MOVE, phase, true, true, robot.getName());
+            moveInit(robot, SOUTH.add(robot.getDirection()), movement, -movement, ROBOTS_AND_OBJECTS_MOVE, phase, true, true, robot.getId());
         }
         if (pc.type() == ROTATE_RIGHT) {
             rotate(robot, EAST, ROBOTS_AND_OBJECTS_MOVE, phase, true);
@@ -66,16 +67,16 @@ public class GameLogic {
         }
     }
 
-    public void moveInit(CourseElement ce, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, String movingRobotName) {
+    public void moveInit(CourseElement ce, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, UUID movingRobotId) {
         course.getProperties().getSwitchPositions().forEach(pos -> {
             if (CourseHandler.getRobots(course, pos).isEmpty()) {
                 CourseHandler.getFloor(course, pos).setSwitchActive(true);
             }
         });
-        move(ce, direction, strength, amount, step, phase, notBlockedByMovableRobot, wait, movingRobotName, true);
+        move(ce, direction, strength, amount, step, phase, notBlockedByMovableRobot, wait, movingRobotId, true);
     }
 
-    private boolean move(CourseElement ce, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, String movingRobotName, boolean considerRepulsor) {
+    private boolean move(CourseElement ce, Direction direction, int strength, int amount, Step step, int phase, boolean notBlockedByMovableRobot, boolean wait, UUID movingRobotId, boolean considerRepulsor) {
         Position oldPosition    = ce.getPosition();
         Floor    floor1         = CourseHandler.getFloor(course, oldPosition);
         Position targetPosition = ce.getPosition().neighbour(direction);
@@ -95,7 +96,7 @@ public class GameLogic {
             amount = 0;
             die(ce, step, phase);
         }
-        wait = wait && (movingRobotName == null || movingRobotName.equals(ce.getName()));
+        wait = wait && (movingRobotId == null || movingRobotId.equals(ce.getId()));
         if (amount > 0) {
             WallType sourceWall = floor1.wall(direction);
             WallType targetWall = floor2.wall(direction2);
@@ -134,7 +135,7 @@ public class GameLogic {
                             rob.takeDamage(course, phase, null, false);
                         }
                     }
-                    if (move(conflictingElement, direction, strength, 1, step, phase, true, wait, movingRobotName, considerRepulsor)) {
+                    if (move(conflictingElement, direction, strength, 1, step, phase, true, wait, movingRobotId, considerRepulsor)) {
                         ce.setPosition(targetPosition);
                         if (!(ce instanceof Robot r) || !r.isFlying()) {
                             ce.setLevel(floor2.getLevel());
@@ -151,12 +152,12 @@ public class GameLogic {
                         || floor1.wall(direction) == RAMP_DOWN)
                         && floor2.wall(direction2) == REPULSOR_FIELD
                         && floor2.getActiveInPhase()[phase])) {
-                    move(ce, direction2, strength, strength, step, phase, true, wait, movingRobotName, false);
+                    move(ce, direction2, strength, strength, step, phase, true, wait, movingRobotId, false);
                 }
             }
         }
         if (amount > 0 && wait) {
-            notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
+            notifyCourseMayHaveChanged(step, phase, null, movingRobotId);
         }
         Floor floor3 = CourseHandler.getFloor(course, ce.getPosition());
         if (ce instanceof Robot r && !r.isFlying()) {
@@ -169,7 +170,7 @@ public class GameLogic {
                         ce.setPosition(portal.getTargetPosition());
                         ce.setLevel(floor3.getLevel());
                         if (wait) {
-                            notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
+                            notifyCourseMayHaveChanged(step, phase, null, movingRobotId);
                         }
                         minesGoOff(step, phase, floor3);
                     }
@@ -182,7 +183,7 @@ public class GameLogic {
                 }
                 floor3.setSwitchActive(false);
                 if (wait) {
-                    notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
+                    notifyCourseMayHaveChanged(step, phase, null, movingRobotId);
                 }
             }
         }
@@ -197,18 +198,18 @@ public class GameLogic {
             }
         }
         if (amount > 1) {
-            move(ce, direction, strength, amount - 1, step, phase, true, wait, movingRobotName, considerRepulsor);
+            move(ce, direction, strength, amount - 1, step, phase, true, wait, movingRobotId, considerRepulsor);
         }
         if (!oldPosition.equals(ce.getPosition()) && !(ce instanceof CourseObject co && co.getType() == OIL)) {
             boolean notBlocked = true;
             if (!(ce instanceof Robot r) || !r.isFlying()) {
                 while (notBlocked && CourseHandler.getObjects(course, ce.getPosition()).stream().anyMatch(co -> co.getType() == OIL)) {
-                    notBlocked = move(ce, direction, 0, 1, step, phase, false, wait, movingRobotName, considerRepulsor);
+                    notBlocked = move(ce, direction, 0, 1, step, phase, false, wait, movingRobotId, considerRepulsor);
                 }
             }
         }
         if (wait) {
-            notifyCourseMayHaveChanged(step, phase, null, movingRobotName);
+            notifyCourseMayHaveChanged(step, phase, null, movingRobotId);
         }
         return !oldPosition.equals(ce.getPosition());
     }

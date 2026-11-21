@@ -26,7 +26,7 @@ public class AsyncService {
             log.info("{}: {} ({})", gameGui.getGameAttributes().getGameId(), request.getReasonForCourseChange(), request.getStep());
         }
         gameGui.refreshCourse(request.getCourse(), request.getReasonForCourseChange(), request.getStep(), request.getPhase(),
-                              request.getSubPhase(), request.getAnimationSteps(), request.getMovingRobotName());
+                              request.getSubPhase(), request.getAnimationSteps(), request.getMovingRobotId());
     }
 
     @Async

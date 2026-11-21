@@ -47,13 +47,13 @@ import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_EXPLOSION;
 @Getter
 public class GameGui extends BaseGui implements GuiHelper {
 
-    private final String id = UUID.randomUUID().toString();
+    private final UUID id = UUID.randomUUID();
 
     private final ClientToServerConnection clientToServerConnection;
     private final GameAttributes           gameAttributes;
 
     private String myRobotsName = null;
-    private String myRobotsId   = null;
+    private UUID   myRobotsId   = null;
 
     private       JFrame            lastRevealFrame = null;
     private final JPanel            revealPanel     = new JPanel(new FlowLayout());
@@ -134,7 +134,7 @@ public class GameGui extends BaseGui implements GuiHelper {
     }
 
     @Override
-    public void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
+    public void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, UUID movingRobotId) {
         setAndClearIfEmpty(course);
         log.debug("Received new course because '{}': {}", reasonForCourseChange, course);
         mainFrame.setTitle("Circuit Chaos Course - %s - %s - %s".formatted(gameAttributes.getRegistration().getGameName(),
@@ -145,7 +145,7 @@ public class GameGui extends BaseGui implements GuiHelper {
             if (subPhase == null || state == CourseState.GAME_ENDED || step == Step.SETUP) {
                 audioSupplier.stop();
             } else if (subPhase == 0) {
-                boolean hover   = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(movingRobotName);
+                boolean hover   = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(movingRobotId);
                 boolean explode = step == Step.ROBOTS_AND_OBJECTS_MOVE && course.getFloor().stream().anyMatch(f -> f.getExplosiveDamage() > 0);
                 playSound(step, course, hover, explode);
             }
@@ -156,7 +156,7 @@ public class GameGui extends BaseGui implements GuiHelper {
     }
 
     private int myNextCheckpoint(Course course) {
-        if (StringUtils.hasText(myRobotsId)) {
+        if (myRobotsId != null) {
             Optional<Robot> myself = course.getRobots().stream().filter(r -> myRobotsId.equals(r.getId())).findFirst();
             if (myself.isPresent()) {
                 return myself.get().getNextCheckpoint();
@@ -165,9 +165,9 @@ public class GameGui extends BaseGui implements GuiHelper {
         return -1;
     }
 
-    private boolean isHover(String movingRobotName) {
+    private boolean isHover(UUID movingRobotId) {
         return course.getRobots().stream()
-                     .filter(r -> r.getName().equals(movingRobotName))
+                     .filter(r -> r.getId().equals(movingRobotId))
                      .filter(CourseElement::isOnCourse)
                      .anyMatch(Robot::isFlying);
     }
@@ -210,6 +210,7 @@ public class GameGui extends BaseGui implements GuiHelper {
             return;
         }
         myRobotsName = request.getMyRobot().getName();
+        myRobotsId = request.getMyRobot().getId();
         mainFrame.setTitle("Circuit Chaos Course - %s - %s - Waiting for all to program their robots"
                                    .formatted(gameAttributes.getRegistration().getGameName(), myRobotsName));
         if (lastRevealFrame != null) {

@@ -28,7 +28,7 @@ public class ServerToClientConnection {
      * @see ClientController refreshCourse(String  NetworkRequest)
      */
     // Nicht Async - Animationen könnten kaputtgehen
-    public void notifyOfCourseChange(Registration registration, Course course, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
+    public void notifyOfCourseChange(Registration registration, Course course, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, UUID movingRobotId) {
         log.debug("Send notifyOfCourseChange request");
         try {
             NetworkRequest programRequest = new NetworkRequest();
@@ -38,7 +38,7 @@ public class ServerToClientConnection {
             programRequest.setPhase(phase);
             programRequest.setSubPhase(subPhase);
             programRequest.setAnimationSteps(animationSteps);
-            programRequest.setMovingRobotName(movingRobotName);
+            programRequest.setMovingRobotId(movingRobotId);
             restClient.post()
                       .uri(URI.create(registration.getUrl() + "/course"))
                       .contentType(MediaType.APPLICATION_JSON)
