@@ -85,7 +85,7 @@ public class ServerController {
      */
     @PostMapping("/{gameId}")
     public ResponseEntity<Void> register(@PathVariable("gameId") UUID gameId, @RequestBody Registration registration) {
-        if (gameId != null || registration == null || (!registration.isPull() && !StringUtils.hasText(registration.getUrl()))) {
+        if (gameId == null || registration == null || (!registration.isPull() && !StringUtils.hasText(registration.getUrl()))) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         log.debug("Received register request");
