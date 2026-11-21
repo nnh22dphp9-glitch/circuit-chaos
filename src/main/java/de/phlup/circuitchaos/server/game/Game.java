@@ -1,6 +1,5 @@
 package de.phlup.circuitchaos.server.game;
 
-import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.CircuitChaosException;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
@@ -8,7 +7,6 @@ import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.enums.ObjectType;
-import de.phlup.circuitchaos.common.enums.RobotType;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.NetworkResponse;
@@ -26,6 +24,7 @@ import de.phlup.circuitchaos.common.records.CourseElementStub;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
 import de.phlup.circuitchaos.common.records.RevealProgrammeListItem;
+import de.phlup.circuitchaos.common.settings.ClientSettings;
 import de.phlup.circuitchaos.common.settings.TimeSettings;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.player.NetworkPlayer;
@@ -65,6 +64,7 @@ public class Game {
     private final PollOrPushSwitchService pollOrPushSwitchService;
     private final TimeSettings            timeSettings;
     private final Registration            initiator;
+    private final ClientSettings          clientSettings;
 
     private final UUID gameId = UUID.randomUUID();
 
@@ -203,28 +203,15 @@ public class Game {
         notStartedYet = false;
         GlobalServerAttributes.setGameRunning(this.getGameId(), this);
 
-        List<RobotType> availableRobotTypes = RobotType.mixedValues();
         for (Registration reg : List.copyOf(networkPlayers)) {
-            if (availableRobotTypes.isEmpty()) {
-                pollOrPushSwitchService.showMessage(reg, "Game is full. :-(");
-                for (Registration registration : List.copyOf(networkPlayers)) {
-                    if (reg.getId().equals(registration.getId())) {
-                        networkPlayers.remove(reg);
-                    }
-                }
-            } else {
-                RobotType robotType = availableRobotTypes.getFirst();
-                availableRobotTypes.remove(robotType);
-                Robot         robot         = createRobot(robotType);
-                NetworkPlayer networkPlayer = new NetworkPlayer(robot, gameId, reg);
-                players.addLast(networkPlayer);
-                CourseHandler.add(course, robot);
-            }
+            Robot         robot         = createRobot(reg.getRobotName());
+            NetworkPlayer networkPlayer = new NetworkPlayer(robot, gameId, reg);
+            players.addLast(networkPlayer);
+            CourseHandler.add(course, robot);
         }
-        for (int i = 0; !availableRobotTypes.isEmpty() && i < gameOptions.getMaxNumberOfComputerPlayers(); i++) {
-            RobotType robotType = availableRobotTypes.getFirst();
-            availableRobotTypes.remove(robotType);
-            Robot robot = createRobot(robotType);
+        for (int i = 0; i < gameOptions.getNumberOfComputerPlayers(); i++) {
+            Robot robot = createRobot(clientSettings.getDefaultRobotNames().get(
+                    GlobalServerAttributes.RANDOM.nextInt(clientSettings.getDefaultRobotNames().size())));
             players.addLast(new ComputerPlayer(robot, gameId, goal));
             CourseHandler.add(course, robot);
         }
@@ -271,10 +258,11 @@ public class Game {
         }
     }
 
-    private Robot createRobot(RobotType robotType) {
+    private Robot createRobot(String robotName) {
         Robot robot = new Robot();
-        robot.setName(robotType.getRobotName());
+        robot.setName(robotName);
         robot.setId(UUID.randomUUID());
+        robot.setVariantSeed(RANDOM.nextDouble());
         return robot;
     }
 
@@ -458,7 +446,7 @@ public class Game {
             Programme program = r.getProgram()[phase];
             if (program != null && !r.isPoweredDown() && r.isOnCourse()) {
                 revealProgrammeResponse.getProgramme().add(
-                        new RevealProgrammeListItem(r.getName(), ImageSupplier.getRobotImagePathAndName(r), program, r.getWeapon(phase), r.getDamage()));
+                        new RevealProgrammeListItem(r.getName(), r.getVariantSeed(), program, r.getWeapon(phase), r.getDamage()));
             }
         }
         for (Registration reg : watchers) {

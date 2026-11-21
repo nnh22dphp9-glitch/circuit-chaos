@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.StringUtils;
 
 import javax.swing.ImageIcon;
@@ -38,9 +39,11 @@ import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 
+import static de.phlup.circuitchaos.client.gui.PictureConstants.FOLDER_ROBOTS_NORMAL;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_EXPLOSION;
 
 @Slf4j
@@ -63,11 +66,12 @@ public class GameGui extends BaseGui implements GuiHelper {
     private CourseArranger courseArranger = null;
 
     public GameGui(@NotNull ResourceLoader resourceLoader,
+                   @NotNull ResourcePatternResolver resourcePatternResolver,
                    @NotNull AudioSupplier audioSupplier,
                    @NotNull ClientToServerConnection clientToServerConnection,
                    @NotNull GameAttributes gameAttributes,
-                   @NotNull ClientSettings clientSettings) {
-        super(resourceLoader, clientSettings, audioSupplier);
+                   @NotNull ClientSettings clientSettings) throws IOException {
+        super(resourceLoader, resourcePatternResolver, clientSettings, audioSupplier);
 
         this.clientToServerConnection = clientToServerConnection;
         this.gameAttributes = gameAttributes;
@@ -236,8 +240,9 @@ public class GameGui extends BaseGui implements GuiHelper {
                 int                     y    = 1;
                 RevealProgrammeListItem item = revealProgrammeResponse.getProgramme().get(i);
                 addComponentToPanel(new JLabel(item.name()), p, displayLayout, 2 + i, y++, 1, GridBagConstraints.CENTER);
-                ImageIcon originalIcon = imageSupplier.getImageIconPlain(item.imageIconPath());
-                Image     scaledImage  = originalIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                ImageIcon originalIcon = imageSupplier.getImageIconPlain(FOLDER_ROBOTS_NORMAL +
+                                                                                 imageSupplier.getNormalizedRobotName(item.name(), item.variantSeed()));
+                Image scaledImage = originalIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
                 addComponentToPanel(new JLabel(new ImageIcon(scaledImage)),
                                     p, displayLayout, 2 + i, y++, 1, GridBagConstraints.CENTER);
                 addComponentToPanel(new JLabel(" "), p, displayLayout, 2 + i, y++, 1, GridBagConstraints.CENTER);

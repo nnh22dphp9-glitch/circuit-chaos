@@ -18,6 +18,7 @@ public abstract class CourseElement {
     private Direction direction     = Direction.NORTH;
     private Direction prevDirection = Direction.NORTH;
     private boolean   onCourse      = false;
+    private double    variantSeed   = 0;
 
     @JsonIgnore
     private int conflictingMark = 0;
@@ -33,6 +34,7 @@ public abstract class CourseElement {
         copy.setLevel(level);
         copy.setOnCourse(onCourse);
         copy.setConflictingMark(conflictingMark);
+        copy.setVariantSeed(variantSeed);
         return copy;
     }
 

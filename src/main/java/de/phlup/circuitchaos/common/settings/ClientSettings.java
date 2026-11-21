@@ -24,6 +24,7 @@ public class ClientSettings {
     private String defaultTheme;
     private float  defaultZoom;
 
+    private List<String> defaultRobotNames;
     private List<String> defaultModules;
 
     private List<String> courseDirectories;

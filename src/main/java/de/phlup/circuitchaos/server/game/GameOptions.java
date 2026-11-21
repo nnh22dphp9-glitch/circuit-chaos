@@ -11,8 +11,8 @@ import java.util.List;
 @NoArgsConstructor
 public class GameOptions {
 
-    private Goal         goal                       = Goal.FINISH;
-    private List<String> defaultModules             = new ArrayList<>();
-    private int          maxNumberOfComputerPlayers = 0;
+    private Goal         goal                    = Goal.FINISH;
+    private List<String> defaultModules          = new ArrayList<>();
+    private int          numberOfComputerPlayers = 0;
 
 }

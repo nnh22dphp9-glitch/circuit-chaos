@@ -16,9 +16,8 @@ public class CourseObject extends CourseElement {
 
     private ObjectType type;
     private Position   targetPosition;
-    private int        glue        = 0;
-    private double     variantSeed = 0;
-    private boolean    active      = false;
+    private int        glue   = 0;
+    private boolean    active = false;
 
     @JsonIgnore
     public CourseObject copyForSimulation() {
@@ -26,7 +25,6 @@ public class CourseObject extends CourseElement {
         object.setType(type);
         object.setTargetPosition(targetPosition);
         object.setGlue(glue);
-        object.setVariantSeed(variantSeed);
         object.setActive(active);
         return object;
     }

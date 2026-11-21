@@ -12,5 +12,6 @@ public class Registration {
     private String  url;
     private boolean watchOnly;
     private boolean pull;
+    private String  robotName;
 
 }

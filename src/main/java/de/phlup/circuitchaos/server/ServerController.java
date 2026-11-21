@@ -72,7 +72,7 @@ public class ServerController {
                 || !registration.getUrl().equals(clientSettings.getOwnUrl() + "/client/" + registration.getId()))) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        Game game = new Game(pollOrPushSwitchService, timeSettings, registration);
+        Game game = new Game(pollOrPushSwitchService, timeSettings, registration, clientSettings);
         game.setAnimationSteps(timeSettings.getAnimationSteps());
         game.getWatchers().add(registration);
         game.getNetworkPlayers().add(registration);
