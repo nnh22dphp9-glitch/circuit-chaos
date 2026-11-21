@@ -277,7 +277,7 @@ public class CourseHandler {
         glue.setPosition(position);
         glue.setLevel(getFloor(course, position).getLevel());
         glue.setPrevPosition(position);
-        glue.setDirection(Direction.random());
+        glue.setDirection(Direction.NORTH);
         glue.setVariantSeed(RANDOM.nextDouble());
         glue.setGlue(CourseObject.GLUE_INITIAL_AMOUNT);
         glue.setActive(false);
@@ -292,7 +292,7 @@ public class CourseHandler {
         oil.setPosition(position);
         oil.setLevel(getFloor(course, position).getLevel());
         oil.setPrevPosition(position);
-        oil.setDirection(Direction.random());
+        oil.setDirection(Direction.NORTH);
         oil.setVariantSeed(RANDOM.nextDouble());
         oil.setActive(false);
         add(course, oil);
