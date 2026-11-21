@@ -329,22 +329,22 @@ public class CourseHandler {
         }
         for (CourseObject co : course.getObjects()) {
             if (co.isOnCourse()) {
-                elements.add(new CourseElementStub(co.getName() + co.getType(), co.getPosition(), co.getDirection()));
+                elements.add(new CourseElementStub(co.getName() + co.getId() + co.getType(), co.getPosition(), co.getDirection()));
             }
         }
         for (Robot robot : course.getRobots()) {
             if (robot.isOnCourse()) {
-                elements.add(new CourseElementStub(robot.getName(), robot.getPosition(), robot.getDirection()));
+                elements.add(new CourseElementStub(robot.getId().toString(), robot.getPosition(), robot.getDirection()));
             }
         }
         for (Checkpoint checkpoint : course.getCheckpoints()) {
             elements.add(new CourseElementStub(String.valueOf(checkpoint.getNumber()), checkpoint.getPosition(), Direction.NORTH));
         }
         for (Robot robot : course.getRobotsFallingIntoAbyss()) {
-            elements.add(new CourseElementStub(robot.getName(), robot.getPosition(), robot.getDirection()));
+            elements.add(new CourseElementStub(robot.getId().toString(), robot.getPosition(), robot.getDirection()));
         }
         for (CourseObject co : course.getObjectsFallingIntoAbyss()) {
-            elements.add(new CourseElementStub(co.getName(), co.getPosition(), co.getDirection()));
+            elements.add(new CourseElementStub(co.getName() + co.getId(), co.getPosition(), co.getDirection()));
         }
         return elements.stream()
                        .sorted(Comparator.comparing(CourseElementStub::name)
