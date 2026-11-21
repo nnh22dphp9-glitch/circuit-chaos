@@ -849,7 +849,7 @@ public class GameLogic {
                 ROBOT_MOUNTED_SPIN_RIGHT_BEAMS_FIRE,
                 ROBOT_MOUNTED_EXCHANGE_BEAMS_FIRE,
                 ROBOT_MOUNTED_LASER_FIRE).forEach(step ->
-                                                               robotMountedBeamsAndLasersShoot(phase, getCurrentShooters(phase, step, onlyRobot), step));
+                                                          robotMountedBeamsAndLasersShoot(phase, getCurrentShooters(phase, step, onlyRobot), step));
         List.of(COURSE_MOUNTED_TRACTOR_BEAMS_FIRE,
                 COURSE_MOUNTED_PRESSURE_BEAMS_FIRE,
                 COURSE_MOUNTED_LASER_FIRE)

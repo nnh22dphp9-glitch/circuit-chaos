@@ -66,7 +66,7 @@ public class Game {
     private final TimeSettings            timeSettings;
     private final Registration            initiator;
 
-    private final String gameId = UUID.randomUUID().toString();
+    private final UUID gameId = UUID.randomUUID();
 
     private ZonedDateTime lastAccessed = ZonedDateTime.now();
 
@@ -89,7 +89,7 @@ public class Game {
     @Setter
     private       boolean              notStartedYet  = true;
 
-    private final Map<String, Map<String, NetworkResponse>> awaitingResponses = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<UUID, NetworkResponse>> awaitingResponses = new ConcurrentHashMap<>();
 
     private int animationSteps;
 
@@ -274,14 +274,14 @@ public class Game {
     private Robot createRobot(RobotType robotType) {
         Robot robot = new Robot();
         robot.setName(robotType.getRobotName());
-        robot.setId(UUID.randomUUID().toString());
+        robot.setId(UUID.randomUUID());
         return robot;
     }
 
     @AllArgsConstructor
     private class LoopThread extends Thread {
 
-        private final String id;
+        private final UUID id;
 
         public void run() {
             try {
@@ -489,8 +489,8 @@ public class Game {
     }
 
     private void letAllPlayersProgramTheRobots(List<Player> players) {
-        String                       purposeId        = UUID.randomUUID().toString();
-        Map<String, NetworkResponse> requestedAnswers = askNetworkPlayersToProgramTheirRobots(purposeId, players);
+        UUID                       purposeId        = UUID.randomUUID();
+        Map<UUID, NetworkResponse> requestedAnswers = askNetworkPlayersToProgramTheirRobots(purposeId, players);
         // +++ computer players perform
         for (Player player : players) {
             if (player instanceof ComputerPlayer computerPlayer
@@ -510,8 +510,8 @@ public class Game {
         awaitingResponses.remove(purposeId);
     }
 
-    private Map<String, NetworkResponse> askNetworkPlayersToProgramTheirRobots(String purposeId, List<Player> playersToInteractWith) {
-        Map<String, NetworkResponse> requestedAnswers = new ConcurrentHashMap<>();
+    private Map<UUID, NetworkResponse> askNetworkPlayersToProgramTheirRobots(UUID purposeId, List<Player> playersToInteractWith) {
+        Map<UUID, NetworkResponse> requestedAnswers = new ConcurrentHashMap<>();
         awaitingResponses.put(purposeId, requestedAnswers);
         for (Player player : playersToInteractWith) {
             if (player instanceof NetworkPlayer networkPlayer && !gameAborted && !player.getRobot().hasLost(goal)) {
@@ -525,7 +525,7 @@ public class Game {
         return requestedAnswers;
     }
 
-    private void waitForAllAnswers(Map<String, NetworkResponse> requestedAnswers) {
+    private void waitForAllAnswers(Map<UUID, NetworkResponse> requestedAnswers) {
         boolean stillWaitingOrTimeout = true;
         long    timestamp             = System.currentTimeMillis();
         while (stillWaitingOrTimeout) {
@@ -560,12 +560,12 @@ public class Game {
         }
     }
 
-    public void giveUp(Robot r, String registrationId) {
+    public void giveUp(Robot r, UUID registrationId) {
         r.setGiveUp(true);
         r.setDamage(10);
         r.setOnCourse(false);
         CourseHandler.remove(course, r);
-        if (StringUtils.hasText(registrationId)) {
+        if (registrationId != null) {
             for (Registration reg : List.copyOf(networkPlayers)) {
                 if (registrationId.equals(reg.getId())) {
                     networkPlayers.remove(reg);

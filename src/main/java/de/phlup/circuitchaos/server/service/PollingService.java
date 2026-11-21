@@ -18,15 +18,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @AllArgsConstructor
 @Component
 public class PollingService {
 
-    private final Map<String, List<PullingData>> data = new HashMap<>();
+    private final Map<UUID, List<PullingData>> data = new HashMap<>();
 
-    public List<PullingData> getDataByRegistrationId(String registrationId) {
+    public List<PullingData> getDataByRegistrationId(UUID registrationId) {
         synchronized (data) {
             List<PullingData> dataList = data.get(registrationId);
             data.remove(registrationId);
@@ -69,7 +70,7 @@ public class PollingService {
         }
     }
 
-    public void programQuestion(Registration registration, String purposeId, String requestId, NetworkRequest request) {
+    public void programQuestion(Registration registration, UUID purposeId, UUID requestId, NetworkRequest request) {
         PullingData pullingData = new PullingData();
         pullingData.setType(PullType.PROGRAMME_QUESTION);
         pullingData.setPurposeId(purposeId);
@@ -91,8 +92,8 @@ public class PollingService {
     }
 
     public void cleanupRegistrations() {
-        List<String> registrationsToCheck = data.keySet().stream().toList(); // make a copy
-        for (String registrationId : registrationsToCheck) {
+        List<UUID> registrationsToCheck = data.keySet().stream().toList(); // make a copy
+        for (UUID registrationId : registrationsToCheck) {
             if (isNotFound(registrationId, GlobalServerAttributes.PREPARING_GAMES.values())
                     && isNotFound(registrationId, GlobalServerAttributes.RUNNING_GAMES.values())) {
                 data.remove(registrationId);
@@ -100,7 +101,7 @@ public class PollingService {
         }
     }
 
-    private static boolean isNotFound(String registrationId, Collection<Game> games) {
+    private static boolean isNotFound(UUID registrationId, Collection<Game> games) {
         boolean notFound = true;
         for (Game game : games) {
             for (Registration reg : game.getNetworkPlayers()) {

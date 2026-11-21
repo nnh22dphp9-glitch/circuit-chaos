@@ -13,13 +13,14 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -34,9 +35,9 @@ public class ClientController {
      * @see de.phlup.circuitchaos.server.ServerToClientConnection notifyOfCourseChange(Registration, Course, String, Step, Integer)
      */
     @PostMapping("/{registrationId}/course")
-    public ResponseEntity<Void> refreshCourse(@PathVariable("registrationId") String registrationId,
+    public ResponseEntity<Void> refreshCourse(@PathVariable("registrationId") UUID registrationId,
                                               @RequestBody NetworkRequest request) {
-        if (!StringUtils.hasText(registrationId) || request == null || request.getCourse() == null) {
+        if (registrationId == null || request == null || request.getCourse() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         log.debug("Received refreshCourse request");
@@ -49,9 +50,9 @@ public class ClientController {
      * @see de.phlup.circuitchaos.server.ServerToClientConnection showMessage(Registration, String)
      */
     @PostMapping("/{registrationId}/message")
-    public ResponseEntity<Void> showMessage(@PathVariable("registrationId") String registrationId,
+    public ResponseEntity<Void> showMessage(@PathVariable("registrationId") UUID registrationId,
                                             @RequestBody String message) {
-        if (!StringUtils.hasText(registrationId) || message == null) {
+        if (registrationId == null || message == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         log.debug("Received showMessage request");
@@ -63,9 +64,9 @@ public class ClientController {
      * @see de.phlup.circuitchaos.server.ServerToClientConnection revealProgramme(Registration, RevealProgrammeResponse)
      */
     @PostMapping("/{registrationId}/reveal")
-    public ResponseEntity<Void> revealProgramme(@PathVariable("registrationId") String registrationId,
+    public ResponseEntity<Void> revealProgramme(@PathVariable("registrationId") UUID registrationId,
                                                 @RequestBody RevealProgrammeResponse revealProgrammeResponse) {
-        if (!StringUtils.hasText(registrationId) || revealProgrammeResponse == null) {
+        if (registrationId == null || revealProgrammeResponse == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         log.debug("Received revealProgramme request");
@@ -79,11 +80,11 @@ public class ClientController {
      * @see de.phlup.circuitchaos.server.ServerToClientConnection programQuestion(Registration, Action, String, String, NetworkRequest)
      */
     @PostMapping("/{registrationId}/answer/program/{purposeId}/{requestId}")
-    public ResponseEntity<Void> programQuestion(@PathVariable("registrationId") String registrationId,
-                                                @PathVariable("purposeId") String purposeId,
-                                                @PathVariable("requestId") String requestId,
+    public ResponseEntity<Void> programQuestion(@PathVariable("registrationId") UUID registrationId,
+                                                @PathVariable("purposeId") UUID purposeId,
+                                                @PathVariable("requestId") UUID requestId,
                                                 @RequestBody NetworkRequest request) {
-        if (!StringUtils.hasText(registrationId) || request == null) {
+        if (registrationId == null || request == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         log.debug("Received programQuestion request");
@@ -98,10 +99,10 @@ public class ClientController {
      * @see de.phlup.circuitchaos.server.ServerToClientConnection notifyOfNumberOfPlayersChange(Registration, int, int)
      */
     @GetMapping("/{registrationId}/numberOfPlayersChanged/{numberOfPlayers}/{numberOfWatchers}")
-    public ResponseEntity<Void> numberOfPlayersChanged(@PathVariable("registrationId") String registrationId,
+    public ResponseEntity<Void> numberOfPlayersChanged(@PathVariable("registrationId") UUID registrationId,
                                                        @PathVariable("numberOfPlayers") int numberOfPlayers,
                                                        @PathVariable("numberOfWatchers") int numberOfWatchers) {
-        if (!StringUtils.hasText(registrationId)) {
+        if (registrationId == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         log.debug("Received numberOfPlayersChanged request");
@@ -112,7 +113,7 @@ public class ClientController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    private GameGui determineGame(String registrationId) {
+    private GameGui determineGame(UUID registrationId) {
         GameAttributes gameAttributes = GlobalServerAttributes.CLIENT_GAMES.get(registrationId);
         if (gameAttributes == null) {
             throw new CircuitChaosException("Game not found");

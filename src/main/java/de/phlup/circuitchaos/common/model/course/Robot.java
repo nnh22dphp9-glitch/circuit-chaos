@@ -15,6 +15,7 @@ import lombok.ToString;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static de.phlup.circuitchaos.common.enums.ModuleType.*;
 
@@ -23,7 +24,7 @@ import static de.phlup.circuitchaos.common.enums.ModuleType.*;
 @ToString(callSuper = true)
 public class Robot extends CourseElement {
 
-    private String          id;
+    private UUID            id;
     private int             damage                 = 0;
     private Position        archivePosition;
     private int             archiveLevel;

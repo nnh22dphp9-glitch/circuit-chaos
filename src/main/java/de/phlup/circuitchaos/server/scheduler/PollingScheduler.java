@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -28,7 +29,7 @@ public class PollingScheduler {
         List<GameAttributes> copyOfGames = GlobalServerAttributes.CLIENT_GAMES.values().stream().toList();
         for (GameAttributes reg : copyOfGames) {
             if (reg.getRegistration().isPull()) {
-                String        registrationId = reg.getRegistration().getId();
+                UUID          registrationId = reg.getRegistration().getId();
                 PullingData[] dataList       = serverConnection.pull(reg.getGameUrl(), registrationId);
                 if (dataList != null) {
                     for (PullingData data : dataList) {
@@ -39,7 +40,7 @@ public class PollingScheduler {
         }
     }
 
-    private void handleSinglePullingData(GameAttributes reg, PullingData data, String registrationId) {
+    private void handleSinglePullingData(GameAttributes reg, PullingData data, UUID registrationId) {
         final GameGui gameGui = reg.getGameGui();
         switch (data.getType()) {
             case COURSE_CHANGE -> asyncService.refreshCourse(gameGui, data.getRequest());

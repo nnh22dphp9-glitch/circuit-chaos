@@ -9,6 +9,8 @@ import de.phlup.circuitchaos.server.ServerToClientConnection;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @Component
 public class PollOrPushSwitchService {
@@ -40,7 +42,7 @@ public class PollOrPushSwitchService {
         }
     }
 
-    public void programQuestion(Registration registration, String purposeId, String requestId, NetworkRequest request) {
+    public void programQuestion(Registration registration, UUID purposeId, UUID requestId, NetworkRequest request) {
         if (registration.isPull()) {
             pollingService.programQuestion(registration, purposeId, requestId, request);
         } else {

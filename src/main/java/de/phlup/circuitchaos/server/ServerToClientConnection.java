@@ -15,6 +15,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
 
 import java.net.URI;
+import java.util.UUID;
 
 @Slf4j
 @AllArgsConstructor
@@ -95,7 +96,7 @@ public class ServerToClientConnection {
      * @see ClientController programQuestion(String, String, String, NetworkRequest)
      */
     @Async
-    public void programQuestion(Registration registration, String purposeId, String requestId, NetworkRequest request) {
+    public void programQuestion(Registration registration, UUID purposeId, UUID requestId, NetworkRequest request) {
         log.debug("Send programQuestion request");
         try {
             restClient.post()

@@ -55,7 +55,7 @@ public class CircuitChaosGui implements GuiHelper {
 
     private static final String TEXT_NO_GAME_FOUND = "  ---   no preparing game found on server   ---  ";
 
-    public static String lastRequestedNewGame;
+    public static UUID lastRequestedNewGame;
 
     private final ResourceLoader           resourceLoader;
     private final ClientSettings           clientSettings;
@@ -193,7 +193,7 @@ public class CircuitChaosGui implements GuiHelper {
     private void startNewGame(String gameName, boolean pull) {
         GameAttributes gameAttributes = null;
         try {
-            lastRequestedNewGame = UUID.randomUUID().toString();
+            lastRequestedNewGame = UUID.randomUUID();
 
             Registration clientRegistration = new Registration();
             clientRegistration.setGameName(gameName);
@@ -203,7 +203,7 @@ public class CircuitChaosGui implements GuiHelper {
             clientRegistration.setPull(pull);
 
             String gameUrl = serverAddressInput.getText().trim() + "/game";
-            String gameId  = clientToServerConnection.createGame(gameUrl, clientRegistration);
+            UUID   gameId  = clientToServerConnection.createGame(gameUrl, clientRegistration);
 
             gameAttributes = new GameAttributes(gameId, clientRegistration, gameUrl + "/" + gameId, false);
 
@@ -229,7 +229,7 @@ public class CircuitChaosGui implements GuiHelper {
         GameAttributes gameAttributes = null;
         try {
             Registration clientRegistration = new Registration();
-            clientRegistration.setId(UUID.randomUUID().toString());
+            clientRegistration.setId(UUID.randomUUID());
             if (!pull) {
                 clientRegistration.setUrl(clientSettings.getOwnUrl() + "/client/" + clientRegistration.getId());
             }
@@ -237,7 +237,7 @@ public class CircuitChaosGui implements GuiHelper {
             clientRegistration.setGameName(selectedGame.getGameName());
             clientRegistration.setPull(pull);
 
-            String gameId  = selectedGame.getGameId();
+            UUID   gameId  = selectedGame.getGameId();
             String gameUrl = serverAddressInput.getText().trim() + "/game/" + gameId;
             clientToServerConnection.registerAsWatcher(gameUrl, clientRegistration);
 

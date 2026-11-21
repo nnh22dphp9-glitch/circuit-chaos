@@ -53,6 +53,7 @@ public class GameGui extends BaseGui implements GuiHelper {
     private final GameAttributes           gameAttributes;
 
     private String myRobotsName = null;
+    private String myRobotsId   = null;
 
     private       JFrame            lastRevealFrame = null;
     private final JPanel            revealPanel     = new JPanel(new FlowLayout());
@@ -155,8 +156,8 @@ public class GameGui extends BaseGui implements GuiHelper {
     }
 
     private int myNextCheckpoint(Course course) {
-        if (StringUtils.hasText(myRobotsName)) {
-            Optional<Robot> myself = course.getRobots().stream().filter(r -> myRobotsName.equals(r.getName())).findFirst();
+        if (StringUtils.hasText(myRobotsId)) {
+            Optional<Robot> myself = course.getRobots().stream().filter(r -> myRobotsId.equals(r.getId())).findFirst();
             if (myself.isPresent()) {
                 return myself.get().getNextCheckpoint();
             }

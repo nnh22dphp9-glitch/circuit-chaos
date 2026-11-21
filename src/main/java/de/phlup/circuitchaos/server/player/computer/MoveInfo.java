@@ -17,6 +17,7 @@ import lombok.Data;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Data
 public class MoveInfo {
@@ -27,7 +28,7 @@ public class MoveInfo {
     private       Course      course;
     private       GameLogic   gameLogic;
     private       Robot       myself;
-    private final String      robotId;
+    private final UUID        robotId;
     private final List<Robot> robotsInPriorityOrder = new java.util.ArrayList<>();
 
     private       Programme[]  program;

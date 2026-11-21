@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -61,7 +62,7 @@ public class ServerController {
      * @see de.phlup.circuitchaos.client.ClientToServerConnection createGame(String gameUrl, Registration clientRegistration)
      */
     @PostMapping
-    public ResponseEntity<String> createGame(@RequestBody Registration registration) {
+    public ResponseEntity<UUID> createGame(@RequestBody Registration registration) {
         if (registration == null || (!registration.isPull() && !StringUtils.hasText(registration.getUrl()))) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -83,8 +84,8 @@ public class ServerController {
      * @see de.phlup.circuitchaos.client.ClientToServerConnection registerAsWatcher(String gameUrl, Registration clientRegistration)
      */
     @PostMapping("/{gameId}")
-    public ResponseEntity<Void> register(@PathVariable("gameId") String gameId, @RequestBody Registration registration) {
-        if (!StringUtils.hasText(gameId) || registration == null || (!registration.isPull() && !StringUtils.hasText(registration.getUrl()))) {
+    public ResponseEntity<Void> register(@PathVariable("gameId") UUID gameId, @RequestBody Registration registration) {
+        if (gameId != null || registration == null || (!registration.isPull() && !StringUtils.hasText(registration.getUrl()))) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         log.debug("Received register request");
@@ -104,7 +105,7 @@ public class ServerController {
      * @see de.phlup.circuitchaos.client.ClientToServerConnection deregister(String gameUrl, String clientRegistration)
      */
     @DeleteMapping("/{gameId}/{registrationId}")
-    public ResponseEntity<Course> deregister(@PathVariable("gameId") String gameId, @PathVariable("registrationId") String registrationId) {
+    public ResponseEntity<Course> deregister(@PathVariable("gameId") UUID gameId, @PathVariable("registrationId") UUID registrationId) {
         log.debug("Received deregister request");
         Game               game             = GlobalServerAttributes.getGame(gameId, true, true);
         List<Registration> registrationList = List.copyOf(game.getWatchers());
@@ -136,7 +137,7 @@ public class ServerController {
      * @see de.phlup.circuitchaos.client.ClientToServerConnection getCourse(String gameUrl)
      */
     @GetMapping("/{gameId}/course")
-    public Course getCourse(@PathVariable("gameId") String gameId) {
+    public Course getCourse(@PathVariable("gameId") UUID gameId) {
         log.debug("Received getCourse request");
         return GlobalServerAttributes.getGame(gameId, true, true).getCourse();
     }
@@ -145,7 +146,7 @@ public class ServerController {
      * @see de.phlup.circuitchaos.client.ClientToServerConnection play(String gameUrl, GameOptions gameOptions)
      */
     @PostMapping("/{gameId}/play")
-    public void play(@PathVariable("gameId") String gameId, @RequestBody GameOptions options) {
+    public void play(@PathVariable("gameId") UUID gameId, @RequestBody GameOptions options) {
         log.debug("Received play request - Options: {}", options);
         GlobalServerAttributes.getGame(gameId, false, true).play(options);
     }
@@ -154,7 +155,7 @@ public class ServerController {
      * @see de.phlup.circuitchaos.client.ClientToServerConnection replaceCourse(String gameUrl, Course course)
      */
     @PostMapping("/{gameId}/course")
-    public void replaceCourse(@PathVariable("gameId") String gameId, @RequestBody Course course) {
+    public void replaceCourse(@PathVariable("gameId") UUID gameId, @RequestBody Course course) {
         log.debug("Received replaceCourse request");
         Game                 game           = GlobalServerAttributes.getGame(gameId, false, true);
         ServerCourseArranger courseArranger = game.getCourseArranger();
@@ -173,7 +174,7 @@ public class ServerController {
      * @see de.phlup.circuitchaos.client.ClientToServerConnection addCheckpoint(String gameUrl, Position position)
      */
     @PostMapping("/{gameId}/checkpoint")
-    public void addCheckpoint(@PathVariable("gameId") String gameId, @RequestParam("x") int x, @RequestParam("y") int y) {
+    public void addCheckpoint(@PathVariable("gameId") UUID gameId, @RequestParam("x") int x, @RequestParam("y") int y) {
         log.debug("Received addCheckpoint request");
         Game                 game           = GlobalServerAttributes.getGame(gameId, false, true);
         ServerCourseArranger courseArranger = game.getCourseArranger();
@@ -192,7 +193,7 @@ public class ServerController {
      * @see de.phlup.circuitchaos.client.ClientToServerConnection removeCheckpoint(String gameUrl, Position position)
      */
     @DeleteMapping("/{gameId}/checkpoint")
-    public void removeCheckpoint(@PathVariable("gameId") String gameId, @RequestParam("x") int x, @RequestParam("y") int y) {
+    public void removeCheckpoint(@PathVariable("gameId") UUID gameId, @RequestParam("x") int x, @RequestParam("y") int y) {
         log.debug("Received removeCheckpoint request");
         Game                 game           = GlobalServerAttributes.getGame(gameId, false, true);
         ServerCourseArranger courseArranger = game.getCourseArranger();
@@ -211,15 +212,15 @@ public class ServerController {
      * @see de.phlup.circuitchaos.client.ClientToServerConnection postAnswer(String answerUrl, NetworkResponse response)
      */
     @PostMapping("/{gameId}/answer/{purposeId}/{requestId}")
-    public void receiveAnswer(@PathVariable("gameId") String gameId,
-                              @PathVariable("purposeId") String purposeId,
-                              @PathVariable("requestId") String requestId,
+    public void receiveAnswer(@PathVariable("gameId") UUID gameId,
+                              @PathVariable("purposeId") UUID purposeId,
+                              @PathVariable("requestId") UUID requestId,
                               @RequestBody NetworkResponse response) {
         log.debug("Received receivedAnswer request: game {}, purpose {}, request {}, response {}",
                   gameId, purposeId, requestId, response);
-        Game                                      game                   = GlobalServerAttributes.getGame(gameId, true, false);
-        Map<String, Map<String, NetworkResponse>> awaitingResponses      = game.getAwaitingResponses();
-        Map<String, NetworkResponse>              networkResponseHashMap = awaitingResponses.get(purposeId);
+        Game                                  game                   = GlobalServerAttributes.getGame(gameId, true, false);
+        Map<UUID, Map<UUID, NetworkResponse>> awaitingResponses      = game.getAwaitingResponses();
+        Map<UUID, NetworkResponse>            networkResponseHashMap = awaitingResponses.get(purposeId);
         if (networkResponseHashMap == null) {
             throw new CircuitChaosException("You´ve timed out.");
         } else {
@@ -232,8 +233,8 @@ public class ServerController {
     }
 
     @GetMapping("/{gameId}/pull/{registrationId}")
-    public List<PullingData> pullAction(@PathVariable("gameId") @SuppressWarnings("unused") String gameId,
-                                        @PathVariable("registrationId") String registrationId) {
+    public List<PullingData> pullAction(@PathVariable("gameId") @SuppressWarnings("unused") UUID gameId,
+                                        @PathVariable("registrationId") UUID registrationId) {
         log.debug("Received pullAction request");
         return pollingService.getDataByRegistrationId(registrationId);
     }

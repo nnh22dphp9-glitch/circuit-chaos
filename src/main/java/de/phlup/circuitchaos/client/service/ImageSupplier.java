@@ -785,7 +785,8 @@ public class ImageSupplier {
 
     private String getGroundElementPicture(Floor floor) {
         return switch (floor.getFloortype()) {
-            case Floortype.OPEN_FLOOR, Floortype.SWITCH -> GFX_OPEN_FLOOR + ((int) (floor.getVariant() * theme.getOpenFloorVariants()));
+            case Floortype.OPEN_FLOOR, Floortype.SWITCH ->
+                    GFX_OPEN_FLOOR + ((int) (floor.getVariant() * theme.getOpenFloorVariants()));
             case Floortype.PIT_STOP -> GFX_PIT_STOP;
             case Floortype.ABYSS -> GFX_ABYSS_BG;
             case Floortype.TRAPDOOR -> GFX_TRAPDOOR_3;
