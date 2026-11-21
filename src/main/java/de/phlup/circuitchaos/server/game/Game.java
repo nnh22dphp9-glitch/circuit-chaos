@@ -1,6 +1,5 @@
 package de.phlup.circuitchaos.server.game;
 
-import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.CircuitChaosException;
 import de.phlup.circuitchaos.common.CourseHandler;
 import de.phlup.circuitchaos.common.enums.Direction;
@@ -8,7 +7,6 @@ import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.Goal;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.enums.ObjectType;
-import de.phlup.circuitchaos.common.enums.RobotType;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.model.NetworkRequest;
 import de.phlup.circuitchaos.common.model.NetworkResponse;
@@ -26,6 +24,7 @@ import de.phlup.circuitchaos.common.records.CourseElementStub;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Programme;
 import de.phlup.circuitchaos.common.records.RevealProgrammeListItem;
+import de.phlup.circuitchaos.common.settings.ClientSettings;
 import de.phlup.circuitchaos.common.settings.TimeSettings;
 import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import de.phlup.circuitchaos.server.player.NetworkPlayer;
@@ -65,8 +64,9 @@ public class Game {
     private final PollOrPushSwitchService pollOrPushSwitchService;
     private final TimeSettings            timeSettings;
     private final Registration            initiator;
+    private final ClientSettings          clientSettings;
 
-    private final String gameId = UUID.randomUUID().toString();
+    private final UUID gameId = UUID.randomUUID();
 
     private ZonedDateTime lastAccessed = ZonedDateTime.now();
 
@@ -89,11 +89,11 @@ public class Game {
     @Setter
     private       boolean              notStartedYet  = true;
 
-    private final Map<String, Map<String, NetworkResponse>> awaitingResponses = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<UUID, NetworkResponse>> awaitingResponses = new ConcurrentHashMap<>();
 
     private int animationSteps;
 
-    public void notifyCourseMayHaveChanged(Step step, Integer phase, String detail, String movingRobotName) {
+    public void notifyCourseMayHaveChanged(Step step, Integer phase, String detail, UUID movingRobotId) {
         String reason = (phase == null ? "" : (phase + 1) + ": ") + step.getName() + (StringUtils.hasText(detail) ? " - " + detail : "");
         log.debug("Course may have changed: {}: {}", step.name(), reason);
         List<CourseElementStub> stubList    = CourseHandler.createCourseElementStubList(course);
@@ -132,13 +132,13 @@ public class Game {
             if (step == Step.SETUP || !wait) {
                 for (Registration reg : watchers) {
                     // Please note: "reason" will become part of the window title
-                    pollOrPushSwitchService.notifyOfCourseChange(reg, course, reason, step, phase, null, animationSteps, movingRobotName);
+                    pollOrPushSwitchService.notifyOfCourseChange(reg, course, reason, step, phase, null, animationSteps, movingRobotId);
                 }
             } else {
                 randomlySetFloorOrientationForDisplay();
                 for (int subPhase = 0; subPhase < animationSteps; subPhase++) {
                     for (Registration reg : watchers) {
-                        pollOrPushSwitchService.notifyOfCourseChange(reg, course, reason, step, phase, subPhase, animationSteps, movingRobotName);
+                        pollOrPushSwitchService.notifyOfCourseChange(reg, course, reason, step, phase, subPhase, animationSteps, movingRobotId);
                     }
                     Sleep.sleepForMillis(timeSettings.getTimeBetweenSteps() / animationSteps);
                 }
@@ -151,7 +151,7 @@ public class Game {
             randomlySetFloorOrientationForDisplay();
             for (int subPhase = animationSteps; subPhase < 2 * animationSteps; subPhase++) {
                 for (Registration reg : watchers) {
-                    pollOrPushSwitchService.notifyOfCourseChange(reg, course, reason, step, phase, subPhase, animationSteps, movingRobotName);
+                    pollOrPushSwitchService.notifyOfCourseChange(reg, course, reason, step, phase, subPhase, animationSteps, movingRobotId);
                 }
                 Sleep.sleepForMillis(timeSettings.getTimeBetweenSteps() / animationSteps);
             }
@@ -203,28 +203,15 @@ public class Game {
         notStartedYet = false;
         GlobalServerAttributes.setGameRunning(this.getGameId(), this);
 
-        List<RobotType> availableRobotTypes = RobotType.mixedValues();
         for (Registration reg : List.copyOf(networkPlayers)) {
-            if (availableRobotTypes.isEmpty()) {
-                pollOrPushSwitchService.showMessage(reg, "Game is full. :-(");
-                for (Registration registration : List.copyOf(networkPlayers)) {
-                    if (reg.getId().equals(registration.getId())) {
-                        networkPlayers.remove(reg);
-                    }
-                }
-            } else {
-                RobotType robotType = availableRobotTypes.getFirst();
-                availableRobotTypes.remove(robotType);
-                Robot         robot         = createRobot(robotType);
-                NetworkPlayer networkPlayer = new NetworkPlayer(robot, gameId, reg);
-                players.addLast(networkPlayer);
-                CourseHandler.add(course, robot);
-            }
+            Robot         robot         = createRobot(reg.getRobotName());
+            NetworkPlayer networkPlayer = new NetworkPlayer(robot, gameId, reg);
+            players.addLast(networkPlayer);
+            CourseHandler.add(course, robot);
         }
-        for (int i = 0; !availableRobotTypes.isEmpty() && i < gameOptions.getMaxNumberOfComputerPlayers(); i++) {
-            RobotType robotType = availableRobotTypes.getFirst();
-            availableRobotTypes.remove(robotType);
-            Robot robot = createRobot(robotType);
+        for (int i = 0; i < gameOptions.getNumberOfComputerPlayers(); i++) {
+            Robot robot = createRobot(clientSettings.getDefaultRobotNames().get(
+                    GlobalServerAttributes.RANDOM.nextInt(clientSettings.getDefaultRobotNames().size())));
             players.addLast(new ComputerPlayer(robot, gameId, goal));
             CourseHandler.add(course, robot);
         }
@@ -271,17 +258,18 @@ public class Game {
         }
     }
 
-    private Robot createRobot(RobotType robotType) {
+    private Robot createRobot(String robotName) {
         Robot robot = new Robot();
-        robot.setName(robotType.getRobotName());
-        robot.setId(UUID.randomUUID().toString());
+        robot.setName(robotName);
+        robot.setId(UUID.randomUUID());
+        robot.setVariantSeed(RANDOM.nextDouble());
         return robot;
     }
 
     @AllArgsConstructor
     private class LoopThread extends Thread {
 
-        private final String id;
+        private final UUID id;
 
         public void run() {
             try {
@@ -458,7 +446,7 @@ public class Game {
             Programme program = r.getProgram()[phase];
             if (program != null && !r.isPoweredDown() && r.isOnCourse()) {
                 revealProgrammeResponse.getProgramme().add(
-                        new RevealProgrammeListItem(r.getName(), ImageSupplier.getRobotImagePathAndName(r), program, r.getWeapon(phase), r.getDamage()));
+                        new RevealProgrammeListItem(r.getName(), r.getVariantSeed(), program, r.getWeapon(phase), r.getDamage()));
             }
         }
         for (Registration reg : watchers) {
@@ -489,8 +477,8 @@ public class Game {
     }
 
     private void letAllPlayersProgramTheRobots(List<Player> players) {
-        String                       purposeId        = UUID.randomUUID().toString();
-        Map<String, NetworkResponse> requestedAnswers = askNetworkPlayersToProgramTheirRobots(purposeId, players);
+        UUID                       purposeId        = UUID.randomUUID();
+        Map<UUID, NetworkResponse> requestedAnswers = askNetworkPlayersToProgramTheirRobots(purposeId, players);
         // +++ computer players perform
         for (Player player : players) {
             if (player instanceof ComputerPlayer computerPlayer
@@ -510,8 +498,8 @@ public class Game {
         awaitingResponses.remove(purposeId);
     }
 
-    private Map<String, NetworkResponse> askNetworkPlayersToProgramTheirRobots(String purposeId, List<Player> playersToInteractWith) {
-        Map<String, NetworkResponse> requestedAnswers = new ConcurrentHashMap<>();
+    private Map<UUID, NetworkResponse> askNetworkPlayersToProgramTheirRobots(UUID purposeId, List<Player> playersToInteractWith) {
+        Map<UUID, NetworkResponse> requestedAnswers = new ConcurrentHashMap<>();
         awaitingResponses.put(purposeId, requestedAnswers);
         for (Player player : playersToInteractWith) {
             if (player instanceof NetworkPlayer networkPlayer && !gameAborted && !player.getRobot().hasLost(goal)) {
@@ -525,7 +513,7 @@ public class Game {
         return requestedAnswers;
     }
 
-    private void waitForAllAnswers(Map<String, NetworkResponse> requestedAnswers) {
+    private void waitForAllAnswers(Map<UUID, NetworkResponse> requestedAnswers) {
         boolean stillWaitingOrTimeout = true;
         long    timestamp             = System.currentTimeMillis();
         while (stillWaitingOrTimeout) {
@@ -560,12 +548,12 @@ public class Game {
         }
     }
 
-    public void giveUp(Robot r, String registrationId) {
+    public void giveUp(Robot r, UUID registrationId) {
         r.setGiveUp(true);
         r.setDamage(10);
         r.setOnCourse(false);
         CourseHandler.remove(course, r);
-        if (StringUtils.hasText(registrationId)) {
+        if (registrationId != null) {
             for (Registration reg : List.copyOf(networkPlayers)) {
                 if (registrationId.equals(reg.getId())) {
                     networkPlayers.remove(reg);

@@ -11,15 +11,16 @@ public interface PictureConstants {
 
     String PREFIX = "/gfx/";
 
-    String FOLDER_ADD_ONS   = PREFIX + "add-ons/";
-    String FOLDER_ARROWS    = PREFIX + "arrows/";
-    String FOLDER_BEAMS     = PREFIX + "beams/";
-    String FOLDER_FLOOR     = PREFIX + "floor/";
-    String FOLDER_OBJECTS   = PREFIX + "objects/";
-    String FOLDER_MODULES   = PREFIX + "modules/";
-    String FOLDER_PICTURES  = PREFIX + "pictures/";
-    String FOLDER_PROGRAMME = PREFIX + "programme/";
-    String FOLDER_ROBOTS    = PREFIX + "robots/";
+    String FOLDER_ADD_ONS       = PREFIX + "add-ons/";
+    String FOLDER_ARROWS        = PREFIX + "arrows/";
+    String FOLDER_BEAMS         = PREFIX + "beams/";
+    String FOLDER_FLOOR         = PREFIX + "floor/";
+    String FOLDER_OBJECTS       = PREFIX + "objects/";
+    String FOLDER_MODULES       = PREFIX + "modules/";
+    String FOLDER_PICTURES      = PREFIX + "pictures/";
+    String FOLDER_PROGRAMME     = PREFIX + "programme/";
+    String FOLDER_ROBOTS_NORMAL = PREFIX + "robots/normal/";
+    String FOLDER_ROBOTS_FLYING = PREFIX + "robots/flying/";
 
     String FOLDER_FLOOR_CONVEYOR_BELTS = FOLDER_FLOOR + "conveyor-belts/";
     String FOLDER_FLOOR_ABYSS          = FOLDER_FLOOR + "abyss/";

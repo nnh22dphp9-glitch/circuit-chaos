@@ -7,7 +7,6 @@ import de.phlup.circuitchaos.common.model.NetworkResponse;
 import de.phlup.circuitchaos.common.model.PullingData;
 import de.phlup.circuitchaos.common.model.Registration;
 import de.phlup.circuitchaos.common.model.course.Course;
-import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.server.ServerController;
 import de.phlup.circuitchaos.server.game.GameOptions;
 import lombok.AllArgsConstructor;
@@ -25,6 +24,7 @@ import javax.swing.JOptionPane;
 import java.net.URI;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 @Slf4j
@@ -62,21 +62,21 @@ public class ClientToServerConnection {
     /**
      * @see ServerController createGame(Registration registration)
      */
-    public String createGame(String gameUrl, Registration clientRegistration) {
+    public UUID createGame(String gameUrl, Registration clientRegistration) {
         log.debug("Send createGame request");
         return showErrorMessage(() -> restClient.post()
                                                 .uri(URI.create(gameUrl))
                                                 .contentType(MediaType.APPLICATION_JSON)
                                                 .body(clientRegistration)
                                                 .retrieve()
-                                                .body(String.class));
+                                                .body(UUID.class));
     }
 
     /**
      * @see ServerController deregister(String gameId, String registrationId)
      */
     @Async
-    public void deregister(String gameUrl, String clientRegistration) {
+    public void deregister(String gameUrl, UUID clientRegistration) {
         log.debug("Send deregister request");
         try {
             restClient.delete().uri(URI.create(gameUrl + "/" + clientRegistration)).retrieve().toBodilessEntity();
@@ -114,28 +114,6 @@ public class ClientToServerConnection {
     }
 
     /**
-     * @see ServerController addCheckpoint(String gameId, int x, int y)
-     */
-    public void addCheckpoint(String gameUrl, Position position) {
-        log.debug("Send addCheckpoint request");
-        String uri = gameUrl + "/checkpoint?x=" + position.x() + "&y=" + position.y();
-        showErrorMessage(() -> restClient.post()
-                                         .uri(URI.create(uri))
-                                         .contentType(MediaType.APPLICATION_JSON)
-                                         .retrieve()
-                                         .toBodilessEntity());
-    }
-
-    /**
-     * @see ServerController removeCheckpoint(String gameId, int x, int y)
-     */
-    public void removeCheckpoint(String gameUrl, Position position) {
-        log.debug("Send removeCheckpoint request");
-        String uri = gameUrl + "/checkpoint?x=" + position.x() + "&y=" + position.y();
-        showErrorMessage(() -> restClient.delete().uri(URI.create(uri)).retrieve().toBodilessEntity());
-    }
-
-    /**
      * @see ServerController getCouse(String gameId)
      */
     public Course getCourse(String gameUrl) {
@@ -163,7 +141,7 @@ public class ClientToServerConnection {
         }
     }
 
-    public PullingData[] pull(String gameUrl, String registrationId) {
+    public PullingData[] pull(String gameUrl, UUID registrationId) {
         log.debug("Send pull request");
         return restClient.get()
                          .uri(URI.create(gameUrl + "/pull/" + registrationId))

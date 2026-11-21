@@ -24,6 +24,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -37,7 +38,7 @@ public class ComputerPlayer extends Player {
     private boolean    turnFinished;
     private GameLogic  gameLogic;
 
-    public ComputerPlayer(@NotNull Robot robot, @NotNull String gameId, @NotNull Goal goal) {
+    public ComputerPlayer(@NotNull Robot robot, @NotNull UUID gameId, @NotNull Goal goal) {
         super(robot, gameId);
         this.goal = goal;
     }

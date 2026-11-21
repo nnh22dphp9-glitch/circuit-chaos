@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
@@ -27,18 +28,21 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Getter
 public abstract class BaseGui {
 
-    protected final ResourceLoader resourceLoader;
-    protected final ClientSettings clientSettings;
-    protected final AudioSupplier  audioSupplier;
-    protected final ImageSupplier  imageSupplier;
+    protected final ResourceLoader          resourceLoader;
+    protected final ResourcePatternResolver resourcePatternResolver;
+    protected final ClientSettings          clientSettings;
+    protected final AudioSupplier           audioSupplier;
+    protected final ImageSupplier           imageSupplier;
 
     protected final CourseJPanel courseJPanel;
     protected       Course       course;
@@ -51,16 +55,18 @@ public abstract class BaseGui {
     protected final Map<Position, BufferedImage> images = new HashMap<>();
 
     public BaseGui(@NotNull ResourceLoader resourceLoader,
+                   @NotNull ResourcePatternResolver resourcePatternResolver,
                    @NotNull ClientSettings clientSettings,
-                   @Nullable AudioSupplier audioSupplier) {
+                   @Nullable AudioSupplier audioSupplier) throws IOException {
         this.resourceLoader = resourceLoader;
+        this.resourcePatternResolver = resourcePatternResolver;
         this.clientSettings = clientSettings;
         this.audioSupplier = audioSupplier;
         ClientSettings.Theme theme = determineTheme();
         if (audioSupplier != null) {
             this.audioSupplier.setThemePath(theme.getPath());
         }
-        this.imageSupplier = new ImageSupplier(theme, resourceLoader);
+        this.imageSupplier = new ImageSupplier(theme, resourceLoader, resourcePatternResolver);
         courseJPanel = new CourseJPanel(imageSupplier);
         this.zoomFactor = clientSettings.getDefaultZoom();
     }
@@ -148,7 +154,7 @@ public abstract class BaseGui {
         images.put(f.getPosition(), bi);
     }
 
-    public abstract void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName);
+    public abstract void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, UUID movingRobotId);
 
 }
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.swing.JOptionPane;
 import java.awt.Component;
+import java.util.UUID;
 
 import static de.phlup.circuitchaos.server.game.Game.AND_THE_WINNER_IS;
 import static de.phlup.circuitchaos.server.game.Game.THIS_GAME_IS_A_TIE;
@@ -25,7 +26,7 @@ public class AsyncService {
             log.info("{}: {} ({})", gameGui.getGameAttributes().getGameId(), request.getReasonForCourseChange(), request.getStep());
         }
         gameGui.refreshCourse(request.getCourse(), request.getReasonForCourseChange(), request.getStep(), request.getPhase(),
-                              request.getSubPhase(), request.getAnimationSteps(), request.getMovingRobotName());
+                              request.getSubPhase(), request.getAnimationSteps(), request.getMovingRobotId());
     }
 
     @Async
@@ -34,7 +35,7 @@ public class AsyncService {
     }
 
     @Async
-    public void showMessage(String registrationId, String message) {
+    public void showMessage(UUID registrationId, String message) {
         Component      mainFrame      = null;
         GameAttributes gameAttributes = GlobalServerAttributes.CLIENT_GAMES.get(registrationId);
         if (gameAttributes != null) {

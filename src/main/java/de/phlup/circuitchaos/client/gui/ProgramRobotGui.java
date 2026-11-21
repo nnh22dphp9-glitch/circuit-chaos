@@ -451,8 +451,8 @@ public class ProgramRobotGui implements GuiHelper {
         }
 
         private Direction setDirectionOfRobot() {
-            robot.setPrevDirection(robot.getDirection());
             robot.setDirection(robot.getDirection().add(Direction.EAST));
+            robot.setPrevDirection(robot.getDirection());
             return robot.getDirection();
         }
     }

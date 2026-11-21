@@ -19,13 +19,13 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 public class NetworkPlayer extends Player {
 
-    private final String       id;
+    private final UUID         id;
     private final Registration registration;
 
-    public NetworkPlayer(Robot robot, String gameId, Registration registration) {
+    public NetworkPlayer(Robot robot, UUID gameId, Registration registration) {
         super(robot, gameId);
         this.registration = registration;
-        this.id = UUID.randomUUID().toString();
+        this.id = UUID.randomUUID();
     }
 
     public NetworkRequest createRequest(Integer phase) {

@@ -9,6 +9,8 @@ import de.phlup.circuitchaos.server.ServerToClientConnection;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @Component
 public class PollOrPushSwitchService {
@@ -16,11 +18,11 @@ public class PollOrPushSwitchService {
     private final ServerToClientConnection serverToClientConnection;
     private final PollingService           pollingService;
 
-    public void notifyOfCourseChange(Registration registration, Course course, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
+    public void notifyOfCourseChange(Registration registration, Course course, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, UUID movingRobotId) {
         if (registration.isPull()) {
-            pollingService.notifyOfCourseChange(registration, course, reason, step, phase, subPhase, animationSteps, movingRobotName);
+            pollingService.notifyOfCourseChange(registration, course, reason, step, phase, subPhase, animationSteps, movingRobotId);
         } else {
-            serverToClientConnection.notifyOfCourseChange(registration, course, reason, step, phase, subPhase, animationSteps, movingRobotName);
+            serverToClientConnection.notifyOfCourseChange(registration, course, reason, step, phase, subPhase, animationSteps, movingRobotId);
         }
     }
 
@@ -40,7 +42,7 @@ public class PollOrPushSwitchService {
         }
     }
 
-    public void programQuestion(Registration registration, String purposeId, String requestId, NetworkRequest request) {
+    public void programQuestion(Registration registration, UUID purposeId, UUID requestId, NetworkRequest request) {
         if (registration.isPull()) {
             pollingService.programQuestion(registration, purposeId, requestId, request);
         } else {

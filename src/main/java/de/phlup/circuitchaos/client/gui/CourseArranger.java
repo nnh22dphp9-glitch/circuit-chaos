@@ -33,14 +33,14 @@ import java.util.Collection;
 @Slf4j
 public class CourseArranger implements GuiHelper {
 
-    private static final int GLOBAL_MAX_COMPUTER_PLAYERS = 8;
+    private static final int GLOBAL_MAX_COMPUTER_PLAYERS = 20;
 
     private final ImageSupplier imageSupplier;
     private final JFrame        frame = new JFrame("CC");
 
-    private final JComboBox<CourseInfo> courseList         = new JComboBox<>();
-    private final JComboBox<Goal>       goal               = new JComboBox<>();
-    private final JComboBox<Integer>    maxComputerPlayers = new JComboBox<>();
+    private final JComboBox<CourseInfo> courseList      = new JComboBox<>();
+    private final JComboBox<Goal>       goal            = new JComboBox<>();
+    private final JComboBox<Integer>    computerPlayers = new JComboBox<>();
 
     @Getter
     private final JButton playButton   = new JButton("Play");
@@ -65,7 +65,7 @@ public class CourseArranger implements GuiHelper {
         JPanel centerPanel = new JPanel(new BorderLayout());
         mainPanel.add(centerPanel);
         centerPanel.add(createGoalChooser(), BorderLayout.NORTH);
-        centerPanel.add(createComputerPlayerChooser(gameSettings.getMaxNumberOfComputerPlayers()), BorderLayout.SOUTH);
+        centerPanel.add(createComputerPlayerChooser(gameSettings.getDefaultNumberOfComputerPlayers()), BorderLayout.SOUTH);
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         mainPanel.add(createPlayersDisplay(), BorderLayout.SOUTH);
         borderPanel.add(mainPanel, BorderLayout.CENTER);
@@ -103,14 +103,14 @@ public class CourseArranger implements GuiHelper {
         return panel;
     }
 
-    private JPanel createComputerPlayerChooser(int maxNumberOfComputerPlayers) {
+    private JPanel createComputerPlayerChooser(int numberOfComputerPlayers) {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JLabel("Max. number of computer players:"), BorderLayout.CENTER);
-        for (int i = 0; i < GLOBAL_MAX_COMPUTER_PLAYERS; i++) {
-            maxComputerPlayers.addItem(i);
+        panel.add(new JLabel("Number of computer players:"), BorderLayout.CENTER);
+        for (int i = 0; i <= GLOBAL_MAX_COMPUTER_PLAYERS; i++) {
+            computerPlayers.addItem(i);
         }
-        maxComputerPlayers.setSelectedItem(maxNumberOfComputerPlayers);
-        panel.add(maxComputerPlayers, BorderLayout.SOUTH);
+        computerPlayers.setSelectedItem(numberOfComputerPlayers);
+        panel.add(computerPlayers, BorderLayout.SOUTH);
         return panel;
     }
 
@@ -155,10 +155,10 @@ public class CourseArranger implements GuiHelper {
                 frame.dispose();
                 GameOptions gameOptions = new GameOptions();
                 gameOptions.setGoal((Goal) goal.getSelectedItem());
-                if (maxComputerPlayers.getSelectedItem() != null) {
-                    gameOptions.setMaxNumberOfComputerPlayers((Integer) maxComputerPlayers.getSelectedItem());
+                if (computerPlayers.getSelectedItem() != null) {
+                    gameOptions.setNumberOfComputerPlayers((Integer) computerPlayers.getSelectedItem());
                 } else {
-                    gameOptions.setMaxNumberOfComputerPlayers(0);
+                    gameOptions.setNumberOfComputerPlayers(0);
                 }
                 gameOptions.setDefaultModules(clientSettings.getDefaultModules());
                 game.play(gameOptions);

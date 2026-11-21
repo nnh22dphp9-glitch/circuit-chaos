@@ -15,6 +15,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
 
 import java.net.URI;
+import java.util.UUID;
 
 @Slf4j
 @AllArgsConstructor
@@ -27,7 +28,7 @@ public class ServerToClientConnection {
      * @see ClientController refreshCourse(String  NetworkRequest)
      */
     // Nicht Async - Animationen könnten kaputtgehen
-    public void notifyOfCourseChange(Registration registration, Course course, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
+    public void notifyOfCourseChange(Registration registration, Course course, String reason, Step step, Integer phase, Integer subPhase, int animationSteps, UUID movingRobotId) {
         log.debug("Send notifyOfCourseChange request");
         try {
             NetworkRequest programRequest = new NetworkRequest();
@@ -37,7 +38,7 @@ public class ServerToClientConnection {
             programRequest.setPhase(phase);
             programRequest.setSubPhase(subPhase);
             programRequest.setAnimationSteps(animationSteps);
-            programRequest.setMovingRobotName(movingRobotName);
+            programRequest.setMovingRobotId(movingRobotId);
             restClient.post()
                       .uri(URI.create(registration.getUrl() + "/course"))
                       .contentType(MediaType.APPLICATION_JSON)
@@ -95,7 +96,7 @@ public class ServerToClientConnection {
      * @see ClientController programQuestion(String, String, String, NetworkRequest)
      */
     @Async
-    public void programQuestion(Registration registration, String purposeId, String requestId, NetworkRequest request) {
+    public void programQuestion(Registration registration, UUID purposeId, UUID requestId, NetworkRequest request) {
         log.debug("Send programQuestion request");
         try {
             restClient.post()

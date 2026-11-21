@@ -3,6 +3,8 @@ package de.phlup.circuitchaos.common.model;
 import de.phlup.circuitchaos.common.enums.PullType;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class PullingData {
 
@@ -18,8 +20,8 @@ public class PullingData {
     private RevealProgrammeResponse revealProgrammeResponse;
 
     // action
-    private String purposeId;
-    private String requestId;
+    private UUID purposeId;
+    private UUID requestId;
 
     // number of players changed
     private int numberOfPlayers;

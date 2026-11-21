@@ -23,7 +23,6 @@ import static de.phlup.circuitchaos.common.enums.ModuleType.*;
 @ToString(callSuper = true)
 public class Robot extends CourseElement {
 
-    private String          id;
     private int             damage                 = 0;
     private Position        archivePosition;
     private int             archiveLevel;
@@ -210,7 +209,6 @@ public class Robot extends CourseElement {
     @JsonIgnore
     public Robot copyForSimulation() {
         Robot robot = copyForSimulation(new Robot());
-        robot.setId(id);
         robot.setDamage(damage);
         robot.setArchivePosition(archivePosition);
         robot.setArchiveLevel(archiveLevel);

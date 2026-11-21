@@ -4,15 +4,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 public class GameItem {
 
     private String gameName;
-    private String gameId;
+    private UUID   gameId;
     private String errorMessage;
 
-    public GameItem(String gameName, String gameId) {
+    public GameItem(String gameName, UUID gameId) {
         this.gameName = gameName;
         this.gameId = gameId;
         errorMessage = null;
@@ -28,7 +30,7 @@ public class GameItem {
     public String toString() {
         return StringUtils.hasText(errorMessage) ? errorMessage
                 : StringUtils.hasText(gameName) ? gameId + " - " + gameName
-                : gameId;
+                : gameId.toString();
     }
 
     @Override

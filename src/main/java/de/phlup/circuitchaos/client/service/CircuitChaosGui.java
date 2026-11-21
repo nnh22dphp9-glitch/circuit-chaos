@@ -13,12 +13,14 @@ import de.phlup.circuitchaos.common.model.GameItem;
 import de.phlup.circuitchaos.common.model.Registration;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
 import de.phlup.circuitchaos.common.settings.GameSettings;
+import de.phlup.circuitchaos.server.GlobalServerAttributes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -43,6 +45,7 @@ import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
@@ -55,9 +58,10 @@ public class CircuitChaosGui implements GuiHelper {
 
     private static final String TEXT_NO_GAME_FOUND = "  ---   no preparing game found on server   ---  ";
 
-    public static String lastRequestedNewGame;
+    public static UUID lastRequestedNewGame;
 
     private final ResourceLoader           resourceLoader;
+    private final ResourcePatternResolver  resourcePatternResolver;
     private final ClientSettings           clientSettings;
     private final ClientToServerConnection clientToServerConnection;
     private final GameSettings             gameSettings;
@@ -74,9 +78,9 @@ public class CircuitChaosGui implements GuiHelper {
 
     @SuppressWarnings("unused")
     @EventListener(ApplicationReadyEvent.class)
-    public void initClientGUI() {
+    public void initClientGUI() throws IOException {
         ClientSettings.Theme theme = determineTheme();
-        this.imageSupplier = new ImageSupplier(theme, resourceLoader);
+        this.imageSupplier = new ImageSupplier(theme, resourceLoader, resourcePatternResolver);
         JFrame frame = new JFrame("Circuit Chaos - " + clientSettings.getOwnUrl());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(getStartPanel());
@@ -109,7 +113,13 @@ public class CircuitChaosGui implements GuiHelper {
         menuBar.add(editorMenu);
         JMenuItem showEditor = new JMenuItem("Show editor");
         showEditor.setEnabled(true);
-        showEditor.addActionListener(e -> new EditorGui(resourceLoader, clientSettings, courseLoader).open());
+        showEditor.addActionListener(e -> {
+            try {
+                new EditorGui(resourceLoader, resourcePatternResolver, clientSettings, courseLoader).open();
+            } catch (IOException ioe) {
+                log.error("IOException on initiating theme", ioe);
+            }
+        });
         editorMenu.add(showEditor);
         frame.setJMenuBar(menuBar);
     }
@@ -118,27 +128,32 @@ public class CircuitChaosGui implements GuiHelper {
         GridBagLayout gridBagLayout = new GridBagLayout();
         JPanel        mainPanel     = new JPanel(gridBagLayout);
         JCheckBox     pollingBox    = new JCheckBox(" polling ");
-        addComponentToPanel(createNewGamePanel(pollingBox), mainPanel, gridBagLayout, 1, 1, 1, GridBagConstraints.WEST);
-        addComponentToPanel(new JLabel(" "), mainPanel, gridBagLayout, 1, 2, 1, GridBagConstraints.WEST);
-        addComponentToPanel(createConnectToPreparingGamePanel(pollingBox), mainPanel, gridBagLayout, 1, 3, 1, GridBagConstraints.WEST);
-        addComponentToPanel(new JLabel(" "), mainPanel, gridBagLayout, 1, 4, 1, GridBagConstraints.WEST);
-        addComponentToPanel(new JLabel(" "), mainPanel, gridBagLayout, 1, 5, 1, GridBagConstraints.WEST);
+        JTextArea robotName = new JTextArea(clientSettings.getDefaultRobotNames().get(
+                GlobalServerAttributes.RANDOM.nextInt(clientSettings.getDefaultRobotNames().size())), 1, 50);
+        int y = 1;
+        addComponentToPanel(createRobotChooser(robotName), mainPanel, gridBagLayout, 1, y++, 1, GridBagConstraints.WEST);
+        addComponentToPanel(new JLabel(" "), mainPanel, gridBagLayout, 1, y++, 1, GridBagConstraints.WEST);
+        addComponentToPanel(createNewGamePanel(pollingBox, robotName), mainPanel, gridBagLayout, 1, y++, 1, GridBagConstraints.WEST);
+        addComponentToPanel(new JLabel(" "), mainPanel, gridBagLayout, 1, y++, 1, GridBagConstraints.WEST);
+        addComponentToPanel(createConnectToPreparingGamePanel(pollingBox, robotName), mainPanel, gridBagLayout, 1, y++, 1, GridBagConstraints.WEST);
+        addComponentToPanel(new JLabel(" "), mainPanel, gridBagLayout, 1, y++, 1, GridBagConstraints.WEST);
+        addComponentToPanel(new JLabel(" "), mainPanel, gridBagLayout, 1, y, 1, GridBagConstraints.WEST);
 
         JPanel headerPanel = getHeaderPanel();
         headerPanel.add(mainPanel, BorderLayout.SOUTH);
         return getSidePanel(headerPanel);
     }
 
-    private JPanel createConnectToPreparingGamePanel(JCheckBox pollingBox) {
+    private JPanel createConnectToPreparingGamePanel(JCheckBox pollingBox, JTextArea robotName) {
         JPanel connectPanel = new JPanel(new BorderLayout());
         connectPanel.setBorder(new TitledBorder(new LineBorder(Color.black), " Connect to a preparing game "));
         connectPanel.add(createServerRow(), BorderLayout.NORTH);
         connectPanel.add(createGameChooserRow(), BorderLayout.CENTER);
         watchButton = new JButton("Watch");
-        watchButton.addActionListener(e -> playOrWatch(true, pollingBox.isSelected()));
+        watchButton.addActionListener(e -> playOrWatch(true, pollingBox.isSelected(), robotName.getText().trim()));
         watchButton.setEnabled(false);
         playButton = new JButton("Play");
-        playButton.addActionListener(e -> playOrWatch(false, pollingBox.isSelected()));
+        playButton.addActionListener(e -> playOrWatch(false, pollingBox.isSelected(), robotName.getText().trim()));
         playButton.setEnabled(false);
         JPanel panel = new JPanel(new FlowLayout());
         panel.add(pollingBox);
@@ -148,7 +163,16 @@ public class CircuitChaosGui implements GuiHelper {
         return connectPanel;
     }
 
-    private JPanel createNewGamePanel(JCheckBox pollingBox) {
+    private JPanel createRobotChooser(JTextArea robotName) {
+        robotName.setLineWrap(false);
+        JPanel robotNamePanel = new JPanel(new BorderLayout());
+        robotNamePanel.setBorder(new TitledBorder(new LineBorder(Color.black), " Robot "));
+        robotNamePanel.add(new JLabel(" Name:   "), BorderLayout.WEST);
+        robotNamePanel.add(robotName, BorderLayout.EAST);
+        return robotNamePanel;
+    }
+
+    private JPanel createNewGamePanel(JCheckBox pollingBox, JTextArea robotName) {
         JPanel newGamePanel = new JPanel(new BorderLayout());
         newGamePanel.setBorder(new TitledBorder(new LineBorder(Color.black), " Create a new game "));
         JPanel newGameNamePanel = new JPanel(new BorderLayout());
@@ -159,7 +183,7 @@ public class CircuitChaosGui implements GuiHelper {
         newGameNamePanel.add(new JLabel(" "), BorderLayout.SOUTH);
         newGamePanel.add(newGameNamePanel, BorderLayout.WEST);
         JButton newGameButton = new JButton("Create");
-        newGameButton.addActionListener(e -> startNewGame(nameOfNewGame.getText(), pollingBox.isSelected()));
+        newGameButton.addActionListener(e -> startNewGame(nameOfNewGame.getText(), pollingBox.isSelected(), robotName.getText().trim()));
         newGameButton.setEnabled(true);
         newGamePanel.add(newGameButton, BorderLayout.EAST);
         return newGamePanel;
@@ -190,10 +214,10 @@ public class CircuitChaosGui implements GuiHelper {
         return new ImageIcon(bi);
     }
 
-    private void startNewGame(String gameName, boolean pull) {
+    private void startNewGame(String gameName, boolean pull, String robotName) {
         GameAttributes gameAttributes = null;
         try {
-            lastRequestedNewGame = UUID.randomUUID().toString();
+            lastRequestedNewGame = UUID.randomUUID();
 
             Registration clientRegistration = new Registration();
             clientRegistration.setGameName(gameName);
@@ -201,13 +225,14 @@ public class CircuitChaosGui implements GuiHelper {
             clientRegistration.setUrl(clientSettings.getOwnUrl() + "/client/" + clientRegistration.getId());
             clientRegistration.setWatchOnly(false);
             clientRegistration.setPull(pull);
+            clientRegistration.setRobotName(robotName);
 
             String gameUrl = serverAddressInput.getText().trim() + "/game";
-            String gameId  = clientToServerConnection.createGame(gameUrl, clientRegistration);
+            UUID   gameId  = clientToServerConnection.createGame(gameUrl, clientRegistration);
 
             gameAttributes = new GameAttributes(gameId, clientRegistration, gameUrl + "/" + gameId, false);
 
-            GameGui gui = new GameGui(resourceLoader, audioSupplier, clientToServerConnection, gameAttributes, clientSettings);
+            GameGui gui = new GameGui(resourceLoader, resourcePatternResolver, audioSupplier, clientToServerConnection, gameAttributes, clientSettings);
             gameAttributes.setGameGui(gui);
             gui.setCourseArranger(new CourseArranger(gui, gameSettings, courseLoader, objectMapper, clientSettings));
         } catch (Exception exc) {
@@ -221,7 +246,7 @@ public class CircuitChaosGui implements GuiHelper {
         }
     }
 
-    private void playOrWatch(boolean watchOnly, boolean pull) {
+    private void playOrWatch(boolean watchOnly, boolean pull, String robotName) {
         GameItem selectedGame = (GameItem) gameChooser.getSelectedItem();
         if (selectedGame == null || StringUtils.hasText(selectedGame.getErrorMessage())) {
             throw new CircuitChaosException("no game selected");
@@ -229,20 +254,21 @@ public class CircuitChaosGui implements GuiHelper {
         GameAttributes gameAttributes = null;
         try {
             Registration clientRegistration = new Registration();
-            clientRegistration.setId(UUID.randomUUID().toString());
+            clientRegistration.setId(UUID.randomUUID());
             if (!pull) {
                 clientRegistration.setUrl(clientSettings.getOwnUrl() + "/client/" + clientRegistration.getId());
             }
             clientRegistration.setWatchOnly(watchOnly);
             clientRegistration.setGameName(selectedGame.getGameName());
             clientRegistration.setPull(pull);
+            clientRegistration.setRobotName(robotName);
 
-            String gameId  = selectedGame.getGameId();
+            UUID   gameId  = selectedGame.getGameId();
             String gameUrl = serverAddressInput.getText().trim() + "/game/" + gameId;
             clientToServerConnection.registerAsWatcher(gameUrl, clientRegistration);
 
             gameAttributes = new GameAttributes(gameId, clientRegistration, gameUrl, watchOnly);
-            GameGui gameGui = new GameGui(resourceLoader, audioSupplier, clientToServerConnection, gameAttributes, clientSettings);
+            GameGui gameGui = new GameGui(resourceLoader, resourcePatternResolver, audioSupplier, clientToServerConnection, gameAttributes, clientSettings);
             gameAttributes.setGameGui(gameGui);
         } catch (Exception exc) {
             log.error("Exception occurred - shutting game down", exc);

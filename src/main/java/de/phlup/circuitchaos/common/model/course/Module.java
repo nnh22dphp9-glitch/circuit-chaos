@@ -16,12 +16,23 @@ public class Module {
     private int         ammunition      = 0;
     private boolean[]   activeInPhase   = new boolean[]{false, false, false, false, false};
     private Direction[] shieldDirection = new Direction[]{Direction.NORTH, Direction.NORTH, Direction.NORTH, Direction.NORTH, Direction.NORTH}; // in relation to robot!
-    private boolean[][] powerDownShield = new boolean[][]{{false, false, false, false}, {false, false, false, false}, {false, false, false, false}, {false, false, false, false}, {false, false, false, false}};
+    private boolean[][] powerDownShield = new boolean[][]{
+            {false, false, false, false},
+            {false, false, false, false},
+            {false, false, false, false},
+            {false, false, false, false},
+            {false, false, false, false}};
 
     public Module(@NonNull ModuleType type) {
         this.type = type;
+        this.ammunition = type.getAmmunition();
         if (type == ModuleType.POWER_DOWN_SHIELD) {
-            powerDownShield = new boolean[][]{{true, true, true, true}, {true, true, true, true}, {true, true, true, true}, {true, true, true, true}, {true, true, true, true}};
+            powerDownShield = new boolean[][]{
+                    {true, true, true, true},
+                    {true, true, true, true},
+                    {true, true, true, true},
+                    {true, true, true, true},
+                    {true, true, true, true}};
         }
     }
 

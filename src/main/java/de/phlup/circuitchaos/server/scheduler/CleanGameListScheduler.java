@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -40,9 +41,9 @@ public class CleanGameListScheduler {
     }
 
     private void cleanupRunningGames(int evictTime) {
-        ZonedDateTime     zonedDateTime = ZonedDateTime.now().minusSeconds(evictTime);
-        Map<String, Game> copy          = new ConcurrentHashMap<>(GlobalServerAttributes.RUNNING_GAMES);
-        for (Map.Entry<String, Game> e : copy.entrySet()) {
+        ZonedDateTime   zonedDateTime = ZonedDateTime.now().minusSeconds(evictTime);
+        Map<UUID, Game> copy          = new ConcurrentHashMap<>(GlobalServerAttributes.RUNNING_GAMES);
+        for (Map.Entry<UUID, Game> e : copy.entrySet()) {
             if (zonedDateTime.isAfter(e.getValue().getLastAccessed()) || e.getValue().isGameAborted()) {
                 GlobalServerAttributes.RUNNING_GAMES.remove(e.getKey());
             }

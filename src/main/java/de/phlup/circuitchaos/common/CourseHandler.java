@@ -277,7 +277,7 @@ public class CourseHandler {
         glue.setPosition(position);
         glue.setLevel(getFloor(course, position).getLevel());
         glue.setPrevPosition(position);
-        glue.setDirection(Direction.random());
+        glue.setDirection(Direction.NORTH);
         glue.setVariantSeed(RANDOM.nextDouble());
         glue.setGlue(CourseObject.GLUE_INITIAL_AMOUNT);
         glue.setActive(false);
@@ -292,7 +292,7 @@ public class CourseHandler {
         oil.setPosition(position);
         oil.setLevel(getFloor(course, position).getLevel());
         oil.setPrevPosition(position);
-        oil.setDirection(Direction.random());
+        oil.setDirection(Direction.NORTH);
         oil.setVariantSeed(RANDOM.nextDouble());
         oil.setActive(false);
         add(course, oil);
@@ -329,22 +329,22 @@ public class CourseHandler {
         }
         for (CourseObject co : course.getObjects()) {
             if (co.isOnCourse()) {
-                elements.add(new CourseElementStub(co.getName() + co.getType(), co.getPosition(), co.getDirection()));
+                elements.add(new CourseElementStub(co.getName() + co.getId() + co.getType(), co.getPosition(), co.getDirection()));
             }
         }
         for (Robot robot : course.getRobots()) {
             if (robot.isOnCourse()) {
-                elements.add(new CourseElementStub(robot.getName(), robot.getPosition(), robot.getDirection()));
+                elements.add(new CourseElementStub(robot.getId().toString(), robot.getPosition(), robot.getDirection()));
             }
         }
         for (Checkpoint checkpoint : course.getCheckpoints()) {
             elements.add(new CourseElementStub(String.valueOf(checkpoint.getNumber()), checkpoint.getPosition(), Direction.NORTH));
         }
         for (Robot robot : course.getRobotsFallingIntoAbyss()) {
-            elements.add(new CourseElementStub(robot.getName(), robot.getPosition(), robot.getDirection()));
+            elements.add(new CourseElementStub(robot.getId().toString(), robot.getPosition(), robot.getDirection()));
         }
         for (CourseObject co : course.getObjectsFallingIntoAbyss()) {
-            elements.add(new CourseElementStub(co.getName(), co.getPosition(), co.getDirection()));
+            elements.add(new CourseElementStub(co.getName() + co.getId(), co.getPosition(), co.getDirection()));
         }
         return elements.stream()
                        .sorted(Comparator.comparing(CourseElementStub::name)

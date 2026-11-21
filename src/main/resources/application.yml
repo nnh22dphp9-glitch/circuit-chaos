@@ -14,7 +14,7 @@ logging:
 circuit-chaos:
   game:
     options:
-      max-number-of-computer-players: 1
+      default-number-of-computer-players: 1
     waiting-times-in-milliseconds:
       time-between-steps: 1_000
       time-to-show-explosions: 500
@@ -37,8 +37,81 @@ circuit-chaos:
     default-course-size-y: 880
     default-theme: "default"
     default-zoom: 1
+    default-robot-names:
+      - Acid
+      - Amethyst
+      - Aqua
+      - Arctic
+      - Azure
+      - Blaze
+      - Blizzard
+      - Bluebolt
+      - Brightside
+      - Bumble
+      - Burnout
+      - Chrome
+      - Cinder
+      - Cobalt
+      - Crimson
+      - Ember
+      - Emerald
+      - Fireball
+      - Flare
+      - Flash
+      - Frost
+      - Frostbyte
+      - Frostic
+      - Ghost
+      - Glacier
+      - Goldrush
+      - Grape
+      - Green Machine
+      - Gremlin
+      - Hazard
+      - Hotshot
+      - Hydro
+      - Icebreaker
+      - Inferno
+      - Ivory
+      - Jade
+      - Lagoon
+      - Lemon
+      - Mandarine
+      - Moss
+      - Nebular
+      - Neon
+      - Nightshade
+      - Orange
+      - Overgrowth
+      - Phantom
+      - Pumpkin
+      - Purple Haze
+      - Raspberry
+      - Redline
+      - Riot
+      - Rusty
+      - Scarlett
+      - Skyfire
+      - Snow
+      - Sparky
+      - Specter
+      - Sunstrike
+      - Tangerine
+      - Teal
+      - Tide
+      - Torque
+      - Toxic
+      - Ultraviolet
+      - Venom
+      - Violet
+      - Volt
+      - Voltage
+      - Vortex
+      - Wave
+      - Whiteout
+      - Zero
     default-modules:
-      - "MAIN_LASER"
+      - MAIN_LASER
     course-directories:
       - "classpath:courses"
       - "file:courses"

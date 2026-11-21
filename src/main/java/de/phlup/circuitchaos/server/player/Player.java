@@ -5,15 +5,17 @@ import de.phlup.circuitchaos.common.model.course.Robot;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.UUID;
+
 import static de.phlup.circuitchaos.common.enums.ModuleType.POWER_DOWN_SHIELD;
 
 @Data
 public abstract class Player {
 
-    protected final Robot  robot;
-    protected final String gameId;
+    protected final Robot robot;
+    protected final UUID  gameId;
 
-    protected Player(@NotNull Robot robot, @NotNull String gameId) {
+    protected Player(@NotNull Robot robot, @NotNull UUID gameId) {
         this.robot = robot;
         this.gameId = gameId;
     }

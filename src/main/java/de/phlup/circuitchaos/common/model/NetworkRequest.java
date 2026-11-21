@@ -7,6 +7,8 @@ import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.model.course.Robot;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -18,7 +20,7 @@ public class NetworkRequest {
     private Integer phase;
     private Integer subPhase;
     private Integer animationSteps;
-    private String  movingRobotName;
+    private UUID    movingRobotId;
     private String  reasonForCourseChange;
 
 }

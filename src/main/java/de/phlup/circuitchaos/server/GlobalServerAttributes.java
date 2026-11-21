@@ -8,27 +8,28 @@ import de.phlup.circuitchaos.server.game.Game;
 import java.security.SecureRandom;
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GlobalServerAttributes {
 
-    public static final SecureRandom                RANDOM          = new SecureRandom();
-    public static final Map<GameItem, Game>         PREPARING_GAMES = new ConcurrentHashMap<>();
-    public static final Map<String, Game>           RUNNING_GAMES   = new ConcurrentHashMap<>();
-    public static final Map<String, GameAttributes> CLIENT_GAMES    = new ConcurrentHashMap<>();
+    public static final SecureRandom              RANDOM          = new SecureRandom();
+    public static final Map<GameItem, Game>       PREPARING_GAMES = new ConcurrentHashMap<>();
+    public static final Map<UUID, Game>           RUNNING_GAMES   = new ConcurrentHashMap<>();
+    public static final Map<UUID, GameAttributes> CLIENT_GAMES    = new ConcurrentHashMap<>();
 
     /**
      * WARNING: do not use on network stuff!
      */
-    public static Game getGame(String gameId) {
+    public static Game getGame(UUID gameId) {
         return determineGame(gameId, true, true, false);
     }
 
-    public static Game getGame(String gameId, boolean considerRunning, boolean considerPreparing) {
+    public static Game getGame(UUID gameId, boolean considerRunning, boolean considerPreparing) {
         return determineGame(gameId, considerRunning, considerPreparing, true);
     }
 
-    public static void setGameRunning(String gameId, Game game) {
+    public static void setGameRunning(UUID gameId, Game game) {
         for (GameItem i : PREPARING_GAMES.keySet()) {
             if (gameId.equals(i.getGameId())) {
                 PREPARING_GAMES.remove(i);
@@ -38,7 +39,7 @@ public class GlobalServerAttributes {
         RUNNING_GAMES.put(gameId, game);
     }
 
-    public static void removePreparingGame(String gameId) {
+    public static void removePreparingGame(UUID gameId) {
         for (GameItem i : PREPARING_GAMES.keySet()) {
             if (gameId.equals(i.getGameId())) {
                 PREPARING_GAMES.remove(i);
@@ -47,7 +48,7 @@ public class GlobalServerAttributes {
         }
     }
 
-    private static Game determineGame(String gameId,
+    private static Game determineGame(UUID gameId,
                                       boolean considerRunning,
                                       boolean considerPreparing,
                                       boolean errorOnAborted) {

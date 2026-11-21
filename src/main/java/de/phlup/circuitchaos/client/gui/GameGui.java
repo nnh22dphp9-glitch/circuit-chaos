@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.StringUtils;
 
 import javax.swing.ImageIcon;
@@ -38,21 +39,24 @@ import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 
+import static de.phlup.circuitchaos.client.gui.PictureConstants.FOLDER_ROBOTS_NORMAL;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_EXPLOSION;
 
 @Slf4j
 @Getter
 public class GameGui extends BaseGui implements GuiHelper {
 
-    private final String id = UUID.randomUUID().toString();
+    private final UUID id = UUID.randomUUID();
 
     private final ClientToServerConnection clientToServerConnection;
     private final GameAttributes           gameAttributes;
 
     private String myRobotsName = null;
+    private UUID   myRobotsId   = null;
 
     private       JFrame            lastRevealFrame = null;
     private final JPanel            revealPanel     = new JPanel(new FlowLayout());
@@ -62,11 +66,12 @@ public class GameGui extends BaseGui implements GuiHelper {
     private CourseArranger courseArranger = null;
 
     public GameGui(@NotNull ResourceLoader resourceLoader,
+                   @NotNull ResourcePatternResolver resourcePatternResolver,
                    @NotNull AudioSupplier audioSupplier,
                    @NotNull ClientToServerConnection clientToServerConnection,
                    @NotNull GameAttributes gameAttributes,
-                   @NotNull ClientSettings clientSettings) {
-        super(resourceLoader, clientSettings, audioSupplier);
+                   @NotNull ClientSettings clientSettings) throws IOException {
+        super(resourceLoader, resourcePatternResolver, clientSettings, audioSupplier);
 
         this.clientToServerConnection = clientToServerConnection;
         this.gameAttributes = gameAttributes;
@@ -133,7 +138,7 @@ public class GameGui extends BaseGui implements GuiHelper {
     }
 
     @Override
-    public void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
+    public void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, UUID movingRobotId) {
         setAndClearIfEmpty(course);
         log.debug("Received new course because '{}': {}", reasonForCourseChange, course);
         mainFrame.setTitle("Circuit Chaos Course - %s - %s - %s".formatted(gameAttributes.getRegistration().getGameName(),
@@ -144,7 +149,7 @@ public class GameGui extends BaseGui implements GuiHelper {
             if (subPhase == null || state == CourseState.GAME_ENDED || step == Step.SETUP) {
                 audioSupplier.stop();
             } else if (subPhase == 0) {
-                boolean hover   = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(movingRobotName);
+                boolean hover   = step == Step.ROBOTS_AND_OBJECTS_MOVE && isHover(movingRobotId);
                 boolean explode = step == Step.ROBOTS_AND_OBJECTS_MOVE && course.getFloor().stream().anyMatch(f -> f.getExplosiveDamage() > 0);
                 playSound(step, course, hover, explode);
             }
@@ -155,8 +160,8 @@ public class GameGui extends BaseGui implements GuiHelper {
     }
 
     private int myNextCheckpoint(Course course) {
-        if (StringUtils.hasText(myRobotsName)) {
-            Optional<Robot> myself = course.getRobots().stream().filter(r -> myRobotsName.equals(r.getName())).findFirst();
+        if (myRobotsId != null) {
+            Optional<Robot> myself = course.getRobots().stream().filter(r -> myRobotsId.equals(r.getId())).findFirst();
             if (myself.isPresent()) {
                 return myself.get().getNextCheckpoint();
             }
@@ -164,9 +169,9 @@ public class GameGui extends BaseGui implements GuiHelper {
         return -1;
     }
 
-    private boolean isHover(String movingRobotName) {
+    private boolean isHover(UUID movingRobotId) {
         return course.getRobots().stream()
-                     .filter(r -> r.getName().equals(movingRobotName))
+                     .filter(r -> r.getId().equals(movingRobotId))
                      .filter(CourseElement::isOnCourse)
                      .anyMatch(Robot::isFlying);
     }
@@ -209,6 +214,7 @@ public class GameGui extends BaseGui implements GuiHelper {
             return;
         }
         myRobotsName = request.getMyRobot().getName();
+        myRobotsId = request.getMyRobot().getId();
         mainFrame.setTitle("Circuit Chaos Course - %s - %s - Waiting for all to program their robots"
                                    .formatted(gameAttributes.getRegistration().getGameName(), myRobotsName));
         if (lastRevealFrame != null) {
@@ -234,8 +240,9 @@ public class GameGui extends BaseGui implements GuiHelper {
                 int                     y    = 1;
                 RevealProgrammeListItem item = revealProgrammeResponse.getProgramme().get(i);
                 addComponentToPanel(new JLabel(item.name()), p, displayLayout, 2 + i, y++, 1, GridBagConstraints.CENTER);
-                ImageIcon originalIcon = imageSupplier.getImageIconPlain(item.imageIconPath());
-                Image     scaledImage  = originalIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                ImageIcon originalIcon = imageSupplier.getImageIconPlain(FOLDER_ROBOTS_NORMAL +
+                                                                                 imageSupplier.getNormalizedRobotName(item.name(), item.variantSeed()));
+                Image scaledImage = originalIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
                 addComponentToPanel(new JLabel(new ImageIcon(scaledImage)),
                                     p, displayLayout, 2 + i, y++, 1, GridBagConstraints.CENTER);
                 addComponentToPanel(new JLabel(" "), p, displayLayout, 2 + i, y++, 1, GridBagConstraints.CENTER);

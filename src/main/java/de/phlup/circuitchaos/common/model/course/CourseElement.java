@@ -5,9 +5,12 @@ import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.records.Position;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public abstract class CourseElement {
 
+    private UUID      id;
     private String    name;
     private Position  position      = new Position(0, 0);
     private Position  prevPosition  = new Position(0, 0);
@@ -15,12 +18,14 @@ public abstract class CourseElement {
     private Direction direction     = Direction.NORTH;
     private Direction prevDirection = Direction.NORTH;
     private boolean   onCourse      = false;
+    private double    variantSeed   = 0;
 
     @JsonIgnore
     private int conflictingMark = 0;
 
     @JsonIgnore
     protected <T extends CourseElement> T copyForSimulation(T copy) {
+        copy.setId(id);
         copy.setName(name);
         copy.setPosition(position);
         copy.setPrevPosition(prevPosition);
@@ -29,6 +34,7 @@ public abstract class CourseElement {
         copy.setLevel(level);
         copy.setOnCourse(onCourse);
         copy.setConflictingMark(conflictingMark);
+        copy.setVariantSeed(variantSeed);
         return copy;
     }
 

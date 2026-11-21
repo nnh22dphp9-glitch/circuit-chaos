@@ -9,6 +9,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "circuit-chaos.game.options")
 public class GameSettings {
 
-    private int maxNumberOfComputerPlayers;
+    private int defaultNumberOfComputerPlayers;
 
 }

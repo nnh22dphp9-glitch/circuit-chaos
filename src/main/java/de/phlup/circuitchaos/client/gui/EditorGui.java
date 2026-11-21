@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -49,6 +50,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +58,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_LOGO_SMALL;
 import static de.phlup.circuitchaos.client.gui.PictureConstants.GFX_NO_ACTION;
@@ -111,9 +114,10 @@ public class EditorGui extends BaseGui implements GuiHelper {
     private Floor selectedFloor;
 
     public EditorGui(@NotNull ResourceLoader resourceLoader,
+                     @NotNull ResourcePatternResolver resourcePatternResolver,
                      @NotNull ClientSettings clientSettings,
-                     @NotNull CourseLoader courseLoader) {
-        super(resourceLoader, clientSettings, null);
+                     @NotNull CourseLoader courseLoader) throws IOException {
+        super(resourceLoader, resourcePatternResolver, clientSettings, null);
         this.courseLoader = courseLoader;
         currentFileDirectory = new File(clientSettings.getCourseDirectories().stream()
                                                       .filter(s -> s.startsWith("file:")).findFirst()
@@ -437,7 +441,7 @@ public class EditorGui extends BaseGui implements GuiHelper {
     }
 
     @Override
-    public void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, String movingRobotName) {
+    public void refreshCourse(Course course, String reasonForCourseChange, Step step, Integer phase, Integer subPhase, int animationSteps, UUID movingRobotId) {
         setAndClearIfEmpty(course);
         redrawAll();
     }

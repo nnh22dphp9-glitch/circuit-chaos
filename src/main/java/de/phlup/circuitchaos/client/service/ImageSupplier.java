@@ -10,7 +10,6 @@ import de.phlup.circuitchaos.common.enums.Direction;
 import de.phlup.circuitchaos.common.enums.Floortype;
 import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.enums.ObjectType;
-import de.phlup.circuitchaos.common.enums.RobotType;
 import de.phlup.circuitchaos.common.enums.Step;
 import de.phlup.circuitchaos.common.enums.WallType;
 import de.phlup.circuitchaos.common.model.course.Checkpoint;
@@ -25,6 +24,7 @@ import de.phlup.circuitchaos.common.settings.ClientSettings.Theme;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.StringUtils;
 
 import javax.imageio.ImageIO;
@@ -38,8 +38,11 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static de.phlup.circuitchaos.client.gui.PictureConstants.*;
@@ -56,12 +59,17 @@ public class ImageSupplier {
     private final Theme                  theme;
     private final int                    imageSize;
     private final ImageIcon              emptyImage;
+    private final List<String>           knownRobotPictures;
 
-    public ImageSupplier(Theme theme, ResourceLoader resourceLoader) {
+    public ImageSupplier(Theme theme, ResourceLoader resourceLoader, ResourcePatternResolver resourcePatternResolver) throws IOException {
         this.resourceLoader = resourceLoader;
         this.theme = theme;
         imageSize = theme.getImageSize();
         emptyImage = new ImageIcon(new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB));
+
+        Resource[] resources = resourcePatternResolver.getResources(theme.getPath() + FOLDER_ROBOTS_NORMAL + "*.png");
+        knownRobotPictures = Arrays.stream(resources).map(Resource::getFilename).filter(Objects::nonNull)
+                                   .map(filename -> filename.substring(0, filename.lastIndexOf('.'))).toList();
     }
 
     public ImageIcon getImageIconPlain(Direction direction) {
@@ -374,17 +382,15 @@ public class ImageSupplier {
         }
     }
 
-    public static String getRobotImagePathAndName(Robot robot) {
-        String picture = "";
-        for (RobotType rt : RobotType.values()) {
-            if (rt.getRobotName().equals(robot.getName())) {
-                picture = rt.getNormalizedName();
-            }
+    public String getRobotImagePathAndName(Robot robot) {
+        return (robot.isFlying() ? FOLDER_ROBOTS_FLYING : FOLDER_ROBOTS_NORMAL) + getNormalizedRobotName(robot.getName(), robot.getVariantSeed());
+    }
+
+    public String getNormalizedRobotName(String robotName, double variantSeed) {
+        if (!knownRobotPictures.contains(robotName)) {
+            robotName = knownRobotPictures.get((int) (variantSeed * knownRobotPictures.size()));
         }
-        if (robot.isFlying()) {
-            picture = picture + ROBOT_POSTFIX_FLYING;
-        }
-        return FOLDER_ROBOTS + picture;
+        return robotName;
     }
 
     private void drawCheckpoint(Checkpoint cp, Graphics2D gr, int maxCheckpoint, int nextCP) {
@@ -785,7 +791,8 @@ public class ImageSupplier {
 
     private String getGroundElementPicture(Floor floor) {
         return switch (floor.getFloortype()) {
-            case Floortype.OPEN_FLOOR, Floortype.SWITCH -> GFX_OPEN_FLOOR + ((int) (floor.getVariant() * theme.getOpenFloorVariants()));
+            case Floortype.OPEN_FLOOR, Floortype.SWITCH ->
+                    GFX_OPEN_FLOOR + ((int) (floor.getVariant() * theme.getOpenFloorVariants()));
             case Floortype.PIT_STOP -> GFX_PIT_STOP;
             case Floortype.ABYSS -> GFX_ABYSS_BG;
             case Floortype.TRAPDOOR -> GFX_TRAPDOOR_3;
