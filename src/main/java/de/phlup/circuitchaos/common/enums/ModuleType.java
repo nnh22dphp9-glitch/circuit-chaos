@@ -22,7 +22,7 @@ public enum ModuleType {
     MAIN_LASER("Main Laser", "main-laser", true, true),
     DOUBLE_BARREL_LASER("Double Barrel Laser", "double-barrel-laser", false, true),
     HIGH_POWER_LASER("High Power Laser", "high-power-laser", false, true),
-    RAMMING_ARMOR("Ramming Armor", "ramming-armor", false, true),
+    RAMMING_ARMOR("Ramming Armor", "ramming-armor", false, false),
     REAR_LASER("Rear Laser", "rear-laser", false, true),
     EXCHANGE_BEAM("Exchange Beam", "exchange-beam", false, true),
     PRESSURE_BEAM("Pressure Beam", "pressure-beam", false, true),

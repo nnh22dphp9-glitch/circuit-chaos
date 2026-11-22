@@ -53,6 +53,9 @@ public class GameLogic {
     }
 
     public void singleRobotMove(int phase, Robot robot, Programme pc, int movement) {
+        if (robot.hasModule(RAMMING_ARMOR)) {
+            robot.getModule(RAMMING_ARMOR).getActiveInPhase()[phase] = true;
+        }
         if (movement > 0) {
             moveInit(robot, robot.getDirection(), movement, movement, ROBOTS_AND_OBJECTS_MOVE, phase, true, true, robot.getId());
         } else if (movement < 0) {
@@ -709,7 +712,7 @@ public class GameLogic {
     }
 
     private void reactivateRammingArmor(int phase, Robot robot) {
-        if (robot.isReactivateRammingArmor() && robot.getModule(RAMMING_ARMOR) != null) {
+        if (robot.isReactivateRammingArmor() && robot.hasModule(RAMMING_ARMOR)) {
             robot.setReactivateRammingArmor(false);
             robot.getModule(RAMMING_ARMOR).getActiveInPhase()[phase] = true;
         }
@@ -717,7 +720,7 @@ public class GameLogic {
 
     private void deactivateRammingArmor(int phase, boolean reactivate) {
         for (Robot robot : course.getRobots()) {
-            if (robot.uses(RAMMING_ARMOR, phase)) {
+            if (robot.hasModule(RAMMING_ARMOR)) {
                 robot.setReactivateRammingArmor(reactivate);
                 robot.getModule(RAMMING_ARMOR).getActiveInPhase()[phase] = false;
             }

@@ -35,7 +35,7 @@ public class Robot extends CourseElement {
     private boolean         powerDownAnnounced     = false;
     private boolean         mayChooseDirection     = true;
     private int             nextCheckpoint         = 1;
-    private boolean         reactivateRammingArmor = false;
+    private boolean         reactivateRammingArmor = true;
     private boolean         flying                 = false;
     private int             dieCounter             = 0;
 
@@ -91,7 +91,7 @@ public class Robot extends CourseElement {
     @Nullable
     @JsonIgnore
     public ModuleType getWeapon(int phase) {
-        return Arrays.stream(values()).filter(ModuleType::isWeapon).filter(mt -> mt != RAMMING_ARMOR)
+        return Arrays.stream(values()).filter(ModuleType::isWeapon)
                      .filter(mt -> uses(mt, phase)).findAny().orElse(null);
     }
 
@@ -232,7 +232,7 @@ public class Robot extends CourseElement {
 
     private boolean isModifiedDuringSimulation(ModuleType type) {
         return switch (type) {
-            case POWER_DOWN_SHIELD, SHIELD, LAYERED_ARMOR, RAMMING_ARMOR,
+            case POWER_DOWN_SHIELD, SHIELD, LAYERED_ARMOR,
                  MOBILE_TELEPORTER, MOBILE_RANDOMIZER, GLUE_DISPENSER,
                  OIL_DISPENSER, MINE_LAYER, PROXIMITY_MINE_LAYER,
                  BRIDGE_PROJECTOR -> true;

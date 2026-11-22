@@ -5,6 +5,7 @@ import de.phlup.circuitchaos.client.service.CourseLoader;
 import de.phlup.circuitchaos.client.service.ImageSupplier;
 import de.phlup.circuitchaos.common.enums.CourseState;
 import de.phlup.circuitchaos.common.enums.Goal;
+import de.phlup.circuitchaos.common.enums.ModuleType;
 import de.phlup.circuitchaos.common.model.CourseInfo;
 import de.phlup.circuitchaos.common.model.course.Course;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
@@ -14,8 +15,10 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.AbstractAction;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -29,6 +32,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.stream.Stream;
 
 @Slf4j
 public class CourseArranger implements GuiHelper {
@@ -68,10 +73,20 @@ public class CourseArranger implements GuiHelper {
         centerPanel.add(createComputerPlayerChooser(gameSettings.getDefaultNumberOfComputerPlayers()), BorderLayout.SOUTH);
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         mainPanel.add(createPlayersDisplay(), BorderLayout.SOUTH);
+
         borderPanel.add(mainPanel, BorderLayout.CENTER);
         borderPanel.add(new JLabel(new ImageIcon(new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB))), BorderLayout.SOUTH);
-        borderPanel.add(new JLabel(new ImageIcon(new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB))), BorderLayout.EAST);
         borderPanel.add(new JLabel(new ImageIcon(new BufferedImage(10, 5, BufferedImage.TYPE_INT_ARGB))), BorderLayout.WEST);
+
+        JPanel defaultModulePanel = new JPanel(new BorderLayout());
+        defaultModulePanel.add(new JLabel("Default Modules:"), BorderLayout.NORTH);
+        JPanel defaultModulePanel2 = new JPanel(new BorderLayout());
+        defaultModulePanel2.add(createDefaultModulePanel(clientSettings, true, false), BorderLayout.NORTH);
+        defaultModulePanel2.add(createDefaultModulePanel(clientSettings, false, true), BorderLayout.CENTER);
+        defaultModulePanel.add(new JLabel("  "), BorderLayout.WEST);
+        defaultModulePanel.add(defaultModulePanel2, BorderLayout.CENTER);
+        defaultModulePanel.add(createDefaultModulePanel(clientSettings, false, false), BorderLayout.EAST);
+        borderPanel.add(defaultModulePanel, BorderLayout.EAST);
 
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
@@ -90,6 +105,35 @@ public class CourseArranger implements GuiHelper {
         frame.pack();
         frame.setVisible(true);
         frame.requestFocus();
+    }
+
+    private static JPanel createDefaultModulePanel(ClientSettings clientSettings, boolean isWeapon, boolean isDispenser) {
+        JPanel defaultModulesPanel = new JPanel();
+        defaultModulesPanel.setLayout(new BoxLayout(defaultModulesPanel, BoxLayout.Y_AXIS));
+        defaultModulesPanel.add(new JLabel(" "));
+        if (isWeapon) {
+            defaultModulesPanel.add(new JLabel("Weapons:"));
+        } else if (isDispenser) {
+            defaultModulesPanel.add(new JLabel("Dispensers:"));
+        } else {
+            defaultModulesPanel.add(new JLabel("Other Modules:"));
+        }
+        Stream.of(ModuleType.values())
+              .filter(mt -> isWeapon == mt.isWeapon())
+              .filter(mt -> isDispenser == (mt.getAmmunition() > 0 && mt != ModuleType.EXTRA_PROGRAM && mt != ModuleType.LAYERED_ARMOR))
+              .sorted(Comparator.comparing(ModuleType::getModuleName))
+              .forEach(mt -> {
+                  JCheckBox moduleCheckBox = new JCheckBox(mt.getModuleName(), clientSettings.getDefaultModules().contains(mt.name()));
+                  defaultModulesPanel.add(moduleCheckBox);
+                  moduleCheckBox.addActionListener(actionEvent -> {
+                      if (!moduleCheckBox.isSelected()) {
+                          clientSettings.getDefaultModules().remove(mt.name());
+                      } else if (!clientSettings.getDefaultModules().contains(mt.name())) {
+                          clientSettings.getDefaultModules().add(mt.name());
+                      }
+                  });
+              });
+        return defaultModulesPanel;
     }
 
     private JPanel createGoalChooser() {
