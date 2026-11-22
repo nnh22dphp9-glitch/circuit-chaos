@@ -180,7 +180,7 @@ public class MoveInfo {
     private void setSelectedWeapon(int phase, ModuleType selectedWeapon) {
         selectedWeapons[phase] = selectedWeapon;
         for (var module : myself.getModules()) {
-            if (module.getType().isWeapon() && module.getType() != ModuleType.RAMMING_ARMOR) {
+            if (module.getType().isWeapon()) {
                 module.getActiveInPhase()[phase] = module.getType() == selectedWeapon;
             }
         }

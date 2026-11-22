@@ -113,7 +113,6 @@ public class ComputerPlayer extends Player {
             ModuleType fallbackWeapon = robot.getModules().stream()
                                              .map(Module::getType)
                                              .filter(ModuleType::isWeapon)
-                                             .filter(type -> type != ModuleType.RAMMING_ARMOR)
                                              .findAny()
                                              .orElse(null);
             for (var module : robot.getModules()) {
