@@ -8516,7 +8516,7 @@
     "courseMountedLaserBeamsNS" : 0,
     "courseMountedLaserBeamsWE" : 0,
     "courseMountedPressureBeamsNS" : false,
-    "courseMountedPressureBeamsWE" : false,
+    "courseMountedPressureBeamsWE" : true,
     "courseMountedTractorBeamsNS" : false,
     "courseMountedTractorBeamsWE" : false
   }, {
@@ -8846,7 +8846,7 @@
     "courseMountedLaserBeamsNS" : 0,
     "courseMountedLaserBeamsWE" : 0,
     "courseMountedPressureBeamsNS" : false,
-    "courseMountedPressureBeamsWE" : false,
+    "courseMountedPressureBeamsWE" : true,
     "courseMountedTractorBeamsNS" : false,
     "courseMountedTractorBeamsWE" : false
   }, {
@@ -9178,7 +9178,7 @@
     "courseMountedPressureBeamsNS" : false,
     "courseMountedPressureBeamsWE" : false,
     "courseMountedTractorBeamsNS" : false,
-    "courseMountedTractorBeamsWE" : false
+    "courseMountedTractorBeamsWE" : true
   }, {
     "position" : {
       "x" : 10,
@@ -9209,7 +9209,7 @@
     "courseMountedLaserBeamsNS" : 0,
     "courseMountedLaserBeamsWE" : 0,
     "courseMountedPressureBeamsNS" : false,
-    "courseMountedPressureBeamsWE" : false,
+    "courseMountedPressureBeamsWE" : true,
     "courseMountedTractorBeamsNS" : false,
     "courseMountedTractorBeamsWE" : false
   }, {
@@ -9239,8 +9239,8 @@
     "beamsNS" : 0,
     "beamsWE" : 0,
     "beamType" : "MAIN_LASER",
-    "courseMountedLaserBeamsNS" : 0,
-    "courseMountedLaserBeamsWE" : 0,
+    "courseMountedLaserBeamsNS" : 2,
+    "courseMountedLaserBeamsWE" : 3,
     "courseMountedPressureBeamsNS" : false,
     "courseMountedPressureBeamsWE" : false,
     "courseMountedTractorBeamsNS" : false,
@@ -9272,7 +9272,7 @@
     "beamsNS" : 0,
     "beamsWE" : 0,
     "beamType" : "MAIN_LASER",
-    "courseMountedLaserBeamsNS" : 0,
+    "courseMountedLaserBeamsNS" : 2,
     "courseMountedLaserBeamsWE" : 0,
     "courseMountedPressureBeamsNS" : false,
     "courseMountedPressureBeamsWE" : false,
@@ -9438,7 +9438,7 @@
     "beamsWE" : 0,
     "beamType" : "MAIN_LASER",
     "courseMountedLaserBeamsNS" : 0,
-    "courseMountedLaserBeamsWE" : 0,
+    "courseMountedLaserBeamsWE" : 1,
     "courseMountedPressureBeamsNS" : false,
     "courseMountedPressureBeamsWE" : false,
     "courseMountedTractorBeamsNS" : false,
