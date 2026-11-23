@@ -489,23 +489,29 @@ public class EditorGui extends BaseGui implements GuiHelper {
 
 
     private boolean cleanupCourse() {
-        course.getFloor().removeIf(f -> f.getFloortype() == ABYSS);
-        if (course.getFloor().isEmpty()) {
+        List<Floor> nonAbyssFloors = course.getFloor().stream()
+                                                       .filter(f -> f.getFloortype() != ABYSS)
+                                                       .toList();
+        if (nonAbyssFloors.isEmpty()) {
             JOptionPane.showMessageDialog(mainFrame, "No floor available. Course won't be saved.");
             return false;
         } else {
-            Position firstFloor = course.getFloor().getFirst().getPosition();
-            Range    range      = new Range(firstFloor.x(), firstFloor.y(), firstFloor.x(), firstFloor.y());
-            for (Floor f : course.getFloor()) {
+            Position firstFloor = nonAbyssFloors.getFirst().getPosition();
+            Range range = new Range(firstFloor.x(), firstFloor.y(), firstFloor.x(), firstFloor.y());
+            for (Floor f : nonAbyssFloors) {
                 range = new Range(Math.min(range.minX(), f.getPosition().x()),
-                                  Math.min(range.minY(), f.getPosition().y()),
-                                  Math.max(range.maxX(), f.getPosition().x()),
-                                  Math.max(range.maxY(), f.getPosition().y()));
+                                 Math.min(range.minY(), f.getPosition().y()),
+                                 Math.max(range.maxX(), f.getPosition().x()),
+                                 Math.max(range.maxY(), f.getPosition().y()));
             }
             Range rangeToCheck = range;
+            Range courseRange = range.wide();
+
+            // Keep Abyss floors inside the course bounds; they may contain edited floor properties.
+            course.getFloor().removeIf(f -> f.getFloortype() == ABYSS && !f.getPosition().inRange(courseRange));
             course.getObjects().removeIf(co -> !co.getPosition().inRange(rangeToCheck));
             course.getCheckpoints().removeIf(cp -> !cp.getPosition().inRange(rangeToCheck));
-            course.setRange(range.wide());
+            course.setRange(courseRange);
             adjustCheckpointNumbers();
             fillMissingCourseElementsWithAbyss();
             determineCourseProperties();
