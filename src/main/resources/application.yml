@@ -18,15 +18,15 @@ circuit-chaos:
     waiting-times-in-milliseconds:
       time-between-steps: 1_000
       time-to-show-explosions: 500
-      question-timeout: 3600_000
+      question-timeout: 7200_000
       sleep-time-between-answer-polling: 100
       animation-steps: 20
   server:
     clean-game-list-scheduler:
       start-delay-seconds: 1800
       fixed-rate-seconds: 300
-      evict-time-preparing-minutes: 30
-      evict-time-running-minutes: 60
+      evict-time-preparing-minutes: 240
+      evict-time-running-minutes: 480
   client:
     own-url: http://localhost:8080
     server-url: http://localhost:8080
