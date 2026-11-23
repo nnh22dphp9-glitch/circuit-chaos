@@ -16,6 +16,7 @@ import de.phlup.circuitchaos.common.model.course.Floor;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Range;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -108,6 +109,10 @@ public class EditorGui extends BaseGui implements GuiHelper {
     private final JCheckBox            copyCheckbox       = new JCheckBox();
 
     private boolean updatingFields = true;
+    @NotNull
+    private Direction conveyorBeltDirection = NORTH;
+    @Nullable
+    private Direction pusherDirection = null;
 
     @Getter
     @Setter
@@ -250,8 +255,9 @@ public class EditorGui extends BaseGui implements GuiHelper {
         directionButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                selectedFloor.setFacingDirection(selectedFloor.getFacingDirection().add(Direction.WEST));
+                selectedFloor.setFacingDirection(selectedFloor.getFacingDirection().add(EAST));
                 directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
+                conveyorBeltDirection = selectedFloor.getFacingDirection();
                 redrawAll();
             }
         });
@@ -526,12 +532,15 @@ public class EditorGui extends BaseGui implements GuiHelper {
         directionLabel.setEnabled(newFloortype.isConveyorBelt());
         directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
         directionButton.setEnabled(newFloortype.isConveyorBelt());
+        conveyorBeltDirection = selectedFloor.getFacingDirection();
         waterBox.setSelected(selectedFloor.isWater());
         adjustWallTypeSelection();
         if (selectedFloor.isHasPusher()) {
             pusherButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getPusherDirection()));
+            pusherDirection = selectedFloor.getPusherDirection();
         } else {
             pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
+            pusherDirection = null;
         }
         boolean activationValid = isActivationValid(newFloortype);
         for (int i = 0; i < 5; i++) {
@@ -799,8 +808,11 @@ public class EditorGui extends BaseGui implements GuiHelper {
         if (newFloortype != null) {
             selectedFloor.setFloortype(newFloortype);
             directionLabel.setEnabled(newFloortype.isConveyorBelt());
+            selectedFloor.setFacingDirection(conveyorBeltDirection);
             directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
             directionButton.setEnabled(newFloortype.isConveyorBelt());
+            selectedFloor.setPusherDirection(pusherDirection);
+            selectedFloor.setHasPusher(pusherDirection != null);
             adjustWallTypes();
             boolean activationValid = isActivationValid(newFloortype);
             for (int i = 0; i < 5; i++) {
@@ -1057,8 +1069,10 @@ public class EditorGui extends BaseGui implements GuiHelper {
             }
             if (selectedFloor.isHasPusher()) {
                 pusherButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getPusherDirection()));
+                pusherDirection = selectedFloor.getPusherDirection();
             } else {
                 pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
+                pusherDirection = null;
             }
             beamChooserNorth.setEnabled(isBeamAllowed(NORTH));
             beamChooserEast.setEnabled(isBeamAllowed(EAST));
