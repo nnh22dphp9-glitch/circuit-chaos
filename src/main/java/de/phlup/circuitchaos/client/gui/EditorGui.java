@@ -527,17 +527,17 @@ public class EditorGui extends BaseGui implements GuiHelper {
         directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
         directionButton.setEnabled(newFloortype.isConveyorBelt());
         waterBox.setSelected(selectedFloor.isWater());
-        boolean activationValid = isActivationValid(newFloortype);
-        for (int i = 0; i < 5; i++) {
-            activeInPhase[i].setSelected(activationValid && selectedFloor.getActiveInPhase()[i]);
-            activeInPhase[i].setEnabled(activationValid);
-            activeInPhaseLabel.setEnabled(activationValid);
-        }
         adjustWallTypeSelection();
         if (selectedFloor.isHasPusher()) {
             pusherButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getPusherDirection()));
         } else {
             pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
+        }
+        boolean activationValid = isActivationValid(newFloortype);
+        for (int i = 0; i < 5; i++) {
+            activeInPhase[i].setSelected(activationValid && selectedFloor.getActiveInPhase()[i]);
+            activeInPhase[i].setEnabled(activationValid);
+            activeInPhaseLabel.setEnabled(activationValid);
         }
         levelLabel.setText(" " + selectedFloor.getLevel() + " ");
         levelPlus.setEnabled(levelPlusOrMinusAllowed(true));
@@ -801,13 +801,13 @@ public class EditorGui extends BaseGui implements GuiHelper {
             directionLabel.setEnabled(newFloortype.isConveyorBelt());
             directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
             directionButton.setEnabled(newFloortype.isConveyorBelt());
+            adjustWallTypes();
             boolean activationValid = isActivationValid(newFloortype);
             for (int i = 0; i < 5; i++) {
                 selectedFloor.getActiveInPhase()[i] = activationValid && activeInPhase[i].isSelected();
                 activeInPhase[i].setEnabled(activationValid);
                 activeInPhaseLabel.setEnabled(activationValid);
             }
-            adjustWallTypes();
             if (isBeamAllowed(NORTH)) {
                 beamChooserNorth.setEnabled(true);
                 selectedFloor.getLasers()[0] = beamChooserNorth.getSelectedIndex() > 3 ? 0 : beamChooserNorth.getSelectedIndex();
