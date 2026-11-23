@@ -16,6 +16,7 @@ import de.phlup.circuitchaos.common.model.course.Floor;
 import de.phlup.circuitchaos.common.records.Position;
 import de.phlup.circuitchaos.common.records.Range;
 import de.phlup.circuitchaos.common.settings.ClientSettings;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -108,6 +109,10 @@ public class EditorGui extends BaseGui implements GuiHelper {
     private final JCheckBox            copyCheckbox       = new JCheckBox();
 
     private boolean updatingFields = true;
+    @NotNull
+    private Direction conveyorBeltDirection = NORTH;
+    @Nullable
+    private Direction pusherDirection = null;
 
     @Getter
     @Setter
@@ -250,8 +255,9 @@ public class EditorGui extends BaseGui implements GuiHelper {
         directionButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                selectedFloor.setFacingDirection(selectedFloor.getFacingDirection().add(Direction.WEST));
+                selectedFloor.setFacingDirection(selectedFloor.getFacingDirection().add(EAST));
                 directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
+                conveyorBeltDirection = selectedFloor.getFacingDirection();
                 redrawAll();
             }
         });
@@ -487,25 +493,30 @@ public class EditorGui extends BaseGui implements GuiHelper {
         }
     }
 
-
     private boolean cleanupCourse() {
-        course.getFloor().removeIf(f -> f.getFloortype() == ABYSS);
-        if (course.getFloor().isEmpty()) {
+        List<Floor> nonAbyssFloors = course.getFloor().stream()
+                                           .filter(f -> f.getFloortype() != ABYSS)
+                                           .toList();
+        if (nonAbyssFloors.isEmpty()) {
             JOptionPane.showMessageDialog(mainFrame, "No floor available. Course won't be saved.");
             return false;
         } else {
-            Position firstFloor = course.getFloor().getFirst().getPosition();
+            Position firstFloor = nonAbyssFloors.getFirst().getPosition();
             Range    range      = new Range(firstFloor.x(), firstFloor.y(), firstFloor.x(), firstFloor.y());
-            for (Floor f : course.getFloor()) {
+            for (Floor f : nonAbyssFloors) {
                 range = new Range(Math.min(range.minX(), f.getPosition().x()),
                                   Math.min(range.minY(), f.getPosition().y()),
                                   Math.max(range.maxX(), f.getPosition().x()),
                                   Math.max(range.maxY(), f.getPosition().y()));
             }
             Range rangeToCheck = range;
+            Range courseRange  = range.wide();
+
+            // Keep Abyss floors inside the course bounds; they may contain edited floor properties.
+            course.getFloor().removeIf(f -> f.getFloortype() == ABYSS && !f.getPosition().inRange(courseRange));
             course.getObjects().removeIf(co -> !co.getPosition().inRange(rangeToCheck));
             course.getCheckpoints().removeIf(cp -> !cp.getPosition().inRange(rangeToCheck));
-            course.setRange(range.wide());
+            course.setRange(courseRange);
             adjustCheckpointNumbers();
             fillMissingCourseElementsWithAbyss();
             determineCourseProperties();
@@ -521,22 +532,21 @@ public class EditorGui extends BaseGui implements GuiHelper {
         directionLabel.setEnabled(newFloortype.isConveyorBelt());
         directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
         directionButton.setEnabled(newFloortype.isConveyorBelt());
+        conveyorBeltDirection = selectedFloor.getFacingDirection();
         waterBox.setSelected(selectedFloor.isWater());
-        for (int i = 0; i < 5; i++) {
-            boolean activationValid = newFloortype == TRAPDOOR || selectedFloor.isHasPusher()
-                    || selectedFloor.getWallNorth() == WallType.REPULSOR_FIELD
-                    || selectedFloor.getWallEast() == WallType.REPULSOR_FIELD
-                    || selectedFloor.getWallSouth() == WallType.REPULSOR_FIELD
-                    || selectedFloor.getWallWest() == WallType.REPULSOR_FIELD;
-            activeInPhase[i].setSelected(activationValid && selectedFloor.getActiveInPhase()[i]);
-            activeInPhase[i].setEnabled(activationValid);
-            activeInPhaseLabel.setEnabled(activationValid);
-        }
         adjustWallTypeSelection();
         if (selectedFloor.isHasPusher()) {
             pusherButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getPusherDirection()));
+            pusherDirection = selectedFloor.getPusherDirection();
         } else {
             pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
+            pusherDirection = null;
+        }
+        boolean activationValid = isActivationValid(newFloortype);
+        for (int i = 0; i < 5; i++) {
+            activeInPhase[i].setSelected(activationValid && selectedFloor.getActiveInPhase()[i]);
+            activeInPhase[i].setEnabled(activationValid);
+            activeInPhaseLabel.setEnabled(activationValid);
         }
         levelLabel.setText(" " + selectedFloor.getLevel() + " ");
         levelPlus.setEnabled(levelPlusOrMinusAllowed(true));
@@ -630,6 +640,14 @@ public class EditorGui extends BaseGui implements GuiHelper {
         checkpointButton.setText(checkpointExists ? "Remove" : "Add");
         checkpointButton.setEnabled(newFloortype != ABYSS);
         updatingFields = false;
+    }
+
+    private boolean isActivationValid(Floortype newFloortype) {
+        return newFloortype == TRAPDOOR || selectedFloor.isHasPusher()
+                || selectedFloor.getWallNorth() == WallType.REPULSOR_FIELD
+                || selectedFloor.getWallEast() == WallType.REPULSOR_FIELD
+                || selectedFloor.getWallSouth() == WallType.REPULSOR_FIELD
+                || selectedFloor.getWallWest() == WallType.REPULSOR_FIELD;
     }
 
     private boolean isBeamAllowed(Direction dir) {
@@ -790,19 +808,18 @@ public class EditorGui extends BaseGui implements GuiHelper {
         if (newFloortype != null) {
             selectedFloor.setFloortype(newFloortype);
             directionLabel.setEnabled(newFloortype.isConveyorBelt());
+            selectedFloor.setFacingDirection(conveyorBeltDirection);
             directionButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getFacingDirection()));
             directionButton.setEnabled(newFloortype.isConveyorBelt());
+            selectedFloor.setPusherDirection(pusherDirection);
+            selectedFloor.setHasPusher(pusherDirection != null);
+            adjustWallTypes();
+            boolean activationValid = isActivationValid(newFloortype);
             for (int i = 0; i < 5; i++) {
-                boolean activationValid = newFloortype == TRAPDOOR || selectedFloor.isHasPusher()
-                        || selectedFloor.getWallNorth() == WallType.REPULSOR_FIELD
-                        || selectedFloor.getWallEast() == WallType.REPULSOR_FIELD
-                        || selectedFloor.getWallSouth() == WallType.REPULSOR_FIELD
-                        || selectedFloor.getWallWest() == WallType.REPULSOR_FIELD;
                 selectedFloor.getActiveInPhase()[i] = activationValid && activeInPhase[i].isSelected();
                 activeInPhase[i].setEnabled(activationValid);
                 activeInPhaseLabel.setEnabled(activationValid);
             }
-            adjustWallTypes();
             if (isBeamAllowed(NORTH)) {
                 beamChooserNorth.setEnabled(true);
                 selectedFloor.getLasers()[0] = beamChooserNorth.getSelectedIndex() > 3 ? 0 : beamChooserNorth.getSelectedIndex();
@@ -854,6 +871,12 @@ public class EditorGui extends BaseGui implements GuiHelper {
             } else {
                 selectedFloor.setSwitchTarget(null);
             }
+
+            switchLabel.setEnabled(selectedFloor.getFloortype() == SWITCH);
+            switchTargetX.setEnabled(selectedFloor.getFloortype() == SWITCH);
+            switchTargetX.setText(selectedFloor.getSwitchTarget() == null ? "0" : "" + selectedFloor.getSwitchTarget().x());
+            switchTargetY.setEnabled(selectedFloor.getFloortype() == SWITCH);
+            switchTargetY.setText(selectedFloor.getSwitchTarget() == null ? "0" : "" + selectedFloor.getSwitchTarget().y());
 
             Position               selectedPosition     = selectedFloor.getPosition();
             Optional<CourseObject> courseObjectOptional = CourseHandler.getObjects(course, selectedPosition).stream().findFirst();
@@ -1046,8 +1069,10 @@ public class EditorGui extends BaseGui implements GuiHelper {
             }
             if (selectedFloor.isHasPusher()) {
                 pusherButton.setIcon(imageSupplier.getImageIconPlain(selectedFloor.getPusherDirection()));
+                pusherDirection = selectedFloor.getPusherDirection();
             } else {
                 pusherButton.setIcon(imageSupplier.getImageIconPlain(GFX_NO_ACTION));
+                pusherDirection = null;
             }
             beamChooserNorth.setEnabled(isBeamAllowed(NORTH));
             beamChooserEast.setEnabled(isBeamAllowed(EAST));
