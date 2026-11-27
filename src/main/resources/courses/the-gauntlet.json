@@ -20973,12 +20973,12 @@
       "id": null,
       "name": "Mine",
       "position": {
-        "x": 7,
-        "y": 13
+        "x": 4,
+        "y": 8
       },
       "prevPosition": {
-        "x": 7,
-        "y": 13
+        "x": 4,
+        "y": 8
       },
       "level": 0,
       "direction": "NORTH",
