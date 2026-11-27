@@ -6000,7 +6000,7 @@
         "x": 3,
         "y": 4
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -6008,7 +6008,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "EAST",
       "water": false,
       "lasers": [
         0,
@@ -6055,7 +6055,7 @@
         "x": 4,
         "y": 4
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -6063,7 +6063,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "EAST",
       "water": false,
       "lasers": [
         0,
@@ -6715,7 +6715,7 @@
         "x": 16,
         "y": 4
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -6723,7 +6723,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "EAST",
       "water": false,
       "lasers": [
         0,
@@ -6770,7 +6770,7 @@
         "x": 17,
         "y": 4
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -6778,7 +6778,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "EAST",
       "water": false,
       "lasers": [
         0,
@@ -7873,7 +7873,7 @@
         "x": 16,
         "y": 5
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -7881,7 +7881,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "SOUTH",
       "water": false,
       "lasers": [
         0,
@@ -9028,7 +9028,7 @@
         "x": 16,
         "y": 6
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "EXPRESS_CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -9036,7 +9036,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "SOUTH",
       "water": false,
       "lasers": [
         0,
@@ -10183,7 +10183,7 @@
         "x": 16,
         "y": 7
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -10191,7 +10191,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "SOUTH",
       "water": false,
       "lasers": [
         0,
@@ -11228,7 +11228,7 @@
         "x": 14,
         "y": 8
       },
-      "floortype": "ABYSS",
+      "floortype": "TRAPDOOR",
       "activeInPhase": [
         false,
         false,
@@ -11338,7 +11338,7 @@
         "x": 16,
         "y": 8
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -11346,7 +11346,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "SOUTH",
       "water": false,
       "lasers": [
         0,
@@ -12273,7 +12273,7 @@
         "x": 12,
         "y": 9
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -12281,7 +12281,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "WEST",
       "water": false,
       "lasers": [
         0,
@@ -12328,7 +12328,7 @@
         "x": 13,
         "y": 9
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -12336,7 +12336,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "WEST",
       "water": false,
       "lasers": [
         0,
@@ -12383,7 +12383,7 @@
         "x": 14,
         "y": 9
       },
-      "floortype": "TRAPDOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         true,
@@ -12391,7 +12391,7 @@
         true,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "WEST",
       "water": false,
       "lasers": [
         0,
@@ -13428,7 +13428,7 @@
         "x": 12,
         "y": 10
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -14568,7 +14568,7 @@
       "switchActive": false,
       "switchTarget": {
         "x": 14,
-        "y": 9
+        "y": 8
       },
       "explosiveDamage": 0,
       "beamsNS": 0,
@@ -14586,7 +14586,7 @@
         "x": 12,
         "y": 11
       },
-      "floortype": "ABYSS",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
