@@ -6220,7 +6220,7 @@
         "x": 7,
         "y": 4
       },
-      "floortype": "SWITCH",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -6228,7 +6228,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "EAST",
       "water": false,
       "lasers": [
         0,
@@ -6258,10 +6258,7 @@
       "wallWest": "NONE",
       "variant": 0.37588460726328776,
       "switchActive": false,
-      "switchTarget": {
-        "x": 10,
-        "y": 3
-      },
+      "switchTarget": null,
       "explosiveDamage": 0,
       "beamsNS": 0,
       "beamsWE": 0,
@@ -6498,7 +6495,7 @@
         "x": 12,
         "y": 4
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -6506,7 +6503,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "EAST",
       "water": false,
       "lasers": [
         0,
@@ -6663,7 +6660,7 @@
         "x": 15,
         "y": 4
       },
-      "floortype": "EXPRESS_CONVEYOR_BELT",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -7378,7 +7375,7 @@
         "x": 7,
         "y": 5
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "SWITCH",
       "activeInPhase": [
         false,
         false,
@@ -7416,7 +7413,10 @@
       "wallWest": "NONE",
       "variant": 0.003463752798779751,
       "switchActive": false,
-      "switchTarget": null,
+      "switchTarget": {
+        "x": 10,
+        "y": 3
+      },
       "explosiveDamage": 0,
       "beamsNS": 0,
       "beamsWE": 0,
@@ -11778,7 +11778,7 @@
         "x": 3,
         "y": 9
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -15628,7 +15628,7 @@
         "x": 10,
         "y": 12
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -15683,7 +15683,7 @@
         "x": 11,
         "y": 12
       },
-      "floortype": "SWITCH",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -15741,7 +15741,7 @@
         "x": 12,
         "y": 12
       },
-      "floortype": "TURNING_CONVEYOR_BELT_CCW",
+      "floortype": "TURNING_CONVEYOR_BELT_CW",
       "activeInPhase": [
         false,
         false,
@@ -20952,11 +20952,11 @@
       "id": null,
       "name": "Mine",
       "position": {
-        "x": 17,
+        "x": 18,
         "y": 8
       },
       "prevPosition": {
-        "x": 17,
+        "x": 18,
         "y": 8
       },
       "level": 0,
@@ -21070,7 +21070,7 @@
     "switchPositions": [
       {
         "x": 7,
-        "y": 4
+        "y": 5
       },
       {
         "x": 11,
