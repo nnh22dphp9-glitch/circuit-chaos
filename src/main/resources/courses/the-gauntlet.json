@@ -15741,7 +15741,7 @@
         "x": 12,
         "y": 12
       },
-      "floortype": "TURNING_CONVEYOR_BELT_CW",
+      "floortype": "TURNING_CONVEYOR_BELT_CCW",
       "activeInPhase": [
         false,
         false,
@@ -20953,11 +20953,11 @@
       "name": "Mine",
       "position": {
         "x": 18,
-        "y": 8
+        "y": 10
       },
       "prevPosition": {
         "x": 18,
-        "y": 8
+        "y": 10
       },
       "level": 0,
       "direction": "NORTH",
