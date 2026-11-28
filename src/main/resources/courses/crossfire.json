@@ -3261,7 +3261,7 @@
       "facingDirection": "NORTH",
       "water": false,
       "lasers": [
-        1,
+        0,
         0,
         0,
         0
@@ -5022,7 +5022,7 @@
       "water": false,
       "lasers": [
         0,
-        0,
+        1,
         0,
         0
       ],
@@ -5045,7 +5045,7 @@
       "wallNorth": "NONE",
       "wallEast": "NONE",
       "wallSouth": "NONE",
-      "wallWest": "NONE",
+      "wallWest": "SOLID",
       "variant": 0.0010327963562120068,
       "switchActive": false,
       "switchTarget": null,
@@ -5100,7 +5100,7 @@
       "wallNorth": "NONE",
       "wallEast": "SOLID",
       "wallSouth": "NONE",
-      "wallWest": "NONE",
+      "wallWest": "SOLID",
       "variant": 0.0010327963562120068,
       "switchActive": false,
       "switchTarget": null,
@@ -5134,7 +5134,7 @@
         0,
         0,
         0,
-        1
+        0
       ],
       "pressureBeam": [
         false,
@@ -9697,7 +9697,7 @@
       "water": false,
       "lasers": [
         0,
-        1,
+        0,
         0,
         0
       ],
@@ -9773,7 +9773,7 @@
       "level": 0,
       "distanceCounter": 0,
       "wallNorth": "NONE",
-      "wallEast": "NONE",
+      "wallEast": "SOLID",
       "wallSouth": "NONE",
       "wallWest": "SOLID",
       "variant": 0.0010327963562120068,
@@ -9809,7 +9809,7 @@
         0,
         0,
         0,
-        0
+        1
       ],
       "pressureBeam": [
         false,
@@ -9828,7 +9828,7 @@
       "level": 0,
       "distanceCounter": 0,
       "wallNorth": "NONE",
-      "wallEast": "NONE",
+      "wallEast": "SOLID",
       "wallSouth": "NONE",
       "wallWest": "NONE",
       "variant": 0.0010327963562120068,
@@ -12558,7 +12558,7 @@
       "lasers": [
         0,
         0,
-        1,
+        0,
         0
       ],
       "pressureBeam": [
@@ -15900,20 +15900,12 @@
     "switchPositions": [],
     "laserPositions": [
       {
-        "x": 3,
+        "x": 1,
         "y": 5
       },
       {
-        "x": 14,
+        "x": 16,
         "y": 9
-      },
-      {
-        "x": 5,
-        "y": 3
-      },
-      {
-        "x": 12,
-        "y": 12
       }
     ],
     "pressureBeamPositions": [],

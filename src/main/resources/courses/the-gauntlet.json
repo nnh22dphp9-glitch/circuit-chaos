@@ -7543,7 +7543,7 @@
         "x": 10,
         "y": 5
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -7551,7 +7551,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "SOUTH",
       "water": false,
       "lasers": [
         0,
@@ -8643,7 +8643,7 @@
         "x": 9,
         "y": 6
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -8651,7 +8651,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "SOUTH",
       "water": false,
       "lasers": [
         0,
@@ -8698,7 +8698,7 @@
         "x": 10,
         "y": 6
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -8706,7 +8706,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "SOUTH",
       "water": false,
       "lasers": [
         0,
@@ -9853,7 +9853,7 @@
         "x": 10,
         "y": 7
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "CONVEYOR_BELT",
       "activeInPhase": [
         false,
         false,
@@ -9861,7 +9861,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "SOUTH",
       "water": false,
       "lasers": [
         0,
@@ -15584,7 +15584,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "EAST",
       "water": false,
       "lasers": [
         0,
@@ -15639,7 +15639,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "EAST",
       "water": false,
       "lasers": [
         0,
@@ -15694,7 +15694,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "EAST",
       "water": false,
       "lasers": [
         0,
@@ -15724,10 +15724,7 @@
       "wallWest": "NONE",
       "variant": 0.023310053707973566,
       "switchActive": false,
-      "switchTarget": {
-        "x": 14,
-        "y": 9
-      },
+      "switchTarget": null,
       "explosiveDamage": 0,
       "beamsNS": 0,
       "beamsWE": 0,
@@ -15752,7 +15749,7 @@
         false,
         false
       ],
-      "facingDirection": "NORTH",
+      "facingDirection": "EAST",
       "water": false,
       "lasers": [
         0,
@@ -20805,12 +20802,12 @@
       "id": null,
       "name": "Yellow Portal",
       "position": {
-        "x": 4,
-        "y": 4
+        "x": 10,
+        "y": 8
       },
       "prevPosition": {
-        "x": 4,
-        "y": 4
+        "x": 10,
+        "y": 8
       },
       "level": 0,
       "direction": "NORTH",
@@ -20819,8 +20816,8 @@
       "variantSeed": 0.4429658946182258,
       "type": "PORTAL_YELLOW",
       "targetPosition": {
-        "x": 16,
-        "y": 8
+        "x": 13,
+        "y": 5
       },
       "glue": 0,
       "active": true
@@ -20829,11 +20826,11 @@
       "id": null,
       "name": "Oil",
       "position": {
-        "x": 6,
+        "x": 18,
         "y": 4
       },
       "prevPosition": {
-        "x": 6,
+        "x": 18,
         "y": 4
       },
       "level": 0,
@@ -20988,7 +20985,7 @@
       "prevDirection": "NORTH",
       "onCourse": true,
       "variantSeed": 0.527760391443735,
-      "type": "MINE",
+      "type": "PROXIMITY_MINE",
       "targetPosition": null,
       "glue": 0,
       "active": true
