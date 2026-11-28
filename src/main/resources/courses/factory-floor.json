@@ -9439,7 +9439,7 @@
         "x": 10,
         "y": 8
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "ABYSS",
       "activeInPhase": [
         false,
         false,
