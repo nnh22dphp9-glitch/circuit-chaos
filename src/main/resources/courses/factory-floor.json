@@ -7743,7 +7743,7 @@
         "x": 20,
         "y": 6
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "ABYSS",
       "activeInPhase": [
         false,
         false,
@@ -9969,7 +9969,7 @@
         "x": 20,
         "y": 8
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "ABYSS",
       "activeInPhase": [
         false,
         false,
@@ -11082,7 +11082,7 @@
         "x": 20,
         "y": 9
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "ABYSS",
       "activeInPhase": [
         false,
         false,
@@ -14421,7 +14421,7 @@
         "x": 20,
         "y": 12
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "ABYSS",
       "activeInPhase": [
         false,
         false,
@@ -17760,7 +17760,7 @@
         "x": 20,
         "y": 15
       },
-      "floortype": "OPEN_FLOOR",
+      "floortype": "ABYSS",
       "activeInPhase": [
         false,
         false,
